@@ -1,0 +1,7 @@
+{
+  "title": "Welcome",
+  "slug": "welcome",
+  "date": "2026-02-10",
+  "excerpt": "Content and application code stay separated.",
+  "body": "The Astro application never needs to know which provider delivered this post."
+}

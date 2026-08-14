@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollectionContent, getItemContent } from "../../nexus";
+
+export async function getStaticPaths() {
+  const posts = await getCollectionContent("blog");
+  return posts.map((post) => ({
+    params: { slug: post.slug ?? post.key }
+  }));
+}
+
+const { slug } = Astro.params;
+
+const post = await getItemContent("blog", slug ?? "");
+
+if (!post) {
+  throw new Error(`Required content "${slug}" was not found.`);
+}
+
+const { body, date } = post.data as { body?: string; date?: string };
+---
+
+<BaseLayout title={`${post.title ?? "Post"} - NexusContent Example`}>
+  <article class="post">
+    <h1>{post.title}</h1>
+    {date && <time>{date}</time>}
+    {body && <p>{body}</p>}
+  </article>
+  <style>
+    .post {
+      max-width: 46rem;
+    }
+
+    .post time {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .post p {
+      font-size: 1.1rem;
+      color: var(--muted);
+    }
+  </style>
+</BaseLayout>

@@ -1,0 +1,49 @@
+---
+interface Service {
+  title: string;
+  description: string;
+}
+
+interface Props {
+  heading: string;
+  items: Service[];
+}
+
+const { heading, items } = Astro.props;
+---
+
+<section class="services">
+  <h2>{heading}</h2>
+  <div class="grid">
+    {
+      items.map((service) => (
+        <article>
+          <h3>{service.title}</h3>
+          <p>{service.description}</p>
+        </article>
+      ))
+    }
+  </div>
+  <style>
+    h2 {
+      margin-bottom: 1.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+      gap: 1.5rem;
+    }
+
+    article {
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      background: #ffffff;
+    }
+
+    article h3 {
+      margin-top: 0;
+    }
+  </style>
+</section>

@@ -1,0 +1,56 @@
+---
+interface Testimonial {
+  quote: string;
+  author: string;
+}
+
+interface Props {
+  heading: string;
+  items: Testimonial[];
+}
+
+const { heading, items } = Astro.props;
+---
+
+<section class="testimonials">
+  <h2>{heading}</h2>
+  <div class="grid">
+    {
+      items.map((testimonial) => (
+        <figure>
+          <blockquote>{testimonial.quote}</blockquote>
+          <figcaption>{testimonial.author}</figcaption>
+        </figure>
+      ))
+    }
+  </div>
+  <style>
+    h2 {
+      margin-bottom: 1.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1.5rem;
+    }
+
+    figure {
+      margin: 0;
+      border-left: 3px solid var(--accent);
+      padding: 0.75rem 1.25rem;
+      background: #ffffff;
+      border-radius: 0 0.75rem 0.75rem 0;
+    }
+
+    blockquote {
+      margin: 0 0 0.5rem;
+      color: var(--fg);
+    }
+
+    figcaption {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</section>

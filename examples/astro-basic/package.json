@@ -1,0 +1,19 @@
+{
+  "name": "@nexuscontent/example-astro-basic",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@nexuscontent/core": "file:../..",
+    "astro": "^7.2.2"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

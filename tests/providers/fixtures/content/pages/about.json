@@ -1,0 +1,21 @@
+{
+  "title": "About",
+  "slug": "about",
+  "seo": {
+    "title": "About - NexusContent Example",
+    "description": "How NexusContent separates content from application code."
+  },
+  "story": {
+    "heading": "Our story",
+    "content": "NexusContent keeps the boundary between content sources and content consumers clean."
+  },
+  "values": {
+    "heading": "Principles",
+    "items": [
+      "Astro owns routing.",
+      "Core stays provider independent.",
+      "Editable content lives outside the app.",
+      "Static generation remains the default."
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+---
+interface Props {
+  title?: string;
+  slug?: string;
+  date?: string;
+  excerpt?: string;
+}
+
+const { title, slug, date, excerpt } = Astro.props;
+---
+
+<article class="post">
+  <a href={`/blog/${slug ?? ""}`}>
+    <h2>{title ?? "Untitled"}</h2>
+  </a>
+  {date && <time>{date}</time>}
+  {excerpt && <p>{excerpt}</p>}
+  <style>
+    .post {
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      background: #ffffff;
+    }
+
+    .post h2 {
+      margin-top: 0;
+    }
+
+    time {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</article>

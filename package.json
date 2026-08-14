@@ -1,0 +1,45 @@
+{
+  "name": "@nexuscontent/core",
+  "version": "0.1.0",
+  "description": "An open source content architecture for Astro that separates frontend code, content management, and deployment infrastructure.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "private": true,
+  "workspaces": [
+    "examples/astro-basic"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "test:coverage": "node --test --experimental-test-coverage \"tests/**/*.test.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "keywords": [
+    "astro",
+    "content",
+    "cms",
+    "headless"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^7.0.2"
+  }
+}

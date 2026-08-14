@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.astro/
+
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+
+examples/astro-basic/dist/
+examples/astro-basic/.astro/

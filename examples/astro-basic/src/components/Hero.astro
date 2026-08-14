@@ -1,0 +1,45 @@
+---
+interface Props {
+  heading: string;
+  intro: string;
+  cta?: {
+    label: string;
+    href: string;
+  };
+}
+
+const { heading, intro, cta } = Astro.props;
+---
+
+<section class="hero">
+  <h1>{heading}</h1>
+  <p>{intro}</p>
+  {cta && <a class="button" href={cta.href}>{cta.label}</a>}
+  <style>
+    .hero {
+      padding: 4rem 0;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      margin-bottom: 0.75rem;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--muted);
+      max-width: 42rem;
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: 0.5rem;
+      background: var(--accent);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</section>

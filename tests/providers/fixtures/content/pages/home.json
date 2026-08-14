@@ -1,0 +1,52 @@
+{
+  "title": "Home",
+  "slug": "home",
+  "seo": {
+    "title": "NexusContent Example",
+    "description": "A static Astro site powered by NexusContent and a Git content repository."
+  },
+  "hero": {
+    "heading": "Astro owns the website.",
+    "intro": "Content providers own the content. NexusContent sits between them.",
+    "cta": {
+      "label": "About us",
+      "href": "/about"
+    }
+  },
+  "services": {
+    "heading": "What we do",
+    "items": [
+      {
+        "title": "Static builds",
+        "description": "Predictable, fast, and portable Astro output."
+      },
+      {
+        "title": "Separated content",
+        "description": "Editable content lives outside the application repository."
+      },
+      {
+        "title": "Provider freedom",
+        "description": "Swap Git for WordPress or Strapi without rewriting the frontend."
+      }
+    ]
+  },
+  "testimonials": {
+    "heading": "What people say",
+    "items": [
+      {
+        "quote": "Content changed without touching a single component.",
+        "author": "Content Editor"
+      },
+      {
+        "quote": "The build failed loudly when content was invalid.",
+        "author": "Developer"
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Read our blog",
+    "intro": "Collection-driven pages powered by the same provider.",
+    "label": "View posts",
+    "href": "/blog"
+  }
+}
