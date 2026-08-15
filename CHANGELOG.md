@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Aligned README examples with the implemented API (`new NexusContent`, `getPage`, `getCollection`, `getItem`, `register`).
+- Added AGENTS.md agent engineering guide and aligned it with the v0.1.0 implementation.
+
 ## [0.1.0] - 2026-08-14
 
 Initial milestone. Proves the core content architecture.

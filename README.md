@@ -622,7 +622,7 @@ Providers are registered with NexusContent.
 Example:
 
 ```ts
-registerProvider(
+nexus.register(
   "primary",
   new StrapiProvider(...)
 );
@@ -631,7 +631,7 @@ registerProvider(
 Another provider:
 
 ```ts
-registerProvider(
+nexus.register(
   "legacy",
   new WordPressProvider(...)
 );
@@ -709,13 +709,13 @@ Astro should normally interact with NexusContent through the content service.
 Example:
 
 ```ts
-const page = await getPageContent("about");
+const page = await nexus.getPage("about");
 ```
 
 Internally:
 
 ```text
-getPageContent("about")
+nexus.getPage("about")
         ↓
 Read configuration
         ↓
@@ -772,11 +772,12 @@ Example:
 
 ```astro
 ---
-import { getPageContent } from "@nexuscontent/core";
+import { NexusContent } from "@nexuscontent/core";
 import AboutHero from "../components/AboutHero.astro";
 import CompanyStory from "../components/CompanyStory.astro";
 
-const page = await getPageContent("about");
+const nexus = new NexusContent(config);
+const page = await nexus.getPage("about");
 
 if (!page) {
   throw new Error("About content was not found.");
@@ -1091,7 +1092,7 @@ Required content should normally fail the build.
 For example:
 
 ```ts
-const page = await getPageContent("about");
+const page = await nexus.getPage("about");
 
 if (!page) {
   throw new Error(
@@ -1767,7 +1768,7 @@ This boundary is critical to keeping the project useful.
 NexusContent should eventually make this possible:
 
 ```ts
-const content = await nexus.page("about");
+const page = await nexus.getPage("about");
 ```
 
 without the consumer caring whether the data came from:
