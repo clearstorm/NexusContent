@@ -55,7 +55,7 @@ NexusContent Core
 
 # Project Status
 
-NexusContent is currently in early development.
+NexusContent is currently in early development. Version `0.1.2` is an internal milestone, and the root package intentionally remains private while the architecture is proven.
 
 The first milestone is deliberately small.
 
@@ -1954,7 +1954,7 @@ Core APIs must be stable before CLI abstractions are introduced.
 
 # Initial Milestone
 
-The current milestone, version `0.1.2`, proves the core architecture and its framework neutrality.
+The current internal milestone, version `0.1.2`, proves the core architecture and its framework neutrality. It is not a public package release.
 
 ## Required
 
@@ -2207,11 +2207,7 @@ That is the platform.
 
 # License
 
-NexusContent is intended to be released as open source.
-
-The final open source license should be selected before the first public release.
-
-A permissive license such as MIT or Apache 2.0 should be considered.
+NexusContent is licensed under the MIT License. See `LICENSE` for the full license text.
 
 ---
 

@@ -1,5 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   GitProvider,
@@ -208,6 +211,61 @@ test("rejects a collection name that escapes the content root", async () => {
       return true;
     }
   );
+});
+
+test("rejects a page file symlink that escapes the content root", async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-symlink-page-"));
+  const root = join(fixtureRoot, "content");
+  const outside = join(fixtureRoot, "outside.json");
+
+  try {
+    await mkdir(join(root, "pages"), { recursive: true });
+    await writeFile(outside, JSON.stringify({ title: "Outside" }), "utf8");
+    await symlink(outside, join(root, "pages", "outside.json"));
+
+    const provider = new GitProvider({ contentPath: root });
+    await assert.rejects(
+      () => provider.getPage("outside"),
+      (error: unknown) => {
+        assert.ok(error instanceof ProviderError);
+        assert.equal(error.content, "pages/outside.json");
+        assert.match(error.message, /escapes the configured content root/);
+        return true;
+      }
+    );
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("rejects a collection directory symlink that escapes the content root", async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-symlink-collection-"));
+  const root = join(fixtureRoot, "content");
+  const outside = join(fixtureRoot, "outside-collection");
+
+  try {
+    await mkdir(join(root, "collections"), { recursive: true });
+    await mkdir(outside);
+    await writeFile(
+      join(outside, "outside.json"),
+      JSON.stringify({ title: "Outside" }),
+      "utf8"
+    );
+    await symlink(outside, join(root, "collections", "outside"));
+
+    const provider = new GitProvider({ contentPath: root });
+    await assert.rejects(
+      () => provider.getCollection("outside"),
+      (error: unknown) => {
+        assert.ok(error instanceof ProviderError);
+        assert.equal(error.content, "collections/outside");
+        assert.match(error.message, /escapes the configured content root/);
+        return true;
+      }
+    );
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
 });
 
 test("rejects a collection name that resolves exactly to the content root", async () => {

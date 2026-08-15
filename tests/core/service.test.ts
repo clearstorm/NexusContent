@@ -141,6 +141,20 @@ test("getPage throws a ValidationError for invalid provider content", async () =
   );
 });
 
+test("getPage does not coerce null provider data into an empty object", async () => {
+  const { service, mock } = buildService();
+  mock.setPage({ id: "home", key: "home", data: null, meta: { source: "mock" } });
+
+  await assert.rejects(
+    () => service.getPage("home"),
+    (error: unknown) => {
+      assert.ok(error instanceof ValidationError);
+      assert.ok(error.issues.some((issue) => issue.path === "data"));
+      return true;
+    }
+  );
+});
+
 test("getCollection returns normalized collection items", async () => {
   const { service, mock } = buildService();
   mock.setCollection([
@@ -154,6 +168,39 @@ test("getCollection returns normalized collection items", async () => {
   assert.equal(items[0]?.title, "A");
   assert.equal(items[1]?.title, "B");
   assert.equal(items[1]?.meta.source, "mock");
+});
+
+test("getCollection does not coerce primitive item data into an empty object", async () => {
+  const { service, mock } = buildService();
+  mock.setCollection([
+    { id: "a", key: "a", data: "invalid", meta: { source: "mock" } }
+  ]);
+
+  await assert.rejects(
+    () => service.getCollection("blog"),
+    (error: unknown) => {
+      assert.ok(error instanceof ValidationError);
+      assert.ok(error.issues.some((issue) => issue.path === "data"));
+      return true;
+    }
+  );
+});
+
+test("getCollection wraps a provider failure in a ProviderError", async () => {
+  const { service, mock } = buildService();
+  mock.setError(new Error("Collection API unavailable"));
+
+  await assert.rejects(
+    () => service.getCollection("blog"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "mock");
+      assert.equal(error.operation, "getCollection");
+      assert.equal(error.content, "blog");
+      assert.match(error.reason ?? "", /Collection API unavailable/);
+      return true;
+    }
+  );
 });
 
 test("getItem returns a single collection item", async () => {
@@ -172,6 +219,37 @@ test("getItem returns null when the item does not exist", async () => {
   mock.setItem(null);
 
   assert.equal(await service.getItem("blog", "missing"), null);
+});
+
+test("getItem rejects invalid provider content", async () => {
+  const { service, mock } = buildService();
+  mock.setItem({ id: "a", key: "a", data: null, meta: { source: "mock" } });
+
+  await assert.rejects(
+    () => service.getItem("blog", "a"),
+    (error: unknown) => {
+      assert.ok(error instanceof ValidationError);
+      assert.ok(error.issues.some((issue) => issue.path === "data"));
+      return true;
+    }
+  );
+});
+
+test("getItem wraps a provider failure in a ProviderError", async () => {
+  const { service, mock } = buildService();
+  mock.setError(new Error("Item API unavailable"));
+
+  await assert.rejects(
+    () => service.getItem("blog", "a"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "mock");
+      assert.equal(error.operation, "getItem");
+      assert.equal(error.content, "blog");
+      assert.match(error.reason ?? "", /Item API unavailable/);
+      return true;
+    }
+  );
 });
 
 test("getPage throws a RegistryError for an unregistered provider", async () => {

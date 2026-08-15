@@ -5,16 +5,18 @@ import { getCollectionContent, getItemContent } from "../../nexus";
 export async function getStaticPaths() {
   const posts = await getCollectionContent("blog");
   return posts.map((post) => ({
-    params: { slug: post.slug ?? post.key }
+    params: { slug: post.slug ?? post.key },
+    props: { key: post.key }
   }));
 }
 
 const { slug } = Astro.params;
+const { key } = Astro.props as { key?: string };
 
-const post = await getItemContent("blog", slug ?? "");
+const post = await getItemContent("blog", key ?? "");
 
 if (!post) {
-  throw new Error(`Required content "${slug}" was not found.`);
+  throw new Error(`Required content "${key ?? slug}" was not found.`);
 }
 
 const { body, date } = post.data as { body?: string; date?: string };

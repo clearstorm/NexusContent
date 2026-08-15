@@ -1,4 +1,9 @@
-import { readFile as readFileFromDisk, readdir, stat } from "node:fs/promises";
+import {
+  readFile as readFileFromDisk,
+  readdir,
+  realpath,
+  stat
+} from "node:fs/promises";
 import path from "node:path";
 import { ProviderError } from "../../core/errors.ts";
 import { jsonFormatAdapter } from "../../formats/index.ts";
@@ -9,27 +14,70 @@ export interface RawFile {
   updatedAt?: string;
 }
 
+function buildPathEscapeError(relativePath: string): ProviderError {
+  return new ProviderError(
+    `Content path "${relativePath}" escapes the configured content root.`,
+    {
+      provider: "git",
+      operation: "load",
+      content: relativePath,
+      reason: "Content keys must resolve inside the configured content root."
+    }
+  );
+}
+
+function isWithinRoot(root: string, target: string): boolean {
+  const relative = path.relative(root, target);
+  return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
 function resolveWithinRoot(contentPath: string, segments: string[]): string {
   const root = path.resolve(contentPath);
   const resolved = path.resolve(root, ...segments);
-  const relative = path.relative(root, resolved);
 
-  if (relative === "" || relative.startsWith("..")) {
-    throw new ProviderError(
-      `Content path "${segments.join("/")}" escapes the configured content root.`,
-      {
-        provider: "git",
-        operation: "load",
-        content: segments.join("/"),
-        reason: "Content keys must resolve inside the configured content root."
-      }
-    );
+  if (!isWithinRoot(root, resolved)) {
+    throw buildPathEscapeError(segments.join("/"));
   }
 
   return resolved;
 }
 
-async function readFile(filePath: string, relativePath: string): Promise<RawFile> {
+async function verifyRealPathWithinRoot(
+  contentPath: string,
+  targetPath: string,
+  relativePath: string
+): Promise<void> {
+  let realRoot: string;
+  let realTarget: string;
+
+  try {
+    [realRoot, realTarget] = await Promise.all([
+      realpath(path.resolve(contentPath)),
+      realpath(targetPath)
+    ]);
+  } catch (error) {
+    throw new ProviderError(
+      `Could not resolve content path "${relativePath}".`,
+      {
+        provider: "git",
+        operation: "load",
+        content: relativePath,
+        reason: error instanceof Error ? error.message : String(error)
+      }
+    );
+  }
+
+  if (!isWithinRoot(realRoot, realTarget)) {
+    throw buildPathEscapeError(relativePath);
+  }
+}
+
+async function readFile(
+  contentPath: string,
+  filePath: string,
+  relativePath: string
+): Promise<RawFile> {
+  await verifyRealPathWithinRoot(contentPath, filePath, relativePath);
   let contents: string;
   let fileStat;
 
@@ -90,7 +138,7 @@ export async function loadPageFile(
     );
   }
 
-  return readFile(filePath, relativePath);
+  return readFile(contentPath, filePath, relativePath);
 }
 
 export async function loadCollectionFiles(
@@ -100,15 +148,31 @@ export async function loadCollectionFiles(
   const relativeDir = `collections/${collection}`;
   const dirPath = resolveWithinRoot(contentPath, ["collections", collection]);
 
-  let entries: string[];
   try {
-    entries = await readdir(dirPath);
+    await stat(dirPath);
   } catch (error) {
     if (isMissingError(error)) {
       return [];
     }
     throw new ProviderError(
       `Could not access collection directory "${relativeDir}".`,
+      {
+        provider: "git",
+        operation: "loadCollection",
+        content: relativeDir,
+        reason: error instanceof Error ? error.message : String(error)
+      }
+    );
+  }
+
+  await verifyRealPathWithinRoot(contentPath, dirPath, relativeDir);
+
+  let entries: string[];
+  try {
+    entries = await readdir(dirPath);
+  } catch (error) {
+    throw new ProviderError(
+      `Could not read collection directory "${relativeDir}".`,
       {
         provider: "git",
         operation: "loadCollection",
@@ -126,7 +190,7 @@ export async function loadCollectionFiles(
   for (const entry of jsonFiles) {
     const relativePath = `${relativeDir}/${entry}`;
     const filePath = path.join(dirPath, entry);
-    files.push(await readFile(filePath, relativePath));
+    files.push(await readFile(contentPath, filePath, relativePath));
   }
 
   return files;
@@ -157,7 +221,7 @@ export async function loadItemFile(
     );
   }
 
-  return readFile(filePath, relativePath);
+  return readFile(contentPath, filePath, relativePath);
 }
 
 function isMissingError(error: unknown): boolean {

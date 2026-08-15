@@ -12,7 +12,11 @@ Internal architecture hardening release.
 ### Changed
 
 - Isolated Git content JSON parsing and serialization behind an internal format adapter (`src/formats/`) so providers read and write files without depending on how a format is handled.
-- No public API or behaviour change in this release.
+- Hardened Git content-root containment against symlink escapes while preserving missing-content behavior.
+- Preserved invalid provider `data` values through normalization so validation rejects malformed external content instead of receiving an empty object.
+- Updated the Astro dynamic blog route to keep public slugs separate from provider item keys.
+- Expanded Core and Git provider tests for provider failures, malformed data, and symlink escapes.
+- Clarified that `0.1.2` is an internal private milestone and that the repository uses the MIT License.
 
 ## [0.1.1] - 2026-08-15
 
