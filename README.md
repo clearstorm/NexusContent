@@ -1103,7 +1103,7 @@ The Git provider does not care which editor created or modified the files.
 
 A Git based CMS is compatible with the NexusContent Git provider when it can maintain files matching the content structure and file formats supported by that provider.
 
-For `0.1.1`, the baseline contract is deliberately small:
+For `0.1.2`, the baseline contract is deliberately small:
 
 ```text
 UTF-8 JSON
@@ -1119,11 +1119,13 @@ normalized NexusContent output
 
 The NexusContent Git provider currently supports JSON content.
 
+Parsing and serialization is isolated behind an internal format adapter so the provider never depends on how a file format is handled.
+
 Git based CMS platforms are compatible when configured to maintain content using the supported NexusContent repository structure and file format.
 
 Markdown with frontmatter, YAML, and MDX are future possibilities.
 
-They are not supported in `0.1.1`.
+They are not supported in `0.1.2`.
 
 Do not assume unsupported formats work.
 
@@ -1187,11 +1189,11 @@ settings/
 
 These are documented conventions for future use.
 
-They are not exposed through the public API in `0.1.1`.
+They are not exposed through the public API in `0.1.2`.
 
 Do not expect `nexus.navigation()` or `nexus.settings()` to exist.
 
-If a consumer needs a site wide singleton in `0.1.1`, place it under `pages/` and read it with `getPage`.
+If a consumer needs a site wide singleton in `0.1.2`, place it under `pages/` and read it with `getPage`.
 
 ## CMS Configuration vs NexusContent Configuration
 
@@ -1209,7 +1211,7 @@ That configuration describes how editors edit content.
 
 NexusContent configuration describes how applications consume content.
 
-They are separate and must not be merged in `0.1.1`.
+They are separate and must not be merged in `0.1.2`.
 
 ## Media
 
@@ -1952,7 +1954,7 @@ Core APIs must be stable before CLI abstractions are introduced.
 
 # Initial Milestone
 
-The current milestone, version `0.1.1`, proves the core architecture and its framework neutrality.
+The current milestone, version `0.1.2`, proves the core architecture and its framework neutrality.
 
 ## Required
 
@@ -2004,7 +2006,7 @@ The current milestone, version `0.1.1`, proves the core architecture and its fra
 
 ---
 
-# Not Part of Version 0.1.1
+# Not Part of Version 0.1.2
 
 Do not implement the following during the current milestone:
 
@@ -2028,7 +2030,7 @@ Do not implement the following during the current milestone:
 
 These features come later.
 
-The purpose of `0.1.1` is to prove the content architecture and its framework neutrality.
+The purpose of `0.1.2` is to prove the content architecture and its framework neutrality.
 
 ---
 

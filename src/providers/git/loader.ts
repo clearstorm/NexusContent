@@ -1,6 +1,7 @@
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readFile as readFileFromDisk, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { ProviderError } from "../../core/errors.ts";
+import { jsonFormatAdapter } from "../../formats/index.ts";
 
 export interface RawFile {
   data: unknown;
@@ -28,12 +29,12 @@ function resolveWithinRoot(contentPath: string, segments: string[]): string {
   return resolved;
 }
 
-async function readJsonFile(filePath: string, relativePath: string): Promise<RawFile> {
+async function readFile(filePath: string, relativePath: string): Promise<RawFile> {
   let contents: string;
   let fileStat;
 
   try {
-    contents = await readFile(filePath, "utf8");
+    contents = await readFileFromDisk(filePath, "utf8");
   } catch (error) {
     throw new ProviderError(
       `Could not read content file "${relativePath}".`,
@@ -52,20 +53,11 @@ async function readJsonFile(filePath: string, relativePath: string): Promise<Raw
     fileStat = undefined;
   }
 
-  let data: unknown;
-  try {
-    data = JSON.parse(contents);
-  } catch (error) {
-    throw new ProviderError(
-      `Content file "${relativePath}" contains malformed JSON.`,
-      {
-        provider: "git",
-        operation: "load",
-        content: relativePath,
-        reason: error instanceof Error ? error.message : String(error)
-      }
-    );
-  }
+  const data = jsonFormatAdapter.parse(contents, {
+    filePath: relativePath,
+    provider: "git",
+    operation: "load"
+  });
 
   return {
     data,
@@ -98,7 +90,7 @@ export async function loadPageFile(
     );
   }
 
-  return readJsonFile(filePath, relativePath);
+  return readFile(filePath, relativePath);
 }
 
 export async function loadCollectionFiles(
@@ -134,7 +126,7 @@ export async function loadCollectionFiles(
   for (const entry of jsonFiles) {
     const relativePath = `${relativeDir}/${entry}`;
     const filePath = path.join(dirPath, entry);
-    files.push(await readJsonFile(filePath, relativePath));
+    files.push(await readFile(filePath, relativePath));
   }
 
   return files;
@@ -165,7 +157,7 @@ export async function loadItemFile(
     );
   }
 
-  return readJsonFile(filePath, relativePath);
+  return readFile(filePath, relativePath);
 }
 
 function isMissingError(error: unknown): boolean {

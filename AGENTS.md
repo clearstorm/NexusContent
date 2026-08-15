@@ -16,7 +16,7 @@ If implementation convenience conflicts with the architectural rules in this fil
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.1.1
+- **Current milestone:** 0.1.2
 - **Primary implementation language:** TypeScript
 - **Primary initial consumer:** Astro (reference consumer only)
 
@@ -273,7 +273,7 @@ Future package architecture may include:
 
 Do not create these packages prematurely.
 
-During milestone 0.1.1, prove the architecture before extracting multiple packages.
+During milestone 0.1.2, prove the architecture before extracting multiple packages.
 
 The Astro example belongs under:
 
@@ -560,9 +560,11 @@ Only documented file formats are supported.
 
 The Git provider currently supports JSON.
 
+Parsing and serialization is isolated behind an internal format adapter so the Git provider reads and writes files without knowing how a format is handled.
+
 Do not silently attempt to parse unsupported formats.
 
-Do not add Markdown, MDX, YAML, TOML, or CSV parsing during 0.1.1 without explicit scope approval.
+Do not add Markdown, MDX, YAML, TOML, or CSV parsing during 0.1.2 without explicit scope approval.
 
 The Git provider must not attempt to parse every file in the repository.
 
@@ -1012,7 +1014,7 @@ Media CDN decisions should remain configurable.
 
 WordPress is planned for a later milestone.
 
-Do not implement the WordPress provider during milestone 0.1.1 unless explicitly requested.
+Do not implement the WordPress provider during milestone 0.1.2 unless explicitly requested.
 
 When implemented, it belongs outside Core.
 
@@ -1048,7 +1050,7 @@ WordPress response objects must stop at the provider boundary.
 
 Strapi is planned for a later milestone.
 
-Do not implement the Strapi provider during milestone 0.1.1 unless explicitly requested.
+Do not implement the Strapi provider during milestone 0.1.2 unless explicitly requested.
 
 When implemented, it belongs outside Core.
 
@@ -1196,7 +1198,7 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.1.1
+**CURRENT MILESTONE:** 0.1.2
 
 The goal is to prove the core architecture and its framework neutrality.
 
@@ -1204,7 +1206,7 @@ Implement only what is required to establish a stable content provider model.
 
 ---
 
-# 33. Required Scope for 0.1.1
+# 33. Required Scope for 0.1.2
 
 The milestone should include:
 
@@ -1264,7 +1266,7 @@ The milestone should include:
 
 ---
 
-# 34. Explicitly Forbidden in 0.1.1
+# 34. Explicitly Forbidden in 0.1.2
 
 Unless the user explicitly changes scope, DO NOT implement:
 
@@ -1302,7 +1304,7 @@ Do not build future roadmap features because they "might be useful."
 
 ---
 
-# 35. Repository Structure for 0.1.1
+# 35. Repository Structure for 0.1.2
 
 Use a deliberately small structure.
 
@@ -1318,6 +1320,11 @@ nexuscontent/
 │   │   ├── service.ts
 │   │   ├── errors.ts
 │   │   ├── normalize.ts
+│   │   └── index.ts
+│   │
+│   ├── formats/
+│   │   ├── types.ts
+│   │   ├── json.ts
 │   │   └── index.ts
 │   │
 │   ├── providers/
@@ -1424,6 +1431,14 @@ Contains structured NexusContent errors.
 Preserve underlying causes where practical.
 
 Never leak credentials.
+
+## src/formats/
+
+Contains format adapter contracts and implementations (currently JSON only).
+
+Providers use format adapters to parse and serialize content without knowing how a format is handled.
+
+This module is internal and must not become part of the public API surface unless intentionally exposed as an extension API.
 
 ## src/providers/git/
 
@@ -1781,7 +1796,7 @@ Do not silently execute content as code.
 
 Avoid unnecessary repeated provider calls during a single operation.
 
-Do not introduce caching during 0.1.1 unless testing demonstrates a concrete need.
+Do not introduce caching during 0.1.2 unless testing demonstrates a concrete need.
 
 When caching is eventually added:
 
@@ -2149,7 +2164,7 @@ Do not require persistent application state for ordinary reads.
 
 # 65. Future Synchronization
 
-Synchronization is intentionally not part of 0.1.1.
+Synchronization is intentionally not part of 0.1.2.
 
 When eventually implemented, it should remain conceptually separate from content reading.
 
@@ -2176,7 +2191,7 @@ Do not contaminate the provider read interface with synchronization methods befo
 
 # 66. Future Preview
 
-Preview is intentionally not part of 0.1.1.
+Preview is intentionally not part of 0.1.2.
 
 When eventually implemented, preserve these principles:
 
@@ -2185,13 +2200,13 @@ When eventually implemented, preserve these principles:
 - Preview content must not accidentally enter production builds.
 - CMS preview must render through the real frontend where practical.
 
-Do not add draft flags to every Core API during 0.1.1 merely because preview may exist later.
+Do not add draft flags to every Core API during 0.1.2 merely because preview may exist later.
 
 ---
 
 # 67. Future Webhooks
 
-Webhooks are intentionally not part of 0.1.1.
+Webhooks are intentionally not part of 0.1.2.
 
 When eventually implemented:
 
@@ -2205,7 +2220,7 @@ When eventually implemented:
 
 # 68. Future CLI
 
-The CLI is intentionally not part of 0.1.1.
+The CLI is intentionally not part of 0.1.2.
 
 Do not create CLI commands until the underlying programmatic APIs are stable.
 
