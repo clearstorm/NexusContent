@@ -5,13 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.1] - 2026-08-15
+
+Architectural compatibility release that makes framework neutrality explicit.
+
+### Added
+
+- Plain Node compatibility example (`examples/node-basic`) proving NexusContent Core works without Astro installed.
+- Framework neutrality tests (`tests/compat`) covering framework imports, framework specific globals, runtime dependencies, and plain Node consumption.
+- CI stage that runs the plain Node compatibility example.
 
 ### Changed
 
+- Aligned README with the framework neutral architecture: Astro is documented as the first reference consumer rather than an architectural owner.
+- Clarified in AGENTS.md that Core must not depend on Astro, Next.js, React, Vue, Svelte, or any other frontend framework.
 - Aligned README examples with the implemented API (`new NexusContent`, `getPage`, `getCollection`, `getItem`, `register`).
 - Added AGENTS.md agent engineering guide and aligned it with the v0.1.0 implementation.
 - Hardened the Git provider against path traversal: content keys are now verified to resolve inside the configured content root before any filesystem access.
+- Added the plain Node compatibility example to the npm workspaces.
 
 ## [0.1.0] - 2026-08-14
 

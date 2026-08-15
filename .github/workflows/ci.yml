@@ -33,3 +33,6 @@ jobs:
 
       - name: Build Astro example
         run: npm run build --workspace @nexuscontent/example-astro-basic
+
+      - name: Run plain Node compatibility example
+        run: node examples/node-basic/index.mjs

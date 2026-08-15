@@ -1,12 +1,14 @@
 # NexusContent
 
-> An open source content architecture for Astro that separates frontend code, content management, and deployment infrastructure.
+> NexusContent is an open source, framework neutral content access layer for JavaScript and TypeScript applications. It provides a consistent API for retrieving normalized content from external sources such as Git managed content, WordPress, Strapi, and future providers.
 
-NexusContent provides a consistent content layer between Astro websites and external content sources such as Git managed content, WordPress, Strapi, and future headless CMS providers.
+NexusContent sits between content sources and applications.
+
+Astro is the first reference consumer and integration environment used to prove NexusContent in static website workflows. It is not a dependency or architectural owner of NexusContent.
 
 It is designed around a simple principle:
 
-**Astro owns the website. Content providers own the content. Deployment infrastructure owns delivery.**
+**Consumers own the application. Content providers own the content. Deployment infrastructure owns delivery.**
 
 NexusContent sits between those concerns.
 
@@ -19,7 +21,10 @@ Content Sources
       └── Future Providers
       │
       ▼
- NexusContent
+   Providers
+      │
+      ▼
+NexusContent Core
       │
       ├── Provider Interface
       ├── Normalization
@@ -28,15 +33,16 @@ Content Sources
       └── Content Provenance
       │
       ▼
-     Astro
+    Consumers
       │
-      ├── Routes
-      ├── Pages
-      ├── Layouts
-      └── Components
+      ├── Astro
+      ├── Next.js
+      ├── Node
+      ├── React based frameworks
+      └── Future JavaScript consumers
       │
       ▼
-     Build
+ Build or Runtime
       │
       ├── cPanel
       ├── Vercel
@@ -53,18 +59,19 @@ NexusContent is currently in early development.
 
 The first milestone is deliberately small.
 
-The initial version will establish:
+The initial version establishes:
 
 1. NexusContent Core
 2. A stable provider contract
 3. Normalized content types
 4. Provider registration
 5. Project configuration
-6. An Astro facing content service
+6. A framework neutral content service
 7. A Git based content provider
 8. Content validation
-9. A working Astro example
-10. Automated tests
+9. A working Astro reference example
+10. A plain Node compatibility proof
+11. Automated tests
 
 WordPress, Strapi, preview workflows, CMS webhooks, synchronization, and deployment integrations will be added after the core architecture is proven.
 
@@ -74,7 +81,7 @@ The project must not become over engineered before the core contract is stable.
 
 # Why NexusContent Exists
 
-Astro is excellent at building fast websites, but real client websites have a content management problem.
+Modern JavaScript applications are excellent at building fast websites, but real client websites have a content management problem.
 
 Developers want:
 
@@ -107,6 +114,14 @@ Another may use Cloudflare.
 
 Content may live in WordPress, Strapi, a Git backed content system, or another headless CMS.
 
+Applications also vary in framework.
+
+One project may use Astro.
+
+Another may use a React based framework.
+
+Another may be a plain Node script.
+
 These concerns should not be tightly coupled.
 
 NexusContent provides the boundary between them.
@@ -117,11 +132,11 @@ NexusContent provides the boundary between them.
 
 NexusContent follows five major principles.
 
-## 1. Astro owns routing
+## 1. Consumers own routing
 
-Primary website routes belong inside the Astro project.
+Primary website routes belong inside the consuming application.
 
-For example:
+For example, in the Astro reference example:
 
 ```text
 src/pages/
@@ -138,11 +153,11 @@ A CMS does not determine the primary website information architecture.
 
 A CMS supplies content.
 
-Astro determines how that content is presented.
+The consumer determines how that content is presented.
 
 Dynamic routes are still valid where appropriate.
 
-For example, a blog may use:
+For example, an Astro blog may use:
 
 ```text
 src/pages/blog/[slug].astro
@@ -158,7 +173,7 @@ NexusContent does not treat `src/data/*.json` as the primary content management 
 
 Files bundled directly inside the application repository are appropriate for developer owned configuration, but they are weak as a client content management system.
 
-Editable business content should normally live outside the Astro application.
+Editable business content should normally live outside the application.
 
 Examples include:
 
@@ -172,16 +187,16 @@ This provides a clearer separation between application code and content.
 
 ---
 
-## 3. Astro must not know which CMS is being used
+## 3. Applications must not know which CMS is being used
 
-Astro pages and components should consume normalized NexusContent data.
+Application pages and components should consume normalized NexusContent data.
 
 They should not consume WordPress or Strapi response objects directly.
 
 Bad:
 
 ```text
-Astro Page
+Page
     ↓
 WordPress REST API
 ```
@@ -189,7 +204,7 @@ WordPress REST API
 Correct:
 
 ```text
-Astro Page
+Page
     ↓
 NexusContent Service
     ↓
@@ -198,7 +213,7 @@ Provider
 WordPress
 ```
 
-The same Astro page should be capable of changing content providers without requiring a complete frontend rewrite.
+The same application should be capable of changing content providers without requiring a complete frontend rewrite.
 
 ---
 
@@ -206,7 +221,7 @@ The same Astro page should be capable of changing content providers without requ
 
 NexusContent does not require a particular hosting platform.
 
-Static Astro output should be deployable to any suitable host.
+Static consumer output should be deployable to any suitable host.
 
 Examples include:
 
@@ -231,12 +246,14 @@ Content
    ↓
 NexusContent
    ↓
-Astro Build
+Consumer Build
    ↓
 dist/
    ↓
 Deployment
 ```
+
+Static generation is a consumer execution mode, not a NexusContent Core requirement.
 
 A Node runtime should only be introduced when the project actually requires server side functionality.
 
@@ -250,10 +267,11 @@ NexusContent is:
 * a provider architecture
 * a normalization layer
 * a validation layer
-* a consistent API for Astro
+* a consistent API for JavaScript and TypeScript applications
 * a foundation for CMS integrations
 * a foundation for content synchronization
 * a foundation for preview workflows
+* framework neutral infrastructure
 * open source infrastructure
 
 ---
@@ -267,6 +285,8 @@ NexusContent is not:
 * a WordPress replacement
 * a Strapi replacement
 * an Astro theme
+* a Next.js plugin
+* a React library
 * a UI component library
 * a hosting platform
 * a deployment platform
@@ -284,7 +304,7 @@ It should not attempt to replace them.
 The target architecture is:
 
 ```text
-                        Content Sources
+                         Content Sources
 
           ┌─────────────────┼─────────────────┐
           │                 │                 │
@@ -304,15 +324,15 @@ The target architecture is:
                             ▼
                      Content Service
                             │
-                            ▼
-                          Astro
+            ┌───────────────┼───────────────┐
+            │               │               │
+          Node            Astro          Future
+                                          Next.js
+                                          TanStack
+                                          Other JS
                             │
-              ┌─────────────┼─────────────┐
-              │             │             │
-            Pages        Layouts      Components
-                            │
                             ▼
-                       Astro Build
+                     Build or Runtime
                             │
                             ▼
                           dist/
@@ -322,11 +342,15 @@ The target architecture is:
         cPanel            Vercel          Cloudflare
 ```
 
+NexusContent Core ends at the consumer boundary.
+
+It does not own the build, the runtime, or the deployment of the consuming application.
+
 ---
 
 # Separation of Responsibilities
 
-NexusContent uses a separation similar in spirit to MVC, although Astro itself is not being forced into a traditional MVC framework.
+NexusContent uses a separation similar in spirit to MVC, although consuming applications are not being forced into a traditional MVC framework.
 
 ## Model
 
@@ -343,7 +367,7 @@ Future CMS providers
 
 ## View
 
-Astro presentation.
+The consumer application's presentation.
 
 ```text
 Pages
@@ -351,6 +375,8 @@ Layouts
 Components
 Styles
 ```
+
+For Astro projects, Astro owns these concerns.
 
 ## Content Controller Layer
 
@@ -406,19 +432,23 @@ nexuscontent/
 │   └── index.ts
 │
 ├── examples/
-│   └── astro-basic/
-│       ├── src/
-│       │   ├── components/
-│       │   ├── layouts/
-│       │   └── pages/
-│       ├── public/
-│       ├── astro.config.mjs
-│       ├── package.json
-│       └── tsconfig.json
+│   ├── astro-basic/
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── layouts/
+│   │   │   └── pages/
+│   │   ├── public/
+│   │   ├── astro.config.mjs
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── node-basic/
+│       ├── index.mjs
+│       └── package.json
 │
 ├── tests/
 │   ├── core/
 │   ├── providers/
+│   ├── compat/
 │   └── validation/
 │
 ├── .github/
@@ -457,6 +487,10 @@ Core is responsible for:
 * normalized content
 * errors
 * content retrieval
+
+Core never assumes the consuming application is an Astro project.
+
+Core works in any JavaScript runtime where its dependencies can run.
 
 ---
 
@@ -535,7 +569,7 @@ form
 
 The content provider supplies normalized content.
 
-The Astro project determines the page specific schema.
+The consuming project determines the page specific schema.
 
 ---
 
@@ -698,13 +732,13 @@ Provider
 Provider Content Key
 ```
 
-It does not create Astro routes.
+It does not create application routes.
 
 ---
 
 # Content Service
 
-Astro should normally interact with NexusContent through the content service.
+Consumers should normally interact with NexusContent through the content service.
 
 Example:
 
@@ -730,15 +764,32 @@ Validate
 Return content
 ```
 
-Astro should not need to know whether `about` came from Git, WordPress, Strapi, or another provider.
+The consumer should not need to know whether `about` came from Git, WordPress, Strapi, or another provider.
 
 ---
 
-# Astro Integration
+# Framework Neutrality
 
-NexusContent Core must not depend on Astro.
+NexusContent Core is framework neutral.
 
-This is a strict architectural boundary.
+It does not depend on Astro, Next.js, React, Vue, Svelte, or any frontend framework.
+
+The same Core code runs inside:
+
+```text
+Astro
+Next.js
+React based frameworks
+plain Node scripts
+future JavaScript consumers
+```
+
+Core never assumes the consumer is:
+
+* Astro
+* a Next.js application
+* a React application
+* any other specific framework
 
 Bad:
 
@@ -750,25 +801,29 @@ inside NexusContent Core or a content provider.
 
 Core deals with content.
 
-Astro deals with presentation.
+Consumers deal with presentation.
 
-The Astro application imports NexusContent.
+The consumer imports NexusContent.
 
-NexusContent does not import Astro.
+NexusContent does not import the consumer's framework.
 
-This separation should eventually allow NexusContent Core to be used outside Astro if there is a legitimate reason.
+Framework specific integration code belongs in the consuming application, not in Core.
+
+A project that wants a NexusContent integration for a new framework should build that integration in the consuming application.
 
 ---
 
-# Astro Page Example
+# Consumer Example
 
-An Astro route remains explicit:
+Every consumer uses the same NexusContent API.
+
+First install the package:
 
 ```text
-src/pages/about.astro
+npm install @nexuscontent/core
 ```
 
-Example:
+### Astro
 
 ```astro
 ---
@@ -791,9 +846,55 @@ const content = page.data;
 <CompanyStory {...content.story} />
 ```
 
+### Plain Node
+
+```js
+import { NexusContent } from "@nexuscontent/core";
+
+const nexus = new NexusContent(config);
+
+const about = await nexus.getPage("about");
+const projects = await nexus.getCollection("projects");
+const project = await nexus.getItem("projects", "project-one");
+
+console.log(about.title);
+console.log(projects.length);
+console.log(project.title);
+```
+
+The Astro page and the Node script call the same methods.
+
+No provider code is imported in either consumer.
+
+The reference examples live under `examples/`:
+
+* `examples/astro-basic/` proves consumption inside an Astro static build.
+* `examples/node-basic/` proves consumption from a plain Node process.
+
+---
+
+# Astro Example
+
+The Astro reference example under `examples/astro-basic/` proves NexusContent consumption inside an Astro static build.
+
+Astro routes remain explicit:
+
+```text
+src/pages/
+├── index.astro
+├── about.astro
+├── services.astro
+├── contact.astro
+└── blog/
+    ├── index.astro
+    └── [slug].astro
+```
+
 The page controls composition.
 
 NexusContent supplies data.
+
+No Astro page or component calls a provider directly.
 
 ---
 
@@ -801,9 +902,9 @@ NexusContent supplies data.
 
 NexusContent does not require a universal section renderer.
 
-For normal websites, explicit Astro composition is preferred.
+For normal websites, explicit composition is preferred.
 
-Example:
+Example (Astro):
 
 ```astro
 <Hero {...content.hero} />
@@ -834,7 +935,7 @@ Example:
 GitHub
 
 company-website/
-    Astro application
+    Application
 
 company-content/
     Content
@@ -873,7 +974,17 @@ NEXUS_GIT_CONTENT_PATH=../company-content
 
 The Git provider reads from that location.
 
-The Astro application must not assume the content repository exists inside `src`.
+The application must not assume the content repository exists inside `src`.
+
+## Node requirement
+
+The Git provider uses Node filesystem APIs.
+
+This constraint is specific to the Git provider.
+
+Core itself does not assume a Node runtime.
+
+Future providers may target other JavaScript runtimes.
 
 ---
 
@@ -920,7 +1031,7 @@ Git Content Repository
       ↓
 Webhook or Git Event
       ↓
-Astro Build
+Build
       ↓
 Deployment
 ```
@@ -946,7 +1057,7 @@ WordPress Provider
     ↓
 NexusContent
     ↓
-Astro
+Consumer
 ```
 
 The WordPress provider will be responsible for:
@@ -980,7 +1091,7 @@ Strapi Provider
    ↓
 NexusContent
    ↓
-Astro
+Consumer
 ```
 
 The Strapi provider will be responsible for:
@@ -1135,6 +1246,10 @@ Object storage
 
 Astro components should not contain CMS specific media URL logic.
 
+The same applies to components in any consumer framework.
+
+Media CDN decisions should remain configurable by the consuming application.
+
 ---
 
 # Content Workflow
@@ -1154,7 +1269,7 @@ Publish
    ↓
 Webhook
    ↓
-Astro Build
+Build
    ↓
 NexusContent fetches CMS
    ↓
@@ -1180,7 +1295,7 @@ Content Sync
    ↓
 Git Content Repository
    ↓
-Astro Build
+Build
    ↓
 Deploy
 ```
@@ -1206,7 +1321,7 @@ Preview request
    ↓
 NexusContent
    ↓
-Astro frontend
+Consumer frontend
    ↓
 Real website design
 ```
@@ -1280,7 +1395,7 @@ Webhook implementation is not part of the first milestone.
 
 NexusContent Core is deployment independent.
 
-It should work regardless of whether the Astro application is deployed to:
+It should work regardless of whether the consuming application is deployed to:
 
 ```text
 cPanel
@@ -1317,7 +1432,7 @@ GitHub
    ↓
 GitHub Actions
    ↓
-Astro Build
+Build
    ↓
 dist/
    ↓
@@ -1339,7 +1454,7 @@ GitHub
    ↓
 Vercel
    ↓
-Astro Build
+Build
    ↓
 Deployment
 ```
@@ -1355,7 +1470,7 @@ Form handling is not a responsibility of NexusContent Core.
 A website may use:
 
 ```text
-Astro Form
+Form
     ↓
 Form API
     ↓
@@ -1452,6 +1567,8 @@ Tests
 Build package
       ↓
 Build Astro example
+      ↓
+Run plain Node compatibility example
 ```
 
 CI should fail if any stage fails.
@@ -1491,6 +1608,12 @@ Initial test coverage should include:
 * missing required fields
 * invalid field types
 * useful validation errors
+
+## Framework Neutrality
+
+* Core and provider code contains no framework imports
+* Core works without Astro
+* runtime dependencies do not include Astro or any frontend framework
 
 The project should test behaviour, not implementation details.
 
@@ -1547,7 +1670,7 @@ Core APIs must be stable before CLI abstractions are introduced.
 
 # Initial Milestone
 
-Version `0.1.0` should focus only on proving the core architecture.
+The current milestone, version `0.1.1`, proves the core architecture and its framework neutrality.
 
 ## Required
 
@@ -1582,6 +1705,12 @@ Version `0.1.0` should focus only on proving the core architecture.
 * home page
 * about page
 * collection example
+* no direct provider calls from Astro components
+
+### Plain Node Compatibility
+
+* runs the NexusContent public API from a plain Node script
+* proves Core does not require Astro
 
 ### Engineering
 
@@ -1593,9 +1722,9 @@ Version `0.1.0` should focus only on proving the core architecture.
 
 ---
 
-# Not Part of Version 0.1.0
+# Not Part of Version 0.1.1
 
-Do not implement the following during the first milestone:
+Do not implement the following during the current milestone:
 
 * WordPress provider
 * Strapi provider
@@ -1617,7 +1746,7 @@ Do not implement the following during the first milestone:
 
 These features come later.
 
-The purpose of `0.1.0` is to prove the content architecture.
+The purpose of `0.1.1` is to prove the content architecture and its framework neutrality.
 
 ---
 
@@ -1665,15 +1794,15 @@ These rules are non negotiable unless there is a documented reason to change the
 
 ### Rule 1
 
-Astro owns website routes.
+The consuming application owns website routes.
 
 ### Rule 2
 
-NexusContent Core does not depend on Astro.
+NexusContent Core does not depend on Astro or any other frontend framework.
 
 ### Rule 3
 
-Content providers do not depend on Astro.
+Content providers do not depend on any frontend framework.
 
 ### Rule 4
 
@@ -1846,6 +1975,6 @@ CMS platforms can change.
 
 Hosting can change.
 
-The Astro application should not need to be rebuilt architecturally every time one of those choices changes.
+The consuming application should not need to be rebuilt architecturally every time one of those choices changes.
 
 That separation is the reason NexusContent exists.

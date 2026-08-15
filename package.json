@@ -1,7 +1,7 @@
 {
   "name": "@nexuscontent/core",
-  "version": "0.1.0",
-  "description": "An open source content architecture for Astro that separates frontend code, content management, and deployment infrastructure.",
+  "version": "0.1.1",
+  "description": "An open source, framework neutral content access layer for JavaScript and TypeScript applications.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,7 +16,8 @@
   ],
   "private": true,
   "workspaces": [
-    "examples/astro-basic"
+    "examples/astro-basic",
+    "examples/node-basic"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

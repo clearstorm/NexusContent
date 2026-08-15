@@ -16,9 +16,9 @@ If implementation convenience conflicts with the architectural rules in this fil
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.1.0
+- **Current milestone:** 0.1.1
 - **Primary implementation language:** TypeScript
-- **Primary initial consumer:** Astro
+- **Primary initial consumer:** Astro (reference consumer only)
 
 NexusContent Core must remain framework independent.
 
@@ -71,6 +71,10 @@ Content Source
 → Static Build
 → Deployment Target
 ```
+
+Astro is the first reference consumer.
+
+The same Core code must also work for other consumers, including plain Node scripts, without modification.
 
 ---
 
@@ -165,9 +169,21 @@ NexusContent Core must not contain deployment logic.
 
 # 5. Framework Independence
 
-NexusContent Core MUST NOT depend on Astro.
+NexusContent Core MUST NOT depend on any frontend framework.
 
-Do not import Astro into:
+This includes, but is not limited to:
+
+- Astro
+- Next.js
+- React
+- Vue
+- Svelte
+- Nuxt
+- Remix
+- Solid
+- Vite
+
+Do not import any framework into:
 
 - src/core/
 - src/providers/
@@ -182,15 +198,44 @@ Core code must not assume:
 - Astro server runtime
 - Astro adapters
 - Astro Content Collections
+- Next.js routing
+- Next.js server components
+- Next.js edge runtime
+- React components
+- React hooks
+- Vue components
+- Svelte components
+- Vite plugins
+
+Core code must not use framework specific globals such as:
+
+- Astro
+- process.env
+- import.meta.env
+- React
+- next
+- window / document where a runtime cannot guarantee them
 
 Astro may consume NexusContent.
 
-NexusContent Core must not consume Astro.
+Next.js may consume NexusContent.
+
+A plain Node script may consume NexusContent.
+
+NexusContent Core must not consume any framework.
 
 Bad:
 
 ```ts
 import { Astro } from "astro";
+```
+
+inside Core or a provider.
+
+Also bad:
+
+```ts
+import { useRouter } from "next/navigation";
 ```
 
 inside Core or a provider.
@@ -203,13 +248,19 @@ const page = await nexus.getPage("about");
 
 The consumer decides what to do with the returned content.
 
+Provider specific runtimes (such as the Git provider's use of Node filesystem APIs) are isolated inside the provider that requires them.
+
+They are never imposed on Core.
+
 ---
 
-# 6. Astro Integration
+# 6. Consumer Integration
 
-Astro is the first and primary frontend integration.
+Astro is the first and primary frontend integration, used as a reference consumer.
 
-Astro specific functionality must remain outside Core.
+Framework specific integration code must remain outside Core.
+
+A consumer integration for a new framework belongs in the consuming application.
 
 Future package architecture may include:
 
@@ -222,7 +273,7 @@ Future package architecture may include:
 
 Do not create these packages prematurely.
 
-During milestone 0.1.0, prove the architecture before extracting multiple packages.
+During milestone 0.1.1, prove the architecture before extracting multiple packages.
 
 The Astro example belongs under:
 
@@ -234,13 +285,25 @@ It exists to prove that NexusContent can be consumed cleanly by Astro.
 
 It must not become the implementation location for NexusContent Core.
 
+The plain Node compatibility example belongs under:
+
+```text
+examples/node-basic/
+```
+
+It proves that NexusContent Core works without Astro installed.
+
+Core and its tests must never assume the Astro example exists.
+
 ---
 
-# 7. Astro Owns Routes
+# 7. Consumers Own Routes
 
-NexusContent does not generate the primary information architecture of an Astro website.
+NexusContent does not generate the primary information architecture of a website.
 
-Routes belong in:
+The consuming application owns routes.
+
+For Astro consumers, routes belong in:
 
 ```text
 src/pages/
@@ -275,13 +338,13 @@ src/pages/blog/[slug].astro
 
 may use NexusContent to obtain the blog collection.
 
-The Astro application still owns the route.
+The consumer application still owns the route.
 
 ---
 
 # 8. Page Composition
 
-Astro pages should explicitly compose components when the page structure is known.
+Consumer pages should explicitly compose components when the page structure is known.
 
 Preferred:
 
@@ -306,6 +369,8 @@ unless the project explicitly requires CMS controlled section ordering.
 NexusContent supplies data.
 
 It does not dictate page composition.
+
+Composition is a consumer concern.
 
 ---
 
@@ -354,7 +419,7 @@ External Content Source
 
 # 10. Git Content Provider
 
-The first provider implemented in milestone 0.1.0 is the Git content provider.
+The first provider implemented in the 0.1.x milestones is the Git content provider.
 
 The recommended production architecture uses a separate content repository.
 
@@ -453,7 +518,7 @@ export interface ContentProvider {
 }
 ```
 
-The exact API may evolve during milestone 0.1.0 if testing exposes a better design.
+The exact API may evolve during the 0.1.x milestones if testing exposes a better design.
 
 Any change to the provider contract must be deliberate.
 
@@ -868,7 +933,7 @@ Media CDN decisions should remain configurable.
 
 WordPress is planned for a later milestone.
 
-Do not implement the WordPress provider during milestone 0.1.0 unless explicitly requested.
+Do not implement the WordPress provider during milestone 0.1.1 unless explicitly requested.
 
 When implemented, it belongs outside Core.
 
@@ -904,7 +969,7 @@ WordPress response objects must stop at the provider boundary.
 
 Strapi is planned for a later milestone.
 
-Do not implement the Strapi provider during milestone 0.1.0 unless explicitly requested.
+Do not implement the Strapi provider during milestone 0.1.1 unless explicitly requested.
 
 When implemented, it belongs outside Core.
 
@@ -980,10 +1045,14 @@ Typical workflow:
 Build starts
 → Consumer calls NexusContent
 → NexusContent fetches content
-→ Astro generates pages
+→ Consumer generates pages
 → dist generated
 → dist deployed
 ```
+
+Static generation is a consumer execution mode.
+
+NexusContent Core must not assume it is running inside an Astro build or any other framework build.
 
 NexusContent must not require a persistent production Node process for normal static builds.
 
@@ -1048,17 +1117,17 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.1.0
+**CURRENT MILESTONE:** 0.1.1
 
-The goal is to prove the core architecture.
+The goal is to prove the core architecture and its framework neutrality.
 
 Implement only what is required to establish a stable content provider model.
 
 ---
 
-# 33. Required Scope for 0.1.0
+# 33. Required Scope for 0.1.1
 
-The first milestone should include:
+The milestone should include:
 
 ## Core
 
@@ -1096,6 +1165,12 @@ The first milestone should include:
 - Static build
 - No direct provider calls from Astro components
 
+## Plain Node Compatibility
+
+- Automated framework neutrality tests
+- A plain Node example under `examples/node-basic/`
+- Proof that Core works without Astro installed
+
 ## Engineering
 
 - TypeScript
@@ -1108,7 +1183,7 @@ The first milestone should include:
 
 ---
 
-# 34. Explicitly Forbidden in 0.1.0
+# 34. Explicitly Forbidden in 0.1.1
 
 Unless the user explicitly changes scope, DO NOT implement:
 
@@ -1145,7 +1220,7 @@ Do not build future roadmap features because they "might be useful."
 
 ---
 
-# 35. Repository Structure for 0.1.0
+# 35. Repository Structure for 0.1.1
 
 Use a deliberately small structure.
 
@@ -1178,19 +1253,23 @@ nexuscontent/
 │   └── index.ts
 │
 ├── examples/
-│   └── astro-basic/
-│       ├── src/
-│       │   ├── components/
-│       │   ├── layouts/
-│       │   └── pages/
-│       ├── public/
-│       ├── astro.config.mjs
-│       ├── package.json
-│       └── tsconfig.json
+│   ├── astro-basic/
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── layouts/
+│   │   │   └── pages/
+│   │   ├── public/
+│   │   ├── astro.config.mjs
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── node-basic/
+│       ├── index.mjs
+│       └── package.json
 │
 ├── tests/
 │   ├── core/
 │   ├── providers/
+│   ├── compat/
 │   └── validation/
 │
 ├── .github/
@@ -1280,11 +1359,27 @@ Example specific schemas belong in the example application.
 
 ## examples/astro-basic/
 
-Demonstrates consumption of NexusContent.
+Demonstrates consumption of NexusContent inside an Astro static build.
 
 It must not become a hidden dependency of Core.
 
 Deleting the example must not break the library.
+
+## examples/node-basic/
+
+Demonstrates consumption of NexusContent from a plain Node process.
+
+It proves that Core does not require Astro.
+
+It must not become a hidden dependency of Core.
+
+Deleting the example must not break the library.
+
+## tests/compat/
+
+Contains framework neutrality tests.
+
+These tests must run without Astro or any frontend framework installed.
 
 ---
 
@@ -1365,7 +1460,7 @@ Do not add large utility libraries for trivial operations.
 
 Do not add frontend frameworks to Core.
 
-Do not add Astro to Core runtime dependencies.
+Do not add Astro, Next.js, React, Vue, Svelte, or TanStack to Core runtime dependencies.
 
 ---
 
@@ -1424,6 +1519,12 @@ Do not test implementation details unless necessary.
 - Incorrect field types
 - Useful error output
 
+## Minimum framework neutrality tests
+
+- Core and provider sources contain no framework imports
+- The public API works from plain Node code without Astro installed
+- Runtime dependencies do not include Astro or any frontend framework
+
 ---
 
 # 42. Test Fixtures
@@ -1450,6 +1551,7 @@ Install
 → Tests
 → Package Build
 → Astro Example Build
+→ Plain Node Compatibility Example
 ```
 
 CI must fail when any required stage fails.
@@ -1595,7 +1697,7 @@ Do not silently execute content as code.
 
 Avoid unnecessary repeated provider calls during a single operation.
 
-Do not introduce caching during 0.1.0 unless testing demonstrates a concrete need.
+Do not introduce caching during 0.1.1 unless testing demonstrates a concrete need.
 
 When caching is eventually added:
 
@@ -1603,7 +1705,7 @@ When caching is eventually added:
 - It must support invalidation.
 - It must not hide stale content errors.
 
-Do not add Redis in 0.1.0.
+Do not add Redis in 0.1.x.
 
 ---
 
@@ -1617,7 +1719,7 @@ Errors should contain enough context for debugging.
 
 Future structured logging may be added through an injectable logger if there is a demonstrated requirement.
 
-Do not add a logging framework during 0.1.0 without a concrete need.
+Do not add a logging framework during 0.1.x without a concrete need.
 
 ---
 
@@ -1768,6 +1870,7 @@ Run:
 - Full tests where practical
 - Build
 - Astro example build where relevant
+- Plain Node compatibility example where relevant
 
 ### Step 7
 
@@ -1948,7 +2051,7 @@ This improves:
 
 NexusContent must not assume all consumers operate at runtime.
 
-The primary Astro use case is build time.
+The primary Astro use case is build time, but the same Core must also work at runtime in other consumers.
 
 Therefore provider APIs must work cleanly during:
 
@@ -1962,7 +2065,7 @@ Do not require persistent application state for ordinary reads.
 
 # 65. Future Synchronization
 
-Synchronization is intentionally not part of 0.1.0.
+Synchronization is intentionally not part of 0.1.1.
 
 When eventually implemented, it should remain conceptually separate from content reading.
 
@@ -1989,7 +2092,7 @@ Do not contaminate the provider read interface with synchronization methods befo
 
 # 66. Future Preview
 
-Preview is intentionally not part of 0.1.0.
+Preview is intentionally not part of 0.1.1.
 
 When eventually implemented, preserve these principles:
 
@@ -1998,13 +2101,13 @@ When eventually implemented, preserve these principles:
 - Preview content must not accidentally enter production builds.
 - CMS preview must render through the real frontend where practical.
 
-Do not add draft flags to every Core API during 0.1.0 merely because preview may exist later.
+Do not add draft flags to every Core API during 0.1.1 merely because preview may exist later.
 
 ---
 
 # 67. Future Webhooks
 
-Webhooks are intentionally not part of 0.1.0.
+Webhooks are intentionally not part of 0.1.1.
 
 When eventually implemented:
 
@@ -2018,7 +2121,7 @@ When eventually implemented:
 
 # 68. Future CLI
 
-The CLI is intentionally not part of 0.1.0.
+The CLI is intentionally not part of 0.1.1.
 
 Do not create CLI commands until the underlying programmatic APIs are stable.
 
@@ -2082,7 +2185,9 @@ Before completing substantial work, ask:
 
 - Does Core now know something provider specific?
   - If yes, reconsider.
-- Does a provider now know something Astro specific?
+- Does Core now assume a specific consumer framework?
+  - If yes, reconsider.
+- Does a provider now know something framework specific?
   - If yes, reconsider.
 - Does NexusContent now know where the website is hosted?
   - If yes, reconsider.

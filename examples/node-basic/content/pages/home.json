@@ -1,0 +1,14 @@
+{
+  "id": "home",
+  "key": "home",
+  "slug": "home",
+  "title": "Home",
+  "seo": {
+    "title": "NexusContent Example",
+    "description": "A framework neutral content access layer."
+  },
+  "hero": {
+    "heading": "Framework neutral by default.",
+    "intro": "NexusContent works from plain Node without any framework installed."
+  }
+}

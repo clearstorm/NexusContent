@@ -1,0 +1,8 @@
+{
+  "id": "welcome",
+  "key": "welcome",
+  "slug": "welcome",
+  "title": "Welcome",
+  "body": "Plain Node consumes the same NexusContent API as Astro.",
+  "date": "2026-08-15"
+}

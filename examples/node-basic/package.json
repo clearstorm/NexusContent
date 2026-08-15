@@ -1,0 +1,13 @@
+{
+  "name": "@nexuscontent/example-node-basic",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "description": "Plain Node consumer proving NexusContent Core works without Astro installed.",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "@nexuscontent/core": "file:../.."
+  }
+}
