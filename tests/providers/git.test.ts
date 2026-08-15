@@ -111,6 +111,19 @@ test("returns an empty array for a missing collection", async () => {
   assert.deepEqual(await buildProvider().getCollection("missing"), []);
 });
 
+test("ignores unrelated repository files such as CMS configuration and media", async () => {
+  const page = await buildProvider().getPage("home");
+  assert.ok(page);
+
+  const items = await buildProvider().getCollection("posts");
+  assert.deepEqual(
+    items.map((item) => item.key),
+    ["hello-world", "welcome"]
+  );
+
+  assert.deepEqual(await buildProvider().getCollection("admin"), []);
+});
+
 test("loads a single collection item", async () => {
   const item = await buildProvider().getItem("posts", "hello-world");
 

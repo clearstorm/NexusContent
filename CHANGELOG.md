@@ -14,6 +14,10 @@ Architectural compatibility release that makes framework neutrality explicit.
 - Plain Node compatibility example (`examples/node-basic`) proving NexusContent Core works without Astro installed.
 - Framework neutrality tests (`tests/compat`) covering framework imports, framework specific globals, runtime dependencies, and plain Node consumption.
 - CI stage that runs the plain Node compatibility example.
+- Documented Git based CMS compatibility through the existing Git provider.
+- Clarified the distinction between content editing systems and content providers.
+- Documented JSON as the supported Git content format for the 0.1.1 workflow.
+- Added compatibility tests for externally managed Git content repositories (unrelated CMS files are ignored).
 
 ### Changed
 

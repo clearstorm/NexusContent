@@ -491,6 +491,85 @@ NexusContent Core must not require content editors to understand Git.
 
 The editing interface itself is outside Core.
 
+NexusContent integrates with the content source, not necessarily the editing interface.
+
+## 11.1 Git Based CMS Products Are Editing Layers
+
+Git based CMS products are treated as editing layers when their authoritative content is stored as repository files.
+
+Examples include Decap CMS and TinaCMS when operating against repository files.
+
+The Git repository remains the content source.
+
+NexusContent reads the repository through its Git provider.
+
+## 11.2 No Dedicated Provider for Editing Interfaces
+
+Do not create a provider for a Git based CMS merely because it has a different editing interface.
+
+Do not create providers such as:
+
+- DecapProvider
+- TinaProvider
+- KeystaticProvider
+- GitCMSProvider
+
+A Git based CMS should interact with NexusContent through the existing Git content provider.
+
+## 11.3 Dedicated Provider Justification
+
+A dedicated CMS provider is justified only when NexusContent must communicate with a CMS specific API or capability that cannot reasonably be represented through the Git content provider.
+
+Proprietary API access may justify a dedicated provider.
+
+A different editing interface does not.
+
+## 11.4 Editor Independence
+
+The Git provider must remain editor independent.
+
+The provider must behave the same whether a content file was created by:
+
+- a developer
+- a Git based CMS
+- an AI coding agent
+- a custom editor
+- a script
+- a hosted Git editing interface
+
+Do not inspect or depend on editor identity during ordinary content retrieval.
+
+## 11.5 Git Operations Stay Out of Retrieval
+
+Ordinary content retrieval must not execute Git commands.
+
+Do not introduce:
+
+- git clone
+- git pull
+- git commit
+- git push
+
+inside content retrieval.
+
+Repository synchronization belongs to CI, deployment tooling, the editing system, or a future explicitly designed synchronization capability.
+
+## 11.6 Supported Formats
+
+Only documented file formats are supported.
+
+The Git provider currently supports JSON.
+
+Do not silently attempt to parse unsupported formats.
+
+Do not add Markdown, MDX, YAML, TOML, or CSV parsing during 0.1.1 without explicit scope approval.
+
+The Git provider must not attempt to parse every file in the repository.
+
+It only reads configured or convention based NexusContent content locations.
+
+CMS metadata, configuration, README files, and media are ignored.
+
 ---
 
 # 12. Provider Architecture
@@ -1149,6 +1228,8 @@ The milestone should include:
 - Normalization
 - Content provenance
 - Useful errors
+- Git based CMS compatibility documentation
+- Unrelated repository files are ignored
 
 ## Validation
 
@@ -1192,6 +1273,7 @@ Unless the user explicitly changes scope, DO NOT implement:
 - Directus provider
 - Sanity provider
 - Contentful provider
+- Git CMS specific providers (Decap, Tina, Keystatic, and similar)
 - CLI
 - Admin UI
 - Webhooks
@@ -1510,6 +1592,8 @@ Do not test implementation details unless necessary.
 - Normalization
 - Content provenance
 - Path handling
+- Unrelated CMS files are ignored
+- Editor independence
 
 ## Minimum validation tests
 

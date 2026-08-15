@@ -1020,6 +1020,8 @@ A Git repository does not mean editors should edit JSON manually.
 
 A Git backed CMS or editing interface can sit above the repository.
 
+NexusContent integrates with the content source, not necessarily the editing interface.
+
 Expected workflow:
 
 ```text
@@ -1038,7 +1040,287 @@ Deployment
 
 The specific editing product is not part of NexusContent Core.
 
-Possible integrations may be documented separately.
+The next section explains how Git based CMS editing systems map onto the NexusContent Git provider.
+
+---
+
+# Git Based CMS Compatibility
+
+NexusContent does not need a dedicated provider for every Git based CMS.
+
+A Git based CMS is an editing layer.
+
+The Git repository is the content source.
+
+NexusContent reads the content repository through its Git provider.
+
+```text
+                Editing Layer
+
+      Git CMS A   Git CMS B   Custom UI
+          |           |           |
+          +-----------+-----------+
+                      |
+                      v
+                Git Repository
+                      |
+                      v
+            NexusContent Git Provider
+                      |
+                      v
+               NexusContent Core
+                      |
+                      v
+              Consumer Application
+```
+
+Examples of Git based editing systems include Decap CMS and TinaCMS when they operate against repository files, and Git based workflows of other headless CMS platforms.
+
+NexusContent does not claim complete compatibility with any particular product.
+
+Compatibility depends on whether the editing system can maintain files in the NexusContent compatible repository structure and format.
+
+## Editing Layer vs Content Source
+
+Four distinct roles exist in this architecture:
+
+```text
+Editing Layer       Git based CMS, custom editorial UI
+Content Source      Git content repository
+Content Provider    NexusContent Git provider
+Consumer            Astro, Node, future consumers
+```
+
+The editing layer and the content provider never interact directly.
+
+The editing layer writes files.
+
+The provider reads files.
+
+The Git provider does not care which editor created or modified the files.
+
+## The Compatibility Contract
+
+A Git based CMS is compatible with the NexusContent Git provider when it can maintain files matching the content structure and file formats supported by that provider.
+
+For `0.1.1`, the baseline contract is deliberately small:
+
+```text
+UTF-8 JSON
+external content directories
+pages
+collections
+individual collection items
+stable file paths
+normalized NexusContent output
+```
+
+## Supported Content Format
+
+The NexusContent Git provider currently supports JSON content.
+
+Git based CMS platforms are compatible when configured to maintain content using the supported NexusContent repository structure and file format.
+
+Markdown with frontmatter, YAML, and MDX are future possibilities.
+
+They are not supported in `0.1.1`.
+
+Do not assume unsupported formats work.
+
+## Git Is Versioning, Filesystem Is Retrieval
+
+At build or runtime, the Git provider reads files from a filesystem.
+
+Git itself provides version history, collaboration, change tracking, rollback, and content publishing workflows.
+
+The provider does not execute Git commands merely to retrieve content.
+
+Repository synchronization belongs to CI, deployment tooling, the editing system, or a future explicitly designed synchronization capability.
+
+## External Content Repository
+
+The content repository may be:
+
+```text
+a sibling Git repository
+a CI checkout
+a Git submodule
+a mounted directory
+another explicitly configured filesystem location
+```
+
+NexusContent does not require any particular Git hosting provider.
+
+GitHub, GitLab, and Bitbucket are all hosted Git services.
+
+None of them are hardcoded into the Git provider.
+
+## CMS Metadata and Configuration Files
+
+A Git based CMS may create its own files:
+
+```text
+admin/
+CMS configuration
+editor metadata
+README files
+CI configuration
+```
+
+The Git provider only reads convention based NexusContent locations:
+
+```text
+pages/
+collections/
+```
+
+Everything else in the repository is ignored.
+
+## Navigation and Settings
+
+The recommended content repository structure includes:
+
+```text
+navigation/
+settings/
+```
+
+These are documented conventions for future use.
+
+They are not exposed through the public API in `0.1.1`.
+
+Do not expect `nexus.navigation()` or `nexus.settings()` to exist.
+
+If a consumer needs a site wide singleton in `0.1.1`, place it under `pages/` and read it with `getPage`.
+
+## CMS Configuration vs NexusContent Configuration
+
+A Git based CMS requires its own configuration:
+
+```text
+collection definitions
+editor fields
+authentication settings
+Git backend settings
+media paths
+```
+
+That configuration describes how editors edit content.
+
+NexusContent configuration describes how applications consume content.
+
+They are separate and must not be merged in `0.1.1`.
+
+## Media
+
+Media references may exist inside JSON content.
+
+The actual media strategy varies by consumer:
+
+```text
+public repository assets
+external CDN
+object storage
+CMS managed media
+remote URLs
+```
+
+NexusContent may normalize media metadata where appropriate.
+
+It does not provide image upload or Git media management.
+
+## Publishing Workflow
+
+```text
+Editor
+   |
+   v
+Git based CMS
+   |
+   v
+Commit or pull request
+   |
+   v
+Git content repository
+   |
+   v
+Build trigger
+   |
+   v
+Consumer build
+   |
+   v
+NexusContent reads latest content
+   |
+   v
+Website generated
+   |
+   v
+Deployment
+```
+
+NexusContent itself does not create commits.
+
+## Staging Compatibility
+
+Git based content naturally supports staging workflows.
+
+```text
+Editor
+   |
+   v
+CMS editing workflow
+   |
+   v
+staging branch
+   |
+   v
+staging build
+   |
+   v
+review
+   |
+   v
+merge to production branch
+   |
+   v
+production build
+```
+
+Branch names are never hardcoded into Core.
+
+Branch management belongs to Git and CI workflows.
+
+NexusContent consumes whichever content checkout the build environment provides.
+
+## Deployment Neutrality
+
+Git CMS support does not assume a deployment platform.
+
+The frontend may be deployed to cPanel, Vercel, Cloudflare, Netlify, or any other host.
+
+Future consumers such as Next.js, TanStack, or plain Node applications may use the same Git content architecture.
+
+The Git provider contains no deployment logic.
+
+## When a Dedicated Provider Is Needed
+
+```text
+CMS stores content as supported Git files
+        |
+        v
+Use the Git Provider
+
+
+CMS requires proprietary API access
+        |
+        v
+Consider a dedicated Provider
+```
+
+A dedicated provider is justified only when NexusContent must communicate with a CMS specific API or capability that cannot reasonably be represented through the Git content provider.
+
+The existence of a different editing interface is not a justification.
 
 ---
 
