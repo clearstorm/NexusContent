@@ -8,8 +8,24 @@ export interface RawFile {
   updatedAt?: string;
 }
 
-function joinRelative(contentPath: string, segments: string[]): string {
-  return path.join(path.resolve(contentPath), ...segments);
+function resolveWithinRoot(contentPath: string, segments: string[]): string {
+  const root = path.resolve(contentPath);
+  const resolved = path.resolve(root, ...segments);
+  const relative = path.relative(root, resolved);
+
+  if (relative === "" || relative.startsWith("..")) {
+    throw new ProviderError(
+      `Content path "${segments.join("/")}" escapes the configured content root.`,
+      {
+        provider: "git",
+        operation: "load",
+        content: segments.join("/"),
+        reason: "Content keys must resolve inside the configured content root."
+      }
+    );
+  }
+
+  return resolved;
 }
 
 async function readJsonFile(filePath: string, relativePath: string): Promise<RawFile> {
@@ -63,7 +79,7 @@ export async function loadPageFile(
   key: string
 ): Promise<RawFile | null> {
   const relativePath = `pages/${key}.json`;
-  const filePath = joinRelative(contentPath, ["pages", `${key}.json`]);
+  const filePath = resolveWithinRoot(contentPath, ["pages", `${key}.json`]);
 
   try {
     await stat(filePath);
@@ -90,7 +106,7 @@ export async function loadCollectionFiles(
   collection: string
 ): Promise<RawFile[]> {
   const relativeDir = `collections/${collection}`;
-  const dirPath = joinRelative(contentPath, ["collections", collection]);
+  const dirPath = resolveWithinRoot(contentPath, ["collections", collection]);
 
   let entries: string[];
   try {
@@ -130,7 +146,7 @@ export async function loadItemFile(
   key: string
 ): Promise<RawFile | null> {
   const relativePath = `collections/${collection}/${key}.json`;
-  const filePath = joinRelative(contentPath, ["collections", collection, `${key}.json`]);
+  const filePath = resolveWithinRoot(contentPath, ["collections", collection, `${key}.json`]);
 
   try {
     await stat(filePath);

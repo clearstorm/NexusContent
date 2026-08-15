@@ -143,3 +143,69 @@ test("requires a content path", () => {
     }
   );
 });
+
+test("rejects a page key that escapes the content root", async () => {
+  await assert.rejects(
+    () => buildProvider().getPage("../../secret"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.ok(error instanceof NexusContentError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.match(error.message, /escapes the configured content root/);
+      return true;
+    }
+  );
+});
+
+test("rejects a collection item key that escapes the content root", async () => {
+  await assert.rejects(
+    () => buildProvider().getItem("../../", "secret"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.match(error.message, /escapes the configured content root/);
+      return true;
+    }
+  );
+});
+
+test("rejects a nested collection item key that escapes the content root", async () => {
+  await assert.rejects(
+    () => buildProvider().getItem("posts", "../../../secret"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.match(error.message, /escapes the configured content root/);
+      return true;
+    }
+  );
+});
+
+test("rejects a collection name that escapes the content root", async () => {
+  await assert.rejects(
+    () => buildProvider().getCollection("../../"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.match(error.message, /escapes the configured content root/);
+      return true;
+    }
+  );
+});
+
+test("rejects a collection name that resolves exactly to the content root", async () => {
+  await assert.rejects(
+    () => buildProvider().getCollection(".."),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.match(error.message, /escapes the configured content root/);
+      return true;
+    }
+  );
+});
