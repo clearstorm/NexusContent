@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "label": "Resources",
+      "href": "/resources",
+      "children": [
+        {
+          "label": "Guides",
+          "href": "/guides"
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,14 @@
 ---
-const links = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Blog", href: "/blog" }
-];
+interface NavigationLink {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  links: NavigationLink[];
+}
+
+const { links } = Astro.props;
 ---
 
 <header>

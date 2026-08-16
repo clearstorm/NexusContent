@@ -141,6 +141,87 @@ export async function loadPageFile(
   return readFile(contentPath, filePath, relativePath);
 }
 
+export async function loadSingletonFile(
+  contentPath: string,
+  key: string
+): Promise<RawFile | null> {
+  const relativePath = `singletons/${key}.json`;
+  const filePath = resolveWithinRoot(contentPath, ["singletons", `${key}.json`]);
+
+  try {
+    await stat(filePath);
+  } catch (error) {
+    if (isMissingError(error)) {
+      return null;
+    }
+    throw new ProviderError(
+      `Could not access content file "${relativePath}".`,
+      {
+        provider: "git",
+        operation: "loadSingleton",
+        content: relativePath,
+        reason: error instanceof Error ? error.message : String(error)
+      }
+    );
+  }
+
+  return readFile(contentPath, filePath, relativePath);
+}
+
+export async function loadNavigationFile(
+  contentPath: string,
+  key: string
+): Promise<RawFile | null> {
+  const relativePath = `navigation/${key}.json`;
+  const filePath = resolveWithinRoot(contentPath, ["navigation", `${key}.json`]);
+
+  try {
+    await stat(filePath);
+  } catch (error) {
+    if (isMissingError(error)) {
+      return null;
+    }
+    throw new ProviderError(
+      `Could not access content file "${relativePath}".`,
+      {
+        provider: "git",
+        operation: "loadNavigation",
+        content: relativePath,
+        reason: error instanceof Error ? error.message : String(error)
+      }
+    );
+  }
+
+  return readFile(contentPath, filePath, relativePath);
+}
+
+export async function loadSettingsFile(
+  contentPath: string,
+  key: string
+): Promise<RawFile | null> {
+  const relativePath = `settings/${key}.json`;
+  const filePath = resolveWithinRoot(contentPath, ["settings", `${key}.json`]);
+
+  try {
+    await stat(filePath);
+  } catch (error) {
+    if (isMissingError(error)) {
+      return null;
+    }
+    throw new ProviderError(
+      `Could not access content file "${relativePath}".`,
+      {
+        provider: "git",
+        operation: "loadSettings",
+        content: relativePath,
+        reason: error instanceof Error ? error.message : String(error)
+      }
+    );
+  }
+
+  return readFile(contentPath, filePath, relativePath);
+}
+
 export async function loadCollectionFiles(
   contentPath: string,
   collection: string

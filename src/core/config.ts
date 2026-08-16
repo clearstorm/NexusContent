@@ -1,38 +1,71 @@
 import type { ContentConfig, NexusConfig } from "./types.ts";
 import { ConfigError } from "./errors.ts";
 
-export function resolveContentConfig(
-  config: NexusConfig,
-  contentName: string
+function resolveConfigSection(
+  section: Record<string, ContentConfig> | undefined,
+  contentName: string,
+  category: string,
+  operation: string
 ): ContentConfig {
-  const entry = config.content[contentName];
+  const entry = section?.[contentName];
 
   if (!entry) {
-    const available = Object.keys(config.content);
+    const available = Object.keys(section ?? {});
     const hint =
       available.length > 0
-        ? ` Available content names: ${available.join(", ")}.`
+        ? ` Available ${category.toLowerCase()} names: ${available.join(", ")}.`
         : "";
 
     throw new ConfigError(
-      `Content "${contentName}" is not configured.${hint}`,
-      { content: contentName, operation: "resolve" }
+      `${category} "${contentName}" is not configured.${hint}`,
+      { content: contentName, operation }
     );
   }
 
   if (!entry.provider) {
     throw new ConfigError(
-      `Content "${contentName}" does not declare a provider.`,
-      { content: contentName, operation: "resolve" }
+      `${category} "${contentName}" does not declare a provider.`,
+      { content: contentName, operation }
     );
   }
 
   if (!entry.key) {
     throw new ConfigError(
-      `Content "${contentName}" does not declare a provider key.`,
-      { content: contentName, operation: "resolve" }
+      `${category} "${contentName}" does not declare a provider key.`,
+      { content: contentName, operation }
     );
   }
 
   return entry;
+}
+
+export function resolveContentConfig(
+  config: NexusConfig,
+  contentName: string
+): ContentConfig {
+  return resolveConfigSection(config.content, contentName, "Content", "resolve");
+}
+
+export function resolveNavigationConfig(
+  config: NexusConfig,
+  navigationName: string
+): ContentConfig {
+  return resolveConfigSection(
+    config.navigation,
+    navigationName,
+    "Navigation",
+    "resolveNavigation"
+  );
+}
+
+export function resolveSettingsConfig(
+  config: NexusConfig,
+  settingsName: string
+): ContentConfig {
+  return resolveConfigSection(
+    config.settings,
+    settingsName,
+    "Settings",
+    "resolveSettings"
+  );
 }

@@ -7,11 +7,22 @@ import {
   RegistryError,
   ValidationError
 } from "../../src/core/index.ts";
-import type { CollectionItem, ContentProvider, NexusConfig, PageContent } from "../../src/core/index.ts";
+import type {
+  CollectionItem,
+  ContentProvider,
+  NavigationContent,
+  NexusConfig,
+  PageContent,
+  SettingsContent,
+  SingletonContent
+} from "../../src/core/index.ts";
 
 class MockProvider implements ContentProvider {
   readonly name: string;
   private pageResult: Record<string, unknown> | null = null;
+  private singletonResult: Record<string, unknown> | null = null;
+  private navigationResult: Record<string, unknown> | null = null;
+  private settingsResult: Record<string, unknown> | null = null;
   private collectionResult: Record<string, unknown>[] = [];
   private itemResult: Record<string, unknown> | null = null;
   private failure: Error | null = null;
@@ -22,6 +33,21 @@ class MockProvider implements ContentProvider {
 
   setPage(value: Record<string, unknown> | null) {
     this.pageResult = value;
+    return this;
+  }
+
+  setSingleton(value: Record<string, unknown> | null) {
+    this.singletonResult = value;
+    return this;
+  }
+
+  setNavigation(value: Record<string, unknown> | null) {
+    this.navigationResult = value;
+    return this;
+  }
+
+  setSettings(value: Record<string, unknown> | null) {
+    this.settingsResult = value;
     return this;
   }
 
@@ -45,6 +71,21 @@ class MockProvider implements ContentProvider {
     return this.pageResult as unknown as PageContent<TData> | null;
   }
 
+  async getSingleton<TData = Record<string, unknown>>(): Promise<SingletonContent<TData> | null> {
+    if (this.failure) throw this.failure;
+    return this.singletonResult as unknown as SingletonContent<TData> | null;
+  }
+
+  async getNavigation(): Promise<NavigationContent | null> {
+    if (this.failure) throw this.failure;
+    return this.navigationResult as unknown as NavigationContent | null;
+  }
+
+  async getSettings<TData = Record<string, unknown>>(): Promise<SettingsContent<TData> | null> {
+    if (this.failure) throw this.failure;
+    return this.settingsResult as unknown as SettingsContent<TData> | null;
+  }
+
   async getCollection<TData = Record<string, unknown>>(): Promise<CollectionItem<TData>[]> {
     if (this.failure) throw this.failure;
     return this.collectionResult as unknown as CollectionItem<TData>[];
@@ -61,7 +102,14 @@ function buildConfig(): NexusConfig {
     providers: { mock: { type: "test" } },
     content: {
       home: { provider: "mock", key: "home" },
+      singleton: { provider: "mock", key: "singleton" },
       blog: { provider: "mock", key: "posts" }
+    },
+    navigation: {
+      primary: { provider: "mock", key: "primary" }
+    },
+    settings: {
+      site: { provider: "mock", key: "site" }
     }
   };
 }
@@ -150,6 +198,311 @@ test("getPage does not coerce null provider data into an empty object", async ()
     (error: unknown) => {
       assert.ok(error instanceof ValidationError);
       assert.ok(error.issues.some((issue) => issue.path === "data"));
+      return true;
+    }
+  );
+});
+
+test("getSingleton returns normalized content from the provider", async () => {
+  const { service, mock } = buildService();
+  mock.setSingleton({
+    id: "navigation",
+    key: "navigation",
+    data: { items: [{ label: "Home", href: "/" }] },
+    meta: { source: "mock" }
+  });
+
+  const singleton = await service.getSingleton("singleton");
+
+  assert.ok(singleton);
+  assert.equal(singleton.key, "navigation");
+  assert.deepEqual(singleton.data, {
+    items: [{ label: "Home", href: "/" }]
+  });
+  assert.equal(singleton.meta.source, "mock");
+});
+
+test("getSingleton normalizes a missing meta source to the provider name", async () => {
+  const { service, mock } = buildService();
+  mock.setSingleton({ id: "singleton", key: "singleton", data: {} });
+
+  const singleton = await service.getSingleton("singleton");
+
+  assert.ok(singleton);
+  assert.equal(singleton.meta.source, "mock");
+});
+
+test("getSingleton returns null when the provider has no content", async () => {
+  const { service, mock } = buildService();
+  mock.setSingleton(null);
+
+  assert.equal(await service.getSingleton("singleton"), null);
+});
+
+test("getSingleton rejects invalid provider content", async () => {
+  const { service, mock } = buildService();
+  mock.setSingleton({
+    id: "singleton",
+    key: "singleton",
+    data: null,
+    meta: { source: "mock" }
+  });
+
+  await assert.rejects(
+    () => service.getSingleton("singleton"),
+    (error: unknown) => {
+      assert.ok(error instanceof ValidationError);
+      assert.ok(error.issues.some((issue) => issue.path === "data"));
+      return true;
+    }
+  );
+});
+
+test("getSingleton wraps a provider failure in a ProviderError", async () => {
+  const { service, mock } = buildService();
+  mock.setError(new Error("Singleton API unavailable"));
+
+  await assert.rejects(
+    () => service.getSingleton("singleton"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "mock");
+      assert.equal(error.operation, "getSingleton");
+      assert.equal(error.content, "singleton");
+      assert.match(error.reason ?? "", /Singleton API unavailable/);
+      return true;
+    }
+  );
+});
+
+test("getSingleton throws a RegistryError for an unregistered provider", async () => {
+  const service = new NexusContent(buildConfig());
+  service.register("other", new MockProvider("other"));
+
+  await assert.rejects(
+    () => service.getSingleton("singleton"),
+    (error: unknown) => {
+      assert.ok(error instanceof RegistryError);
+      assert.equal(error.provider, "mock");
+      return true;
+    }
+  );
+});
+
+test("getSingleton throws a ConfigError for unconfigured content", async () => {
+  const { service } = buildService();
+
+  await assert.rejects(
+    () => service.getSingleton("missing"),
+    (error: unknown) => {
+      assert.ok(error instanceof NexusContentError);
+      assert.match(error.message, /"missing"/);
+      return true;
+    }
+  );
+});
+
+test("getNavigation returns normalized nested navigation", async () => {
+  const { service, mock } = buildService();
+  mock.setNavigation({
+    id: "primary",
+    key: "primary",
+    items: [
+      {
+        label: "Products",
+        href: "/products",
+        children: [{ label: "Guides", href: "/guides" }]
+      }
+    ],
+    meta: { source: "mock" }
+  });
+
+  const navigation = await service.getNavigation("primary");
+
+  assert.ok(navigation);
+  assert.equal(navigation.key, "primary");
+  assert.equal(navigation.items[0]?.children?.[0]?.label, "Guides");
+  assert.equal(navigation.meta.source, "mock");
+});
+
+test("getNavigation normalizes a missing meta source to the provider name", async () => {
+  const { service, mock } = buildService();
+  mock.setNavigation({
+    id: "primary",
+    key: "primary",
+    items: [{ label: "Home", href: "/" }]
+  });
+
+  const navigation = await service.getNavigation("primary");
+
+  assert.ok(navigation);
+  assert.equal(navigation.meta.source, "mock");
+});
+
+test("getNavigation returns null when the provider has no content", async () => {
+  const { service, mock } = buildService();
+  mock.setNavigation(null);
+
+  assert.equal(await service.getNavigation("primary"), null);
+});
+
+test("getNavigation rejects invalid provider items", async () => {
+  const { service, mock } = buildService();
+  mock.setNavigation({
+    id: "primary",
+    key: "primary",
+    items: [{ label: "Missing href" }],
+    meta: { source: "mock" }
+  });
+
+  await assert.rejects(
+    () => service.getNavigation("primary"),
+    (error: unknown) => {
+      assert.ok(error instanceof ValidationError);
+      assert.ok(error.issues.some((issue) => issue.path === "items.0.href"));
+      return true;
+    }
+  );
+});
+
+test("getNavigation wraps a provider failure in a ProviderError", async () => {
+  const { service, mock } = buildService();
+  mock.setError(new Error("Navigation API unavailable"));
+
+  await assert.rejects(
+    () => service.getNavigation("primary"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "mock");
+      assert.equal(error.operation, "getNavigation");
+      assert.equal(error.content, "primary");
+      assert.match(error.reason ?? "", /Navigation API unavailable/);
+      return true;
+    }
+  );
+});
+
+test("getNavigation throws a RegistryError for an unregistered provider", async () => {
+  const service = new NexusContent(buildConfig());
+  service.register("other", new MockProvider("other"));
+
+  await assert.rejects(
+    () => service.getNavigation("primary"),
+    (error: unknown) => {
+      assert.ok(error instanceof RegistryError);
+      assert.equal(error.provider, "mock");
+      return true;
+    }
+  );
+});
+
+test("getNavigation throws a ConfigError for unconfigured navigation", async () => {
+  const { service } = buildService();
+
+  await assert.rejects(
+    () => service.getNavigation("missing"),
+    (error: unknown) => {
+      assert.ok(error instanceof NexusContentError);
+      assert.match(error.message, /Navigation/);
+      assert.match(error.message, /"missing"/);
+      return true;
+    }
+  );
+});
+
+test("getSettings returns normalized generic settings", async () => {
+  const { service, mock } = buildService();
+  mock.setSettings({
+    id: "site",
+    key: "site",
+    data: { title: "NexusContent" },
+    meta: { source: "mock" }
+  });
+
+  const settings = await service.getSettings<{ title: string }>("site");
+
+  assert.ok(settings);
+  assert.equal(settings.key, "site");
+  assert.deepEqual(settings.data, { title: "NexusContent" });
+  assert.equal(settings.meta.source, "mock");
+});
+
+test("getSettings normalizes a missing meta source to the provider name", async () => {
+  const { service, mock } = buildService();
+  mock.setSettings({ id: "site", key: "site", data: {} });
+
+  const settings = await service.getSettings("site");
+
+  assert.ok(settings);
+  assert.equal(settings.meta.source, "mock");
+});
+
+test("getSettings returns null when the provider has no content", async () => {
+  const { service, mock } = buildService();
+  mock.setSettings(null);
+
+  assert.equal(await service.getSettings("site"), null);
+});
+
+test("getSettings rejects invalid provider data", async () => {
+  const { service, mock } = buildService();
+  mock.setSettings({
+    id: "site",
+    key: "site",
+    data: null,
+    meta: { source: "mock" }
+  });
+
+  await assert.rejects(
+    () => service.getSettings("site"),
+    (error: unknown) => {
+      assert.ok(error instanceof ValidationError);
+      assert.ok(error.issues.some((issue) => issue.path === "data"));
+      return true;
+    }
+  );
+});
+
+test("getSettings wraps a provider failure in a ProviderError", async () => {
+  const { service, mock } = buildService();
+  mock.setError(new Error("Settings API unavailable"));
+
+  await assert.rejects(
+    () => service.getSettings("site"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "mock");
+      assert.equal(error.operation, "getSettings");
+      assert.equal(error.content, "site");
+      assert.match(error.reason ?? "", /Settings API unavailable/);
+      return true;
+    }
+  );
+});
+
+test("getSettings throws a RegistryError for an unregistered provider", async () => {
+  const service = new NexusContent(buildConfig());
+  service.register("other", new MockProvider("other"));
+
+  await assert.rejects(
+    () => service.getSettings("site"),
+    (error: unknown) => {
+      assert.ok(error instanceof RegistryError);
+      assert.equal(error.provider, "mock");
+      return true;
+    }
+  );
+});
+
+test("getSettings throws a ConfigError for unconfigured settings", async () => {
+  const { service } = buildService();
+
+  await assert.rejects(
+    () => service.getSettings("missing"),
+    (error: unknown) => {
+      assert.ok(error instanceof NexusContentError);
+      assert.match(error.message, /Settings/);
+      assert.match(error.message, /"missing"/);
       return true;
     }
   );

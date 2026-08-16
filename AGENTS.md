@@ -12,6 +12,127 @@ If implementation convenience conflicts with the architectural rules in this fil
 
 ---
 
+# 0. Project State Awareness
+
+The root project tracking files are a coordinated system. They must remain concise, consistent, and synchronized with implementation reality.
+
+## 0.1 Mandatory Agent Startup Sequence
+
+Before modifying code, every coding agent must read, in order:
+
+1. `PROJECT_STATUS.md`.
+2. `FEATURES.md`.
+3. `project.state.json`.
+4. `AGENTS.md` completely.
+5. The relevant section of `ROADMAP.md`.
+6. `README.md` when project usage, identity, or public API is relevant.
+7. Relevant implementation and tests only after understanding the documented state.
+
+For substantial tasks, continue to read `package.json`, `tsconfig.json`, and the implementation, tests, examples, and CI files required by the change.
+
+Do not infer implementation status solely from roadmap or README text. Verify current status using `FEATURES.md`, `project.state.json`, and the implementation and tests when necessary.
+
+## 0.2 Documentation Responsibilities and Precedence
+
+Use each file for its assigned responsibility:
+
+- `README.md`: what NexusContent is and how it is used.
+- `AGENTS.md`: how humans and AI agents must modify the project.
+- `FEATURES.md`: authoritative human-readable feature status.
+- `project.state.json`: authoritative machine-readable project state.
+- `PROJECT_STATUS.md`: current focus, immediate next work, decisions, and constraints.
+- `ROADMAP.md`: planned sequencing and milestone intent.
+- `CHANGELOG.md`: historical released changes and current unreleased changes.
+
+For disputes about whether a capability is actually implemented, tests and implementation are the final technical evidence. Correct the tracking files in the same pull request when they disagree with that evidence.
+
+`FEATURES.md` and `project.state.json` must remain synchronized. Neither is generated during milestone `0.1.2`; both are maintained deliberately.
+
+## 0.3 Project State Synchronization
+
+The project tracking system must be updated in the same pull request that changes feature status. State documentation is part of the implementation, not a later administrative task.
+
+Apply these rules:
+
+```text
+Feature implemented:
+    update FEATURES.md
+    update project.state.json
+    update PROJECT_STATUS.md if the current summary changes
+
+Milestone changed:
+    update PROJECT_STATUS.md
+    update ROADMAP.md
+    update project.state.json
+
+Released:
+    update CHANGELOG.md
+    update package version
+    update FEATURES.md introduced versions
+    update project.state.json
+
+Feature deferred or blocked:
+    update FEATURES.md
+    update project.state.json
+    update ROADMAP.md if sequencing changes
+```
+
+Not every task requires every state file. Update only the documents whose assigned responsibility changed.
+
+## 0.4 Status Vocabulary and Transitions
+
+Formal feature statuses are exactly:
+
+```text
+implemented
+in_progress
+planned
+blocked
+deferred
+```
+
+Do not substitute informal terms such as `done`, `complete`, `coming soon`, or `later` as status values.
+
+Typical transition:
+
+```text
+planned -> in_progress -> implemented
+```
+
+Other allowed transitions:
+
+```text
+planned -> deferred
+planned -> blocked
+in_progress -> blocked
+blocked -> in_progress
+deferred -> planned
+```
+
+A direct `planned -> implemented` transition is valid only when the implementation and all required verification were completed in the same change. Never mark a feature `implemented` merely because it appears in `README.md`, `ROADMAP.md`, an issue, a prototype, or incomplete code.
+
+Use `blocked` only when an identifiable blocker is documented in the feature Notes. Low-priority work remains `planned` or becomes `deferred`.
+
+Use `deferred` when the project deliberately excludes a feature from the current foreseeable milestone. Deferred does not mean permanently rejected.
+
+## 0.5 Definition of Implemented
+
+A feature may be marked `implemented` only when:
+
+1. Required code exists.
+2. Applicable tests exist.
+3. Tests pass.
+4. Type checking passes where applicable.
+5. Public API documentation is updated when required.
+6. Examples are updated when required.
+7. The feature satisfies its stated scope and applicable definition of done.
+
+A partially complete feature is `in_progress`, not `implemented`.
+
+Before completing a state-changing task, run `npm run validate:project-state` in addition to the applicable engineering checks.
+
+---
+
 # 1. Project Identity
 
 - **Project name:** NexusContent
@@ -587,6 +708,18 @@ export interface ContentProvider {
   getPage<TData = Record<string, unknown>>(
     key: string
   ): Promise<PageContent<TData> | null>;
+
+  getSingleton<TData = Record<string, unknown>>(
+    key: string
+  ): Promise<SingletonContent<TData> | null>;
+
+  getNavigation(
+    key: string
+  ): Promise<NavigationContent | null>;
+
+  getSettings<TData = Record<string, unknown>>(
+    key: string
+  ): Promise<SettingsContent<TData> | null>;
 
   getCollection<TData = Record<string, unknown>>(
     collection: string
@@ -1225,6 +1358,9 @@ The milestone should include:
 
 - External content directory support
 - JSON page loading
+- JSON singleton loading from `singletons/<key>.json`
+- JSON navigation loading from `navigation/<key>.json`
+- JSON settings loading from `settings/<key>.json`
 - JSON collection loading
 - Individual collection item loading
 - Normalization
@@ -1852,29 +1988,13 @@ When adding or changing public behaviour:
 
 ---
 
-# 53. README vs AGENTS.md
+# 53. Documentation Responsibility Conflicts
 
-README.md explains:
-
-- What NexusContent is
-- Why it exists
-- How developers use it
-- Architecture overview
-- Examples
-- Roadmap
-
-AGENTS.md explains:
-
-- How agents must modify the repository
-- Architectural boundaries
-- Current scope
-- Forbidden scope
-- Testing requirements
-- Implementation rules
+`README.md` explains what NexusContent is and how developers use it. `AGENTS.md` defines modification rules. Current status and sequencing belong in the dedicated state files described in section 0.
 
 Do not duplicate large amounts of documentation unnecessarily.
 
-If the two files conflict on engineering constraints, flag the conflict before making a major architectural change.
+If documentation conflicts on engineering constraints, follow `AGENTS.md` and flag the conflict before making a major architectural change. If documentation conflicts on implementation status, inspect tests and implementation, then synchronize `FEATURES.md`, `project.state.json`, and any affected summary documents.
 
 ---
 
@@ -1924,14 +2044,7 @@ For every substantial task:
 
 ### Step 1
 
-Read:
-
-- AGENTS.md
-- README.md
-- package.json
-- tsconfig.json
-
-and relevant implementation files.
+Complete the mandatory startup sequence in section 0, then read `package.json`, `tsconfig.json`, and relevant implementation, test, example, and CI files.
 
 ### Step 2
 

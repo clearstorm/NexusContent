@@ -1,4 +1,10 @@
-import type { CollectionItem, PageContent } from "./types.ts";
+import type {
+  CollectionItem,
+  NavigationContent,
+  PageContent,
+  SettingsContent,
+  SingletonContent
+} from "./types.ts";
 
 export function normalizePage<TData = Record<string, unknown>>(
   page: PageContent<TData>,
@@ -15,6 +21,63 @@ export function normalizePage<TData = Record<string, unknown>>(
     meta: {
       ...(page.meta ?? {}),
       source: page.meta?.source ?? fallbackSource
+    }
+  };
+}
+
+export function normalizeSingleton<TData = Record<string, unknown>>(
+  singleton: SingletonContent<TData>,
+  fallbackSource: string
+): SingletonContent<TData> {
+  const key = singleton.key ?? singleton.id;
+  const id = singleton.id ?? key;
+
+  return {
+    ...singleton,
+    id,
+    key,
+    data: singleton.data,
+    meta: {
+      ...(singleton.meta ?? {}),
+      source: singleton.meta?.source ?? fallbackSource
+    }
+  };
+}
+
+export function normalizeNavigation(
+  navigation: NavigationContent,
+  fallbackSource: string
+): NavigationContent {
+  const key = navigation.key ?? navigation.id;
+  const id = navigation.id ?? key;
+
+  return {
+    ...navigation,
+    id,
+    key,
+    items: navigation.items,
+    meta: {
+      ...(navigation.meta ?? {}),
+      source: navigation.meta?.source ?? fallbackSource
+    }
+  };
+}
+
+export function normalizeSettings<TData = Record<string, unknown>>(
+  settings: SettingsContent<TData>,
+  fallbackSource: string
+): SettingsContent<TData> {
+  const key = settings.key ?? settings.id;
+  const id = settings.id ?? key;
+
+  return {
+    ...settings,
+    id,
+    key,
+    data: settings.data,
+    meta: {
+      ...(settings.meta ?? {}),
+      source: settings.meta?.source ?? fallbackSource
     }
   };
 }

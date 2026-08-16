@@ -87,6 +87,167 @@ test("throws a ProviderError when the file is not a JSON object", async () => {
   );
 });
 
+test("loads and normalizes navigation singleton content", async () => {
+  const singleton = await buildProvider().getSingleton("navigation");
+
+  assert.ok(singleton);
+  assert.equal(singleton.id, "navigation");
+  assert.equal(singleton.key, "navigation");
+  assert.deepEqual(singleton.data.items, [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" }
+  ]);
+});
+
+test("loads settings as provider-neutral singleton content", async () => {
+  const singleton = await buildProvider().getSingleton("settings");
+
+  assert.ok(singleton);
+  assert.equal(singleton.id, "settings");
+  assert.equal(singleton.key, "settings");
+  assert.equal(singleton.data.siteName, "NexusContent Example");
+  assert.equal(singleton.data.locale, "en-ZA");
+});
+
+test("records content provenance for singletons", async () => {
+  const singleton = await buildProvider().getSingleton("navigation");
+
+  assert.ok(singleton);
+  assert.equal(singleton.meta.source, "git");
+  assert.equal(singleton.meta.sourceId, "singletons/navigation.json");
+  assert.equal(typeof singleton.meta.updatedAt, "string");
+});
+
+test("returns null for a missing singleton", async () => {
+  assert.equal(await buildProvider().getSingleton("missing"), null);
+});
+
+test("throws a ProviderError for malformed singleton JSON", async () => {
+  await assert.rejects(
+    () => buildProvider().getSingleton("malformed"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.equal(error.content, "singletons/malformed.json");
+      assert.match(error.reason ?? "", /JSON/i);
+      return true;
+    }
+  );
+});
+
+test("throws a ProviderError when a singleton file is not a JSON object", async () => {
+  await assert.rejects(
+    () => buildProvider().getSingleton("array"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.operation, "normalize");
+      assert.equal(error.content, "singletons/array.json");
+      assert.match(error.reason ?? "", /object/i);
+      return true;
+    }
+  );
+});
+
+test("loads navigation from the dedicated navigation directory", async () => {
+  const navigation = await buildProvider().getNavigation("primary");
+
+  assert.ok(navigation);
+  assert.equal(navigation.id, "primary");
+  assert.equal(navigation.key, "primary");
+  assert.equal(navigation.items[1]?.children?.[0]?.label, "Guides");
+});
+
+test("records dedicated navigation provenance", async () => {
+  const navigation = await buildProvider().getNavigation("primary");
+
+  assert.ok(navigation);
+  assert.equal(navigation.meta.source, "git");
+  assert.equal(navigation.meta.sourceId, "navigation/primary.json");
+  assert.equal(typeof navigation.meta.updatedAt, "string");
+});
+
+test("returns null for missing dedicated navigation", async () => {
+  assert.equal(await buildProvider().getNavigation("missing"), null);
+});
+
+test("throws a ProviderError for malformed navigation JSON", async () => {
+  await assert.rejects(
+    () => buildProvider().getNavigation("malformed"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.equal(error.content, "navigation/malformed.json");
+      assert.match(error.reason ?? "", /JSON/i);
+      return true;
+    }
+  );
+});
+
+test("throws a ProviderError when navigation JSON is not an object", async () => {
+  await assert.rejects(
+    () => buildProvider().getNavigation("array"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.operation, "normalize");
+      assert.equal(error.content, "navigation/array.json");
+      assert.match(error.reason ?? "", /object/i);
+      return true;
+    }
+  );
+});
+
+test("loads settings from the dedicated settings directory", async () => {
+  const settings = await buildProvider().getSettings("site");
+
+  assert.ok(settings);
+  assert.equal(settings.id, "site");
+  assert.equal(settings.key, "site");
+  assert.equal(settings.data.siteName, "NexusContent Example");
+  assert.deepEqual(settings.data.theme, { color: "indigo" });
+});
+
+test("records dedicated settings provenance", async () => {
+  const settings = await buildProvider().getSettings("site");
+
+  assert.ok(settings);
+  assert.equal(settings.meta.source, "git");
+  assert.equal(settings.meta.sourceId, "settings/site.json");
+  assert.equal(typeof settings.meta.updatedAt, "string");
+});
+
+test("returns null for missing dedicated settings", async () => {
+  assert.equal(await buildProvider().getSettings("missing"), null);
+});
+
+test("throws a ProviderError for malformed settings JSON", async () => {
+  await assert.rejects(
+    () => buildProvider().getSettings("malformed"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.equal(error.content, "settings/malformed.json");
+      assert.match(error.reason ?? "", /JSON/i);
+      return true;
+    }
+  );
+});
+
+test("throws a ProviderError when settings JSON is not an object", async () => {
+  await assert.rejects(
+    () => buildProvider().getSettings("array"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.operation, "normalize");
+      assert.equal(error.content, "settings/array.json");
+      assert.match(error.reason ?? "", /object/i);
+      return true;
+    }
+  );
+});
+
 test("loads a collection with items sorted by file name", async () => {
   const items = await buildProvider().getCollection("posts");
 
@@ -174,6 +335,46 @@ test("rejects a page key that escapes the content root", async () => {
   );
 });
 
+test("rejects a singleton key that escapes the content root", async () => {
+  await assert.rejects(
+    () => buildProvider().getSingleton("../../secret"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.ok(error instanceof NexusContentError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.match(error.message, /escapes the configured content root/);
+      return true;
+    }
+  );
+});
+
+test("rejects a navigation key that escapes the content root", async () => {
+  await assert.rejects(
+    () => buildProvider().getNavigation("../../secret"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.match(error.message, /escapes the configured content root/);
+      return true;
+    }
+  );
+});
+
+test("rejects a settings key that escapes the content root", async () => {
+  await assert.rejects(
+    () => buildProvider().getSettings("../../secret"),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.equal(error.provider, "git");
+      assert.equal(error.operation, "load");
+      assert.match(error.message, /escapes the configured content root/);
+      return true;
+    }
+  );
+});
+
 test("rejects a collection item key that escapes the content root", async () => {
   await assert.rejects(
     () => buildProvider().getItem("../../", "secret"),
@@ -229,6 +430,81 @@ test("rejects a page file symlink that escapes the content root", async () => {
       (error: unknown) => {
         assert.ok(error instanceof ProviderError);
         assert.equal(error.content, "pages/outside.json");
+        assert.match(error.message, /escapes the configured content root/);
+        return true;
+      }
+    );
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("rejects a singleton file symlink that escapes the content root", async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-symlink-singleton-"));
+  const root = join(fixtureRoot, "content");
+  const outside = join(fixtureRoot, "outside.json");
+
+  try {
+    await mkdir(join(root, "singletons"), { recursive: true });
+    await writeFile(outside, JSON.stringify({ siteName: "Outside" }), "utf8");
+    await symlink(outside, join(root, "singletons", "outside.json"));
+
+    const provider = new GitProvider({ contentPath: root });
+    await assert.rejects(
+      () => provider.getSingleton("outside"),
+      (error: unknown) => {
+        assert.ok(error instanceof ProviderError);
+        assert.equal(error.content, "singletons/outside.json");
+        assert.match(error.message, /escapes the configured content root/);
+        return true;
+      }
+    );
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("rejects a navigation file symlink that escapes the content root", async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-symlink-navigation-"));
+  const root = join(fixtureRoot, "content");
+  const outside = join(fixtureRoot, "outside.json");
+
+  try {
+    await mkdir(join(root, "navigation"), { recursive: true });
+    await writeFile(outside, JSON.stringify({ items: [] }), "utf8");
+    await symlink(outside, join(root, "navigation", "outside.json"));
+
+    const provider = new GitProvider({ contentPath: root });
+    await assert.rejects(
+      () => provider.getNavigation("outside"),
+      (error: unknown) => {
+        assert.ok(error instanceof ProviderError);
+        assert.equal(error.content, "navigation/outside.json");
+        assert.match(error.message, /escapes the configured content root/);
+        return true;
+      }
+    );
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("rejects a settings file symlink that escapes the content root", async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-symlink-settings-"));
+  const root = join(fixtureRoot, "content");
+  const outside = join(fixtureRoot, "outside.json");
+
+  try {
+    await mkdir(join(root, "settings"), { recursive: true });
+    await writeFile(outside, JSON.stringify({ siteName: "Outside" }), "utf8");
+    await symlink(outside, join(root, "settings", "outside.json"));
+
+    const provider = new GitProvider({ contentPath: root });
+    await assert.rejects(
+      () => provider.getSettings("outside"),
+      (error: unknown) => {
+        assert.ok(error instanceof ProviderError);
+        assert.equal(error.content, "settings/outside.json");
         assert.match(error.message, /escapes the configured content root/);
         return true;
       }

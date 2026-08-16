@@ -4,10 +4,14 @@ export type {
   ContentMeta,
   ContentSource,
   MediaAsset,
+  NavigationContent,
+  NavigationItem,
   NexusConfig,
   PageContent,
   ProviderConfig,
-  SeoData
+  SeoData,
+  SettingsContent,
+  SingletonContent
 } from "./types.ts";
 
 export type { ContentProvider } from "./provider.ts";
@@ -23,6 +27,16 @@ export {
 export type { NexusContentErrorDetails } from "./errors.ts";
 
 export { ProviderRegistry } from "./registry.ts";
-export { resolveContentConfig } from "./config.ts";
-export { normalizeCollectionItem, normalizePage } from "./normalize.ts";
+export {
+  resolveContentConfig,
+  resolveNavigationConfig,
+  resolveSettingsConfig
+} from "./config.ts";
+export {
+  normalizeCollectionItem,
+  normalizeNavigation,
+  normalizePage,
+  normalizeSettings,
+  normalizeSingleton
+} from "./normalize.ts";
 export { NexusContent } from "./service.ts";

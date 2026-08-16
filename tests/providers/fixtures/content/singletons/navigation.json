@@ -1,0 +1,8 @@
+{
+  "id": "navigation",
+  "key": "navigation",
+  "items": [
+    { "label": "Home", "href": "/" },
+    { "label": "About", "href": "/about" }
+  ]
+}

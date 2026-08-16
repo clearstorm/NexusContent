@@ -55,27 +55,14 @@ NexusContent Core
 
 # Project Status
 
-NexusContent is currently in early development. Version `0.1.2` is an internal milestone, and the root package intentionally remains private while the architecture is proven.
+NexusContent is at version `0.1.2`, an internal private milestone in early development. The framework-neutral Core, Git JSON provider, validation pipeline, Astro reference consumer, and plain Node compatibility proof are implemented. No feature is currently marked in progress; the recommended next focus is the directional `0.2.0` WordPress provider milestone.
 
-The first milestone is deliberately small.
+For authoritative project tracking:
 
-The initial version establishes:
-
-1. NexusContent Core
-2. A stable provider contract
-3. Normalized content types
-4. Provider registration
-5. Project configuration
-6. A framework neutral content service
-7. A Git based content provider
-8. Content validation
-9. A working Astro reference example
-10. A plain Node compatibility proof
-11. Automated tests
-
-WordPress, Strapi, preview workflows, CMS webhooks, synchronization, and deployment integrations will be added after the core architecture is proven.
-
-The project must not become over engineered before the core contract is stable.
+- [Current project status](PROJECT_STATUS.md)
+- [Feature matrix](FEATURES.md)
+- [Roadmap](ROADMAP.md)
+- [Machine-readable state](project.state.json)
 
 ---
 
@@ -625,6 +612,18 @@ export interface ContentProvider {
     key: string
   ): Promise<PageContent<TData> | null>;
 
+  getSingleton<TData = Record<string, unknown>>(
+    key: string
+  ): Promise<SingletonContent<TData> | null>;
+
+  getNavigation(
+    key: string
+  ): Promise<NavigationContent | null>;
+
+  getSettings<TData = Record<string, unknown>>(
+    key: string
+  ): Promise<SettingsContent<TData> | null>;
+
   getCollection<TData = Record<string, unknown>>(
     collection: string
   ): Promise<CollectionItem<TData>[]>;
@@ -718,6 +717,20 @@ export const nexusConfig = {
       provider: "primary",
       key: "services"
     }
+  },
+
+  navigation: {
+    primary: {
+      provider: "marketing",
+      key: "primary"
+    }
+  },
+
+  settings: {
+    site: {
+      provider: "marketing",
+      key: "site"
+    }
   }
 };
 ```
@@ -740,10 +753,13 @@ It does not create application routes.
 
 Consumers should normally interact with NexusContent through the content service.
 
-Example:
+Examples:
 
 ```ts
 const page = await nexus.getPage("about");
+const singleton = await nexus.getSingleton("announcement");
+const navigation = await nexus.getNavigation("primary");
+const settings = await nexus.getSettings("site");
 ```
 
 Internally:
@@ -1173,6 +1189,9 @@ The Git provider only reads convention based NexusContent locations:
 
 ```text
 pages/
+singletons/
+navigation/
+settings/
 collections/
 ```
 
@@ -1180,20 +1199,38 @@ Everything else in the repository is ignored.
 
 ## Navigation and Settings
 
-The recommended content repository structure includes:
+Navigation and settings are first-class provider-neutral content operations. Git stores them in dedicated directories while arbitrary singleton content remains available under `singletons/`:
 
 ```text
-navigation/
-settings/
+singletons/<key>.json
+navigation/<key>.json
+settings/<key>.json
 ```
 
-These are documented conventions for future use.
+Consumers configure logical navigation and settings names in separate maps and retrieve them through dedicated methods:
 
-They are not exposed through the public API in `0.1.2`.
+```ts
+const nexus = new NexusContent({
+  providers: {
+    content: { type: "git", options: { contentPath: "../client-content" } }
+  },
+  content: {
+    announcement: { provider: "content", key: "announcement" }
+  },
+  navigation: {
+    primary: { provider: "content", key: "primary" }
+  },
+  settings: {
+    site: { provider: "content", key: "site" }
+  }
+});
 
-Do not expect `nexus.navigation()` or `nexus.settings()` to exist.
+const announcement = await nexus.getSingleton("announcement");
+const navigation = await nexus.getNavigation("primary");
+const settings = await nexus.getSettings("site");
+```
 
-If a consumer needs a site wide singleton in `0.1.2`, place it under `pages/` and read it with `getPage`.
+`NavigationContent` exposes a direct `items` array. Each `NavigationItem` requires `label` and `href` and may contain recursive `children`. `SettingsContent<TData>` keeps provider-neutral settings under generic `data` so consumers can apply project-level schemas.
 
 ## CMS Configuration vs NexusContent Configuration
 
@@ -2034,41 +2071,9 @@ The purpose of `0.1.2` is to prove the content architecture and its framework ne
 
 ---
 
-# Version Roadmap
+# Roadmap
 
-## 0.1
-
-NexusContent Core and Git provider.
-
-## 0.2
-
-WordPress provider.
-
-## 0.3
-
-Strapi provider.
-
-## 0.4
-
-Content synchronization and change detection.
-
-## 0.5
-
-Webhooks and automated rebuild workflows.
-
-## 0.6
-
-Draft preview.
-
-## 0.7
-
-CLI and developer tooling.
-
-## 1.0
-
-Stable provider API, documented extension model, production tested integrations, and stable public package contracts.
-
-The roadmap may change as the architecture is tested against real projects.
+Release sequencing and milestone exit criteria are maintained in [ROADMAP.md](ROADMAP.md). Current feature status belongs in [FEATURES.md](FEATURES.md), not in the roadmap.
 
 ---
 

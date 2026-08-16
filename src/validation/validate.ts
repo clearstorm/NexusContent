@@ -1,7 +1,19 @@
 import { z } from "zod";
-import type { CollectionItem, PageContent } from "../core/types.ts";
+import type {
+  CollectionItem,
+  NavigationContent,
+  PageContent,
+  SettingsContent,
+  SingletonContent
+} from "../core/types.ts";
 import { ValidationError } from "../core/errors.ts";
-import { collectionItemSchema, pageSchema } from "./schemas.ts";
+import {
+  collectionItemSchema,
+  navigationSchema,
+  pageSchema,
+  settingsSchema,
+  singletonSchema
+} from "./schemas.ts";
 
 export interface ValidationIssue {
   path: string;
@@ -25,6 +37,36 @@ export function validatePageContent(
   context: ValidationContext = {}
 ): void {
   const result = pageSchema.safeParse(value);
+  if (!result.success) {
+    throw buildValidationError(result.error, context, value.key);
+  }
+}
+
+export function validateSingletonContent(
+  value: SingletonContent,
+  context: ValidationContext = {}
+): void {
+  const result = singletonSchema.safeParse(value);
+  if (!result.success) {
+    throw buildValidationError(result.error, context, value.key);
+  }
+}
+
+export function validateNavigationContent(
+  value: NavigationContent,
+  context: ValidationContext = {}
+): void {
+  const result = navigationSchema.safeParse(value);
+  if (!result.success) {
+    throw buildValidationError(result.error, context, value.key);
+  }
+}
+
+export function validateSettingsContent(
+  value: SettingsContent,
+  context: ValidationContext = {}
+): void {
+  const result = settingsSchema.safeParse(value);
   if (!result.success) {
     throw buildValidationError(result.error, context, value.key);
   }

@@ -18,6 +18,18 @@ class StubProvider implements ContentProvider {
     return null;
   }
 
+  async getSingleton() {
+    return null;
+  }
+
+  async getNavigation() {
+    return null;
+  }
+
+  async getSettings() {
+    return null;
+  }
+
   async getCollection() {
     return [];
   }

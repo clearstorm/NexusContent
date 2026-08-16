@@ -117,7 +117,14 @@ test("the public API works from plain Node code without Astro installed", async 
   const nexus = new NexusContent({
     content: {
       home: { provider: "git", key: "home" },
+      singleton: { provider: "git", key: "navigation" },
       posts: { provider: "git", key: "posts" }
+    },
+    navigation: {
+      primary: { provider: "git", key: "primary" }
+    },
+    settings: {
+      site: { provider: "git", key: "site" }
     }
   });
 
@@ -130,6 +137,23 @@ test("the public API works from plain Node code without Astro installed", async 
   assert.ok(page);
   assert.equal(page.key, "home");
   assert.equal(page.meta.source, "git");
+
+  const singleton = await nexus.getSingleton("singleton");
+  assert.ok(singleton);
+  assert.equal(singleton.key, "navigation");
+  assert.equal(singleton.meta.sourceId, "singletons/navigation.json");
+
+  const navigation = await nexus.getNavigation("primary");
+  assert.ok(navigation);
+  assert.equal(navigation.key, "primary");
+  assert.equal(navigation.items[1]?.children?.[0]?.label, "Guides");
+  assert.equal(navigation.meta.sourceId, "navigation/primary.json");
+
+  const settings = await nexus.getSettings("site");
+  assert.ok(settings);
+  assert.equal(settings.key, "site");
+  assert.equal(settings.data.siteName, "NexusContent Example");
+  assert.equal(settings.meta.sourceId, "settings/site.json");
 
   const collection = await nexus.getCollection("posts");
   assert.equal(collection.length, 2);

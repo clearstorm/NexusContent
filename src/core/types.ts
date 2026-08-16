@@ -30,6 +30,33 @@ export interface PageContent<TData = Record<string, unknown>> {
   meta: ContentMeta;
 }
 
+export interface SingletonContent<TData = Record<string, unknown>> {
+  id: string;
+  key: string;
+  data: TData;
+  meta: ContentMeta;
+}
+
+export interface NavigationItem {
+  label: string;
+  href: string;
+  children?: NavigationItem[];
+}
+
+export interface NavigationContent {
+  id: string;
+  key: string;
+  items: NavigationItem[];
+  meta: ContentMeta;
+}
+
+export interface SettingsContent<TData = Record<string, unknown>> {
+  id: string;
+  key: string;
+  data: TData;
+  meta: ContentMeta;
+}
+
 export interface CollectionItem<TData = Record<string, unknown>> {
   id: string;
   key: string;
@@ -52,4 +79,6 @@ export interface ContentConfig {
 export interface NexusConfig {
   providers?: Record<string, ProviderConfig>;
   content: Record<string, ContentConfig>;
+  navigation?: Record<string, ContentConfig>;
+  settings?: Record<string, ContentConfig>;
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { NavigationItem } from "../core/types.ts";
 
 export const seoSchema = z.object({
   title: z.string().optional(),
@@ -13,6 +14,30 @@ export const contentMetaSchema = z.object({
 });
 
 export const dataSchema = z.record(z.string(), z.unknown());
+
+export const navigationItemSchema: z.ZodType<NavigationItem> = z.lazy(() =>
+  z.object({
+    label: z.string(),
+    href: z.string(),
+    children: z.array(navigationItemSchema).optional()
+  })
+);
+
+export const navigationSchema = z.object({
+  id: z.string(),
+  key: z.string(),
+  items: z.array(navigationItemSchema),
+  meta: contentMetaSchema
+});
+
+export const settingsSchema = z.object({
+  id: z.string(),
+  key: z.string(),
+  data: dataSchema,
+  meta: contentMetaSchema
+});
+
+export const singletonSchema = settingsSchema;
 
 export const pageSchema = z.object({
   id: z.string(),

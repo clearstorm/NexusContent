@@ -1,4 +1,13 @@
-import type { CollectionItem, ContentMeta, PageContent, SeoData } from "../../core/types.ts";
+import type {
+  CollectionItem,
+  ContentMeta,
+  NavigationContent,
+  NavigationItem,
+  PageContent,
+  SeoData,
+  SettingsContent,
+  SingletonContent
+} from "../../core/types.ts";
 import { ProviderError } from "../../core/errors.ts";
 
 export interface NormalizeSource {
@@ -52,6 +61,64 @@ export function normalizeRawPage(
     slug: object.slug as string | undefined,
     title: object.title as string | undefined,
     seo,
+    data,
+    meta: buildMeta(source)
+  };
+}
+
+export function normalizeRawSingleton(
+  raw: unknown,
+  source: NormalizeSource
+): SingletonContent {
+  const object = asObject(raw, source.sourceId);
+
+  const data: Record<string, unknown> = {};
+  for (const [field, value] of Object.entries(object)) {
+    if (field === "id" || field === "key") {
+      continue;
+    }
+    data[field] = value;
+  }
+
+  return {
+    id: (object.id as string | undefined) ?? source.key,
+    key: source.key,
+    data,
+    meta: buildMeta(source)
+  };
+}
+
+export function normalizeRawNavigation(
+  raw: unknown,
+  source: NormalizeSource
+): NavigationContent {
+  const object = asObject(raw, source.sourceId);
+
+  return {
+    id: (object.id as string | undefined) ?? source.key,
+    key: source.key,
+    items: object.items as NavigationItem[],
+    meta: buildMeta(source)
+  };
+}
+
+export function normalizeRawSettings(
+  raw: unknown,
+  source: NormalizeSource
+): SettingsContent {
+  const object = asObject(raw, source.sourceId);
+
+  const data: Record<string, unknown> = {};
+  for (const [field, value] of Object.entries(object)) {
+    if (field === "id" || field === "key") {
+      continue;
+    }
+    data[field] = value;
+  }
+
+  return {
+    id: (object.id as string | undefined) ?? source.key,
+    key: source.key,
     data,
     meta: buildMeta(source)
   };

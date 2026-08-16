@@ -1,8 +1,27 @@
-import type { CollectionItem, PageContent } from "../../core/types.ts";
+import type {
+  CollectionItem,
+  NavigationContent,
+  PageContent,
+  SettingsContent,
+  SingletonContent
+} from "../../core/types.ts";
 import type { ContentProvider } from "../../core/provider.ts";
 import { ProviderError } from "../../core/errors.ts";
-import { loadCollectionFiles, loadItemFile, loadPageFile } from "./loader.ts";
-import { normalizeRawItem, normalizeRawPage } from "./normalize.ts";
+import {
+  loadCollectionFiles,
+  loadItemFile,
+  loadNavigationFile,
+  loadPageFile,
+  loadSettingsFile,
+  loadSingletonFile
+} from "./loader.ts";
+import {
+  normalizeRawItem,
+  normalizeRawNavigation,
+  normalizeRawPage,
+  normalizeRawSettings,
+  normalizeRawSingleton
+} from "./normalize.ts";
 
 export interface GitProviderOptions {
   contentPath: string;
@@ -44,6 +63,53 @@ export class GitProvider implements ContentProvider {
     });
 
     return page as unknown as PageContent<TData>;
+  }
+
+  async getSingleton<TData = Record<string, unknown>>(
+    key: string
+  ): Promise<SingletonContent<TData> | null> {
+    const file = await loadSingletonFile(this.contentPath, key);
+    if (file === null) {
+      return null;
+    }
+
+    const singleton = normalizeRawSingleton(file.data, {
+      key,
+      sourceId: file.relativePath,
+      updatedAt: file.updatedAt
+    });
+
+    return singleton as unknown as SingletonContent<TData>;
+  }
+
+  async getNavigation(key: string): Promise<NavigationContent | null> {
+    const file = await loadNavigationFile(this.contentPath, key);
+    if (file === null) {
+      return null;
+    }
+
+    return normalizeRawNavigation(file.data, {
+      key,
+      sourceId: file.relativePath,
+      updatedAt: file.updatedAt
+    });
+  }
+
+  async getSettings<TData = Record<string, unknown>>(
+    key: string
+  ): Promise<SettingsContent<TData> | null> {
+    const file = await loadSettingsFile(this.contentPath, key);
+    if (file === null) {
+      return null;
+    }
+
+    const settings = normalizeRawSettings(file.data, {
+      key,
+      sourceId: file.relativePath,
+      updatedAt: file.updatedAt
+    });
+
+    return settings as unknown as SettingsContent<TData>;
   }
 
   async getCollection<TData = Record<string, unknown>>(

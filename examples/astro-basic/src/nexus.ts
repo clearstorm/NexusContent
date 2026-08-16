@@ -11,6 +11,9 @@ export const nexus = new NexusContent({
     home: { provider: "git", key: "home" },
     about: { provider: "git", key: "about" },
     blog: { provider: "git", key: "posts" }
+  },
+  navigation: {
+    primary: { provider: "git", key: "primary" }
   }
 });
 
@@ -18,6 +21,10 @@ nexus.register("git", new GitProvider({ contentPath }));
 
 export async function getPageContent(name: string) {
   return nexus.getPage(name);
+}
+
+export async function getNavigationContent(name: string) {
+  return nexus.getNavigation(name);
 }
 
 export async function getCollectionContent(name: string) {
