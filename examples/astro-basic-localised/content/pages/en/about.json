@@ -1,0 +1,37 @@
+{
+  "title": "About",
+  "slug": "about",
+  "seo": {
+    "title": "About - NexusContent Example",
+    "description": "How NexusContent separates content from application code."
+  },
+  "hero": {
+    "eyebrow": "Who we are",
+    "heading": "Separation, by design.",
+    "intro": "NexusContent keeps the boundary between content sources and content consumers clean."
+  },
+  "mission": {
+    "heading": "Our mission",
+    "content": "Give frontend applications a single, predictable content interface regardless of where the content lives."
+  },
+  "story": {
+    "heading": "Our story",
+    "content": "NexusContent began with one question: why should a website be rebuilt every time a content source changes? The answer is a thin, framework-neutral layer that normalizes content once and lets applications stay focused on presentation."
+  },
+  "values": {
+    "heading": "Principles",
+    "items": [
+      "Astro owns routing.",
+      "Core stays provider independent.",
+      "Editable content lives outside the app.",
+      "Static generation remains the default.",
+      "Missing content fails loudly."
+    ]
+  },
+  "cta": {
+    "heading": "Want to talk?",
+    "intro": "We are happy to explain the architecture.",
+    "label": "Contact us",
+    "href": "/contact"
+  }
+}

@@ -1,0 +1,75 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollectionContent, getItemContent } from "../../nexus";
+
+export async function getStaticPaths() {
+  const paths: {
+    params: { slug: string };
+    props: { key: string };
+  }[] = [];
+
+  const posts = await getCollectionContent("blog");
+  for (const post of posts) {
+    paths.push({
+      params: { slug: post.slug ?? post.key },
+      props: { key: post.key }
+    });
+  }
+
+  return paths;
+}
+
+const { slug } = Astro.params;
+const { key } = Astro.props as { key?: string };
+
+const post = await getItemContent("blog", key ?? "");
+
+if (!post) {
+  throw new Error(`Required content "${key ?? slug}" was not found.`);
+}
+
+const { body, date } = post.data as { body?: string; date?: string };
+---
+
+<BaseLayout
+  title={`${post.title ?? "Post"} - NexusContent Example`}
+>
+  <article class="post">
+    <p class="back">
+      <a href="/blog">← Blog</a>
+    </p>
+    <h1>{post.title}</h1>
+    {date && <time>{date}</time>}
+    {body && <p class="body">{body}</p>}
+  </article>
+
+  <style>
+    .post {
+      max-width: 46rem;
+    }
+
+    .back a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back a:hover {
+      color: var(--accent);
+    }
+
+    .post time {
+      display: inline-block;
+      margin-top: 0.5rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .body {
+      margin-top: 2rem;
+      font-size: 1.15rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+  </style>
+</BaseLayout>

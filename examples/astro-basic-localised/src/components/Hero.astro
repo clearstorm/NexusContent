@@ -1,5 +1,8 @@
 ---
+import { localizeHref } from "../app/locale";
+
 interface Props {
+  locale: string;
   eyebrow?: string;
   heading: string;
   intro: string;
@@ -9,7 +12,7 @@ interface Props {
   };
 }
 
-const { eyebrow, heading, intro, cta } = Astro.props;
+const { locale, eyebrow, heading, intro, cta } = Astro.props;
 ---
 
 <section class="hero">
@@ -17,7 +20,7 @@ const { eyebrow, heading, intro, cta } = Astro.props;
   <h1>{heading}</h1>
   <p class="intro">{intro}</p>
   {cta && (
-    <a class="btn btn-light" href={cta.href}>
+    <a class="btn btn-light" href={localizeHref(locale, cta.href)}>
       {cta.label}
     </a>
   )}

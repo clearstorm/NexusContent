@@ -1,18 +1,21 @@
 ---
+import { localizeHref } from "../app/locale";
+
 interface Props {
+  locale: string;
   heading: string;
   intro: string;
   label: string;
   href: string;
 }
 
-const { heading, intro, label, href } = Astro.props;
+const { locale, heading, intro, label, href } = Astro.props;
 ---
 
 <section class="cta">
   <h2>{heading}</h2>
   <p>{intro}</p>
-  <a class="btn btn-primary" href={href}>
+  <a class="btn btn-primary" href={localizeHref(locale, href)}>
     {label}
   </a>
   <style>

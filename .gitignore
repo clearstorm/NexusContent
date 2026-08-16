@@ -12,3 +12,5 @@ coverage/
 
 examples/astro-basic/dist/
 examples/astro-basic/.astro/
+examples/astro-basic-localised/dist/
+examples/astro-basic-localised/.astro/

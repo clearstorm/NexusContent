@@ -34,8 +34,11 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Build Astro example
+      - name: Build Astro example (single locale)
         run: npm run build --workspace @nexuscontent/example-astro-basic
+
+      - name: Build Astro example (localised)
+        run: npm run build --workspace @nexuscontent/example-astro-basic-localised
 
       - name: Run plain Node compatibility example
         run: node examples/node-basic/index.mjs

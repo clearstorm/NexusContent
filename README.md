@@ -428,6 +428,15 @@ nexuscontent/
 │   │   ├── astro.config.mjs
 │   │   ├── package.json
 │   │   └── tsconfig.json
+│   ├── astro-basic-localised/
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── layouts/
+│   │   │   └── pages/
+│   │   ├── public/
+│   │   ├── astro.config.mjs
+│   │   ├── package.json
+│   │   └── tsconfig.json
 │   └── node-basic/
 │       ├── index.mjs
 │       └── package.json
@@ -796,7 +805,7 @@ A request for `zu-ZA` resolves `pages/zu-ZA/home.json`. If it is missing and fal
 
 Translation workflows (state tracking, per-locale publishing, completeness reporting, and outdated detection) are not part of `0.1.3`. `TranslationState` and `LocaleVariantInfo` are typed extension points for a future workflow.
 
-The Astro example demonstrates per-locale retrieval: every page is generated in English and French under `/en/` and `/fr/`, with translated navigation and site settings resolved through the same locale-aware calls.
+The localised Astro example (`examples/astro-basic-localised/`) demonstrates per-locale retrieval: every page is generated in English and French under `/en/` and `/fr/`, with translated navigation and site settings resolved through the same locale-aware calls. The single-locale example (`examples/astro-basic/`) demonstrates the flat retrieval path with no locale configuration.
 
 ---
 
@@ -935,18 +944,47 @@ No provider code is imported in either consumer.
 
 The reference examples live under `examples/`:
 
-* `examples/astro-basic/` proves consumption inside an Astro static build.
+* `examples/astro-basic/` proves consumption inside an Astro static build for a single locale.
+* `examples/astro-basic-localised/` proves the same build with locale-prefixed routes in English and French.
 * `examples/node-basic/` proves consumption from a plain Node process.
 
 ---
 
-# Astro Example
+# Astro Examples
 
-The Astro reference example under `examples/astro-basic/` proves NexusContent consumption inside an Astro static build.
+The Astro reference examples prove NexusContent consumption inside an Astro static build.
 
-The example is generated in two locales, English and French, under locale-prefixed routes. The root `/` redirects to the default locale.
+Two Astro examples are provided so the localisation progression is visible:
+
+* `examples/astro-basic/` is a single-locale site. It reads flat content (no locale configuration) and serves English routes directly at the root.
+* `examples/astro-basic-localised/` adds localisation. The same site is generated in English and French under locale-prefixed routes, and the root `/` redirects to the default locale.
+
+The two examples are intentionally separate so each demonstrates one concern without the other.
+
+## Single-locale example
 
 Astro routes remain explicit:
+
+```text
+src/pages/
+├── index.astro              # home
+├── about.astro
+├── services.astro
+├── contact.astro
+└── blog/
+    ├── index.astro
+    └── [slug].astro
+```
+
+Pages request content without any locale options:
+
+```ts
+const page = await getPageContent("about");
+```
+
+## Localised example
+
+Astro routes remain explicit, with one variant per locale:
 
 ```text
 src/pages/
@@ -969,7 +1007,7 @@ const page = await getPageContent("about", { locale });
 
 Navigation, settings, and collection content are resolved the same way. Internal content hrefs stay locale-relative and are localized by the application at render time because routing belongs to the consumer.
 
-The page controls composition.
+In both examples the page controls composition.
 
 NexusContent supplies data.
 
@@ -1054,6 +1092,36 @@ NEXUS_GIT_CONTENT_PATH=../company-content
 The Git provider reads from that location.
 
 The application must not assume the content repository exists inside `src`.
+
+### GitHub-hosted content repository
+
+The reference flow keeps editable content in a separate GitHub repository and
+reads it from a local clone at build time. Retrieval never runs Git commands;
+cloning and pulling are the synchronization step, performed by CI, deployment
+tooling, or a developer before the build.
+
+Tested flow:
+
+```bash
+# 1. Content lives in its own repository on GitHub.
+# 2. Clone it beside the application repository.
+git clone https://github.com/<org>/company-content.git ../company-content
+
+# 3. Point the Git provider at the content directory inside the clone.
+#    In the example this is done through a local .env file:
+NEXUS_GIT_CONTENT_PATH=../company-content/content
+
+# 4. Build. NexusContent reads the cloned content.
+npm run build
+
+# 5. Editors push content changes to GitHub; the build machine pulls before building.
+git -C ../company-content pull
+```
+
+The `examples/astro-basic-localised/` example was tested against a real
+GitHub-hosted content repository: a fresh clone of
+`https://github.com/clearstorm/nexuscontent-demo-content` produced the same
+17 built pages, confirming GitHub as the source of truth.
 
 ## Node requirement
 
@@ -1950,7 +2018,7 @@ Tests
       ↓
 Build package
       ↓
-Build Astro example
+Build Astro examples
       ↓
 Run plain Node compatibility example
 ```
@@ -2092,6 +2160,7 @@ The current internal milestone, version `0.1.3`, proves the core architecture an
 * about page
 * collection example
 * no direct provider calls from Astro components
+* localised variant with locale-prefixed routes in English and French
 
 ### Plain Node Compatibility
 

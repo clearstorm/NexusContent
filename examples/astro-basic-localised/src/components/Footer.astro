@@ -1,4 +1,6 @@
 ---
+import { localizeHref } from "../app/locale";
+
 interface SiteFooter {
   description?: string;
   credit?: string;
@@ -11,10 +13,12 @@ interface SiteData {
 }
 
 interface Props {
+  locale: string;
   site?: SiteData;
 }
 
-const { site } = Astro.props;
+const { locale, site } = Astro.props;
+const homeLabel = locale === "fr" ? "Accueil" : "Home";
 ---
 
 <footer>
@@ -25,7 +29,7 @@ const { site } = Astro.props;
     </div>
     <div class="desc">
       {site?.footer?.description && <p>{site.footer.description}</p>}
-      <a class="home" href="/">Home</a>
+      <a class="home" href={localizeHref(locale, "/")}>{homeLabel}</a>
     </div>
   </div>
   <p class="credit">

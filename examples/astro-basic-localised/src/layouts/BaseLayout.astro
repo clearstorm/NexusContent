@@ -2,24 +2,28 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getNavigationContent, getSettingsContent } from "../nexus";
+import { defaultLocale, isSupportedLocale } from "../app/locale";
 
 interface Props {
   title: string;
   description?: string;
+  locale: string;
 }
 
-const { title, description } = Astro.props;
-const lang = "en";
+const { title, description, locale } = Astro.props;
+const lang = isSupportedLocale(locale) ? locale : defaultLocale;
 
-const navigation = await getNavigationContent("primary");
-const site = await getSettingsContent("site");
+const navigation = await getNavigationContent("primary", { locale: lang });
+const site = await getSettingsContent("site", { locale: lang });
 
 if (!navigation) {
-  throw new Error(`Required navigation "primary" was not found.`);
+  throw new Error(
+    `Required navigation "primary" was not found for locale "${lang}".`
+  );
 }
 
 if (!site) {
-  throw new Error(`Required settings "site" was not found.`);
+  throw new Error(`Required settings "site" was not found for locale "${lang}".`);
 }
 ---
 
@@ -136,10 +140,10 @@ if (!site) {
     </style>
   </head>
   <body>
-    <Header links={navigation.items} />
+    <Header links={navigation.items} locale={lang} />
     <main>
       <slot />
     </main>
-    <Footer site={site.data} />
+    <Footer site={site.data} locale={lang} />
   </body>
 </html>

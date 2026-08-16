@@ -1,0 +1,7 @@
+{
+  "title": "Content in Git",
+  "slug": "git-backed-content",
+  "date": "2026-02-10",
+  "excerpt": "Content and application code stay separated.",
+  "body": "The Git provider reads pages from the pages directory and collections from the collections directory. Each file keeps its provenance so builds stay auditable."
+}

@@ -1,18 +1,49 @@
 ---
-// Root redirects to the default locale. Both languages are served from their
-// own prefixed routes, and routing stays a consumer concern.
-const target = "/en/";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/Hero.astro";
+import Services from "../components/Services.astro";
+import Testimonials from "../components/Testimonials.astro";
+import CTA from "../components/CTA.astro";
+import { getPageContent } from "../nexus";
+
+const page = await getPageContent("home");
+
+if (!page) {
+  throw new Error(`Required content "home" was not found.`);
+}
+
+const hero = page.data.hero as {
+  eyebrow?: string;
+  heading: string;
+  intro: string;
+  cta?: { label: string; href: string };
+};
+
+const services = page.data.services as {
+  heading: string;
+  intro?: string;
+  items: { title: string; description: string }[];
+};
+
+const testimonials = page.data.testimonials as {
+  heading: string;
+  items: { quote: string; author: string }[];
+};
+
+const cta = page.data.cta as {
+  heading: string;
+  intro: string;
+  label: string;
+  href: string;
+};
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="refresh" content={`0; url=${target}`} />
-    <title>Redirecting</title>
-  </head>
-  <body>
-    <p>Redirecting to <a href={target}>{target}</a>.</p>
-  </body>
-</html>
+<BaseLayout
+  title={page.title ?? "NexusContent Example"}
+  description={page.seo?.description}
+>
+  <Hero {...hero} />
+  <Services {...services} />
+  <Testimonials {...testimonials} />
+  <CTA {...cta} />
+</BaseLayout>

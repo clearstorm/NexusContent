@@ -77,6 +77,7 @@ The exit criteria are satisfied by `0.1.3`.
 - Media and SEO normalization where supported by reliable source data.
 - Provider contract tests with deterministic fixtures or mocked responses.
 - Consumption through the existing public API in Node and Astro examples.
+- WordPress examples under `examples/astro-wordpress/` and `examples/astro-wordpress-localised/`, following the same basic-to-localised progression proven by the Git Astro examples. Do not create these directories before the provider exists.
 
 **Explicit exclusions:**
 

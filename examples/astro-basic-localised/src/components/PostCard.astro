@@ -1,14 +1,17 @@
 ---
+import { localizeHref } from "../app/locale";
+
 interface Props {
+  locale: string;
   title?: string;
   slug?: string;
   date?: string;
   excerpt?: string;
 }
 
-const { title, slug, date, excerpt } = Astro.props;
-const href = `/blog/${slug ?? ""}`;
-const more = "Read more →";
+const { locale, title, slug, date, excerpt } = Astro.props;
+const href = localizeHref(locale, `/blog/${slug ?? ""}`);
+const more = locale === "fr" ? "Lire la suite →" : "Read more →";
 ---
 
 <article class="card">

@@ -9,8 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Split the Astro reference example into a single-locale `examples/astro-basic/` (flat content, no locale configuration, root-level routes) and `examples/astro-basic-localised/` (the same site generated in English and French under `/en/` and `/fr/`).
 - Expanded the Astro reference example to five pages (home, about, services, blog, contact) generated in English and French under `/en/` and `/fr/`, with a root redirect to the default locale.
-- Added locale-aware navigation and settings usage, content-driven language switching, and a polished dependency-free design refresh to the Astro example.
+- Added locale-aware navigation and settings usage, content-driven language switching, and a polished dependency-free design refresh to the Astro examples.
+- Separated the Astro example's NexusContent configuration (`src/nexus.config.ts`) from service wiring and helper access (`src/nexus.ts`).
+- Reserved `examples/astro-wordpress/` and `examples/astro-wordpress-localised/` for the future WordPress milestone following the same progression. No directories were created.
+
+### Documentation
+
+- Documented and verified the GitHub-hosted content repository flow: the localised example was built against a real GitHub-hosted content clone, and the README now describes the clone → `NEXUS_GIT_CONTENT_PATH` → build workflow.
 
 ## [0.1.3] - 2026-08-16
 

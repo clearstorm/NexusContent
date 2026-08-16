@@ -17,6 +17,7 @@
   "private": true,
   "workspaces": [
     "examples/astro-basic",
+    "examples/astro-basic-localised",
     "examples/node-basic"
   ],
   "scripts": {

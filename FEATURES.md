@@ -55,7 +55,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
 | `consumer.node` Plain Node compatibility | implemented | 0.1.1 | - | Example and automated public API compatibility test without Astro. |
-| `consumer.astro` Astro reference consumer | implemented | 0.1.0 | - | Static example with explicit home, about, services, contact, and blog routes generated in English and French under `/en/` and `/fr/`; Astro is not a Core dependency. |
+| `consumer.astro` Astro reference consumer | implemented | 0.1.0 | - | Two examples: `astro-basic` with explicit single-locale routes (home, about, services, contact, blog) using flat content, and `astro-basic-localised` generating the same site in English and French under `/en/` and `/fr/`. Astro is not a Core dependency. |
 | `consumer.framework-neutrality` Framework-neutral source boundary | implemented | 0.1.1 | - | Tests prohibit framework imports, framework globals, and frontend runtime dependencies in library source. |
 | `consumer.framework-adapters` Framework-specific adapter packages | deferred | - | TBD | Integrations remain consumer-owned until package extraction has a demonstrated need. |
 

@@ -1,4 +1,6 @@
 ---
+import { localizeHref, switchLocalePath, supportedLocales } from "../app/locale";
+
 interface NavigationLink {
   label: string;
   href: string;
@@ -6,11 +8,12 @@ interface NavigationLink {
 
 interface Props {
   links: NavigationLink[];
+  locale: string;
 }
 
-const { links } = Astro.props;
+const { links, locale } = Astro.props;
 const currentPath = Astro.url.pathname;
-const homeHref = "/";
+const homeHref = localizeHref(locale, "/");
 ---
 
 <header>
@@ -19,7 +22,7 @@ const homeHref = "/";
     <ul class="nav-links">
       {
         links.map((link) => {
-          const href = link.href;
+          const href = localizeHref(locale, link.href);
           const active =
             href === currentPath ||
             (href !== homeHref && currentPath.startsWith(href));
@@ -29,6 +32,20 @@ const homeHref = "/";
             </li>
           );
         })
+      }
+    </ul>
+    <ul class="lang">
+      {
+        supportedLocales.map((other) => (
+          <li>
+            <a
+              href={switchLocalePath(currentPath, other)}
+              class:list={{ active: other === locale }}
+            >
+              {other.toUpperCase()}
+            </a>
+          </li>
+        ))
       }
     </ul>
   </nav>
@@ -83,6 +100,27 @@ const homeHref = "/";
 
     .nav-links a.active {
       font-weight: 700;
+    }
+
+    .lang {
+      gap: 0.35rem;
+    }
+
+    .lang a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+    }
+
+    .lang a:hover,
+    .lang a.active {
+      color: #ffffff;
+      background: var(--accent);
+      border-color: var(--accent);
     }
 
     @media (max-width: 40rem) {

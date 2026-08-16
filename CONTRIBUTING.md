@@ -48,7 +48,8 @@ Direct unreviewed changes to the primary branch should be avoided.
 npm run typecheck     # Type check the package and tests
 npm test              # Run the test suite
 npm run build         # Build the package into dist/
-npm run build --workspace @nexuscontent/example-astro-basic  # Build the example
+npm run build --workspace @nexuscontent/example-astro-basic  # Build the single-locale Astro example
+npm run build --workspace @nexuscontent/example-astro-basic-localised  # Build the localised Astro example
 ```
 
 ## Environment Variables

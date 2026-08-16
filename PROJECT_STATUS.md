@@ -45,7 +45,7 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Git-based CMS compatibility through editor-independent repository files.
 - Localisation foundations: optional `locales` configuration, central fallback-chain resolution, strict mode, structured locale errors, and per-request retrieval options.
 - Git locale variant directories with legacy flat-file fallback and optional `meta.locale` provenance.
-- Astro static-build reference consumer with explicit routes.
+- Astro static-build reference consumers with explicit routes: `astro-basic` (single locale, flat content) and `astro-basic-localised` (English and French under locale-prefixed routes).
 - Plain Node compatibility example and framework-neutrality tests.
 - Type checking, tests, package build, Astro example build, and Node example execution in CI.
 
@@ -61,7 +61,7 @@ No active implementation work is identified.
 
 1. Confirm the WordPress provider's minimum REST API scope and contract test strategy.
 2. Implement WordPress pages, posts, pagination, normalization, media handling, and actionable errors outside Core.
-3. Prove WordPress consumption through the existing public API in Node and Astro examples.
+3. Prove WordPress consumption through the existing public API in Node and Astro examples, following the same basic-to-localised progression with `examples/astro-wordpress/` and `examples/astro-wordpress-localised/`.
 4. Reassess the provider contract before beginning the directional `0.3.0` Strapi milestone.
 5. Consider the directional localisation continuation (per-file multilingual content, per-locale validation policies, and the translation state workflow) once provider breadth is proven.
 

@@ -396,15 +396,29 @@ Do not create these packages prematurely.
 
 During the 0.1.x milestones, prove the architecture before extracting multiple packages.
 
-The Astro example belongs under:
+The Astro examples belong under:
 
 ```text
 examples/astro-basic/
+examples/astro-basic-localised/
 ```
 
-It exists to prove that NexusContent can be consumed cleanly by Astro.
+They exist to prove that NexusContent can be consumed cleanly by Astro.
 
-It must not become the implementation location for NexusContent Core.
+`examples/astro-basic/` is the single-locale reference. It uses flat content and no locale configuration.
+
+`examples/astro-basic-localised/` is the localised reference. It uses locale-prefixed routes and the same site content in English and French.
+
+When the WordPress provider lands in a later milestone, follow the same progression with:
+
+```text
+examples/astro-wordpress/
+examples/astro-wordpress-localised/
+```
+
+Do not create these WordPress example directories before the provider exists.
+
+The Astro examples must not become the implementation location for NexusContent Core.
 
 The plain Node compatibility example belongs under:
 
@@ -1515,6 +1529,15 @@ nexuscontent/
 │   │   ├── astro.config.mjs
 │   │   ├── package.json
 │   │   └── tsconfig.json
+│   ├── astro-basic-localised/
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── layouts/
+│   │   │   └── pages/
+│   │   ├── public/
+│   │   ├── astro.config.mjs
+│   │   ├── package.json
+│   │   └── tsconfig.json
 │   └── node-basic/
 │       ├── index.mjs
 │       └── package.json
@@ -1620,7 +1643,19 @@ Example specific schemas belong in the example application.
 
 ## examples/astro-basic/
 
-Demonstrates consumption of NexusContent inside an Astro static build.
+Demonstrates consumption of NexusContent inside an Astro static build for a single locale.
+
+It uses flat content and no locale configuration.
+
+It must not become a hidden dependency of Core.
+
+Deleting the example must not break the library.
+
+## examples/astro-basic-localised/
+
+Demonstrates the same Astro consumption with locale-prefixed routes in English and French.
+
+It proves the localisation progression on top of the single-locale example.
 
 It must not become a hidden dependency of Core.
 
