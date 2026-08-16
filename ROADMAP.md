@@ -2,11 +2,11 @@
 
 This roadmap describes intended sequencing. It does not determine whether a feature is currently implemented. See [FEATURES.md](FEATURES.md) and [project.state.json](project.state.json) for current status, and [PROJECT_STATUS.md](PROJECT_STATUS.md) for immediate next work.
 
-Versions after `0.1.2` are directional targets. Scope and ordering may change as integrations test the provider contract. A roadmap item remains `planned` or `deferred` until implementation and verification justify a status change.
+Versions after `0.1.3` are directional targets. Scope and ordering may change as integrations test the provider contract. A roadmap item remains `planned` or `deferred` until implementation and verification justify a status change.
 
 ## 0.1.x - Framework-Neutral Foundation
 
-**State:** Released internally through `0.1.2`.
+**State:** Released internally through `0.1.3`.
 
 **Goal:** Prove a small, framework-neutral content provider architecture with Git content and both Astro and plain Node consumers.
 
@@ -35,7 +35,34 @@ Versions after `0.1.2` are directional targets. Scope and ordering may change as
 - Framework-neutrality tests pass without a frontend framework runtime dependency.
 - Package, Astro example, and Node example build or execute in CI.
 
-The exit criteria are satisfied by `0.1.2`.
+The exit criteria are satisfied by `0.1.3`.
+
+## 0.1.3 - Localisation Foundations
+
+**State:** Released internally.
+
+**Goal:** Add locale-aware content resolution without coupling Core to any translation workflow.
+
+**Required capabilities:**
+
+- Optional `locales` configuration with a default locale, supported locales, and an optional explicit fallback map.
+- Central `LocaleResolver` producing deterministic fallback chains with strict mode.
+- Structured locale errors and per-request `locale` / `fallback` retrieval options.
+- Git locale variant directories with legacy flat-file fallback and optional `meta.locale` provenance.
+- Typed `TranslationState` and `LocaleVariantInfo` extension points.
+
+**Explicit exclusions:**
+
+- Translation workflows, publishing, completeness reporting, and outdated tracking.
+- Per-locale validation policies.
+- Per-item variant merging and full file-level multilingual content.
+- Locale-specific routing in Core. The Astro example demonstrates per-locale routes by explicit user scope change.
+
+**Exit criteria:**
+
+- Locale resolution, Git variant loading, and flat-file backward compatibility pass their tests.
+- Projects without locale configuration retain the legacy flat retrieval path.
+- WordPress remains the recommended next focus milestone.
 
 ## 0.2.0 - WordPress Provider
 
@@ -63,6 +90,34 @@ The exit criteria are satisfied by `0.1.2`.
 - Native WordPress responses do not cross the provider boundary.
 - Existing Git, Node, Astro, typecheck, test, and build gates remain green.
 - Public behavior and project state documentation are updated.
+
+## 0.2.x - Localisation Continuation
+
+**State:** Directional. These items are `planned` and may land after or alongside the `0.2.0` WordPress milestone. They do not block the WordPress provider.
+
+**Goal:** Extend the localisation foundations from `0.1.3` into per-locale content, validation, and translation workflows as demonstrated needs require.
+
+**Directional capabilities:**
+
+- `localisation.file-level`: per-item variant merging and locale publishing for one file per language.
+- `localisation.validation-policies`: per-locale consumer schemas and validation context.
+- `translation.state-model`: a concrete workflow built on the `TranslationState` and `LocaleVariantInfo` extension points.
+- `translation.publishing`: publish individual locale variants without publishing the whole collection.
+- `translation.completeness`: report missing or partial locale variants.
+- `translation.source-change-detection`: detect source changes that make a translation outdated.
+- `translation.outdated-tracking`: track the `outdated` state and require review before republishing.
+- `content.references`: stable `collection` + `entryId` references that are resolved locale-aware.
+
+**Explicit exclusions:**
+
+- CMS-owned locale routing and URL negotiation.
+- Automatic machine translation.
+- Translation workflow features in the `0.1.3` milestone.
+
+**Exit criteria:**
+
+- Each item ships with tests, documentation, and project state updates when implemented.
+- Existing retrieval semantics and flat-file backward compatibility remain intact.
 
 ## 0.3.0 - Strapi Provider
 

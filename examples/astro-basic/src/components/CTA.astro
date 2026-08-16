@@ -1,26 +1,31 @@
 ---
+import { localizeHref } from "../app/locale";
+
 interface Props {
+  locale: string;
   heading: string;
   intro: string;
   label: string;
   href: string;
 }
 
-const { heading, intro, label, href } = Astro.props;
+const { locale, heading, intro, label, href } = Astro.props;
 ---
 
 <section class="cta">
   <h2>{heading}</h2>
   <p>{intro}</p>
-  <a class="button" href={href}>{label}</a>
+  <a class="btn btn-primary" href={localizeHref(locale, href)}>
+    {label}
+  </a>
   <style>
     .cta {
-      margin-top: 3rem;
-      padding: 2.5rem;
+      margin-top: 3.5rem;
+      padding: 2.75rem 2.5rem;
       text-align: center;
       border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      background: #ffffff;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--accent-soft), #faf5ff);
     }
 
     .cta h2 {
@@ -30,17 +35,7 @@ const { heading, intro, label, href } = Astro.props;
     .cta p {
       color: var(--muted);
       max-width: 36rem;
-      margin: 0 auto 1.25rem;
-    }
-
-    .button {
-      display: inline-block;
-      padding: 0.6rem 1.25rem;
-      border-radius: 0.5rem;
-      background: var(--accent);
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 600;
+      margin: 0 auto 1.5rem;
     }
   </style>
 </section>

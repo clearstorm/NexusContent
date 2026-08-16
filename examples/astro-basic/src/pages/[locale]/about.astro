@@ -1,0 +1,90 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/Hero.astro";
+import CTA from "../../components/CTA.astro";
+import { getPageContent } from "../../nexus";
+import { supportedLocales } from "../../app/locale";
+
+export function getStaticPaths() {
+  return supportedLocales.map((locale) => ({ params: { locale } }));
+}
+
+const { locale } = Astro.params;
+
+const page = await getPageContent("about", { locale });
+
+if (!page) {
+  throw new Error(`Required content "about" was not found for locale "${locale}".`);
+}
+
+const hero = page.data.hero as {
+  eyebrow?: string;
+  heading: string;
+  intro: string;
+};
+
+const mission = page.data.mission as { heading: string; content: string };
+const story = page.data.story as { heading: string; content: string };
+const values = page.data.values as { heading: string; items: string[] };
+
+const cta = page.data.cta as {
+  heading: string;
+  intro: string;
+  label: string;
+  href: string;
+};
+---
+
+<BaseLayout
+  title={page.title ?? "About"}
+  description={page.seo?.description}
+  locale={locale}
+>
+  <Hero {...hero} locale={locale} />
+
+  <section class="section mission">
+    <h2>{mission.heading}</h2>
+    <p>{mission.content}</p>
+  </section>
+
+  <section class="section story">
+    <h2>{story.heading}</h2>
+    <p>{story.content}</p>
+  </section>
+
+  <section class="section values">
+    <h2>{values.heading}</h2>
+    <ul>
+      {values.items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </section>
+
+  <CTA {...cta} locale={locale} />
+
+  <style>
+    .mission p,
+    .story p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 44rem;
+    }
+
+    .values ul {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1rem;
+      list-style: none;
+      padding: 0;
+    }
+
+    .values li {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+  </style>
+</BaseLayout>

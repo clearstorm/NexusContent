@@ -1,0 +1,37 @@
+{
+  "title": "À propos",
+  "slug": "about",
+  "seo": {
+    "title": "À propos - Exemple NexusContent",
+    "description": "Comment NexusContent sépare le contenu du code applicatif."
+  },
+  "hero": {
+    "eyebrow": "Qui nous sommes",
+    "heading": "La séparation, par conception.",
+    "intro": "NexusContent garde une frontière nette entre les sources de contenu et les consommateurs."
+  },
+  "mission": {
+    "heading": "Notre mission",
+    "content": "Offrir aux applications front-end une interface de contenu unique et prévisible, quelle que soit la source."
+  },
+  "story": {
+    "heading": "Notre histoire",
+    "content": "NexusContent est né d'une question : pourquoi reconstruire un site à chaque changement de source de contenu ? La réponse est une fine couche indépendante des frameworks qui normalise le contenu une fois, pour que les applications se concentrent sur la présentation."
+  },
+  "values": {
+    "heading": "Principes",
+    "items": [
+      "Astro possède le routage.",
+      "Le noyau reste indépendant des fournisseurs.",
+      "Le contenu modifiable vit hors de l'application.",
+      "La génération statique reste la valeur par défaut.",
+      "Un contenu manquant échoue bruyamment."
+    ]
+  },
+  "cta": {
+    "heading": "Vous voulez en parler ?",
+    "intro": "Nous expliquons volontiers l'architecture.",
+    "label": "Contactez-nous",
+    "href": "/contact"
+  }
+}

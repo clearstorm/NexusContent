@@ -14,6 +14,7 @@ export interface NormalizeSource {
   key: string;
   sourceId: string;
   updatedAt?: string;
+  locale?: string;
 }
 
 function asObject(value: unknown, sourceId: string): Record<string, unknown> {
@@ -32,11 +33,17 @@ function asObject(value: unknown, sourceId: string): Record<string, unknown> {
 }
 
 function buildMeta(source: NormalizeSource): ContentMeta {
-  return {
+  const meta: ContentMeta = {
     source: "git",
     sourceId: source.sourceId,
     updatedAt: source.updatedAt
   };
+
+  if (source.locale !== undefined) {
+    meta.locale = source.locale;
+  }
+
+  return meta;
 }
 
 export function normalizeRawPage(

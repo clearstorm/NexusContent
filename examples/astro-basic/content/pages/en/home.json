@@ -3,11 +3,12 @@
   "slug": "home",
   "seo": {
     "title": "NexusContent Example",
-    "description": "A static Astro site powered by NexusContent and a Git content repository."
+    "description": "A static Astro site powered by NexusContent and a Git content repository, in English and French."
   },
   "hero": {
+    "eyebrow": "Content, decoupled",
     "heading": "Astro owns the website.",
-    "intro": "Content providers own the content. NexusContent sits between them.",
+    "intro": "Content providers own the content. NexusContent sits between them with normalized types, provenance, validation, and locale-aware resolution.",
     "cta": {
       "label": "About us",
       "href": "/about"
@@ -15,6 +16,7 @@
   },
   "services": {
     "heading": "What we do",
+    "intro": "The same content service powers every page on this site.",
     "items": [
       {
         "title": "Static builds",

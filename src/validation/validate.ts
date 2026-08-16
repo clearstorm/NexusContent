@@ -23,6 +23,7 @@ export interface ValidationIssue {
 export interface ValidationContext {
   provider?: string;
   content?: string;
+  locale?: string;
 }
 
 export function formatIssues(error: { issues: z.ZodIssue[] }): ValidationIssue[] {
@@ -108,6 +109,7 @@ function buildValidationError(
       provider: context.provider,
       operation: "validate",
       content,
+      locale: context.locale,
       reason: issues.map((issue) => `${issue.path}: ${issue.message}`).join("; ")
     },
     issues

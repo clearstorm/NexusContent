@@ -1,0 +1,7 @@
+{
+  "title": "Le contenu dans Git",
+  "slug": "git-backed-content",
+  "date": "2026-02-10",
+  "excerpt": "Le contenu et le code applicatif restent séparés.",
+  "body": "Le fournisseur Git lit les pages dans le dossier pages et les collections dans le dossier collections. Chaque fichier conserve sa provenance pour des générations auditables."
+}

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "project": {
     "name": "NexusContent",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "status": "active",
     "stage": "early-development",
-    "milestone": "0.1.2-framework-neutral-core",
+    "milestone": "0.1.3-locale-aware-core",
     "packagePrivate": true
   },
   "currentFocus": {
@@ -47,6 +47,8 @@
       "core.item",
       "content.navigation",
       "content.settings",
+      "localisation.foundations",
+      "localisation.git-variants",
       "workflow.git-cms",
       "tooling.typescript",
       "tooling.build",
@@ -70,6 +72,14 @@
       "content.sync",
       "content.webhooks",
       "content.preview",
+      "content.references",
+      "localisation.file-level",
+      "localisation.validation-policies",
+      "translation.state-model",
+      "translation.publishing",
+      "translation.completeness",
+      "translation.source-change-detection",
+      "translation.outdated-tracking",
       "tooling.cli"
     ],
     "blocked": [],
@@ -89,8 +99,10 @@
     "JSON is the only supported Git content format.",
     "Generic Git singleton content is read from singletons/<key>.json through the provider-neutral getSingleton operation.",
     "Dedicated navigation and settings content are read from navigation/<key>.json and settings/<key>.json through their dedicated provider operations.",
+    "Locale-aware retrieval resolves variants from <directory>/<locale>/<file>.json with a fallback chain when locales are configured; the legacy flat path is preserved when they are not.",
     "No remote CMS provider is implemented.",
     "No synchronization, webhook, or preview workflow is implemented.",
+    "Localisation covers locale configuration, fallback resolution, and Git variant directories; translation workflows are not implemented.",
     "The package remains private while the pre-1.0 architecture is proven."
   ],
   "architecturalDecisions": [
@@ -103,7 +115,9 @@
     "Deployment is outside Core.",
     "Astro is a reference consumer, not a Core dependency.",
     "Generic singleton content remains available for arbitrary singleton data, while navigation and settings use dedicated APIs, types, configuration sections, and Git directories.",
-    "Multiple instances of the same provider type must remain possible."
+    "Multiple instances of the same provider type must remain possible.",
+    "Locale resolution is centralized in Core; providers implement variant file resolution; format adapters and validators implement no locale logic.",
+    "Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged."
   ],
   "next": [
     "provider.wordpress",
@@ -111,6 +125,14 @@
     "content.sync",
     "content.webhooks",
     "content.preview",
+    "content.references",
+    "localisation.file-level",
+    "localisation.validation-policies",
+    "translation.state-model",
+    "translation.publishing",
+    "translation.completeness",
+    "translation.source-change-detection",
+    "translation.outdated-tracking",
     "tooling.cli"
   ],
   "roadmapTargets": {
@@ -119,6 +141,14 @@
     "content.sync": "0.4.0",
     "content.webhooks": "0.5.0",
     "content.preview": "0.6.0",
+    "content.references": "0.2.x",
+    "localisation.file-level": "0.2.x",
+    "localisation.validation-policies": "0.2.x",
+    "translation.state-model": "0.2.x",
+    "translation.publishing": "0.2.x",
+    "translation.completeness": "0.2.x",
+    "translation.source-change-detection": "0.2.x",
+    "translation.outdated-tracking": "0.2.x",
     "tooling.cli": "0.7.0"
   },
   "sources": {

@@ -1,0 +1,28 @@
+{
+  "title": "Contact",
+  "slug": "contact",
+  "seo": {
+    "title": "Contact - Exemple NexusContent",
+    "description": "Coordonnées du site d'exemple NexusContent."
+  },
+  "hero": {
+    "eyebrow": "Prenons contact",
+    "heading": "Contactez-nous",
+    "intro": "Ces coordonnées sont aussi du contenu, chargé par le même pipeline."
+  },
+  "contact": {
+    "heading": "Coordonnées",
+    "items": [
+      { "label": "Courriel", "value": "bonjour@exemple.com", "href": "mailto:bonjour@exemple.com" },
+      { "label": "Téléphone", "value": "+27 11 000 0000", "href": "tel:+27110000000" },
+      { "label": "Adresse", "value": "1, Content Lane, Sandton, Johannesburg" },
+      { "label": "Horaires", "value": "Lun-Ven, 08:00-17:00" }
+    ]
+  },
+  "cta": {
+    "heading": "Écrivez-nous directement",
+    "intro": "Vous préférez le courriel ? Écrivez à l'adresse ci-dessus.",
+    "label": "Envoyer un courriel",
+    "href": "mailto:bonjour@exemple.com"
+  }
+}

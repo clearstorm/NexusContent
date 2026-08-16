@@ -1,0 +1,8 @@
+{
+  "siteName": "NexusContent",
+  "tagline": "Content abstraction for the modern web",
+  "footer": {
+    "description": "A reference consumer proving that Astro and NexusContent share a clean boundary.",
+    "credit": "Powered by NexusContent with a Git content repository."
+  }
+}

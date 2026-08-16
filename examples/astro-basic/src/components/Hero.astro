@@ -1,5 +1,9 @@
 ---
+import { localizeHref } from "../app/locale";
+
 interface Props {
+  locale: string;
+  eyebrow?: string;
   heading: string;
   intro: string;
   cta?: {
@@ -8,38 +12,60 @@ interface Props {
   };
 }
 
-const { heading, intro, cta } = Astro.props;
+const { locale, eyebrow, heading, intro, cta } = Astro.props;
 ---
 
 <section class="hero">
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
   <h1>{heading}</h1>
-  <p>{intro}</p>
-  {cta && <a class="button" href={cta.href}>{cta.label}</a>}
+  <p class="intro">{intro}</p>
+  {cta && (
+    <a class="btn btn-light" href={localizeHref(locale, cta.href)}>
+      {cta.label}
+    </a>
+  )}
   <style>
     .hero {
-      padding: 4rem 0;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: var(--radius-lg);
+      padding: 3.5rem 2.5rem;
+      color: #ffffff;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -6rem;
+      top: -6rem;
+      width: 18rem;
+      height: 18rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .hero .eyebrow {
+      color: #e0e7ff;
     }
 
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      margin-bottom: 0.75rem;
+      margin: 0.5rem 0 1rem;
+      font-size: clamp(2.25rem, 6vw, 4rem);
+      max-width: 32rem;
+      position: relative;
     }
 
-    .hero p {
+    .hero .intro {
+      margin: 0 0 1.75rem;
       font-size: 1.25rem;
-      color: var(--muted);
-      max-width: 42rem;
+      color: #e0e7ff;
+      max-width: 40rem;
+      position: relative;
     }
 
-    .button {
-      display: inline-block;
-      margin-top: 1rem;
-      padding: 0.6rem 1.25rem;
-      border-radius: 0.5rem;
-      background: var(--accent);
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 600;
+    .hero .btn {
+      position: relative;
     }
   </style>
 </section>

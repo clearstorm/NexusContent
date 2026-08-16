@@ -7,13 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Expanded the Astro reference example to five pages (home, about, services, blog, contact) generated in English and French under `/en/` and `/fr/`, with a root redirect to the default locale.
+- Added locale-aware navigation and settings usage, content-driven language switching, and a polished dependency-free design refresh to the Astro example.
+
+## [0.1.3] - 2026-08-16
+
+Localisation foundations release.
+
 ### Added
 
-- Added coordinated project state tracking through `PROJECT_STATUS.md`, `FEATURES.md`, `ROADMAP.md`, and `project.state.json`.
-- Added dependency-free project state validation to keep feature IDs, statuses, and package version metadata synchronized.
-- Added provider-neutral singleton retrieval through `getSingleton`, with arbitrary Git singleton content stored under `singletons/<key>.json`.
-- Added dedicated `getNavigation` and `getSettings` APIs, configuration sections, normalized public types, validation, and Git storage under `navigation/<key>.json` and `settings/<key>.json`.
-- Updated the Astro and plain Node examples to consume the dedicated navigation and settings APIs.
+- Optional `locales` configuration (`default`, `supported`, optional `fallback`) on `NexusConfig`.
+- Central `LocaleResolver` with deterministic fallback chains, strict mode, duplicate and invalid tag detection, and circular chain rejection.
+- Structured locale errors: `LocaleError`, `UnsupportedLocaleError`, and `MissingLocaleVariantError`, with `locale`, `supportedLocales`, and fallback `chain` details.
+- Per-request retrieval options (`locale` and `fallback`) on `getPage`, `getSingleton`, `getNavigation`, `getSettings`, `getCollection`, and `getItem`.
+- Git locale variant directories (`pages/<locale>/<key>.json` and equivalent layout for singletons, navigation, settings, collections, and items) with legacy flat-file fallback.
+- Optional `meta.locale` provenance recorded from the resolved locale variant directory.
+- Typed `TranslationState` and `LocaleVariantInfo` extension points for a future translation workflow.
+- Tests for locale resolution, locale-aware service forwarding, Git variant loading, flat-file backward compatibility, strict missing-variant errors, and locale path-segment hardening.
+
+### Changed
+
+- The legacy flat retrieval path is preserved byte-identical when a project does not configure locales.
+- The Astro example content helper functions accept and forward optional retrieval options.
 
 ## [0.1.2] - 2026-08-15
 
@@ -22,6 +39,11 @@ Internal architecture hardening release.
 ### Added
 
 - Added dedicated navigation and settings retrieval to the 0.1.2 foundation while retaining generic singleton retrieval for arbitrary singleton content.
+- Added coordinated project state tracking through `PROJECT_STATUS.md`, `FEATURES.md`, `ROADMAP.md`, and `project.state.json`.
+- Added dependency-free project state validation to keep feature IDs, statuses, and package version metadata synchronized.
+- Added provider-neutral singleton retrieval through `getSingleton`, with arbitrary Git singleton content stored under `singletons/<key>.json`.
+- Added dedicated `getNavigation` and `getSettings` APIs, configuration sections, normalized public types, validation, and Git storage under `navigation/<key>.json` and `settings/<key>.json`.
+- Updated the Astro and plain Node examples to consume the dedicated navigation and settings APIs.
 
 ### Changed
 

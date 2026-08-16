@@ -12,43 +12,42 @@ interface Props {
 const { heading, items } = Astro.props;
 ---
 
-<section class="testimonials">
+<section class="section testimonials">
   <h2>{heading}</h2>
   <div class="grid">
     {
-      items.map((testimonial) => (
-        <figure>
-          <blockquote>{testimonial.quote}</blockquote>
-          <figcaption>{testimonial.author}</figcaption>
-        </figure>
+      items.map((item) => (
+        <blockquote class="card">
+          <p class="quote">"{item.quote}"</p>
+          <footer>— {item.author}</footer>
+        </blockquote>
       ))
     }
   </div>
   <style>
-    h2 {
-      margin-bottom: 1.5rem;
-    }
-
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
       gap: 1.5rem;
+      margin-top: 1.5rem;
     }
 
-    figure {
+    .card {
       margin: 0;
-      border-left: 3px solid var(--accent);
-      padding: 0.75rem 1.25rem;
-      background: #ffffff;
-      border-radius: 0 0.75rem 0.75rem 0;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
     }
 
-    blockquote {
-      margin: 0 0 0.5rem;
+    .quote {
+      margin: 0 0 0.75rem;
       color: var(--fg);
     }
 
-    figcaption {
+    .card footer {
       color: var(--muted);
       font-size: 0.9rem;
     }

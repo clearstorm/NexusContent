@@ -1,0 +1,40 @@
+{
+  "title": "Services",
+  "slug": "services",
+  "seo": {
+    "title": "Services - Exemple NexusContent",
+    "description": "Les services de contenu démontrés par le site d'exemple NexusContent."
+  },
+  "hero": {
+    "eyebrow": "Ce que nous faisons",
+    "heading": "Des services bâtis sur une frontière propre.",
+    "intro": "Chaque service de cette page passe par la même API de contenu normalisé."
+  },
+  "services": {
+    "heading": "Services principaux",
+    "intro": "Prouvés par les pages que vous visitez en ce moment.",
+    "items": [
+      {
+        "title": "Génération statique",
+        "description": "La génération statique est le mode d'exécution par défaut, du développement local à l'intégration continue.",
+        "points": ["Sortie prévisible", "Générations rapides", "Dist portable"]
+      },
+      {
+        "title": "Contenu localisé",
+        "description": "Les répertoires de variantes linguistiques résolvent la bonne langue avec repli.",
+        "points": ["Deux langues", "Repli explicite", "Aucun workflow imposé"]
+      },
+      {
+        "title": "Contenu séparé",
+        "description": "Le contenu modifiable vit hors du dépôt de l'application.",
+        "points": ["Contenu maîtrisé par le client", "Diffs propres", "Adapté aux éditeurs"]
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Prêt à commencer ?",
+    "intro": "Contactez-nous, nous vous montrerons l'architecture.",
+    "label": "Contactez-nous",
+    "href": "/contact"
+  }
+}

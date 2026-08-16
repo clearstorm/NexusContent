@@ -46,7 +46,7 @@ Use each file for its assigned responsibility:
 
 For disputes about whether a capability is actually implemented, tests and implementation are the final technical evidence. Correct the tracking files in the same pull request when they disagree with that evidence.
 
-`FEATURES.md` and `project.state.json` must remain synchronized. Neither is generated during milestone `0.1.2`; both are maintained deliberately.
+`FEATURES.md` and `project.state.json` must remain synchronized. Neither is generated during milestone `0.1.3`; both are maintained deliberately.
 
 ## 0.3 Project State Synchronization
 
@@ -137,7 +137,7 @@ Before completing a state-changing task, run `npm run validate:project-state` in
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.1.2
+- **Current milestone:** 0.1.3
 - **Primary implementation language:** TypeScript
 - **Primary initial consumer:** Astro (reference consumer only)
 
@@ -394,7 +394,7 @@ Future package architecture may include:
 
 Do not create these packages prematurely.
 
-During milestone 0.1.2, prove the architecture before extracting multiple packages.
+During the 0.1.x milestones, prove the architecture before extracting multiple packages.
 
 The Astro example belongs under:
 
@@ -685,7 +685,7 @@ Parsing and serialization is isolated behind an internal format adapter so the G
 
 Do not silently attempt to parse unsupported formats.
 
-Do not add Markdown, MDX, YAML, TOML, or CSV parsing during 0.1.2 without explicit scope approval.
+Do not add Markdown, MDX, YAML, TOML, or CSV parsing during the 0.1.x milestones without explicit scope approval.
 
 The Git provider must not attempt to parse every file in the repository.
 
@@ -706,31 +706,39 @@ export interface ContentProvider {
   readonly name: string;
 
   getPage<TData = Record<string, unknown>>(
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<PageContent<TData> | null>;
 
   getSingleton<TData = Record<string, unknown>>(
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<SingletonContent<TData> | null>;
 
   getNavigation(
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<NavigationContent | null>;
 
   getSettings<TData = Record<string, unknown>>(
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<SettingsContent<TData> | null>;
 
   getCollection<TData = Record<string, unknown>>(
-    collection: string
+    collection: string,
+    options?: ProviderRetrievalOptions
   ): Promise<CollectionItem<TData>[]>;
 
   getItem<TData = Record<string, unknown>>(
     collection: string,
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<CollectionItem<TData> | null>;
 }
 ```
+
+`ProviderRetrievalOptions` carries per-request `locale`, the resolved `fallbackLocales` chain, and `strict` mode. Providers that do not support locale resolution may ignore it; projects without locale configuration never receive provider options.
 
 The exact API may evolve during the 0.1.x milestones if testing exposes a better design.
 
@@ -841,6 +849,7 @@ export interface ContentMeta {
   source: ContentSource;
   sourceId?: string;
   updatedAt?: string;
+  locale?: string;
 }
 
 export interface PageContent<
@@ -901,6 +910,20 @@ Git example:
   }
 }
 ```
+
+Locale variant example:
+
+```json
+{
+  "meta": {
+    "source": "git",
+    "sourceId": "pages/en-ZA/home.json",
+    "locale": "en-ZA"
+  }
+}
+```
+
+`meta.locale` records the locale variant actually resolved when locale-aware retrieval is in use. Flat-file fallbacks carry no locale.
 
 Provenance exists to support:
 
@@ -1147,7 +1170,7 @@ Media CDN decisions should remain configurable.
 
 WordPress is planned for a later milestone.
 
-Do not implement the WordPress provider during milestone 0.1.2 unless explicitly requested.
+Do not implement the WordPress provider during the 0.1.x milestones unless explicitly requested.
 
 When implemented, it belongs outside Core.
 
@@ -1183,7 +1206,7 @@ WordPress response objects must stop at the provider boundary.
 
 Strapi is planned for a later milestone.
 
-Do not implement the Strapi provider during milestone 0.1.2 unless explicitly requested.
+Do not implement the Strapi provider during the 0.1.x milestones unless explicitly requested.
 
 When implemented, it belongs outside Core.
 
@@ -1331,15 +1354,15 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.1.2
+**CURRENT MILESTONE:** 0.1.3
 
-The goal is to prove the core architecture and its framework neutrality.
+The goal is to prove the core architecture, its framework neutrality, and its localisation foundations.
 
 Implement only what is required to establish a stable content provider model.
 
 ---
 
-# 33. Required Scope for 0.1.2
+# 33. Required Scope for 0.1.3
 
 The milestone should include:
 
@@ -1350,6 +1373,8 @@ The milestone should include:
 - Provider registry
 - Provider resolution
 - NexusContent configuration
+- Optional locale configuration, fallback-chain resolution, and strict mode
+- Per-request retrieval options (`locale`, `fallback`)
 - Content service
 - Structured errors
 - Public exports
@@ -1363,8 +1388,9 @@ The milestone should include:
 - JSON settings loading from `settings/<key>.json`
 - JSON collection loading
 - Individual collection item loading
+- Locale variant directories with legacy flat-file fallback
 - Normalization
-- Content provenance
+- Content provenance including optional `meta.locale`
 - Useful errors
 - Git based CMS compatibility documentation
 - Unrelated repository files are ignored
@@ -1381,6 +1407,7 @@ The milestone should include:
 - NexusContent integration
 - At least one page
 - At least one collection
+- Locale-aware pages and content-driven language switching
 - Static build
 - No direct provider calls from Astro components
 
@@ -1402,7 +1429,7 @@ The milestone should include:
 
 ---
 
-# 34. Explicitly Forbidden in 0.1.2
+# 34. Explicitly Forbidden in 0.1.x
 
 Unless the user explicitly changes scope, DO NOT implement:
 
@@ -1435,12 +1462,13 @@ Unless the user explicitly changes scope, DO NOT implement:
 - GraphQL abstraction
 - Plugin marketplace
 - Complex caching infrastructure
+- Translation workflows, per-locale publishing, completeness reporting, and outdated tracking
 
 Do not build future roadmap features because they "might be useful."
 
 ---
 
-# 35. Repository Structure for 0.1.2
+# 35. Repository Structure for 0.1.x
 
 Use a deliberately small structure.
 
@@ -1932,7 +1960,7 @@ Do not silently execute content as code.
 
 Avoid unnecessary repeated provider calls during a single operation.
 
-Do not introduce caching during 0.1.2 unless testing demonstrates a concrete need.
+Do not introduce caching during the 0.1.x milestones unless testing demonstrates a concrete need.
 
 When caching is eventually added:
 
@@ -2277,7 +2305,7 @@ Do not require persistent application state for ordinary reads.
 
 # 65. Future Synchronization
 
-Synchronization is intentionally not part of 0.1.2.
+Synchronization is intentionally not part of the 0.1.x milestones.
 
 When eventually implemented, it should remain conceptually separate from content reading.
 
@@ -2304,7 +2332,7 @@ Do not contaminate the provider read interface with synchronization methods befo
 
 # 66. Future Preview
 
-Preview is intentionally not part of 0.1.2.
+Preview is intentionally not part of the 0.1.x milestones.
 
 When eventually implemented, preserve these principles:
 
@@ -2313,13 +2341,13 @@ When eventually implemented, preserve these principles:
 - Preview content must not accidentally enter production builds.
 - CMS preview must render through the real frontend where practical.
 
-Do not add draft flags to every Core API during 0.1.2 merely because preview may exist later.
+Do not add draft flags to every Core API during the 0.1.x milestones merely because preview may exist later.
 
 ---
 
 # 67. Future Webhooks
 
-Webhooks are intentionally not part of 0.1.2.
+Webhooks are intentionally not part of the 0.1.x milestones.
 
 When eventually implemented:
 
@@ -2333,7 +2361,7 @@ When eventually implemented:
 
 # 68. Future CLI
 
-The CLI is intentionally not part of 0.1.2.
+The CLI is intentionally not part of the 0.1.x milestones.
 
 Do not create CLI commands until the underlying programmatic APIs are stable.
 

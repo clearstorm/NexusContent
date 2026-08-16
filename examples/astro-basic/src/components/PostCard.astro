@@ -1,35 +1,67 @@
 ---
+import { localizeHref } from "../app/locale";
+
 interface Props {
+  locale: string;
   title?: string;
   slug?: string;
   date?: string;
   excerpt?: string;
 }
 
-const { title, slug, date, excerpt } = Astro.props;
+const { locale, title, slug, date, excerpt } = Astro.props;
+const href = localizeHref(locale, `/blog/${slug ?? ""}`);
+const more = locale === "fr" ? "Lire la suite →" : "Read more →";
 ---
 
-<article class="post">
-  <a href={`/blog/${slug ?? ""}`}>
+<article class="card">
+  <a class="title" href={href}>
     <h2>{title ?? "Untitled"}</h2>
   </a>
   {date && <time>{date}</time>}
-  {excerpt && <p>{excerpt}</p>}
+  {excerpt && <p class="excerpt">{excerpt}</p>}
+  <a class="more" href={href}>{more}</a>
   <style>
-    .post {
+    .card {
+      display: flex;
+      flex-direction: column;
       border: 1px solid var(--border);
-      border-radius: 0.75rem;
-      padding: 1.25rem;
-      background: #ffffff;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .post h2 {
-      margin-top: 0;
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .title {
+      text-decoration: none;
+    }
+
+    .title h2 {
+      margin: 0 0 0.5rem;
+      color: var(--fg);
     }
 
     time {
       color: var(--muted);
       font-size: 0.85rem;
+    }
+
+    .excerpt {
+      color: var(--muted);
+      margin: 0.75rem 0 1rem;
+    }
+
+    .more {
+      margin-top: auto;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.9rem;
     }
   </style>
 </article>

@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | Project name | NexusContent |
-| Current version | `0.1.2` |
-| Current milestone | `0.1.2` - framework-neutral Core and Git provider |
+| Current version | `0.1.3` |
+| Current milestone | `0.1.3` - localisation foundations |
 | Project status | Active, early development; internal private package |
 | Current focus | Unassigned |
 
-The `0.1.2` milestone is implemented and released internally. No active feature implementation is identified in the repository. The recommended next focus is the directional `0.2.0` WordPress provider milestone after its provider scope and contract expectations are confirmed.
+The `0.1.3` milestone is implemented and released internally. No active feature implementation is identified in the repository. The recommended next focus is the directional `0.2.0` WordPress provider milestone after its provider scope and contract expectations are confirmed.
 
 ## Current Architecture
 
@@ -43,6 +43,8 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Provider-neutral singleton retrieval from `singletons/<key>.json` for arbitrary singleton content.
 - Dedicated navigation and settings retrieval from `navigation/<key>.json` and `settings/<key>.json`, with recursive navigation validation and generic settings data.
 - Git-based CMS compatibility through editor-independent repository files.
+- Localisation foundations: optional `locales` configuration, central fallback-chain resolution, strict mode, structured locale errors, and per-request retrieval options.
+- Git locale variant directories with legacy flat-file fallback and optional `meta.locale` provenance.
 - Astro static-build reference consumer with explicit routes.
 - Plain Node compatibility example and framework-neutrality tests.
 - Type checking, tests, package build, Astro example build, and Node example execution in CI.
@@ -61,6 +63,7 @@ No active implementation work is identified.
 2. Implement WordPress pages, posts, pagination, normalization, media handling, and actionable errors outside Core.
 3. Prove WordPress consumption through the existing public API in Node and Astro examples.
 4. Reassess the provider contract before beginning the directional `0.3.0` Strapi milestone.
+5. Consider the directional localisation continuation (per-file multilingual content, per-locale validation policies, and the translation state workflow) once provider breadth is proven.
 
 ## Not Implementing Yet
 
@@ -73,6 +76,7 @@ No active implementation work is identified.
 - Framework-specific adapter packages.
 - Deployment integrations.
 - Admin UI, authentication, forms, databases, queues, and complex caching.
+- Translation workflows (state model, locale-specific publishing, completeness reporting, outdated tracking, and source change detection).
 
 ## Known Architectural Decisions
 
@@ -88,12 +92,15 @@ No active implementation work is identified.
 - Multiple instances of the same provider type must remain possible.
 - Generic singleton retrieval is provider-neutral; Git stores arbitrary singleton content under `singletons/<key>.json`.
 - Navigation and settings are dedicated provider operations with separate configuration sections and Git directories.
+- Locale resolution is centralized in Core; providers implement variant file resolution; format adapters and validators implement no locale logic.
+- Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged.
 
 ## Known Issues or Constraints
 
 - The Git provider requires Node filesystem APIs.
 - Git content supports JSON only.
 - Generic singleton content remains separate from dedicated navigation and settings content and APIs.
+- Localisation covers locale configuration, fallback resolution, and Git variant directories; translation workflows are not implemented.
 - No remote CMS provider is implemented.
 - No synchronization, webhook, or preview workflow is implemented.
 - The package remains private while the pre-1.0 architecture is proven.

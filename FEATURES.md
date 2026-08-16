@@ -55,7 +55,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
 | `consumer.node` Plain Node compatibility | implemented | 0.1.1 | - | Example and automated public API compatibility test without Astro. |
-| `consumer.astro` Astro reference consumer | implemented | 0.1.0 | - | Static example with explicit pages and collection routes; Astro is not a Core dependency. |
+| `consumer.astro` Astro reference consumer | implemented | 0.1.0 | - | Static example with explicit home, about, services, contact, and blog routes generated in English and French under `/en/` and `/fr/`; Astro is not a Core dependency. |
 | `consumer.framework-neutrality` Framework-neutral source boundary | implemented | 0.1.1 | - | Tests prohibit framework imports, framework globals, and frontend runtime dependencies in library source. |
 | `consumer.framework-adapters` Framework-specific adapter packages | deferred | - | TBD | Integrations remain consumer-owned until package extraction has a demonstrated need. |
 
@@ -77,6 +77,21 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `core.item` Individual item retrieval | implemented | 0.1.0 | - | Returns a normalized item or `null` when absent. |
 | `content.navigation` Dedicated navigation retrieval | implemented | 0.1.2 | - | `getNavigation` resolves a dedicated navigation configuration section and Git reads `navigation/<key>.json` into validated recursive `NavigationContent`. |
 | `content.settings` Dedicated settings retrieval | implemented | 0.1.2 | - | `getSettings` resolves a dedicated settings configuration section and Git reads `settings/<key>.json` into validated generic `SettingsContent`. |
+| `content.references` Stable content references | planned | - | 0.2.x | References must target `collection` + `entryId` and never locale filenames; locale-aware reference resolution is deferred. |
+
+## Localisation
+
+| Feature | Status | Introduced | Target | Notes |
+|---|---|---|---|---|
+| `localisation.foundations` Locale-aware core | implemented | 0.1.3 | - | Optional `locales` configuration, central `LocaleResolver` with fallback chains and strict mode, structured locale errors, optional `meta.locale` provenance, and per-request `locale` / `fallback` options on every retrieval method. |
+| `localisation.git-variants` Git locale variant directories | implemented | 0.1.3 | - | Reads `pages/<locale>/<key>.json` and equivalent variant directories for pages, singletons, navigation, settings, collections, and items, with legacy flat-file fallback; strict mode throws `MissingLocaleVariantError` when a variant is absent. |
+| `localisation.file-level` Full file-level multilingual content | planned | - | 0.2.x | Per-item variant merging and locale publishing for one file per language. |
+| `localisation.validation-policies` Per-locale validation policies | planned | - | 0.2.x | Locale-specific consumer schemas and validation context. |
+| `translation.state-model` Translation state workflow | planned | - | 0.2.x | `TranslationState` and `LocaleVariantInfo` extension points are established in 0.1.3; the workflow is not implemented. |
+| `translation.publishing` Locale-specific publishing | planned | - | 0.2.x | Publish individual locale variants without publishing the whole collection. |
+| `translation.completeness` Translation completeness reporting | planned | - | 0.2.x | Report which locales are missing or partial variants. |
+| `translation.source-change-detection` Source change detection for translations | planned | - | 0.2.x | Detect when a source variant changes and a translation becomes outdated. |
+| `translation.outdated-tracking` Outdated translation tracking | planned | - | 0.2.x | Track the `outdated` state and require review before republishing. |
 
 ## CMS Workflows
 

@@ -55,7 +55,7 @@ NexusContent Core
 
 # Project Status
 
-NexusContent is at version `0.1.2`, an internal private milestone in early development. The framework-neutral Core, Git JSON provider, validation pipeline, Astro reference consumer, and plain Node compatibility proof are implemented. No feature is currently marked in progress; the recommended next focus is the directional `0.2.0` WordPress provider milestone.
+NexusContent is at version `0.1.3`, an internal private milestone in early development. The framework-neutral Core, Git JSON provider, validation pipeline, localisation foundations, Astro reference consumer, and plain Node compatibility proof are implemented. No feature is currently marked in progress; the recommended next focus is the directional `0.2.0` WordPress provider milestone.
 
 For authoritative project tracking:
 
@@ -749,6 +749,57 @@ It does not create application routes.
 
 ---
 
+# Localisation
+
+Locale-aware content resolution is optional.
+
+Projects that do not configure locales keep the exact legacy flat retrieval behaviour.
+
+Configure locales on the NexusContent configuration:
+
+```ts
+const nexus = new NexusContent({
+  locales: {
+    default: "en-ZA",
+    supported: ["en-ZA", "zu-ZA", "af"],
+    fallback: {
+      "zu-ZA": "en-ZA",
+      af: "en-ZA"
+    }
+  }
+  // providers and content as usual
+});
+```
+
+`default` must be one of `supported`. The optional `fallback` map defines a per-locale fallback chain; a value of `null` terminates fallback for that locale. When `fallback` is absent, a locale falls back to `default`.
+
+Per-request options select a locale and control fallback:
+
+```ts
+const page = await nexus.getPage("home", { locale: "zu-ZA" });
+```
+
+`fallback` defaults to `true`. Set `fallback: false` for strict retrieval; a missing variant then throws `MissingLocaleVariantError`. An unsupported locale throws `UnsupportedLocaleError` before any provider call.
+
+The Git provider stores locale variants in locale directories:
+
+```text
+pages/
+├── home.json
+├── en-ZA/
+│   └── home.json
+└── zu-ZA/
+    └── home.json
+```
+
+A request for `zu-ZA` resolves `pages/zu-ZA/home.json`. If it is missing and fallback is enabled, the provider tries `pages/en-ZA/home.json` through the fallback chain and finally the flat `pages/home.json`. The same layout applies to `singletons/`, `navigation/`, `settings/`, and `collections/<name>/<locale>/`. Resolved variants record `meta.locale`; flat fallbacks do not.
+
+Translation workflows (state tracking, per-locale publishing, completeness reporting, and outdated detection) are not part of `0.1.3`. `TranslationState` and `LocaleVariantInfo` are typed extension points for a future workflow.
+
+The Astro example demonstrates per-locale retrieval: every page is generated in English and French under `/en/` and `/fr/`, with translated navigation and site settings resolved through the same locale-aware calls.
+
+---
+
 # Content Service
 
 Consumers should normally interact with NexusContent through the content service.
@@ -893,18 +944,30 @@ The reference examples live under `examples/`:
 
 The Astro reference example under `examples/astro-basic/` proves NexusContent consumption inside an Astro static build.
 
+The example is generated in two locales, English and French, under locale-prefixed routes. The root `/` redirects to the default locale.
+
 Astro routes remain explicit:
 
 ```text
 src/pages/
-├── index.astro
-├── about.astro
-├── services.astro
-├── contact.astro
-└── blog/
-    ├── index.astro
-    └── [slug].astro
+├── index.astro              # redirects to /en/
+└── [locale]/
+    ├── index.astro          # home
+    ├── about.astro
+    ├── services.astro
+    ├── contact.astro
+    └── blog/
+        ├── index.astro
+        └── [slug].astro
 ```
+
+Every page requests its content with the active locale:
+
+```ts
+const page = await getPageContent("about", { locale });
+```
+
+Navigation, settings, and collection content are resolved the same way. Internal content hrefs stay locale-relative and are localized by the application at render time because routing belongs to the consumer.
 
 The page controls composition.
 
@@ -1119,7 +1182,7 @@ The Git provider does not care which editor created or modified the files.
 
 A Git based CMS is compatible with the NexusContent Git provider when it can maintain files matching the content structure and file formats supported by that provider.
 
-For `0.1.2`, the baseline contract is deliberately small:
+For the `0.1.x` milestones, the baseline contract is deliberately small:
 
 ```text
 UTF-8 JSON
@@ -1141,7 +1204,7 @@ Git based CMS platforms are compatible when configured to maintain content using
 
 Markdown with frontmatter, YAML, and MDX are future possibilities.
 
-They are not supported in `0.1.2`.
+They are not supported in the `0.1.x` milestones.
 
 Do not assume unsupported formats work.
 
@@ -1248,7 +1311,7 @@ That configuration describes how editors edit content.
 
 NexusContent configuration describes how applications consume content.
 
-They are separate and must not be merged in `0.1.2`.
+They are separate and must not be merged in the `0.1.x` milestones.
 
 ## Media
 
@@ -1991,7 +2054,7 @@ Core APIs must be stable before CLI abstractions are introduced.
 
 # Initial Milestone
 
-The current internal milestone, version `0.1.2`, proves the core architecture and its framework neutrality. It is not a public package release.
+The current internal milestone, version `0.1.3`, proves the core architecture and its framework neutrality. It is not a public package release.
 
 ## Required
 
@@ -2003,6 +2066,7 @@ The current internal milestone, version `0.1.2`, proves the core architecture an
 * NexusContent configuration
 * content service
 * structured errors
+* optional locale configuration and fallback-chain resolution
 
 ### Git Provider
 
@@ -2013,6 +2077,7 @@ The current internal milestone, version `0.1.2`, proves the core architecture an
 * JSON support
 * normalization
 * provenance
+* locale variant directories with flat-file fallback
 
 ### Validation
 
@@ -2043,7 +2108,7 @@ The current internal milestone, version `0.1.2`, proves the core architecture an
 
 ---
 
-# Not Part of Version 0.1.2
+# Not Part of Version 0.1.3
 
 Do not implement the following during the current milestone:
 
@@ -2064,10 +2129,11 @@ Do not implement the following during the current milestone:
 * visual page builder
 * universal section renderer
 * CLI
+* translation workflows and per-locale publishing
 
 These features come later.
 
-The purpose of `0.1.2` is to prove the content architecture and its framework neutrality.
+The purpose of `0.1.3` is to prove the content architecture, its framework neutrality, and its localisation foundations.
 
 ---
 

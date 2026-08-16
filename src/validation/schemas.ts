@@ -10,7 +10,8 @@ export const seoSchema = z.object({
 export const contentMetaSchema = z.object({
   source: z.string(),
   sourceId: z.string().optional(),
-  updatedAt: z.string().optional()
+  updatedAt: z.string().optional(),
+  locale: z.string().optional()
 });
 
 export const dataSchema = z.record(z.string(), z.unknown());

@@ -1,4 +1,6 @@
 ---
+import { localizeHref, switchLocalePath, supportedLocales } from "../app/locale";
+
 interface NavigationLink {
   label: string;
   href: string;
@@ -6,19 +8,42 @@ interface NavigationLink {
 
 interface Props {
   links: NavigationLink[];
+  locale: string;
 }
 
-const { links } = Astro.props;
+const { links, locale } = Astro.props;
+const currentPath = Astro.url.pathname;
+const homeHref = localizeHref(locale, "/");
 ---
 
 <header>
   <nav>
-    <a class="brand" href="/">NexusContent</a>
-    <ul>
+    <a class="brand" href={homeHref}>NexusContent</a>
+    <ul class="nav-links">
       {
-        links.map((link) => (
+        links.map((link) => {
+          const href = localizeHref(locale, link.href);
+          const active =
+            href === currentPath ||
+            (href !== homeHref && currentPath.startsWith(href));
+          return (
+            <li>
+              <a href={href} class:list={{ active }}>{link.label}</a>
+            </li>
+          );
+        })
+      }
+    </ul>
+    <ul class="lang">
+      {
+        supportedLocales.map((other) => (
           <li>
-            <a href={link.href}>{link.label}</a>
+            <a
+              href={switchLocalePath(currentPath, other)}
+              class:list={{ active: other === locale }}
+            >
+              {other.toUpperCase()}
+            </a>
           </li>
         ))
       }
@@ -26,35 +51,88 @@ const { links } = Astro.props;
   </nav>
   <style>
     header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
       border-bottom: 1px solid var(--border);
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
     }
 
     nav {
-      max-width: 68rem;
+      max-width: var(--maxw);
       margin: 0 auto;
-      padding: 1rem 1.5rem;
+      padding: 0.9rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 1.5rem;
     }
 
     .brand {
-      font-weight: 700;
+      font-weight: 800;
+      font-size: 1.05rem;
       text-decoration: none;
       color: var(--fg);
+      letter-spacing: -0.01em;
     }
 
     ul {
       display: flex;
+      align-items: center;
       gap: 1.25rem;
       list-style: none;
       margin: 0;
       padding: 0;
     }
 
-    a {
+    .nav-links a {
       text-decoration: none;
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--fg);
+    }
+
+    .nav-links a.active {
+      font-weight: 700;
+    }
+
+    .lang {
+      gap: 0.35rem;
+    }
+
+    .lang a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+    }
+
+    .lang a:hover,
+    .lang a.active {
+      color: #ffffff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    @media (max-width: 40rem) {
+      nav {
+        flex-wrap: wrap;
+      }
+
+      .nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+      }
     }
   </style>
 </header>

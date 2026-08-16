@@ -3,28 +3,38 @@ export type {
   ContentConfig,
   ContentMeta,
   ContentSource,
+  LocaleConfig,
+  LocaleVariantInfo,
   MediaAsset,
   NavigationContent,
   NavigationItem,
   NexusConfig,
   PageContent,
   ProviderConfig,
+  RetrievalOptions,
   SeoData,
   SettingsContent,
-  SingletonContent
+  SingletonContent,
+  TranslationState
 } from "./types.ts";
 
-export type { ContentProvider } from "./provider.ts";
+export type { ContentProvider, ProviderRetrievalOptions } from "./provider.ts";
 
 export {
   ConfigError,
+  LocaleError,
+  MissingLocaleVariantError,
   NexusContentError,
   NotFoundError,
   ProviderError,
   RegistryError,
+  UnsupportedLocaleError,
   ValidationError
 } from "./errors.ts";
 export type { NexusContentErrorDetails } from "./errors.ts";
+
+export { LocaleResolver } from "./locale.ts";
+export type { LocaleResolution } from "./locale.ts";
 
 export { ProviderRegistry } from "./registry.ts";
 export {

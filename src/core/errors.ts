@@ -3,6 +3,9 @@ export interface NexusContentErrorDetails {
   operation?: string;
   content?: string;
   reason?: string;
+  locale?: string;
+  supportedLocales?: string[];
+  chain?: string[];
 }
 
 export class NexusContentError extends Error {
@@ -10,6 +13,9 @@ export class NexusContentError extends Error {
   readonly operation?: string;
   readonly content?: string;
   readonly reason?: string;
+  readonly locale?: string;
+  readonly supportedLocales?: string[];
+  readonly chain?: string[];
 
   constructor(message: string, details: NexusContentErrorDetails = {}) {
     super(message);
@@ -18,6 +24,9 @@ export class NexusContentError extends Error {
     this.operation = details.operation;
     this.content = details.content;
     this.reason = details.reason;
+    this.locale = details.locale;
+    this.supportedLocales = details.supportedLocales;
+    this.chain = details.chain;
   }
 
   format(): string {
@@ -25,6 +34,13 @@ export class NexusContentError extends Error {
     if (this.provider !== undefined) lines.push(`Provider: ${this.provider}`);
     if (this.operation !== undefined) lines.push(`Operation: ${this.operation}`);
     if (this.content !== undefined) lines.push(`Content: ${this.content}`);
+    if (this.locale !== undefined) lines.push(`Locale: ${this.locale}`);
+    if (this.supportedLocales !== undefined) {
+      lines.push(`Supported Locales: ${this.supportedLocales.join(", ")}`);
+    }
+    if (this.chain !== undefined && this.chain.length > 0) {
+      lines.push(`Fallback Chain: ${this.chain.join(" -> ")}`);
+    }
     if (this.reason !== undefined) lines.push(`Reason: ${this.reason}`);
     lines.push(`Message: ${this.message}`);
     return lines.join("\n");
@@ -70,5 +86,26 @@ export class NotFoundError extends NexusContentError {
   constructor(message: string, details: NexusContentErrorDetails = {}) {
     super(message, details);
     this.name = "NotFoundError";
+  }
+}
+
+export class LocaleError extends NexusContentError {
+  constructor(message: string, details: NexusContentErrorDetails = {}) {
+    super(message, details);
+    this.name = "LocaleError";
+  }
+}
+
+export class UnsupportedLocaleError extends LocaleError {
+  constructor(message: string, details: NexusContentErrorDetails = {}) {
+    super(message, details);
+    this.name = "UnsupportedLocaleError";
+  }
+}
+
+export class MissingLocaleVariantError extends LocaleError {
+  constructor(message: string, details: NexusContentErrorDetails = {}) {
+    super(message, details);
+    this.name = "MissingLocaleVariantError";
   }
 }
