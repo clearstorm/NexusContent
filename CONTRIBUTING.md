@@ -47,9 +47,14 @@ Direct unreviewed changes to the primary branch should be avoided.
 ```bash
 npm run typecheck     # Type check the package and tests
 npm test              # Run the test suite
+npm run test:astro    # Build-test all Astro examples against deterministic fixtures
+npm run validate:project-state  # Validate synchronized release and feature state
 npm run build         # Build the package into dist/
 npm run build --workspace @nexuscontent/example-astro-basic  # Build the single-locale Astro example
 npm run build --workspace @nexuscontent/example-astro-basic-localised  # Build the localised Astro example
+npm run build --workspace @nexuscontent/example-astro-wordpress  # Build the WordPress Astro example
+npm run build --workspace @nexuscontent/example-astro-wordpress-localised  # Build the localised WordPress example
+npm run start --workspace @nexuscontent/example-node-basic  # Run the plain Node compatibility example
 ```
 
 ## Environment Variables

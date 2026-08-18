@@ -1,0 +1,95 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/Hero.astro";
+import CTA from "../../components/CTA.astro";
+import { getPageContent } from "../../nexus";
+import { resolveSeo } from "@nexuscontent/core";
+import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { supportedLocales } from "../../nexus.config";
+import type { WordPressExampleContent } from "../../nexus";
+
+export function getStaticPaths() {
+  return supportedLocales.map((locale) => ({ params: { locale } }));
+}
+
+const { locale = "en" } = Astro.params;
+const page = await getPageContent<WordPressExampleContent>("about", { locale });
+
+if (!page) {
+  throw new Error(`Required WordPress page "about" was not found for ${locale}.`);
+}
+
+const fields = (page.data.fields ?? {}) as Record<string, unknown>;
+
+const hero = (fields.hero ?? {}) as {
+  eyebrow?: string;
+  heading: string;
+  intro: string;
+};
+
+const mission = (fields.mission ?? {}) as { heading: string; content: string };
+const story = (fields.story ?? {}) as { heading: string; content: string };
+const values = (fields.values ?? {}) as { heading: string; items: string[] };
+
+const cta = (fields.cta ?? {}) as {
+  heading: string;
+  intro: string;
+  label: string;
+  href: string;
+};
+
+const seo = resolveSeo({
+  title: page.title ?? "About",
+  seo: { ...page.seo, canonicalUrl: canonicalUrl(`/${locale}/about/`) }
+}, siteSeoDefaults);
+---
+
+<BaseLayout seo={seo} locale={locale}>
+  <Hero {...hero} />
+
+  <section class="section mission">
+    <h2>{mission.heading}</h2>
+    <p>{mission.content}</p>
+  </section>
+
+  <section class="section story">
+    <h2>{story.heading}</h2>
+    <p>{story.content}</p>
+  </section>
+
+  <section class="section values">
+    <h2>{values.heading}</h2>
+    <ul>
+      {values.items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </section>
+
+  <CTA {...cta} />
+
+  <style>
+    .mission p,
+    .story p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 44rem;
+    }
+
+    .values ul {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1rem;
+      list-style: none;
+      padding: 0;
+    }
+
+    .values li {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+  </style>
+</BaseLayout>

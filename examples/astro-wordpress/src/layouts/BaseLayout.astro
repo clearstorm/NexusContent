@@ -1,0 +1,155 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import NexusSeo from "../components/NexusSeo.astro";
+import { getNavigationContent, getSettingsContent } from "../nexus";
+import type { SeoData } from "@nexuscontent/core";
+
+interface Props {
+  seo: SeoData;
+}
+
+const { seo } = Astro.props;
+const lang = "en";
+
+const navigation = await getNavigationContent("primary");
+const site = await getSettingsContent("site");
+
+// WordPress provider returns null for navigation and settings.
+// Fall back to local constants.
+const navItems = navigation?.items ?? [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Services", href: "/services" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" }
+];
+
+const siteData = site?.data ?? {
+  siteName: "NexusContent WordPress",
+  tagline: "Content abstraction for the modern web",
+  footer: {
+    description: "A reference consumer proving Astro and NexusContent share a clean boundary.",
+    credit: "Powered by NexusContent with a WordPress content source."
+  }
+};
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <NexusSeo seo={seo} />
+    <style is:global>
+      :root {
+        --bg: #fafaf9;
+        --surface: #ffffff;
+        --fg: #1c1917;
+        --muted: #78716c;
+        --accent: #4338ca;
+        --accent-2: #7c3aed;
+        --accent-soft: #eef2ff;
+        --border: #e7e5e4;
+        --radius: 0.75rem;
+        --radius-lg: 1rem;
+        --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06);
+        --shadow-md: 0 10px 24px -12px rgba(28, 25, 23, 0.18);
+        --maxw: 68rem;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.6;
+      }
+
+      main {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 5rem;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 0.25rem;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.2;
+      }
+
+      .section {
+        margin-top: 3.5rem;
+      }
+
+      .section h2 {
+        margin-top: 0;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.65rem 1.4rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #ffffff;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-primary:hover {
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-light {
+        background: #ffffff;
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <Header links={navItems} />
+    <main>
+      <slot />
+    </main>
+    <Footer site={siteData} />
+  </body>
+</html>

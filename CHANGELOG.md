@@ -7,17 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-18
+
+WordPress provider release.
+
+### Added
+
+- Read-only, plugin-neutral `WordPressProvider` for published WordPress REST API v2 pages, posts, and explicitly configured custom post types.
+- Page lookup by slug plus collection and individual item retrieval through the existing `NexusContent` service API.
+- Sequential collection pagination using `X-WP-Total` and `X-WP-TotalPages`, with consistency checks and explicit `maxPages` failure instead of silent truncation.
+- WordPress normalization for rendered title, content and excerpt, published and modified dates, source URL, provenance, author/category/tag IDs, ACF fields, and embedded featured media.
+- Configurable provider name, request headers, custom collection endpoints, page size, maximum pages, and timeout.
+- Actionable WordPress configuration, HTTP, network, timeout, JSON, payload, and pagination errors without exposing authentication header values.
+- Public `WordPressProvider`, `WordPressProviderOptions`, `WordPressCollectionConfig`, and `WordPressContentData` exports.
+- Deterministic WordPress provider tests and a plain Node compatibility test without Astro.
+- `examples/astro-wordpress/` and `examples/astro-wordpress-localised/`, with static-build tests against a local REST fixture server.
+
 ### Changed
 
-- Split the Astro reference example into a single-locale `examples/astro-basic/` (flat content, no locale configuration, root-level routes) and `examples/astro-basic-localised/` (the same site generated in English and French under `/en/` and `/fr/`).
-- Expanded the Astro reference example to five pages (home, about, services, blog, contact) generated in English and French under `/en/` and `/fr/`, with a root redirect to the default locale.
-- Added locale-aware navigation and settings usage, content-driven language switching, and a polished dependency-free design refresh to the Astro examples.
-- Separated the Astro example's NexusContent configuration (`src/nexus.config.ts`) from service wiring and helper access (`src/nexus.ts`).
-- Reserved `examples/astro-wordpress/` and `examples/astro-wordpress-localised/` for the future WordPress milestone following the same progression. No directories were created.
+- Split the Git Astro reference into single-locale `examples/astro-basic/` and localised `examples/astro-basic-localised/`, expanded it to the complete five-page example, and separated configuration from service wiring.
+- Added locale-aware navigation and settings, content-driven language switching, and a dependency-free design refresh to the Git Astro examples.
+- Documented and verified the GitHub-hosted content repository clone, `NEXUS_GIT_CONTENT_PATH`, and build workflow.
+- Established Strapi as the recommended next provider focus for `0.3.0`.
 
-### Documentation
+### Known limitations
 
-- Documented and verified the GitHub-hosted content repository flow: the localised example was built against a real GitHub-hosted content clone, and the README now describes the clone → `NEXUS_GIT_CONTENT_PATH` → build workflow.
+- WordPress access is published-content-only and read-only; preview, webhooks, mutations, synchronization, retries, and caching are not implemented.
+- The base provider does not implement shortcode conversion, Gutenberg rendering, taxonomy caching, media synchronization, plugin SEO, WordPress localisation plugins, endpoint discovery, WooCommerce, or verified multisite behavior.
+- Locale retrieval options are ignored by the base provider; the localised Astro example intentionally renders the same WordPress source content under English and French consumer-owned routes.
+- Rendered WordPress HTML must be trusted or sanitized by the consuming application.
+- Embedded featured-media requests increase REST payload and processing cost.
 
 ## [0.1.4] - 2026-08-17
 

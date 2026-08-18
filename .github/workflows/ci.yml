@@ -34,7 +34,7 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Test Astro SEO rendering
+      - name: Test Astro rendering and WordPress examples
         run: npm run test:astro
 
       - name: Build Astro example (single locale)

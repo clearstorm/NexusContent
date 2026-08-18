@@ -2,7 +2,7 @@
 
 This roadmap describes intended sequencing. It does not determine whether a feature is currently implemented. See [FEATURES.md](FEATURES.md) and [project.state.json](project.state.json) for current status, and [PROJECT_STATUS.md](PROJECT_STATUS.md) for immediate next work.
 
-Versions after `0.1.4` are directional targets. Scope and ordering may change as integrations test the provider contract. A roadmap item remains `planned` or `deferred` until implementation and verification justify a status change.
+Versions after `0.2.0` are directional targets. Scope and ordering may change as integrations test the provider contract. A roadmap item remains `planned` or `deferred` until implementation and verification justify a status change.
 
 ## 0.1.x - Framework-Neutral Foundation
 
@@ -63,7 +63,7 @@ The exit criteria are satisfied by `0.1.4`.
 
 - Locale resolution, Git variant loading, and flat-file backward compatibility pass their tests.
 - Projects without locale configuration retain the legacy flat retrieval path.
-- WordPress remains the recommended next focus milestone.
+- WordPress remained the recommended next focus milestone and was delivered in `0.2.0`.
 
 ## 0.1.4 - SEO Foundations
 
@@ -89,28 +89,31 @@ The exit criteria are satisfied by `0.1.4`.
 
 - Core, validation, provider, Astro, and framework-boundary SEO tests pass.
 - Existing pages without SEO and legacy `canonical` input remain compatible.
-- WordPress remains the recommended next milestone.
+- WordPress remained the recommended next milestone and was delivered in `0.2.0`.
 
 ## 0.2.0 - WordPress Provider
 
+**State:** Completed and released internally on 2026-08-18.
+
 **Goal:** Add a production-ready initial WordPress REST provider without leaking WordPress structures into Core or consumers.
 
-**Required capabilities:**
+**Released capabilities:**
 
-- Provider scope and endpoint mapping confirmed before implementation.
-- REST API communication and actionable WordPress-specific errors.
-- Page and post retrieval mapped to the existing provider contract.
-- Pagination where collection retrieval requires it.
-- Media and SEO normalization where supported by reliable source data.
-- Provider contract tests with deterministic fixtures or mocked responses.
-- Consumption through the existing public API in Node and Astro examples.
-- WordPress examples under `examples/astro-wordpress/` and `examples/astro-wordpress-localised/`, following the same basic-to-localised progression proven by the Git Astro examples. Do not create these directories before the provider exists.
+- Public, read-only WordPress REST API v2 access with explicit headers, timeout, pagination, and custom provider names.
+- Published page lookup by slug, built-in posts collection and item lookup, and explicit custom-post-type endpoint mapping.
+- Sequential collection pagination validated against `X-WP-Total` and `X-WP-TotalPages`, with explicit failure when `maxPages` would truncate content.
+- Normalized rendered title, content, excerpt, dates, URL, provenance, author/category/tag IDs, ACF data, and embedded featured media.
+- Actionable configuration, HTTP, network, timeout, JSON, payload, and pagination errors that do not expose authentication header values.
+- Public `WordPressProvider`, `WordPressProviderOptions`, `WordPressCollectionConfig`, and `WordPressContentData` exports.
+- Deterministic provider and plain Node tests plus `astro-wordpress` and `astro-wordpress-localised` static-build examples.
 
-**Explicit exclusions:**
+**Known limitations:**
 
-- WordPress bridge plugins.
-- Webhooks, preview, and synchronization.
-- WordPress-specific logic in Core or consumer components.
+- Published content only; no draft preview, webhooks, mutations, synchronization, retries, or caching.
+- No shortcode conversion, Gutenberg block renderer, taxonomy cache, media synchronization, plugin SEO, WordPress localisation-plugin integration, endpoint discovery, WooCommerce support, or multisite verification.
+- The base provider ignores locale retrieval options; the localised example uses the same source content for English and French consumer routes.
+- Rendered WordPress HTML remains untrusted consumer input and must be trusted or sanitized by the application.
+- Featured media uses `_embed`, increasing response payload and request processing cost.
 
 **Exit criteria:**
 
@@ -119,9 +122,11 @@ The exit criteria are satisfied by `0.1.4`.
 - Existing Git, Node, Astro, typecheck, test, and build gates remain green.
 - Public behavior and project state documentation are updated.
 
+The exit criteria are satisfied by `0.2.0`.
+
 ## 0.2.x - Localisation Continuation
 
-**State:** Directional. These items are `planned` and may land after or alongside the `0.2.0` WordPress milestone. They do not block the WordPress provider.
+**State:** Directional. These items remain `planned` after the `0.2.0` WordPress milestone and do not block the recommended `0.3.0` Strapi work.
 
 **Goal:** Extend the localisation foundations from `0.1.3` into per-locale content, validation, and translation workflows as demonstrated needs require.
 
@@ -148,6 +153,8 @@ The exit criteria are satisfied by `0.1.4`.
 - Existing retrieval semantics and flat-file backward compatibility remain intact.
 
 ## 0.3.0 - Strapi Provider
+
+**State:** Directional; recommended next focus.
 
 **Goal:** Add structured Strapi REST content while preserving the Core contract proven by Git and WordPress.
 

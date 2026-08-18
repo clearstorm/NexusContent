@@ -55,7 +55,7 @@ NexusContent Core
 
 # Project Status
 
-NexusContent is at version `0.1.4`, an internal private milestone in early development. The framework-neutral Core, Git JSON provider, validation pipeline, localisation and SEO foundations, Astro reference consumer, and plain Node compatibility proof are implemented. No feature is currently marked in progress; the recommended next focus is the directional `0.2.0` WordPress provider milestone.
+NexusContent is at version `0.2.0`, released internally on 2026-08-18 as an early-development private package. The framework-neutral Core, Git JSON provider, WordPress REST provider, validation pipeline, localisation and SEO foundations, Astro reference consumers, and plain Node compatibility proofs are implemented. No feature is currently marked in progress; the recommended next focus is the directional `0.3.0` Strapi provider milestone.
 
 For authoritative project tracking:
 
@@ -655,7 +655,7 @@ const seo: SeoData = resolveSeo(
 
 `resolveSeo` is pure: it does not mutate its input and omits unavailable fields. It uses nullish fallback semantics, so an explicit empty string is preserved.
 
-Partial `openGraph` and `twitter` sub-objects are not auto-completed with resolved fallbacks. If you supply `{ openGraph: { title: "X" } }`, only `title` is set; `description` and `image` remain absent unless they appear in the sub-object. Provide complete sub-objects when you need all fields.
+Partial `openGraph` and `twitter` sub-objects receive field-level fallbacks. For example, `{ openGraph: { title: "X" } }` preserves that title while description and image resolve from the page inputs and site defaults when available.
 
 ## Exact fallback order
 
@@ -863,28 +863,34 @@ export interface ContentProvider {
   readonly name: string;
 
   getPage<TData = Record<string, unknown>>(
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<PageContent<TData> | null>;
 
   getSingleton<TData = Record<string, unknown>>(
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<SingletonContent<TData> | null>;
 
   getNavigation(
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<NavigationContent | null>;
 
   getSettings<TData = Record<string, unknown>>(
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<SettingsContent<TData> | null>;
 
   getCollection<TData = Record<string, unknown>>(
-    collection: string
+    collection: string,
+    options?: ProviderRetrievalOptions
   ): Promise<CollectionItem<TData>[]>;
 
   getItem<TData = Record<string, unknown>>(
     collection: string,
-    key: string
+    key: string,
+    options?: ProviderRetrievalOptions
   ): Promise<CollectionItem<TData> | null>;
 }
 ```
@@ -1191,6 +1197,8 @@ The reference examples live under `examples/`:
 
 * `examples/astro-basic/` proves consumption inside an Astro static build for a single locale.
 * `examples/astro-basic-localised/` proves the same build with locale-prefixed routes in English and French.
+* `examples/astro-wordpress/` proves published WordPress page and post consumption in an Astro static build.
+* `examples/astro-wordpress-localised/` proves consumer-owned locale routes while intentionally using the same plugin-neutral WordPress source content for both locales.
 * `examples/node-basic/` proves consumption from a plain Node process.
 
 ---
@@ -1741,35 +1749,181 @@ The existence of a different editing interface is not a justification.
 
 # WordPress Provider
 
-WordPress support will be implemented after NexusContent Core and the Git provider are stable.
-
-Expected architecture:
+Version `0.2.0` includes a framework-neutral, read-only provider for the standard WordPress REST API. WordPress remains the editorial system and database owner; the provider fetches and normalizes source responses; Core coordinates and validates retrieval; consumers own routes, rendering, HTML trust decisions, and deployment.
 
 ```text
-WordPress
-    ↓
-REST API
-    ↓
-WordPress Provider
-    ↓
-NexusContent
-    ↓
-Consumer
+WordPress Admin -> WordPress Database -> WordPress REST API
+                                            |
+                                            v
+                                NexusContent WordPress Provider
+                                            |
+                                            v
+                                    NexusContent Core
+                                            |
+                                            v
+                                  Consumer Application
 ```
 
-The WordPress provider will be responsible for:
+## Plain TypeScript usage
 
-* API communication
-* pagination
-* authentication where required
-* page retrieval
-* post retrieval
-* media normalization
-* SEO normalization
-* error handling
-* WordPress specific normalization
+Pass the complete REST API root, including `/wp-json/wp/v2`, then register the provider under the same name used by the content configuration:
 
-WordPress response objects must not leak beyond the provider.
+```ts
+import {
+  NexusContent,
+  WordPressProvider,
+  type WordPressContentData
+} from "@nexuscontent/core";
+
+const wordpress = new WordPressProvider({
+  baseUrl: "https://wordpress.example.com/wp-json/wp/v2"
+});
+
+const nexus = new NexusContent({
+  providers: {
+    wordpress: {
+      type: "wordpress",
+      options: {
+        baseUrl: "https://wordpress.example.com/wp-json/wp/v2"
+      }
+    }
+  },
+  content: {
+    home: { provider: "wordpress", key: "home" },
+    posts: { provider: "wordpress", key: "posts" }
+  }
+});
+
+nexus.register("wordpress", wordpress);
+
+const home = await nexus.getPage<WordPressContentData>("home");
+const posts = await nexus.getCollection<WordPressContentData>("posts");
+const post = await nexus.getItem<WordPressContentData>("posts", "hello-world");
+```
+
+`providers` records architecture metadata; provider instances are registered explicitly. `getPage("home")` resolves the configured key `home` and queries the WordPress `pages` endpoint by slug. `getCollection("posts")` uses the built-in posts mapping, and `getItem("posts", "hello-world")` looks up one post by slug.
+
+## Options and URL rules
+
+```ts
+export interface WordPressProviderOptions {
+  baseUrl: string;
+  name?: string; // default: "wordpress"
+  headers?: Record<string, string>; // default: {}
+  collections?: Record<string, { endpoint: string }>; // default: posts only
+  perPage?: number; // default: 100; valid range: 1..100
+  maxPages?: number; // default: 100; positive integer
+  timeoutMs?: number; // default: 10000; positive integer
+}
+```
+
+`baseUrl` must be a complete absolute `http:` or `https:` REST root such as `https://wordpress.example.com/wp-json/wp/v2`. A site homepage such as `https://wordpress.example.com` is not sufficient. Credentials, query strings, and fragments are rejected in `baseUrl`; HTTPS is recommended outside local development.
+
+Custom collection endpoints are relative endpoint paths, not URLs. They may contain safe path segments such as `library/books`, but cannot be absolute, empty, traversing, or include query strings. The provider appends endpoints and owns query parameters.
+
+## Pages, posts, and custom post types
+
+Pages map through `GET pages?slug=<key>&per_page=1&status=publish`. A missing page returns `null`; more than one result is treated as an ambiguous provider error. The normalized page keeps the logical configured key while retaining the WordPress slug separately.
+
+`posts` is available without extra configuration. Collections return `[]` when WordPress reports zero items, and individual missing items return `null`. Unknown collection names throw instead of guessing endpoints.
+
+REST-exposed custom post types must be mapped explicitly:
+
+```ts
+const wordpress = new WordPressProvider({
+  baseUrl: "https://wordpress.example.com/wp-json/wp/v2",
+  collections: {
+    books: { endpoint: "books" },
+    library: { endpoint: "library/books" }
+  }
+});
+```
+
+The logical collection name maps to the configured REST endpoint. NexusContent does not discover custom post types.
+
+## Pagination and failures
+
+Collection retrieval requests page 1 and reads `X-WP-Total` and `X-WP-TotalPages`. It validates those totals against `perPage`, fetches remaining pages sequentially in page order, and verifies every page size and repeated total. Missing, malformed, changing, or inconsistent headers throw a `ProviderError`.
+
+If WordPress reports more pages than `maxPages`, retrieval throws after the first request. It never returns a silently truncated collection. HTTP failures, network failures, timeouts, invalid JSON, invalid lookup shapes, and invalid published entry structures also produce actionable provider errors with provider, operation, and content context.
+
+## Normalized WordPress data
+
+The public `WordPressContentData` shape is:
+
+```ts
+interface WordPressContentData {
+  content: string;
+  excerpt?: string;
+  publishedAt?: string;
+  modifiedAt?: string;
+  url?: string;
+  authorId?: number;
+  featuredMediaId?: number;
+  categories?: number[];
+  tags?: number[];
+  fields?: Record<string, unknown>;
+  featuredImage?: MediaAsset;
+}
+```
+
+The normalized top-level `title` preserves `title.rendered` exactly, including HTML entities. `data.content` and `data.excerpt` likewise preserve WordPress rendered strings. NexusContent does not decode entities, convert shortcodes, interpret Gutenberg blocks, or sanitize rendered HTML. Rendered HTML is external input: a consumer using `set:html`, `innerHTML`, or an equivalent API must trust it or sanitize it according to the application's security policy.
+
+When present as a plain object, ACF REST data is exposed as `data.fields`; ACF is not required by the base provider. Category, tag, and author relationships remain numeric IDs rather than expanded objects. The provider does not implement a taxonomy cache.
+
+Every page, collection, and item REST request asks WordPress for `_embed=wp:featuredmedia`. Basic embedded media is normalized to `featuredImage` with string `id`, `url`, and available `alt`, `width`, and `height`; the original numeric `featured_media` is retained as `featuredMediaId`. Embedding increases response size and WordPress processing cost, and the provider does not synchronize media.
+
+The base provider does not map Yoast, Rank Math, or other plugin SEO fields. Consumers can build deterministic baseline metadata from normalized title, excerpt, and featured image:
+
+```ts
+import { resolveSeo } from "@nexuscontent/core";
+
+const seo = resolveSeo({
+  title: post?.title,
+  excerpt: post?.data.excerpt,
+  featuredImage: post?.data.featuredImage
+});
+```
+
+## Authentication and secrets
+
+Authentication is supplied explicitly through `headers`, for example an `Authorization` header obtained by the consuming application from its secret store:
+
+```ts
+const wordpress = new WordPressProvider({
+  baseUrl: "https://wordpress.example.com/wp-json/wp/v2",
+  headers: { Authorization: `Bearer ${token}` }
+});
+```
+
+The provider and Core do not read environment variables. Consumers decide how configuration is populated. Never put credentials in `baseUrl`, client-side bundles, committed files, logs, or public environment variables. Provider errors report status and endpoint context without printing request headers or their values.
+
+## Unsupported operations and localisation
+
+The base provider returns `null` from `getSingleton`, `getNavigation`, and `getSettings`. It accepts the shared `ProviderRetrievalOptions` contract but ignores locale options. It is plugin-neutral and does not require or integrate with WPML, Polylang, or another WordPress localisation plugin.
+
+`examples/astro-wordpress/` demonstrates explicit `/`, `/blog/`, and `/blog/[slug]/` routes. `examples/astro-wordpress-localised/` demonstrates consumer-owned `/en/` and `/fr/` routes, but both route sets intentionally read the same WordPress source content because the base provider ignores locale options. Automated Astro builds exercise both examples against a deterministic local REST server, and a plain Node compatibility test proves WordPress retrieval without Astro.
+
+## Scope and limitations
+
+The `0.2.0` provider supports public or header-authenticated reads of published pages, posts, and configured REST custom post types. It does not implement:
+
+- draft preview or private-status workflows
+- webhooks, synchronization, or mutations
+- shortcode conversion or a Gutenberg block renderer
+- taxonomy caching or media synchronization
+- Yoast, Rank Math, or other plugin SEO mapping
+- WPML, Polylang, or other WordPress localisation-plugin behavior
+- custom post type or endpoint discovery
+- WooCommerce-specific behavior
+- verified WordPress multisite behavior
+- retries or response caching
+
+WordPress response objects stop at the provider boundary. Core remains unaware of WordPress, and framework rendering remains consumer-owned.
+
+## Public exports
+
+The package root exports `WordPressProvider` and the `WordPressProviderOptions`, `WordPressCollectionConfig`, and `WordPressContentData` types.
 
 ---
 
@@ -2365,9 +2519,9 @@ Core APIs must be stable before CLI abstractions are introduced.
 
 ---
 
-# Initial Milestone
+# Current Milestone
 
-The current internal milestone, version `0.1.4`, adds SEO foundations to the proven core architecture, framework neutrality, and localisation foundations. It is not a public package release.
+The current internal milestone, version `0.2.0`, adds the WordPress provider to the proven Core, Git provider, framework-neutrality, localisation, and SEO foundations. It was released internally on 2026-08-18 and is not a public package release.
 
 ## Required
 
@@ -2392,6 +2546,15 @@ The current internal milestone, version `0.1.4`, adds SEO foundations to the pro
 * normalization
 * provenance
 * locale variant directories with flat-file fallback
+
+### WordPress Provider
+
+* published page lookup by slug
+* posts and explicitly configured custom post types
+* sequential, validated pagination
+* rendered content, ACF field, relationship ID, and featured-media normalization
+* actionable provider errors and explicit header authentication
+* Astro and plain Node compatibility coverage
 
 ### Validation
 
@@ -2425,11 +2588,10 @@ The current internal milestone, version `0.1.4`, adds SEO foundations to the pro
 
 ---
 
-# Not Part of Version 0.1.4
+# Not Part of Version 0.2.0
 
 Do not implement the following during the current milestone:
 
-* WordPress provider
 * Strapi provider
 * CMS webhooks
 * preview
@@ -2451,10 +2613,13 @@ Do not implement the following during the current milestone:
 * sitemap, robots.txt, redirects, metadata scraping, keyword analysis, or analytics
 * provider-specific SEO plugin behavior in Core
 * framework SEO rendering components in the public package
+* WordPress preview, webhooks, mutations, retries, or caching
+* WordPress shortcode conversion, Gutenberg rendering, taxonomy caching, or media synchronization
+* WordPress plugin SEO, localisation-plugin integration, discovery, WooCommerce, or verified multisite support
 
 These features come later.
 
-The purpose of `0.1.4` is to add provider-neutral SEO foundations without moving rendering or deployment knowledge into Core.
+The purpose of `0.2.0` is to add a practical WordPress REST boundary without moving CMS-specific behavior into Core or rendering into the provider.
 
 ---
 

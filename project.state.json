@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "project": {
     "name": "NexusContent",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "status": "active",
     "stage": "early-development",
-    "milestone": "0.1.4-seo-foundations",
+    "milestone": "0.2.0-wordpress-provider",
     "packagePrivate": true
   },
   "currentFocus": {
@@ -14,10 +14,10 @@
     "status": "unassigned"
   },
   "recommendedNextFocus": {
-    "id": "provider.wordpress",
-    "label": "WordPress provider",
+    "id": "provider.strapi",
+    "label": "Strapi provider",
     "status": "planned",
-    "target": "0.2.0"
+    "target": "0.3.0"
   },
   "features": {
     "implemented": [
@@ -33,6 +33,13 @@
       "provider.git",
       "provider.git.path-security",
       "provider.git.editor-independence",
+      "provider.wordpress",
+      "provider.wordpress.pages",
+      "provider.wordpress.posts",
+      "provider.wordpress.custom-post-types",
+      "provider.wordpress.pagination",
+      "provider.wordpress.errors",
+      "provider.wordpress.media",
       "format.adapter",
       "provider.git.json",
       "consumer.node",
@@ -71,7 +78,6 @@
     ],
     "inProgress": [],
     "planned": [
-      "provider.wordpress",
       "provider.strapi",
       "content.sync",
       "content.webhooks",
@@ -105,7 +111,7 @@
     "Generic Git singleton content is read from singletons/<key>.json through the provider-neutral getSingleton operation.",
     "Dedicated navigation and settings content are read from navigation/<key>.json and settings/<key>.json through their dedicated provider operations.",
     "Locale-aware retrieval resolves variants from <directory>/<locale>/<file>.json with a fallback chain when locales are configured; the legacy flat path is preserved when they are not.",
-    "No remote CMS provider is implemented.",
+    "The WordPress provider is read-only, retrieves published content, and requires a complete WordPress REST API v2 root.",
     "No synchronization, webhook, or preview workflow is implemented.",
     "Localisation covers locale configuration, fallback resolution, and Git variant directories; translation workflows are not implemented.",
     "SEO canonical URLs are supplied by content or consumers; Core does not infer deployment URLs.",
@@ -127,7 +133,6 @@
     "Core owns normalized SEO data, validation, and deterministic resolution; providers map source data and consumers own metadata rendering."
   ],
   "next": [
-    "provider.wordpress",
     "provider.strapi",
     "content.sync",
     "content.webhooks",
@@ -143,7 +148,6 @@
     "tooling.cli"
   ],
   "roadmapTargets": {
-    "provider.wordpress": "0.2.0",
     "provider.strapi": "0.3.0",
     "content.sync": "0.4.0",
     "content.webhooks": "0.5.0",

@@ -14,7 +14,7 @@ A feature status change must update both files in the same pull request. Roadmap
 | Blocked | `blocked` | Progress is prevented by an identified blocker recorded in Notes. |
 | Deferred | `deferred` | Deliberately outside the current foreseeable milestone; not permanently rejected. |
 
-Blank Introduced values mean the feature is not implemented. `TBD` means no reliable target version is assigned. Version targets after `0.2.0` are directional and may change as provider work tests the architecture.
+Blank Introduced values mean the feature is not implemented. `TBD` means no reliable target version is assigned. Version targets after `0.3.0` are directional and may change as provider work tests the architecture.
 
 ## Core
 
@@ -37,7 +37,13 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `provider.git` Git filesystem provider | implemented | 0.1.0 | - | Reads configured external content directories; retrieval does not run Git commands. |
 | `provider.git.path-security` Git path containment | implemented | 0.1.1 | - | Rejects traversal; symlink escape hardening completed in 0.1.2. |
 | `provider.git.editor-independence` Git editor independence | implemented | 0.1.1 | - | Ignores unrelated CMS files and does not depend on editor identity. |
-| `provider.wordpress` WordPress provider | planned | - | 0.2.0 | Directional next milestone; REST API first. |
+| `provider.wordpress` WordPress provider | implemented | 0.2.0 | - | Read-only, plugin-neutral WordPress REST API provider for published content. |
+| `provider.wordpress.pages` WordPress pages | implemented | 0.2.0 | - | Resolves published pages by slug through the `pages` endpoint. |
+| `provider.wordpress.posts` WordPress posts | implemented | 0.2.0 | - | Retrieves the built-in `posts` collection and individual posts by slug. |
+| `provider.wordpress.custom-post-types` WordPress custom post types | implemented | 0.2.0 | - | Explicit collection-to-endpoint configuration supports REST-exposed custom post types. |
+| `provider.wordpress.pagination` WordPress pagination | implemented | 0.2.0 | - | Loads collection pages sequentially, verifies WordPress total headers, and throws rather than truncating at `maxPages`. |
+| `provider.wordpress.errors` WordPress errors | implemented | 0.2.0 | - | Actionable configuration, HTTP, network, timeout, JSON, payload, and pagination errors without header secret leakage. |
+| `provider.wordpress.media` WordPress featured media | implemented | 0.2.0 | - | Requests embedded featured media and maps its basic fields to `MediaAsset`. |
 | `provider.strapi` Strapi provider | planned | - | 0.3.0 | Directional target after WordPress validates the provider contract. |
 | `provider.additional` Additional CMS and API providers | deferred | - | TBD | Directus, Sanity, Contentful, Payload, Storyblok, DatoCMS, and custom APIs require separate scope. |
 
@@ -54,8 +60,8 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
-| `consumer.node` Plain Node compatibility | implemented | 0.1.1 | - | Example and automated public API compatibility test without Astro. |
-| `consumer.astro` Astro reference consumer | implemented | 0.1.0 | - | Two examples: `astro-basic` with explicit single-locale routes (home, about, services, contact, blog) using flat content, and `astro-basic-localised` generating the same site in English and French under `/en/` and `/fr/`. Astro is not a Core dependency. |
+| `consumer.node` Plain Node compatibility | implemented | 0.1.1 | - | Example plus automated Git and WordPress public API compatibility tests without Astro. |
+| `consumer.astro` Astro reference consumer | implemented | 0.1.0 | - | Git and WordPress each have single-locale and localised static-build examples with explicit consumer-owned routes. The localised WordPress example intentionally uses the same source content for both locales. Astro is not a Core dependency. |
 | `consumer.framework-neutrality` Framework-neutral source boundary | implemented | 0.1.1 | - | Tests prohibit framework imports, framework globals, and frontend runtime dependencies in library source. |
 | `consumer.framework-adapters` Framework-specific adapter packages | deferred | - | TBD | Integrations remain consumer-owned until package extraction has a demonstrated need. |
 
@@ -74,7 +80,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `seo.normalized-contract` Normalized SEO contract | implemented | 0.1.4 | - | Public robots, Open Graph, Twitter, canonical URL, JSON-compatible structured data, and media types; `PageContent.seo` remains optional and legacy `canonical` is deprecated. |
 | `seo.resolution` Deterministic SEO resolution | implemented | 0.1.4 | - | Pure `resolveSeo` applies documented content and site-default fallback chains without mutating input. |
 | `seo.validation-provider-mapping` SEO validation and provider mapping | implemented | 0.1.4 | - | Zod validates normalized SEO at the provider boundary; providers map source-specific fields and the Git provider accepts normalized JSON SEO. |
-| `seo.astro-rendering` Astro SEO rendering | implemented | 0.1.4 | - | Consumer-owned reference component renders metadata and safely escaped JSON-LD in both Astro examples. |
+| `seo.astro-rendering` Astro SEO rendering | implemented | 0.1.4 | - | Consumer-owned reference components render metadata and safely escaped JSON-LD across the Astro examples. |
 | `seo.automation` Advanced SEO automation | deferred | - | TBD | Automatic canonical URL construction, sitemaps, robots.txt, metadata scraping, keyword analysis, redirects, and provider-specific SEO plugin behavior require separate scope. |
 
 ## Content Operations

@@ -1,0 +1,38 @@
+{
+  "id": 42,
+  "slug": "about-us",
+  "status": "publish",
+  "title": {
+    "rendered": "Fish &amp; Chips &#8212; News"
+  },
+  "content": {
+    "rendered": "<p>Rendered <strong>page</strong> content.</p>"
+  },
+  "excerpt": {
+    "rendered": "<p>Rendered excerpt.</p>"
+  },
+  "date_gmt": "2026-08-01T09:30:00",
+  "modified": "2026-08-02T10:45:00+02:00",
+  "link": "https://wordpress.example/about-us/",
+  "author": 7,
+  "featured_media": 99,
+  "categories": [3, 5],
+  "tags": [8, 13],
+  "acf": {
+    "eyebrow": "About NexusContent",
+    "featured": true
+  },
+  "_embedded": {
+    "wp:featuredmedia": [
+      {
+        "id": 99,
+        "source_url": "https://wordpress.example/media/about.jpg",
+        "alt_text": "The NexusContent team",
+        "media_details": {
+          "width": 1600,
+          "height": 900
+        }
+      }
+    ]
+  }
+}

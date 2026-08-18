@@ -1,0 +1,21 @@
+[
+  {
+    "id": 101,
+    "slug": "first-post",
+    "status": "publish",
+    "title": { "rendered": "First post" },
+    "content": { "rendered": "<p>First body.</p>" },
+    "excerpt": { "rendered": "<p>First excerpt.</p>" },
+    "date_gmt": "2026-08-03T08:00:00",
+    "modified_gmt": "2026-08-03T09:00:00"
+  },
+  {
+    "id": 102,
+    "slug": "second-post",
+    "status": "publish",
+    "title": { "rendered": "Second post" },
+    "content": { "rendered": "<p>Second body.</p>" },
+    "date_gmt": "2026-08-04T08:00:00",
+    "modified_gmt": "2026-08-04T09:00:00"
+  }
+]

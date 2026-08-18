@@ -1,0 +1,60 @@
+---
+interface Service {
+  title: string;
+  description: string;
+}
+
+interface Props {
+  heading: string;
+  intro?: string;
+  items: Service[];
+}
+
+const { heading, intro, items } = Astro.props;
+---
+
+<section class="section services">
+  <h2>{heading}</h2>
+  {intro && <p class="lede">{intro}</p>}
+  <div class="grid">
+    {
+      items.map((service) => (
+        <article class="card">
+          <h3>{service.title}</h3>
+          <p>{service.description}</p>
+        </article>
+      ))
+    }
+  </div>
+  <style>
+    .lede {
+      color: var(--muted);
+      max-width: 44rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+  </style>
+</section>

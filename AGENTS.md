@@ -137,7 +137,7 @@ Before completing a state-changing task, run `npm run validate:project-state` in
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.1.4
+- **Current milestone:** 0.2.0
 - **Primary implementation language:** TypeScript
 - **Primary initial consumer:** Astro (reference consumer only)
 
@@ -394,7 +394,7 @@ Future package architecture may include:
 
 Do not create these packages prematurely.
 
-During the 0.1.x milestones, prove the architecture before extracting multiple packages.
+During the pre-1.0 milestones, prove the architecture before extracting multiple packages.
 
 The Astro examples belong under:
 
@@ -409,14 +409,14 @@ They exist to prove that NexusContent can be consumed cleanly by Astro.
 
 `examples/astro-basic-localised/` is the localised reference. It uses locale-prefixed routes and the same site content in English and French.
 
-When the WordPress provider lands in a later milestone, follow the same progression with:
+The implemented WordPress provider follows the same progression with:
 
 ```text
 examples/astro-wordpress/
 examples/astro-wordpress-localised/
 ```
 
-Do not create these WordPress example directories before the provider exists.
+These examples remain consumers and must not become implementation locations for the WordPress provider.
 
 The Astro examples must not become the implementation location for NexusContent Core.
 
@@ -1207,45 +1207,41 @@ Media CDN decisions should remain configurable.
 
 # 25. WordPress
 
-WordPress is planned for a later milestone.
-
-Do not implement the WordPress provider during the 0.1.x milestones unless explicitly requested.
-
-When implemented, it belongs outside Core.
-
-Conceptual location:
+The base WordPress provider was implemented in `0.2.0`. It belongs outside Core:
 
 ```text
 src/providers/wordpress/
 ```
 
-Future extracted package:
+Possible future extracted package:
 
 ```text
 @nexuscontent/wordpress
 ```
 
-The provider will be responsible for WordPress specific concerns such as:
+The provider owns WordPress-specific REST communication, endpoint mapping, pagination, normalization, media mapping, authentication headers, and actionable errors. WordPress response objects must stop at the provider boundary; Core and consumers must never branch on native WordPress structures.
 
-- REST API access
-- Pagination
-- Posts
-- Pages
-- Custom post types where supported
-- Media
-- SEO normalization
-- Authentication where required
-- WordPress specific errors
+Preserve these permanent boundaries:
 
-WordPress response objects must stop at the provider boundary.
+- Core must remain unaware of WordPress and must not contain WordPress-specific branching.
+- The provider must communicate through the WordPress REST API and must not depend on WordPress PHP internals or database access.
+- The provider must remain framework neutral; Astro and other consumers own routes and rendering.
+- Base provider retrieval is read-only and published-content-only. Mutations, preview, webhooks, and synchronization require separate reviewed designs.
+- The base provider must not require ACF, Yoast, Rank Math, WooCommerce, WPML, Polylang, or any other plugin. Optional ACF data exposed by the REST response may be normalized without making ACF a requirement.
+- Provider-specific SEO plugin mapping must not enter Core. The base provider may support normalized source data only when explicitly scoped and tested.
+- Locale handling remains plugin-neutral. The base provider ignores locale retrieval options rather than assuming a WordPress localisation plugin contract.
+- Custom post types require explicit logical collection-to-endpoint mapping; do not add speculative endpoint discovery.
+- Collection pagination must remain sequential and validate `X-WP-Total` and `X-WP-TotalPages`. Exceeding `maxPages` or receiving inconsistent totals must throw, never silently truncate.
+- Authentication belongs in explicit request headers supplied by the consumer. The provider and Core must not read environment variables or expose credentials, authorization headers, or header values in errors.
+- Rendered WordPress HTML remains untrusted external content. The consumer owns trust and sanitization decisions.
 
 ---
 
 # 26. Strapi
 
-Strapi is planned for a later milestone.
+Strapi is the recommended next directional provider milestone for `0.3.0`.
 
-Do not implement the Strapi provider during the 0.1.x milestones unless explicitly requested.
+Do not expand its scope beyond the reviewed milestone merely because adjacent capabilities might be useful.
 
 When implemented, it belongs outside Core.
 
@@ -1393,38 +1389,45 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.1.4
+**CURRENT MILESTONE:** 0.2.0
 
-The SEO foundations release is implemented internally. Its goal is provider-neutral SEO data, validation, and deterministic resolution without moving rendering into Core.
+The WordPress provider release was completed internally on 2026-08-18. Its goal is published WordPress REST content through the existing normalized provider contract without leaking WordPress behavior into Core or consumers.
 
-The recommended next implementation milestone remains the `0.2.0` WordPress provider.
+No implementation is currently active. The recommended next implementation milestone is the directional `0.3.0` Strapi provider.
 
 ---
 
-# 33. Required Scope for 0.1.4
+# 33. Required Scope for 0.2.0
 
 The released milestone includes:
 
-## SEO Core
+## WordPress Provider
 
-- Optional `PageContent.seo` with normalized robots, canonical URL, Open Graph, Twitter, media, and JSON-compatible structured data.
-- Deprecated `canonical` compatibility input and preferred `canonicalUrl`.
-- Pure `resolveSeo` with deterministic content and site-default fallback order.
-- Public SEO types and resolver exports.
+- Complete WordPress REST API v2 root configuration with validated URL, request headers, provider name, timeout, page size, and page limit.
+- Published page lookup by slug.
+- Built-in posts collection and item retrieval by slug.
+- Explicit custom post type collection-to-endpoint mapping.
+- Sequential pagination with required, consistent `X-WP-Total` and `X-WP-TotalPages` headers and no silent `maxPages` truncation.
+- Normalized rendered title, content, excerpt, dates, URL, provenance, ACF fields, relationship IDs, and embedded featured media.
+- Actionable configuration, HTTP, network, timeout, JSON, payload, and pagination errors without secret leakage.
+- Unsupported singleton, navigation, and settings operations return `null`; locale retrieval options are ignored by the plugin-neutral base provider.
+- Public `WordPressProvider`, `WordPressProviderOptions`, `WordPressCollectionConfig`, and `WordPressContentData` exports.
 
-## Provider and Validation Boundaries
+## Consumers and Verification
 
-- Providers map source-specific SEO into the normalized contract.
-- Git JSON may supply already-normalized SEO.
-- Zod validates normalized SEO and rejects non-JSON-compatible structured data.
+- Plain Node compatibility coverage through the package public API.
+- `examples/astro-wordpress/` for single-locale pages and posts.
+- `examples/astro-wordpress-localised/` for consumer-owned English and French routes using the same source content.
+- Deterministic provider tests and local REST fixture builds.
 
-## Consumer Rendering
+## Explicit Scope Boundaries
 
-- Astro owns metadata rendering through a consumer component.
-- Inline JSON-LD is serialized with script-sensitive characters escaped.
-- Core and providers remain framework neutral.
+- Published-content-only, read-only retrieval.
+- No preview, webhooks, mutations, synchronization, retries, or caching.
+- No shortcode conversion, Gutenberg renderer, taxonomy cache, media synchronization, plugin SEO, WordPress localisation plugins, endpoint discovery, WooCommerce, or multisite verification.
+- Rendered HTML remains untrusted and consumer-owned.
 
-The existing `0.1.3` localisation and earlier foundation scope remains implemented; historical release details belong in `CHANGELOG.md` and `ROADMAP.md`.
+The existing SEO, localisation, Git provider, Core, validation, and framework-neutrality foundations remain implemented; historical release details belong in `CHANGELOG.md` and `ROADMAP.md`.
 
 The established foundation includes:
 
@@ -1463,7 +1466,7 @@ The established foundation includes:
 - Project content schema support where practical
 - Useful validation errors
 
-## Astro Example
+## Astro Examples
 
 - Explicit Astro routes
 - NexusContent integration
@@ -1472,6 +1475,7 @@ The established foundation includes:
 - Locale-aware pages and content-driven language switching
 - Static build
 - No direct provider calls from Astro components
+- Separate WordPress single-locale and localised consumers
 
 ## Plain Node Compatibility
 
@@ -1491,11 +1495,12 @@ The established foundation includes:
 
 ---
 
-# 34. Explicitly Forbidden in 0.1.x
+# 34. Historical 0.1.x Scope Exclusions
 
-Unless the user explicitly changes scope, DO NOT implement:
+This section records the exclusions that constrained the completed `0.1.x` foundation milestones. WordPress was subsequently implemented in `0.2.0`; current and future scope is governed by the current milestone, roadmap, and permanent architectural rules above.
 
-- WordPress provider
+During `0.1.x`, unless the user explicitly changed scope, agents did not implement:
+
 - Strapi provider
 - Directus provider
 - Sanity provider

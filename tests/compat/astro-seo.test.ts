@@ -4,9 +4,16 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { serializeJsonLd as serializeBasicJsonLd } from "../../examples/astro-basic/src/app/serialize-json-ld.ts";
 import { serializeJsonLd as serializeLocalisedJsonLd } from "../../examples/astro-basic-localised/src/app/serialize-json-ld.ts";
+import { serializeJsonLd as serializeWordPressJsonLd } from "../../examples/astro-wordpress/src/app/serialize-json-ld.ts";
+import { serializeJsonLd as serializeWordPressLocalisedJsonLd } from "../../examples/astro-wordpress-localised/src/app/serialize-json-ld.ts";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const examples = ["astro-basic", "astro-basic-localised"] as const;
+const examples = [
+  "astro-basic",
+  "astro-basic-localised",
+  "astro-wordpress",
+  "astro-wordpress-localised"
+] as const;
 const routeFiles = {
   "astro-basic": [
     "index.astro",
@@ -23,6 +30,16 @@ const routeFiles = {
     "[locale]/contact.astro",
     "[locale]/blog/index.astro",
     "[locale]/blog/[slug].astro"
+  ],
+  "astro-wordpress": [
+    "index.astro",
+    "blog/index.astro",
+    "blog/[slug].astro"
+  ],
+  "astro-wordpress-localised": [
+    "[locale]/index.astro",
+    "[locale]/blog/index.astro",
+    "[locale]/blog/[slug].astro"
   ]
 } as const;
 
@@ -31,7 +48,12 @@ test("Astro JSON-LD serializers escape script-breaking characters", () => {
     text: "</script><script>alert('xss')</script>&\u2028\u2029"
   };
 
-  for (const serialize of [serializeBasicJsonLd, serializeLocalisedJsonLd]) {
+  for (const serialize of [
+    serializeBasicJsonLd,
+    serializeLocalisedJsonLd,
+    serializeWordPressJsonLd,
+    serializeWordPressLocalisedJsonLd
+  ]) {
     const result = serialize(value);
 
     assert.doesNotMatch(result, /[<>&\u2028\u2029]/u);

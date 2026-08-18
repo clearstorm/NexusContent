@@ -1,0 +1,33 @@
+---
+import type { SeoData } from "@nexuscontent/core";
+import { serializeJsonLd } from "../app/serialize-json-ld";
+
+interface Props {
+  seo: SeoData;
+}
+
+const { seo } = Astro.props;
+const canonicalUrl = seo.canonicalUrl ?? seo.canonical;
+const openGraph = seo.openGraph;
+const twitter = seo.twitter;
+const robots = [
+  seo.robots?.index === undefined ? undefined : seo.robots.index ? "index" : "noindex",
+  seo.robots?.follow === undefined ? undefined : seo.robots.follow ? "follow" : "nofollow"
+].filter((directive): directive is string => directive !== undefined).join(", ");
+---
+
+{seo.title !== undefined && <title>{seo.title}</title>}
+{seo.description !== undefined && <meta name="description" content={seo.description} />}
+{canonicalUrl !== undefined && <link rel="canonical" href={canonicalUrl} />}
+{robots && <meta name="robots" content={robots} />}
+{openGraph?.type !== undefined && <meta property="og:type" content={openGraph.type} />}
+{openGraph?.title !== undefined && <meta property="og:title" content={openGraph.title} />}
+{openGraph?.description !== undefined && <meta property="og:description" content={openGraph.description} />}
+{openGraph?.image && <meta property="og:image" content={openGraph.image.url} />}
+{twitter?.card && <meta name="twitter:card" content={twitter.card} />}
+{twitter?.title !== undefined && <meta name="twitter:title" content={twitter.title} />}
+{twitter?.description !== undefined && <meta name="twitter:description" content={twitter.description} />}
+{twitter?.image && <meta name="twitter:image" content={twitter.image.url} />}
+{seo.structuredData?.map((value) => (
+  <script type="application/ld+json" is:inline set:html={serializeJsonLd(value)} />
+))}
