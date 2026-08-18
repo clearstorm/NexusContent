@@ -21,7 +21,7 @@ WordPress provider release.
 - Actionable WordPress configuration, HTTP, network, timeout, JSON, payload, and pagination errors without exposing authentication header values.
 - Public `WordPressProvider`, `WordPressProviderOptions`, `WordPressCollectionConfig`, and `WordPressContentData` exports.
 - Deterministic WordPress provider tests and a plain Node compatibility test without Astro.
-- `examples/astro-wordpress/` and `examples/astro-wordpress-localised/`, with static-build tests against a local REST fixture server.
+- `examples/astro-wordpress/` with static-build tests against a local REST fixture server.
 
 ### Changed
 

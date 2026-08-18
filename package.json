@@ -19,7 +19,6 @@
     "examples/astro-basic",
     "examples/astro-basic-localised",
     "examples/astro-wordpress",
-    "examples/astro-wordpress-localised",
     "examples/node-basic"
   ],
   "scripts": {

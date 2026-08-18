@@ -27,6 +27,8 @@ const services = (fields.services ?? {}) as {
   items: { title: string; description: string; points: string[] }[];
 };
 
+const serviceItems = Array.isArray(services.items) ? services.items : [];
+
 const cta = (fields.cta ?? {}) as {
   heading: string;
   intro: string;
@@ -48,7 +50,7 @@ const seo = resolveSeo({
     {services.intro && <p class="lede">{services.intro}</p>}
     <div class="grid">
       {
-        services.items.map((service, index) => (
+        serviceItems.map((service, index) => (
           <article class="card">
             <span class="num">{index + 1}</span>
             <h3>{service.title}</h3>

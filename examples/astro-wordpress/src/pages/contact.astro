@@ -26,6 +26,8 @@ const contact = (fields.contact ?? {}) as {
   items: { label: string; value: string; href?: string }[];
 };
 
+const contactItems = Array.isArray(contact.items) ? contact.items : [];
+
 const cta = (fields.cta ?? {}) as {
   heading: string;
   intro: string;
@@ -46,7 +48,7 @@ const seo = resolveSeo({
     <h2>{contact.heading}</h2>
     <div class="grid">
       {
-        contact.items.map((detail) => (
+        contactItems.map((detail) => (
           <article class="card">
             <h3>{detail.label}</h3>
             {detail.href ? (

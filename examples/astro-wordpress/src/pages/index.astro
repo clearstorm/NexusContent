@@ -35,6 +35,9 @@ const testimonials = (fields.testimonials ?? {}) as {
   items: { quote: string; author: string }[];
 };
 
+const serviceItems = Array.isArray(services.items) ? services.items : [];
+const testimonialItems = Array.isArray(testimonials.items) ? testimonials.items : [];
+
 const cta = (fields.cta ?? {}) as {
   heading: string;
   intro: string;
@@ -50,7 +53,7 @@ const seo = resolveSeo({
 
 <BaseLayout seo={seo}>
   <Hero {...hero} />
-  <Services {...services} />
-  <Testimonials {...testimonials} />
+  <Services heading={services.heading} intro={services.intro} items={serviceItems} />
+  <Testimonials heading={testimonials.heading} items={testimonialItems} />
   <CTA {...cta} />
 </BaseLayout>

@@ -413,10 +413,9 @@ The implemented WordPress provider follows the same progression with:
 
 ```text
 examples/astro-wordpress/
-examples/astro-wordpress-localised/
 ```
 
-These examples remain consumers and must not become implementation locations for the WordPress provider.
+The example remains a consumer and must not become an implementation location for the WordPress provider.
 
 The Astro examples must not become the implementation location for NexusContent Core.
 
@@ -1416,8 +1415,7 @@ The released milestone includes:
 ## Consumers and Verification
 
 - Plain Node compatibility coverage through the package public API.
-- `examples/astro-wordpress/` for single-locale pages and posts.
-- `examples/astro-wordpress-localised/` for consumer-owned English and French routes using the same source content.
+- `examples/astro-wordpress/` for pages and posts.
 - Deterministic provider tests and local REST fixture builds.
 
 ## Explicit Scope Boundaries

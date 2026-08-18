@@ -5,14 +5,12 @@ import { fileURLToPath } from "node:url";
 import { serializeJsonLd as serializeBasicJsonLd } from "../../examples/astro-basic/src/app/serialize-json-ld.ts";
 import { serializeJsonLd as serializeLocalisedJsonLd } from "../../examples/astro-basic-localised/src/app/serialize-json-ld.ts";
 import { serializeJsonLd as serializeWordPressJsonLd } from "../../examples/astro-wordpress/src/app/serialize-json-ld.ts";
-import { serializeJsonLd as serializeWordPressLocalisedJsonLd } from "../../examples/astro-wordpress-localised/src/app/serialize-json-ld.ts";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const examples = [
   "astro-basic",
   "astro-basic-localised",
-  "astro-wordpress",
-  "astro-wordpress-localised"
+  "astro-wordpress"
 ] as const;
 const routeFiles = {
   "astro-basic": [
@@ -35,11 +33,6 @@ const routeFiles = {
     "index.astro",
     "blog/index.astro",
     "blog/[slug].astro"
-  ],
-  "astro-wordpress-localised": [
-    "[locale]/index.astro",
-    "[locale]/blog/index.astro",
-    "[locale]/blog/[slug].astro"
   ]
 } as const;
 
@@ -51,8 +44,7 @@ test("Astro JSON-LD serializers escape script-breaking characters", () => {
   for (const serialize of [
     serializeBasicJsonLd,
     serializeLocalisedJsonLd,
-    serializeWordPressJsonLd,
-    serializeWordPressLocalisedJsonLd
+    serializeWordPressJsonLd
   ]) {
     const result = serialize(value);
 

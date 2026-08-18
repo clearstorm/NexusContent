@@ -53,7 +53,6 @@ npm run build         # Build the package into dist/
 npm run build --workspace @nexuscontent/example-astro-basic  # Build the single-locale Astro example
 npm run build --workspace @nexuscontent/example-astro-basic-localised  # Build the localised Astro example
 npm run build --workspace @nexuscontent/example-astro-wordpress  # Build the WordPress Astro example
-npm run build --workspace @nexuscontent/example-astro-wordpress-localised  # Build the localised WordPress example
 npm run start --workspace @nexuscontent/example-node-basic  # Run the plain Node compatibility example
 ```
 

@@ -61,7 +61,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
 | `consumer.node` Plain Node compatibility | implemented | 0.1.1 | - | Example plus automated Git and WordPress public API compatibility tests without Astro. |
-| `consumer.astro` Astro reference consumer | implemented | 0.1.0 | - | Git and WordPress each have single-locale and localised static-build examples with explicit consumer-owned routes. The localised WordPress example intentionally uses the same source content for both locales. Astro is not a Core dependency. |
+| `consumer.astro` Astro reference consumer | implemented | 0.1.0 | - | Git and WordPress each have static-build examples with explicit consumer-owned routes. Astro is not a Core dependency. |
 | `consumer.framework-neutrality` Framework-neutral source boundary | implemented | 0.1.1 | - | Tests prohibit framework imports, framework globals, and frontend runtime dependencies in library source. |
 | `consumer.framework-adapters` Framework-specific adapter packages | deferred | - | TBD | Integrations remain consumer-owned until package extraction has a demonstrated need. |
 

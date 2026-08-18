@@ -9,7 +9,6 @@ import { fileURLToPath } from "node:url";
 const execFileAsync = promisify(execFile);
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const singleRoot = fileURLToPath(new URL("../../examples/astro-wordpress/", import.meta.url));
-const localisedRoot = fileURLToPath(new URL("../../examples/astro-wordpress-localised/", import.meta.url));
 
 const posts = [
   entry(2, "first-post", "First Post", "<p>First post body from WordPress.</p>", "First excerpt"),
@@ -106,10 +105,7 @@ test("WordPress Astro examples build against a local REST API", async (t) => {
   });
 
   t.after(async () => {
-    await Promise.all([
-      rm(`${singleRoot}dist`, { recursive: true, force: true }),
-      rm(`${localisedRoot}dist`, { recursive: true, force: true })
-    ]);
+    await rm(`${singleRoot}dist`, { recursive: true, force: true });
     server.closeAllConnections();
     await new Promise((resolve, reject) => {
       server.close((error) => error ? reject(error) : resolve());
@@ -123,17 +119,12 @@ test("WordPress Astro examples build against a local REST API", async (t) => {
     WORDPRESS_API_URL: `http://127.0.0.1:${address.port}/wp-json/wp/v2`
   };
 
-  for (const workspace of [
-    "@nexuscontent/example-astro-wordpress",
-    "@nexuscontent/example-astro-wordpress-localised"
-  ]) {
-    const result = await execFileAsync("npm", ["run", "build", "--workspace", workspace], {
-      cwd: root,
-      env,
-      maxBuffer: 10 * 1024 * 1024
-    });
-    assert.equal(result.stderr.includes("ERROR"), false, result.stderr);
-  }
+  const result = await execFileAsync("npm", ["run", "build", "--workspace", "@nexuscontent/example-astro-wordpress"], {
+    cwd: root,
+    env,
+    maxBuffer: 10 * 1024 * 1024
+  });
+  assert.equal(result.stderr.includes("ERROR"), false, result.stderr);
 
   const singleHome = await readFile(`${singleRoot}dist/index.html`, "utf8");
   const singleAbout = await readFile(`${singleRoot}dist/about/index.html`, "utf8");
@@ -153,24 +144,6 @@ test("WordPress Astro examples build against a local REST API", async (t) => {
   assert.match(singleBlog, /\/blog\/first-post/);
   assert.match(singleBlog, /Second Post/);
   assert.match(singlePost, /First post body from WordPress/);
-
-  const redirect = await readFile(`${localisedRoot}dist/index.html`, "utf8");
-  assert.match(redirect, /url=\/en\//);
-  for (const locale of ["en", "fr"]) {
-    const home = await readFile(`${localisedRoot}dist/${locale}/index.html`, "utf8");
-    const about = await readFile(`${localisedRoot}dist/${locale}/about/index.html`, "utf8");
-    const services = await readFile(`${localisedRoot}dist/${locale}/services/index.html`, "utf8");
-    const contact = await readFile(`${localisedRoot}dist/${locale}/contact/index.html`, "utf8");
-    const blog = await readFile(`${localisedRoot}dist/${locale}/blog/index.html`, "utf8");
-    const post = await readFile(`${localisedRoot}dist/${locale}/blog/first-post/index.html`, "utf8");
-    assert.match(home, /WordPress Home/);
-    assert.match(home, /Astro owns the website/);
-    assert.match(about, /Separation, by design/);
-    assert.match(services, /Services built on a clean boundary/);
-    assert.match(contact, /Contact us/);
-    assert.match(blog, new RegExp(`/${locale}/blog/second-post`));
-    assert.match(post, /First post body from WordPress/);
-  }
 });
 
 function entry(id, slug, title, content, excerpt, fields = undefined) {

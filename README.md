@@ -1198,7 +1198,6 @@ The reference examples live under `examples/`:
 * `examples/astro-basic/` proves consumption inside an Astro static build for a single locale.
 * `examples/astro-basic-localised/` proves the same build with locale-prefixed routes in English and French.
 * `examples/astro-wordpress/` proves published WordPress page and post consumption in an Astro static build.
-* `examples/astro-wordpress-localised/` proves consumer-owned locale routes while intentionally using the same plugin-neutral WordPress source content for both locales.
 * `examples/node-basic/` proves consumption from a plain Node process.
 
 ---
@@ -1902,7 +1901,7 @@ The provider and Core do not read environment variables. Consumers decide how co
 
 The base provider returns `null` from `getSingleton`, `getNavigation`, and `getSettings`. It accepts the shared `ProviderRetrievalOptions` contract but ignores locale options. It is plugin-neutral and does not require or integrate with WPML, Polylang, or another WordPress localisation plugin.
 
-`examples/astro-wordpress/` demonstrates explicit `/`, `/blog/`, and `/blog/[slug]/` routes. `examples/astro-wordpress-localised/` demonstrates consumer-owned `/en/` and `/fr/` routes, but both route sets intentionally read the same WordPress source content because the base provider ignores locale options. Automated Astro builds exercise both examples against a deterministic local REST server, and a plain Node compatibility test proves WordPress retrieval without Astro.
+`examples/astro-wordpress/` demonstrates explicit `/`, `/blog/`, and `/blog/[slug]/` routes. Automated Astro builds exercise the example against a deterministic local REST server, and a plain Node compatibility test proves WordPress retrieval without Astro.
 
 ## Scope and limitations
 

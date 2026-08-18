@@ -24,6 +24,7 @@ const hero = (fields.hero ?? {}) as {
 const mission = (fields.mission ?? {}) as { heading: string; content: string };
 const story = (fields.story ?? {}) as { heading: string; content: string };
 const values = (fields.values ?? {}) as { heading: string; items: string[] };
+const valueItems = Array.isArray(values.items) ? values.items : [];
 
 const cta = (fields.cta ?? {}) as {
   heading: string;
@@ -54,7 +55,7 @@ const seo = resolveSeo({
   <section class="section values">
     <h2>{values.heading}</h2>
     <ul>
-      {values.items.map((item) => (
+      {valueItems.map((item) => (
         <li>{item}</li>
       ))}
     </ul>

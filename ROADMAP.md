@@ -105,7 +105,7 @@ The exit criteria are satisfied by `0.1.4`.
 - Normalized rendered title, content, excerpt, dates, URL, provenance, author/category/tag IDs, ACF data, and embedded featured media.
 - Actionable configuration, HTTP, network, timeout, JSON, payload, and pagination errors that do not expose authentication header values.
 - Public `WordPressProvider`, `WordPressProviderOptions`, `WordPressCollectionConfig`, and `WordPressContentData` exports.
-- Deterministic provider and plain Node tests plus `astro-wordpress` and `astro-wordpress-localised` static-build examples.
+- Deterministic provider and plain Node tests plus the `astro-wordpress` static-build example.
 
 **Known limitations:**
 
