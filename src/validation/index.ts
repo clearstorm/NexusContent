@@ -2,10 +2,14 @@ export {
   collectionItemSchema,
   contentMetaSchema,
   dataSchema,
+  mediaAssetSchema,
   navigationItemSchema,
   navigationSchema,
   pageSchema,
+  seoOpenGraphSchema,
+  seoRobotsSchema,
   seoSchema,
+  seoTwitterSchema,
   settingsSchema,
   singletonSchema
 } from "./schemas.ts";

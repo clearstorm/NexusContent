@@ -1,17 +1,52 @@
 export type ContentSource = string;
 
-export interface SeoData {
-  title?: string;
-  description?: string;
-  canonical?: string;
-}
-
 export interface MediaAsset {
   id?: string;
   url: string;
   alt?: string;
   width?: number;
   height?: number;
+}
+
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+export type JsonObject = { [key: string]: JsonValue };
+
+export interface SeoRobots {
+  index?: boolean;
+  follow?: boolean;
+}
+
+export interface SeoOpenGraph {
+  title?: string;
+  description?: string;
+  image?: MediaAsset;
+  type?: string;
+}
+
+export interface SeoTwitter {
+  card?: "summary" | "summary_large_image";
+  title?: string;
+  description?: string;
+  image?: MediaAsset;
+}
+
+export interface SeoData {
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  /** @deprecated Use `canonicalUrl` instead. */
+  canonical?: string;
+  robots?: SeoRobots;
+  openGraph?: SeoOpenGraph;
+  twitter?: SeoTwitter;
+  structuredData?: JsonObject[];
 }
 
 export interface ContentMeta {

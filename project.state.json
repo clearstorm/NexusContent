@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "project": {
     "name": "NexusContent",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "status": "active",
     "stage": "early-development",
-    "milestone": "0.1.3-locale-aware-core",
+    "milestone": "0.1.4-seo-foundations",
     "packagePrivate": true
   },
   "currentFocus": {
@@ -41,6 +41,10 @@
       "validation.normalized",
       "validation.consumer-schema",
       "validation.errors",
+      "seo.normalized-contract",
+      "seo.resolution",
+      "seo.validation-provider-mapping",
+      "seo.astro-rendering",
       "core.page",
       "core.singleton",
       "core.collection",
@@ -91,7 +95,8 @@
       "cms.admin",
       "tooling.package-extraction",
       "deployment.adapters",
-      "deployment.examples"
+      "deployment.examples",
+      "seo.automation"
     ]
   },
   "constraints": [
@@ -103,6 +108,7 @@
     "No remote CMS provider is implemented.",
     "No synchronization, webhook, or preview workflow is implemented.",
     "Localisation covers locale configuration, fallback resolution, and Git variant directories; translation workflows are not implemented.",
+    "SEO canonical URLs are supplied by content or consumers; Core does not infer deployment URLs.",
     "The package remains private while the pre-1.0 architecture is proven."
   ],
   "architecturalDecisions": [
@@ -117,7 +123,8 @@
     "Generic singleton content remains available for arbitrary singleton data, while navigation and settings use dedicated APIs, types, configuration sections, and Git directories.",
     "Multiple instances of the same provider type must remain possible.",
     "Locale resolution is centralized in Core; providers implement variant file resolution; format adapters and validators implement no locale logic.",
-    "Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged."
+    "Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged.",
+    "Core owns normalized SEO data, validation, and deterministic resolution; providers map source data and consumers own metadata rendering."
   ],
   "next": [
     "provider.wordpress",

@@ -2,11 +2,11 @@
 
 This roadmap describes intended sequencing. It does not determine whether a feature is currently implemented. See [FEATURES.md](FEATURES.md) and [project.state.json](project.state.json) for current status, and [PROJECT_STATUS.md](PROJECT_STATUS.md) for immediate next work.
 
-Versions after `0.1.3` are directional targets. Scope and ordering may change as integrations test the provider contract. A roadmap item remains `planned` or `deferred` until implementation and verification justify a status change.
+Versions after `0.1.4` are directional targets. Scope and ordering may change as integrations test the provider contract. A roadmap item remains `planned` or `deferred` until implementation and verification justify a status change.
 
 ## 0.1.x - Framework-Neutral Foundation
 
-**State:** Released internally through `0.1.3`.
+**State:** Released internally through `0.1.4`.
 
 **Goal:** Prove a small, framework-neutral content provider architecture with Git content and both Astro and plain Node consumers.
 
@@ -16,6 +16,7 @@ Versions after `0.1.3` are directional targets. Scope and ordering may change as
 - Provider registry, configuration resolution, and content service.
 - Page, generic singleton, dedicated navigation, settings, collection, and item retrieval.
 - Structured errors, normalization, provenance, and validation.
+- Normalized SEO data, deterministic fallback resolution, provider mapping, and consumer-owned Astro rendering.
 - External Git content directories with JSON pages, arbitrary singletons, navigation, settings, and collections.
 - Path containment and editor-independent Git-based CMS compatibility.
 - Astro reference example and plain Node compatibility proof.
@@ -35,7 +36,7 @@ Versions after `0.1.3` are directional targets. Scope and ordering may change as
 - Framework-neutrality tests pass without a frontend framework runtime dependency.
 - Package, Astro example, and Node example build or execute in CI.
 
-The exit criteria are satisfied by `0.1.3`.
+The exit criteria are satisfied by `0.1.4`.
 
 ## 0.1.3 - Localisation Foundations
 
@@ -63,6 +64,32 @@ The exit criteria are satisfied by `0.1.3`.
 - Locale resolution, Git variant loading, and flat-file backward compatibility pass their tests.
 - Projects without locale configuration retain the legacy flat retrieval path.
 - WordPress remains the recommended next focus milestone.
+
+## 0.1.4 - SEO Foundations
+
+**State:** Released internally on 2026-08-17.
+
+**Goal:** Provide provider-neutral SEO data and deterministic resolution while leaving framework rendering and deployment URL knowledge with consumers.
+
+**Released capabilities:**
+
+- Expanded normalized SEO contract for canonical URLs, robots, Open Graph, Twitter, media, and JSON-compatible structured data.
+- Pure `resolveSeo` with documented content, social, and site-default fallback order.
+- Normalized SEO validation and provider-boundary mapping, including Git JSON content.
+- Consumer-owned Astro metadata rendering with safely escaped JSON-LD.
+- Deprecated `canonical` migration fallback in favor of `canonicalUrl`.
+
+**Explicit exclusions:**
+
+- Automatic canonical URL construction, sitemaps, robots.txt, redirects, metadata scraping, keyword analysis, and analytics.
+- Provider-specific SEO plugin behavior in Core.
+- Framework rendering components in the NexusContent public package.
+
+**Exit criteria:**
+
+- Core, validation, provider, Astro, and framework-boundary SEO tests pass.
+- Existing pages without SEO and legacy `canonical` input remain compatible.
+- WordPress remains the recommended next milestone.
 
 ## 0.2.0 - WordPress Provider
 

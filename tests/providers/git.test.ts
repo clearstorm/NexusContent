@@ -25,6 +25,11 @@ test("loads and normalizes a page", async () => {
   assert.equal(page.title, "Home");
   assert.equal(page.slug, "home");
   assert.equal(page.seo?.title, "NexusContent Example");
+  assert.equal(page.seo?.canonicalUrl, "https://example.com/");
+  assert.equal(page.seo?.robots?.follow, true);
+  assert.equal(page.seo?.openGraph?.image?.alt, "NexusContent");
+  assert.equal(page.seo?.twitter?.card, "summary_large_image");
+  assert.equal(page.seo?.structuredData?.[0]?.["@type"], "WebSite");
 
   const hero = page.data.hero as { heading: string };
   const services = page.data.services as { items: unknown[] };
@@ -58,6 +63,14 @@ test("keeps seo in the envelope and the rest in data", async () => {
 
 test("returns null for a missing page", async () => {
   assert.equal(await buildProvider().getPage("missing"), null);
+});
+
+test("keeps SEO optional for Git pages", async () => {
+  const page = await buildProvider().getPage("no-seo");
+
+  assert.ok(page);
+  assert.equal(page.seo, undefined);
+  assert.equal(page.data.body, "SEO remains optional.");
 });
 
 test("throws a ProviderError for malformed JSON", async () => {

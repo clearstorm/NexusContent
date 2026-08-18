@@ -46,7 +46,7 @@ Use each file for its assigned responsibility:
 
 For disputes about whether a capability is actually implemented, tests and implementation are the final technical evidence. Correct the tracking files in the same pull request when they disagree with that evidence.
 
-`FEATURES.md` and `project.state.json` must remain synchronized. Neither is generated during milestone `0.1.3`; both are maintained deliberately.
+`FEATURES.md` and `project.state.json` must remain synchronized. Neither is generated; both are maintained deliberately.
 
 ## 0.3 Project State Synchronization
 
@@ -137,7 +137,7 @@ Before completing a state-changing task, run `npm run validate:project-state` in
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.1.3
+- **Current milestone:** 0.1.4
 - **Primary implementation language:** TypeScript
 - **Primary initial consumer:** Astro (reference consumer only)
 
@@ -845,10 +845,35 @@ Initial normalized types may resemble:
 ```ts
 export type ContentSource = string;
 
+export interface SeoRobots {
+  index?: boolean;
+  follow?: boolean;
+}
+
+export interface SeoOpenGraph {
+  title?: string;
+  description?: string;
+  image?: MediaAsset;
+  type?: string;
+}
+
+export interface SeoTwitter {
+  card?: "summary" | "summary_large_image";
+  title?: string;
+  description?: string;
+  image?: MediaAsset;
+}
+
 export interface SeoData {
   title?: string;
   description?: string;
+  canonicalUrl?: string;
+  /** @deprecated Use `canonicalUrl` instead. */
   canonical?: string;
+  robots?: SeoRobots;
+  openGraph?: SeoOpenGraph;
+  twitter?: SeoTwitter;
+  structuredData?: JsonObject[];
 }
 
 export interface MediaAsset {
@@ -1368,17 +1393,40 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.1.3
+**CURRENT MILESTONE:** 0.1.4
 
-The goal is to prove the core architecture, its framework neutrality, and its localisation foundations.
+The SEO foundations release is implemented internally. Its goal is provider-neutral SEO data, validation, and deterministic resolution without moving rendering into Core.
 
-Implement only what is required to establish a stable content provider model.
+The recommended next implementation milestone remains the `0.2.0` WordPress provider.
 
 ---
 
-# 33. Required Scope for 0.1.3
+# 33. Required Scope for 0.1.4
 
-The milestone should include:
+The released milestone includes:
+
+## SEO Core
+
+- Optional `PageContent.seo` with normalized robots, canonical URL, Open Graph, Twitter, media, and JSON-compatible structured data.
+- Deprecated `canonical` compatibility input and preferred `canonicalUrl`.
+- Pure `resolveSeo` with deterministic content and site-default fallback order.
+- Public SEO types and resolver exports.
+
+## Provider and Validation Boundaries
+
+- Providers map source-specific SEO into the normalized contract.
+- Git JSON may supply already-normalized SEO.
+- Zod validates normalized SEO and rejects non-JSON-compatible structured data.
+
+## Consumer Rendering
+
+- Astro owns metadata rendering through a consumer component.
+- Inline JSON-LD is serialized with script-sensitive characters escaped.
+- Core and providers remain framework neutral.
+
+The existing `0.1.3` localisation and earlier foundation scope remains implemented; historical release details belong in `CHANGELOG.md` and `ROADMAP.md`.
+
+The established foundation includes:
 
 ## Core
 
@@ -1477,6 +1525,10 @@ Unless the user explicitly changes scope, DO NOT implement:
 - Plugin marketplace
 - Complex caching infrastructure
 - Translation workflows, per-locale publishing, completeness reporting, and outdated tracking
+- Automatic canonical URL construction or deployment URL inference
+- Sitemap, robots.txt, redirect, keyword-analysis, metadata-scraping, or analytics systems
+- Provider-specific SEO plugin logic in Core
+- Framework SEO rendering components in the public package
 
 Do not build future roadmap features because they "might be useful."
 

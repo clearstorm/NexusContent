@@ -19,6 +19,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documented and verified the GitHub-hosted content repository flow: the localised example was built against a real GitHub-hosted content clone, and the README now describes the clone → `NEXUS_GIT_CONTENT_PATH` → build workflow.
 
+## [0.1.4] - 2026-08-17
+
+SEO foundations release.
+
+### Added
+
+- Public `SeoRobots`, `SeoOpenGraph`, and `SeoTwitter` types, plus JSON-compatible `JsonObject` and `JsonValue` types for structured data.
+- Expanded `SeoData` with `canonicalUrl`, robots directives, Open Graph, Twitter, and `structuredData`; `PageContent.seo` remains optional.
+- Pure `resolveSeo(input, defaults?)` resolution with deterministic title, description, image, Open Graph, Twitter, and legacy canonical fallbacks.
+- Normalized SEO validation for canonical URLs, social metadata, media, robots directives, Twitter cards, and JSON-compatible structured data.
+- Git provider coverage proving normalized SEO passes through the provider boundary and pages without SEO remain valid.
+- Consumer-owned `NexusSeo.astro` components and complete page integration in both Astro examples.
+- Safe JSON-LD serialization that escapes `<`, `>`, `&`, U+2028, and U+2029 before inline script rendering.
+- Core, validation, provider, framework-boundary, Astro rendering, and structured-data safety tests for the SEO contract.
+
+### Changed
+
+- Deprecated `SeoData.canonical` in favor of `canonicalUrl`; `resolveSeo` continues to read `canonical` as a migration fallback without returning it.
+- Clarified the SEO responsibility boundary: Core owns normalized data, validation, and resolution; providers map source fields; consumers own rendering and canonical URL construction.
+
+### Excluded
+
+- Automatic canonical URL inference, sitemap and robots.txt generation, keyword analysis, redirects, metadata scraping, analytics, and provider-specific SEO plugin integrations remain out of scope.
+
 ## [0.1.3] - 2026-08-16
 
 Localisation foundations release.

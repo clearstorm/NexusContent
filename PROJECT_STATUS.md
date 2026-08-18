@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | Project name | NexusContent |
-| Current version | `0.1.3` |
-| Current milestone | `0.1.3` - localisation foundations |
+| Current version | `0.1.4` |
+| Current milestone | `0.1.4` - SEO foundations |
 | Project status | Active, early development; internal private package |
 | Current focus | Unassigned |
 
-The `0.1.3` milestone is implemented and released internally. No active feature implementation is identified in the repository. The recommended next focus is the directional `0.2.0` WordPress provider milestone after its provider scope and contract expectations are confirmed.
+The `0.1.4` SEO milestone is implemented and released internally. No active feature implementation is identified in the repository. The recommended next focus remains the directional `0.2.0` WordPress provider milestone after its provider scope and contract expectations are confirmed.
 
 ## Current Architecture
 
@@ -38,6 +38,10 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Page, generic singleton, dedicated navigation, dedicated settings, collection, and individual item retrieval through `NexusContent`.
 - Normalization, content provenance, and structured errors.
 - Zod-based normalized content validation and consumer schema validation support.
+- Normalized SEO contract for robots, canonical URLs, Open Graph, Twitter, media, and JSON-compatible structured data.
+- Pure deterministic `resolveSeo` fallback resolution with site title and default image defaults.
+- Provider-boundary SEO validation and mapping, with normalized SEO accepted from Git JSON content.
+- Consumer-owned Astro SEO rendering with safely escaped JSON-LD.
 - Git provider with external content directories and JSON format support.
 - Missing-content behavior, malformed JSON errors, path traversal protection, and symlink escape protection.
 - Provider-neutral singleton retrieval from `singletons/<key>.json` for arbitrary singleton content.
@@ -77,6 +81,7 @@ No active implementation work is identified.
 - Deployment integrations.
 - Admin UI, authentication, forms, databases, queues, and complex caching.
 - Translation workflows (state model, locale-specific publishing, completeness reporting, outdated tracking, and source change detection).
+- Advanced SEO automation including canonical URL inference, sitemaps, robots.txt, metadata scraping, keyword analysis, redirects, and provider-specific plugin behavior.
 
 ## Known Architectural Decisions
 
@@ -94,6 +99,7 @@ No active implementation work is identified.
 - Navigation and settings are dedicated provider operations with separate configuration sections and Git directories.
 - Locale resolution is centralized in Core; providers implement variant file resolution; format adapters and validators implement no locale logic.
 - Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged.
+- Core owns normalized SEO data, validation, and deterministic fallback resolution; providers map source-specific fields and consumers render metadata.
 
 ## Known Issues or Constraints
 
@@ -103,6 +109,7 @@ No active implementation work is identified.
 - Localisation covers locale configuration, fallback resolution, and Git variant directories; translation workflows are not implemented.
 - No remote CMS provider is implemented.
 - No synchronization, webhook, or preview workflow is implemented.
+- Canonical URLs are supplied by content or consumers because Core does not know deployment URLs.
 - The package remains private while the pre-1.0 architecture is proven.
 
 ## Project State Authority

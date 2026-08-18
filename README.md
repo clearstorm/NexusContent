@@ -55,7 +55,7 @@ NexusContent Core
 
 # Project Status
 
-NexusContent is at version `0.1.3`, an internal private milestone in early development. The framework-neutral Core, Git JSON provider, validation pipeline, localisation foundations, Astro reference consumer, and plain Node compatibility proof are implemented. No feature is currently marked in progress; the recommended next focus is the directional `0.2.0` WordPress provider milestone.
+NexusContent is at version `0.1.4`, an internal private milestone in early development. The framework-neutral Core, Git JSON provider, validation pipeline, localisation and SEO foundations, Astro reference consumer, and plain Node compatibility proof are implemented. No feature is currently marked in progress; the recommended next focus is the directional `0.2.0` WordPress provider milestone.
 
 For authoritative project tracking:
 
@@ -501,18 +501,53 @@ Initial types may look similar to:
 ```ts
 export type ContentSource = string;
 
-export interface SeoData {
-  title?: string;
-  description?: string;
-  canonical?: string;
-}
-
 export interface MediaAsset {
   id?: string;
   url: string;
   alt?: string;
   width?: number;
   height?: number;
+}
+
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+export type JsonObject = { [key: string]: JsonValue };
+
+export interface SeoRobots {
+  index?: boolean;
+  follow?: boolean;
+}
+
+export interface SeoOpenGraph {
+  title?: string;
+  description?: string;
+  image?: MediaAsset;
+  type?: string;
+}
+
+export interface SeoTwitter {
+  card?: "summary" | "summary_large_image";
+  title?: string;
+  description?: string;
+  image?: MediaAsset;
+}
+
+export interface SeoData {
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  /** @deprecated Use `canonicalUrl` instead. */
+  canonical?: string;
+  robots?: SeoRobots;
+  openGraph?: SeoOpenGraph;
+  twitter?: SeoTwitter;
+  structuredData?: JsonObject[];
 }
 
 export interface ContentMeta {
@@ -566,6 +601,216 @@ form
 The content provider supplies normalized content.
 
 The consuming project determines the page specific schema.
+
+---
+
+# SEO Foundations
+
+Version `0.1.4` gives providers and consumers one normalized SEO contract. Core owns the data types, validation, and deterministic resolution. Providers map source-specific fields into that contract. Consumers such as Astro own HTML rendering, canonical URL construction, and deployment-specific decisions.
+
+`PageContent.seo` remains optional. Pages without SEO continue to validate and resolve normally.
+
+## Public contract
+
+The public API exports `SeoData`, `SeoRobots`, `SeoOpenGraph`, `SeoTwitter`, `JsonObject`, `JsonValue`, `ResolveSeoInput`, `SeoDefaults`, and `resolveSeo`.
+
+```ts
+export interface ResolveSeoInput {
+  seo?: SeoData;
+  title?: string;
+  excerpt?: string;
+  summary?: string;
+  featuredImage?: MediaAsset;
+}
+
+export interface SeoDefaults {
+  siteTitle?: string;
+  defaultImage?: MediaAsset;
+}
+
+export function resolveSeo(
+  input: ResolveSeoInput,
+  defaults?: SeoDefaults
+): SeoData;
+```
+
+```ts
+import { resolveSeo } from "@nexuscontent/core";
+import type { MediaAsset, SeoData } from "@nexuscontent/core";
+
+const seo: SeoData = resolveSeo(
+  {
+    seo: page.seo,
+    title: page.title,
+    excerpt: page.data.excerpt,
+    summary: page.data.summary,
+    featuredImage: page.data.featuredImage as MediaAsset | undefined
+  },
+  {
+    siteTitle: "Example Site",
+    defaultImage: { url: "https://example.com/default-social.jpg" }
+  }
+);
+```
+
+`resolveSeo` is pure: it does not mutate its input and omits unavailable fields. It uses nullish fallback semantics, so an explicit empty string is preserved.
+
+Partial `openGraph` and `twitter` sub-objects are not auto-completed with resolved fallbacks. If you supply `{ openGraph: { title: "X" } }`, only `title` is set; `description` and `image` remain absent unless they appear in the sub-object. Provide complete sub-objects when you need all fields.
+
+## Exact fallback order
+
+Resolution is deterministic:
+
+1. Title: `seo.title` → `input.title` → `defaults.siteTitle`.
+2. Description: `seo.description` → `input.excerpt` → `input.summary`.
+3. Canonical URL: `seo.canonicalUrl` → deprecated `seo.canonical`.
+4. Open Graph title: `seo.openGraph.title` → resolved title.
+5. Open Graph description: `seo.openGraph.description` → resolved description.
+6. Open Graph image: `seo.openGraph.image` → `input.featuredImage` → `defaults.defaultImage`.
+7. Twitter title: `seo.twitter.title` → resolved Open Graph title → resolved title.
+8. Twitter description: `seo.twitter.description` → resolved Open Graph description → resolved description.
+9. Twitter image: `seo.twitter.image` → resolved Open Graph image.
+
+`robots`, Open Graph `type`, Twitter `card`, and `structuredData` have no inferred defaults. The only site defaults are `siteTitle` and `defaultImage`.
+
+## Provider mapping
+
+Providers must stop source-specific SEO structures at the provider boundary. Git JSON can provide the normalized shape directly:
+
+```json
+{
+  "title": "About",
+  "seo": {
+    "title": "About Example Co",
+    "canonicalUrl": "https://example.com/about/",
+    "robots": { "index": true, "follow": true },
+    "openGraph": { "type": "website" }
+  },
+  "hero": { "heading": "About Example Co" }
+}
+```
+
+An API provider maps its native response rather than exposing it:
+
+```ts
+const page: PageContent = {
+  id: source.id,
+  key,
+  title: source.heading,
+  seo: {
+    title: source.metadata.seoTitle,
+    description: source.metadata.seoDescription,
+    canonicalUrl: source.metadata.canonicalUrl,
+    openGraph: {
+      image: source.metadata.socialImage
+        ? { url: source.metadata.socialImage.url }
+        : undefined
+    }
+  },
+  data: mapPageData(source),
+  meta: { source: providerName, sourceId: source.id }
+};
+```
+
+Normalized validation checks URL, robots, social, media, Twitter card, and structured-data fields. `structuredData` must be an array of plain JSON-compatible objects: no functions, `undefined`, symbols, `bigint`, non-finite numbers, class instances, dates, or circular references.
+
+## Complete Astro usage
+
+Resolve SEO in the page, pass it through the layout, and render it in a consumer-owned component:
+
+```astro
+---
+import { resolveSeo } from "@nexuscontent/core";
+import type { MediaAsset } from "@nexuscontent/core";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const page = await nexus.getPage<{
+  summary?: string;
+  featuredImage?: MediaAsset;
+}>("about");
+if (!page) throw new Error("Required content was not found.");
+
+const seo = resolveSeo(
+  {
+    title: page.title,
+    summary: page.data.summary,
+    featuredImage: page.data.featuredImage,
+    seo: {
+      ...page.seo,
+      canonicalUrl: new URL("/about/", siteUrl).href
+    }
+  },
+  { siteTitle: "Example Site", defaultImage: { url: `${siteUrl}/social.jpg` } }
+);
+---
+
+<BaseLayout seo={seo}>
+  <h1>{page.title}</h1>
+</BaseLayout>
+```
+
+The layout places the component in `<head>`:
+
+```astro
+---
+import NexusSeo from "../components/NexusSeo.astro";
+const { seo } = Astro.props;
+---
+<html lang="en">
+  <head>
+    <NexusSeo seo={seo} />
+  </head>
+  <body><slot /></body>
+</html>
+```
+
+The consumer component renders the normalized contract:
+
+```astro
+---
+import type { SeoData } from "@nexuscontent/core";
+import { serializeJsonLd } from "../app/serialize-json-ld";
+
+const { seo } = Astro.props as { seo: SeoData };
+const robots = [
+  seo.robots?.index === undefined ? undefined : seo.robots.index ? "index" : "noindex",
+  seo.robots?.follow === undefined ? undefined : seo.robots.follow ? "follow" : "nofollow"
+].filter(Boolean).join(", ");
+---
+{seo.title !== undefined && <title>{seo.title}</title>}
+{seo.description !== undefined && <meta name="description" content={seo.description} />}
+{seo.canonicalUrl && <link rel="canonical" href={seo.canonicalUrl} />}
+{robots && <meta name="robots" content={robots} />}
+{seo.openGraph?.title && <meta property="og:title" content={seo.openGraph.title} />}
+{seo.openGraph?.description && <meta property="og:description" content={seo.openGraph.description} />}
+{seo.openGraph?.image && <meta property="og:image" content={seo.openGraph.image.url} />}
+{seo.openGraph?.type && <meta property="og:type" content={seo.openGraph.type} />}
+{seo.twitter?.card && <meta name="twitter:card" content={seo.twitter.card} />}
+{seo.twitter?.title && <meta name="twitter:title" content={seo.twitter.title} />}
+{seo.twitter?.description && <meta name="twitter:description" content={seo.twitter.description} />}
+{seo.twitter?.image && <meta name="twitter:image" content={seo.twitter.image.url} />}
+{seo.structuredData?.map((value) => (
+  <script type="application/ld+json" is:inline set:html={serializeJsonLd(value)} />
+))}
+```
+
+JSON-LD inserted with `set:html` must be script-safe. The reference consumer escapes `<`, `>`, `&`, U+2028, and U+2029 after `JSON.stringify`:
+
+```ts
+export function serializeJsonLd(value: Record<string, unknown>): string {
+  return JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (character) =>
+    ({ "<": "\\u003c", ">": "\\u003e", "&": "\\u0026", "\u2028": "\\u2028", "\u2029": "\\u2029" })[character]!
+  );
+}
+```
+
+Do not insert unescaped external JSON into an inline script.
+
+## Exclusions and migration
+
+NexusContent does not infer canonical URLs or deployment hosts. It does not generate sitemaps, robots.txt, redirects, keywords, analytics, or scraped metadata. Provider-specific SEO plugin mappings belong in providers, not Core. Framework metadata components remain consumer code and are not exported by the package.
+
+For `0.1.3` consumers, no change is required when `seo` is absent. Existing `seo.canonical` input still resolves, but it is deprecated: rename it to `seo.canonicalUrl`. Consumers can adopt `resolveSeo` incrementally and continue rendering metadata themselves.
 
 ---
 
@@ -2122,7 +2367,7 @@ Core APIs must be stable before CLI abstractions are introduced.
 
 # Initial Milestone
 
-The current internal milestone, version `0.1.3`, proves the core architecture and its framework neutrality. It is not a public package release.
+The current internal milestone, version `0.1.4`, adds SEO foundations to the proven core architecture, framework neutrality, and localisation foundations. It is not a public package release.
 
 ## Required
 
@@ -2135,6 +2380,7 @@ The current internal milestone, version `0.1.3`, proves the core architecture an
 * content service
 * structured errors
 * optional locale configuration and fallback-chain resolution
+* normalized SEO types and deterministic `resolveSeo`
 
 ### Git Provider
 
@@ -2151,6 +2397,7 @@ The current internal milestone, version `0.1.3`, proves the core architecture an
 
 * runtime schema validation
 * clear validation errors
+* normalized SEO and JSON-compatible structured-data validation
 
 ### Astro Example
 
@@ -2161,6 +2408,7 @@ The current internal milestone, version `0.1.3`, proves the core architecture an
 * collection example
 * no direct provider calls from Astro components
 * localised variant with locale-prefixed routes in English and French
+* consumer-owned metadata rendering with safely escaped JSON-LD
 
 ### Plain Node Compatibility
 
@@ -2177,7 +2425,7 @@ The current internal milestone, version `0.1.3`, proves the core architecture an
 
 ---
 
-# Not Part of Version 0.1.3
+# Not Part of Version 0.1.4
 
 Do not implement the following during the current milestone:
 
@@ -2199,10 +2447,14 @@ Do not implement the following during the current milestone:
 * universal section renderer
 * CLI
 * translation workflows and per-locale publishing
+* automatic canonical URL construction
+* sitemap, robots.txt, redirects, metadata scraping, keyword analysis, or analytics
+* provider-specific SEO plugin behavior in Core
+* framework SEO rendering components in the public package
 
 These features come later.
 
-The purpose of `0.1.3` is to prove the content architecture, its framework neutrality, and its localisation foundations.
+The purpose of `0.1.4` is to add provider-neutral SEO foundations without moving rendering or deployment knowledge into Core.
 
 ---
 

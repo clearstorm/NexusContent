@@ -1,0 +1,35 @@
+---
+import NexusSeo from "../../../../src/components/NexusSeo.astro";
+
+const dangerous = "</script><script>globalThis.compromised = true</script>";
+const seo = {
+  title: "SEO & safety",
+  description: 'Escaped "metadata" <value>',
+  canonicalUrl: "https://example.com/page",
+  robots: { index: false, follow: true },
+  openGraph: {
+    title: "Open Graph title",
+    description: "Open Graph description",
+    image: { url: "https://example.com/open-graph.jpg" },
+    type: "article"
+  },
+  twitter: {
+    card: "summary_large_image" as const,
+    title: "Twitter title",
+    description: "Twitter description",
+    image: { url: "https://example.com/twitter.jpg" }
+  },
+  structuredData: [
+    { "@context": "https://schema.org", "@type": "WebPage", name: dangerous },
+    { "@context": "https://schema.org", "@type": "BreadcrumbList" }
+  ]
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <NexusSeo seo={seo} />
+  </head>
+  <body></body>
+</html>

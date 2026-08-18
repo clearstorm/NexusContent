@@ -3,7 +3,29 @@
   "slug": "home",
   "seo": {
     "title": "NexusContent Example",
-    "description": "A static Astro site powered by NexusContent and a Git content repository."
+    "description": "A static Astro site powered by NexusContent and a Git content repository.",
+    "canonicalUrl": "https://example.com/",
+    "robots": {
+      "index": true,
+      "follow": true
+    },
+    "openGraph": {
+      "type": "website",
+      "image": {
+        "url": "https://example.com/social.jpg",
+        "alt": "NexusContent"
+      }
+    },
+    "twitter": {
+      "card": "summary_large_image"
+    },
+    "structuredData": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "NexusContent Example"
+      }
+    ]
   },
   "hero": {
     "heading": "Astro owns the website.",

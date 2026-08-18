@@ -4,6 +4,8 @@ import Hero from "../../components/Hero.astro";
 import CTA from "../../components/CTA.astro";
 import { getPageContent } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
+import { resolveSeo } from "@nexuscontent/core";
+import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
 
 export function getStaticPaths() {
   return supportedLocales.map((locale) => ({ params: { locale } }));
@@ -35,11 +37,15 @@ const cta = page.data.cta as {
   label: string;
   href: string;
 };
+
+const seo = resolveSeo({
+  title: page.title ?? "Services",
+  seo: { ...page.seo, canonicalUrl: canonicalUrl(`/${locale}/services/`) }
+}, siteSeoDefaults());
 ---
 
 <BaseLayout
-  title={page.title ?? "Services"}
-  description={page.seo?.description}
+  seo={seo}
   locale={locale}
 >
   <Hero {...hero} locale={locale} />

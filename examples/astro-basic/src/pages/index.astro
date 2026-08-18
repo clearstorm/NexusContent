@@ -5,6 +5,8 @@ import Services from "../components/Services.astro";
 import Testimonials from "../components/Testimonials.astro";
 import CTA from "../components/CTA.astro";
 import { getPageContent } from "../nexus";
+import { resolveSeo } from "@nexuscontent/core";
+import { canonicalUrl, siteSeoDefaults } from "../app/seo";
 
 const page = await getPageContent("home");
 
@@ -36,12 +38,14 @@ const cta = page.data.cta as {
   label: string;
   href: string;
 };
+
+const seo = resolveSeo({
+  title: page.title ?? "NexusContent Example",
+  seo: { ...page.seo, canonicalUrl: canonicalUrl("/") }
+}, siteSeoDefaults);
 ---
 
-<BaseLayout
-  title={page.title ?? "NexusContent Example"}
-  description={page.seo?.description}
->
+<BaseLayout seo={seo}>
   <Hero {...hero} />
   <Services {...services} />
   <Testimonials {...testimonials} />

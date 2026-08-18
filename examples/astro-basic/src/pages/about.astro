@@ -3,6 +3,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import CTA from "../components/CTA.astro";
 import { getPageContent } from "../nexus";
+import { resolveSeo } from "@nexuscontent/core";
+import { canonicalUrl, siteSeoDefaults } from "../app/seo";
 
 const page = await getPageContent("about");
 
@@ -26,12 +28,14 @@ const cta = page.data.cta as {
   label: string;
   href: string;
 };
+
+const seo = resolveSeo({
+  title: page.title ?? "About",
+  seo: { ...page.seo, canonicalUrl: canonicalUrl("/about/") }
+}, siteSeoDefaults);
 ---
 
-<BaseLayout
-  title={page.title ?? "About"}
-  description={page.seo?.description}
->
+<BaseLayout seo={seo}>
   <Hero {...hero} />
 
   <section class="section mission">

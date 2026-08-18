@@ -74,6 +74,46 @@ test("accepts valid page content", () => {
   assert.doesNotThrow(() => validatePageContent(validPage));
 });
 
+test("accepts complete normalized SEO and legacy canonical strings", () => {
+  const page: PageContent = {
+    ...validPage,
+    seo: {
+      title: "Home",
+      description: "The homepage.",
+      canonicalUrl: "https://example.com/",
+      canonical: "/legacy-canonical",
+      robots: { index: true, follow: false },
+      openGraph: {
+        title: "Open Graph title",
+        description: "Open Graph description",
+        type: "website",
+        image: {
+          id: "social",
+          url: "https://example.com/social.jpg",
+          alt: "Social image",
+          width: 1200,
+          height: 630
+        }
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Twitter title",
+        description: "Twitter description",
+        image: { url: "https://example.com/twitter.jpg" }
+      },
+      structuredData: [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          breadcrumbs: [{ name: "Home", position: 1 }]
+        }
+      ]
+    }
+  };
+
+  assert.doesNotThrow(() => validatePageContent(page));
+});
+
 test("accepts minimal valid page content", () => {
   const minimal: PageContent = {
     id: "home",
@@ -148,6 +188,48 @@ test("rejects page content with invalid seo types", () => {
       return true;
     }
   );
+});
+
+test("rejects invalid canonical, robots, social, media, and structured SEO fields", () => {
+  const invalidSeoCases: Array<{ seo: unknown; path: string }> = [
+    { seo: { canonicalUrl: "/relative" }, path: "seo.canonicalUrl" },
+    { seo: { robots: { index: "yes" } }, path: "seo.robots.index" },
+    { seo: { openGraph: { title: 42 } }, path: "seo.openGraph.title" },
+    {
+      seo: { openGraph: { image: { url: 42 } } },
+      path: "seo.openGraph.image.url"
+    },
+    { seo: { twitter: { card: "large" } }, path: "seo.twitter.card" },
+    {
+      seo: { twitter: { image: { width: "1200", url: "/image.jpg" } } },
+      path: "seo.twitter.image.width"
+    },
+    {
+      seo: { structuredData: [{ "@type": "WebPage", invalid: undefined }] },
+      path: "seo.structuredData.0"
+    },
+    {
+      seo: { structuredData: [new Date("2026-08-17T00:00:00Z")] },
+      path: "seo.structuredData.0"
+    }
+  ];
+
+  for (const invalid of invalidSeoCases) {
+    const broken = { ...validPage, seo: invalid.seo } as unknown as PageContent;
+
+    assert.throws(
+      () => validatePageContent(broken),
+      (error: unknown) => {
+        assert.ok(error instanceof ValidationError);
+        assert.ok(
+          error.issues.some((issue) => issue.path === invalid.path),
+          `expected a validation issue at ${invalid.path}`
+        );
+        assert.match(error.reason ?? "", new RegExp(invalid.path.replaceAll(".", "\\.")));
+        return true;
+      }
+    );
+  }
 });
 
 test("validation errors carry structured details", () => {

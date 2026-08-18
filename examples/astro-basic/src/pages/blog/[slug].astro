@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollectionContent, getItemContent } from "../../nexus";
+import { resolveSeo } from "@nexuscontent/core";
+import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
 
 export async function getStaticPaths() {
   const paths: {
@@ -28,12 +30,33 @@ if (!post) {
   throw new Error(`Required content "${key ?? slug}" was not found.`);
 }
 
-const { body, date } = post.data as { body?: string; date?: string };
+const { body, date, excerpt } = post.data as {
+  body?: string;
+  date?: string;
+  excerpt?: string;
+};
+const postTitle = post.title ?? "Post";
+const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
+const seo = resolveSeo({
+  title: `${postTitle} - NexusContent Example`,
+  seo: {
+    description: excerpt,
+    canonicalUrl: postUrl,
+    openGraph: { type: "article" },
+    structuredData: [
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: postTitle,
+        url: postUrl,
+        ...(date ? { datePublished: date } : {})
+      }
+    ]
+  }
+}, siteSeoDefaults);
 ---
 
-<BaseLayout
-  title={`${post.title ?? "Post"} - NexusContent Example`}
->
+<BaseLayout seo={seo}>
   <article class="post">
     <p class="back">
       <a href="/blog">← Blog</a>

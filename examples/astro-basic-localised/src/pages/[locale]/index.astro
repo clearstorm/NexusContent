@@ -6,6 +6,8 @@ import Testimonials from "../../components/Testimonials.astro";
 import CTA from "../../components/CTA.astro";
 import { getPageContent } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
+import { resolveSeo } from "@nexuscontent/core";
+import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
 
 export function getStaticPaths() {
   return supportedLocales.map((locale) => ({ params: { locale } }));
@@ -43,11 +45,15 @@ const cta = page.data.cta as {
   label: string;
   href: string;
 };
+
+const seo = resolveSeo({
+  title: page.title ?? "NexusContent Example",
+  seo: { ...page.seo, canonicalUrl: canonicalUrl(`/${locale}/`) }
+}, siteSeoDefaults());
 ---
 
 <BaseLayout
-  title={page.title ?? "NexusContent Example"}
-  description={page.seo?.description}
+  seo={seo}
   locale={locale}
 >
   <Hero {...hero} locale={locale} />

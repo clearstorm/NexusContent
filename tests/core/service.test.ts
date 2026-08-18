@@ -140,6 +140,31 @@ test("getPage returns normalized content from the provider", async () => {
   assert.equal(page.meta.source, "mock");
 });
 
+test("getPage preserves normalized SEO mapped by a custom provider", async () => {
+  const { service, mock } = buildService();
+  mock.setPage({
+    id: "home",
+    key: "home",
+    title: "Home",
+    seo: {
+      canonicalUrl: "https://example.com/",
+      openGraph: {
+        title: "Mapped provider title",
+        image: { url: "https://example.com/social.jpg" }
+      }
+    },
+    data: {},
+    meta: { source: "custom-api" }
+  });
+
+  const page = await service.getPage("home");
+
+  assert.ok(page);
+  assert.equal(page.seo?.openGraph?.title, "Mapped provider title");
+  assert.equal(page.seo?.openGraph?.image?.url, "https://example.com/social.jpg");
+  assert.equal(page.meta.source, "custom-api");
+});
+
 test("getPage normalizes a missing meta source to the provider name", async () => {
   const { service, mock } = buildService();
   mock.setPage({ id: "home", key: "home", data: {} });

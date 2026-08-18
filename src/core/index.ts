@@ -3,6 +3,8 @@ export type {
   ContentConfig,
   ContentMeta,
   ContentSource,
+  JsonObject,
+  JsonValue,
   LocaleConfig,
   LocaleVariantInfo,
   MediaAsset,
@@ -13,10 +15,16 @@ export type {
   ProviderConfig,
   RetrievalOptions,
   SeoData,
+  SeoOpenGraph,
+  SeoRobots,
+  SeoTwitter,
   SettingsContent,
   SingletonContent,
   TranslationState
 } from "./types.ts";
+
+export { resolveSeo } from "./seo.ts";
+export type { ResolveSeoInput, SeoDefaults } from "./seo.ts";
 
 export type { ContentProvider, ProviderRetrievalOptions } from "./provider.ts";
 

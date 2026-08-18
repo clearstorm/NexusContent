@@ -20,7 +20,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
-| `core.normalized-types` Normalized content types | implemented | 0.1.0 | - | Public page, collection, metadata, media, and SEO types. |
+| `core.normalized-types` Normalized content types | implemented | 0.1.0 | - | Public page, collection, metadata, media, and baseline SEO types. |
 | `core.provider-interface` Provider interface | implemented | 0.1.0 | - | Framework-neutral `getPage`, `getCollection`, and `getItem` contract. |
 | `core.registry` Provider registry | implemented | 0.1.0 | - | Registration, duplicate detection, and provider lookup. |
 | `core.configuration` Content configuration | implemented | 0.1.0 | - | Maps logical content names to provider names and keys. |
@@ -66,6 +66,16 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `validation.normalized` Normalized content validation | implemented | 0.1.0 | - | Zod validates provider output after service normalization. |
 | `validation.consumer-schema` Consumer schema validation | implemented | 0.1.0 | - | Public helper validates untrusted content against consumer-owned Zod schemas. |
 | `validation.errors` Field-level validation errors | implemented | 0.1.0 | - | Reports issue paths and messages with provider and content context. |
+
+## SEO
+
+| Feature | Status | Introduced | Target | Notes |
+|---|---|---|---|---|
+| `seo.normalized-contract` Normalized SEO contract | implemented | 0.1.4 | - | Public robots, Open Graph, Twitter, canonical URL, JSON-compatible structured data, and media types; `PageContent.seo` remains optional and legacy `canonical` is deprecated. |
+| `seo.resolution` Deterministic SEO resolution | implemented | 0.1.4 | - | Pure `resolveSeo` applies documented content and site-default fallback chains without mutating input. |
+| `seo.validation-provider-mapping` SEO validation and provider mapping | implemented | 0.1.4 | - | Zod validates normalized SEO at the provider boundary; providers map source-specific fields and the Git provider accepts normalized JSON SEO. |
+| `seo.astro-rendering` Astro SEO rendering | implemented | 0.1.4 | - | Consumer-owned reference component renders metadata and safely escaped JSON-LD in both Astro examples. |
+| `seo.automation` Advanced SEO automation | deferred | - | TBD | Automatic canonical URL construction, sitemaps, robots.txt, metadata scraping, keyword analysis, redirects, and provider-specific SEO plugin behavior require separate scope. |
 
 ## Content Operations
 

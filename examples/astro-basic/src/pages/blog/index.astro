@@ -2,16 +2,19 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/PostCard.astro";
 import { getCollectionContent } from "../../nexus";
+import { resolveSeo } from "@nexuscontent/core";
+import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
 
 const posts = await getCollectionContent("blog");
 
 const intro = "Posts from the Git content repository.";
+const seo = resolveSeo({
+  title: "Blog - NexusContent Example",
+  seo: { description: intro, canonicalUrl: canonicalUrl("/blog/") }
+}, siteSeoDefaults);
 ---
 
-<BaseLayout
-  title="Blog - NexusContent Example"
-  description={intro}
->
+<BaseLayout seo={seo}>
   <header class="page-head">
     <p class="eyebrow">Blog</p>
     <h1>{intro}</h1>

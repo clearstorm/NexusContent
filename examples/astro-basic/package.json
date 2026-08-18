@@ -1,6 +1,6 @@
 {
   "name": "@nexuscontent/example-astro-basic",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "type": "module",
   "scripts": {
