@@ -22,6 +22,7 @@
   "features": {
     "implemented": [
       "core.normalized-types",
+      "core.section-types",
       "core.provider-interface",
       "core.registry",
       "core.configuration",
@@ -40,6 +41,13 @@
       "provider.wordpress.pagination",
       "provider.wordpress.errors",
       "provider.wordpress.media",
+      "provider.wordpress.phase1.config",
+      "provider.wordpress.phase1.sections",
+      "provider.wordpress.phase1.capabilities",
+      "provider.wordpress.phase1.companion",
+      "provider.wordpress.phase1.diagnostics",
+      "provider.wordpress.phase1.error-codes",
+      "core.error-code",
       "format.adapter",
       "provider.git.json",
       "consumer.node",
@@ -115,7 +123,8 @@
     "No synchronization, webhook, or preview workflow is implemented.",
     "Localisation covers locale configuration, fallback resolution, and Git variant directories; translation workflows are not implemented.",
     "SEO canonical URLs are supplied by content or consumers; Core does not infer deployment URLs.",
-    "The package remains private while the pre-1.0 architecture is proven."
+    "The package remains private while the pre-1.0 architecture is proven.",
+    "Phase 1 WordPress contracts define configuration, sections, capabilities, companion wire format, diagnostics, and error codes without runtime behavior changes."
   ],
   "architecturalDecisions": [
     "Core is framework neutral.",
@@ -130,7 +139,8 @@
     "Multiple instances of the same provider type must remain possible.",
     "Locale resolution is centralized in Core; providers implement variant file resolution; format adapters and validators implement no locale logic.",
     "Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged.",
-    "Core owns normalized SEO data, validation, and deterministic resolution; providers map source data and consumers own metadata rendering."
+    "Core owns normalized SEO data, validation, and deterministic resolution; providers map source data and consumers own metadata rendering.",
+    "Phase 1 defines WordPress configuration contracts, section registry, companion wire protocol, and error codes without changing runtime retrieval semantics."
   ],
   "next": [
     "provider.strapi",

@@ -3,6 +3,7 @@ export interface NexusContentErrorDetails {
   operation?: string;
   content?: string;
   reason?: string;
+  code?: string;
   locale?: string;
   supportedLocales?: string[];
   chain?: string[];
@@ -13,6 +14,7 @@ export class NexusContentError extends Error {
   readonly operation?: string;
   readonly content?: string;
   readonly reason?: string;
+  readonly code?: string;
   readonly locale?: string;
   readonly supportedLocales?: string[];
   readonly chain?: string[];
@@ -24,6 +26,7 @@ export class NexusContentError extends Error {
     this.operation = details.operation;
     this.content = details.content;
     this.reason = details.reason;
+    this.code = details.code;
     this.locale = details.locale;
     this.supportedLocales = details.supportedLocales;
     this.chain = details.chain;
@@ -34,6 +37,7 @@ export class NexusContentError extends Error {
     if (this.provider !== undefined) lines.push(`Provider: ${this.provider}`);
     if (this.operation !== undefined) lines.push(`Operation: ${this.operation}`);
     if (this.content !== undefined) lines.push(`Content: ${this.content}`);
+    if (this.code !== undefined) lines.push(`Code: ${this.code}`);
     if (this.locale !== undefined) lines.push(`Locale: ${this.locale}`);
     if (this.supportedLocales !== undefined) {
       lines.push(`Supported Locales: ${this.supportedLocales.join(", ")}`);

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ContentSection<TData>` and `SectionSettings` types for structured page sections in Core.
+- `PageStatus` type (`"draft" | "published" | "archived"`) and optional `status`, `excerpt`, `featuredImage`, `modifiedAt`, and `sections` fields on `PageContent`.
+- `contentSectionSchema`, `sectionSettingsSchema`, and `pageStatusSchema` Zod validation schemas for the new section contracts.
+- Generic optional `code` field on `NexusContentErrorDetails` and `NexusContentError` for typed error classification.
+- WordPress Phase 1 configuration options: `editorMode`, `apiStrategy`, `unknownContentPolicy`, `mediaResolution`, `acf`, `fixedSections`, `customSections`, and `sectionRegistry` on `WordPressProviderOptions`.
+- WordPress Phase 1 section registry: `buildSectionRegistry`, `mergeSectionRegistry`, `lookupSectionSourceAlias`, `SectionDefinition`, `SectionRegistry`, and all 13 built-in fixed section types.
+- WordPress Phase 1 `capabilities()` method on `WordPressProvider` returning provider-facing capability report.
+- WordPress Phase 1 companion wire contracts: `WordPressPageResponse`, `WordPressPagesResponse`, `WordPressSchemaResponse`, `WordPressSectionsResponse`, `WordPressHealthResponse`, `WordPressDiagnostic`, `WordPressCapabilities`, and `WordPressProviderFacingCapabilities` with contract version 1 and reserved `companion/` namespace.
+- WordPress Phase 1 error codes: 32 typed error codes under `WORDPRESS_ERROR_CODES` covering config, HTTP, network, JSON, pagination, section, content, media, and ACF categories.
+- Canonical test fixtures for companion wire responses, source ACF sections, and invalid contract shapes.
+- Contract validation tests for section schemas, config enums, registry operations, capabilities, wire contract structure, error codes, and public exports.
+
+### Changed
+
+- Extended `PageContent` with optional canonical fields for status, excerpt, featured image, modified date, and sections; all fields remain optional and do not break existing consumers.
+- Updated `pageSchema` validation to accept the new optional fields without changing required field semantics.
+
 ## [0.2.0] - 2026-08-18
 
 WordPress provider release.

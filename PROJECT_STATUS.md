@@ -6,11 +6,11 @@
 |---|---|
 | Project name | NexusContent |
 | Current version | `0.2.0` |
-| Current milestone | `0.2.0` - WordPress provider |
+| Current milestone | `0.2.1` - WordPress Phase 1 contracts |
 | Project status | Active, early development; internal private package |
-| Current focus | Unassigned |
+| Current focus | WordPress Phase 1 contracts (unreleased) |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. No active feature implementation is identified in the repository. The recommended next focus is the directional `0.3.0` Strapi provider milestone.
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. WordPress Phase 1 contracts are implemented but unreleased. The recommended next focus is completing Phase 2 and Phase 3 or the directional `0.3.0` Strapi provider milestone.
 
 ## Current Architecture
 
@@ -32,6 +32,10 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 ## Implemented
 
 - Framework-neutral normalized content types and public exports.
+- `ContentSection`, `SectionSettings`, and `PageStatus` types for structured page sections.
+- Optional `status`, `excerpt`, `featuredImage`, `modifiedAt`, and `sections` fields on `PageContent`.
+- Zod validation schemas for sections, section settings, and page status.
+- Generic optional `code` field on `NexusContentErrorDetails` for typed error classification.
 - Shared `ContentProvider` interface.
 - Provider registration, duplicate detection, and resolution.
 - Explicit content-to-provider configuration.
@@ -47,6 +51,12 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Sequential WordPress collection pagination with verified total headers and explicit `maxPages` failure instead of silent truncation.
 - WordPress normalization for rendered content, excerpts, dates, provenance, ACF fields, taxonomy and author IDs, and embedded featured media.
 - Actionable WordPress configuration, HTTP, network, timeout, JSON, payload, and pagination errors without exposing authentication headers.
+- WordPress Phase 1 configuration: editor mode, API strategy, unknown content policy, media resolution, ACF toggle, and fixed section configuration.
+- WordPress Phase 1 section registry: 13 built-in fixed section types, custom section support, source alias lookup, and deterministic registry merge.
+- WordPress Phase 1 `capabilities()` method returning provider-facing capability report.
+- WordPress Phase 1 companion wire contracts: versioned page, pages, schema, sections, and health response shapes with reserved namespace.
+- WordPress Phase 1 structured diagnostics with severity, code, message, and optional path.
+- WordPress Phase 1 typed error codes covering config, HTTP, network, JSON, pagination, section, content, media, and ACF categories.
 - Missing-content behavior, malformed JSON errors, path traversal protection, and symlink escape protection.
 - Provider-neutral singleton retrieval from `singletons/<key>.json` for arbitrary singleton content.
 - Dedicated navigation and settings retrieval from `navigation/<key>.json` and `settings/<key>.json`, with recursive navigation validation and generic settings data.
@@ -61,9 +71,9 @@ See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 ## Current Work
 
-No active implementation work is identified.
+WordPress Phase 1 contracts are implemented. Phase 1 establishes the configuration, section registry, companion wire format, capabilities, diagnostics, and error code contracts without changing runtime retrieval behavior.
 
-**Recommended next focus:** define and implement the `0.3.0` Strapi provider without changing Core contracts unless provider testing demonstrates a deliberate need.
+**Recommended next focus:** complete Phase 2 (runtime section loading and normalization from ACF fields) or Phase 3 (companion endpoint integration), or proceed to the `0.3.0` Strapi provider milestone.
 
 ## Next
 

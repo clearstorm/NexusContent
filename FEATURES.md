@@ -21,6 +21,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
 | `core.normalized-types` Normalized content types | implemented | 0.1.0 | - | Public page, collection, metadata, media, and baseline SEO types. |
+| `core.section-types` Content section types | implemented | 0.2.1 | - | `ContentSection`, `SectionSettings`, and `PageStatus` types for structured page sections. |
 | `core.provider-interface` Provider interface | implemented | 0.1.0 | - | Framework-neutral `getPage`, `getCollection`, and `getItem` contract. |
 | `core.registry` Provider registry | implemented | 0.1.0 | - | Registration, duplicate detection, and provider lookup. |
 | `core.configuration` Content configuration | implemented | 0.1.0 | - | Maps logical content names to provider names and keys. |
@@ -44,6 +45,13 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `provider.wordpress.pagination` WordPress pagination | implemented | 0.2.0 | - | Loads collection pages sequentially, verifies WordPress total headers, and throws rather than truncating at `maxPages`. |
 | `provider.wordpress.errors` WordPress errors | implemented | 0.2.0 | - | Actionable configuration, HTTP, network, timeout, JSON, payload, and pagination errors without header secret leakage. |
 | `provider.wordpress.media` WordPress featured media | implemented | 0.2.0 | - | Requests embedded featured media and maps its basic fields to `MediaAsset`. |
+| `provider.wordpress.phase1.config` WordPress Phase 1 configuration | implemented | 0.2.1 | - | Editor mode, API strategy, unknown content policy, media resolution, ACF toggle, and fixed section configuration options. |
+| `provider.wordpress.phase1.sections` WordPress Phase 1 section registry | implemented | 0.2.1 | - | Runtime section definitions, source aliases, built-in mappings, custom section support, and deterministic registry merge. |
+| `provider.wordpress.phase1.capabilities` WordPress Phase 1 provider capabilities | implemented | 0.2.1 | - | `capabilities()` method returns provider-facing capability report for editor mode, ACF, media, sections, and future operations. |
+| `provider.wordpress.phase1.companion` WordPress Phase 1 companion wire contracts | implemented | 0.2.1 | - | Contract versioned companion page, pages, schema, sections, and health response shapes with reserved namespace. |
+| `provider.wordpress.phase1.diagnostics` WordPress Phase 1 diagnostic contracts | implemented | 0.2.1 | - | Structured diagnostic entries with severity, code, message, and optional path for companion wire responses. |
+| `provider.wordpress.phase1.error-codes` WordPress Phase 1 error codes | implemented | 0.2.1 | - | Typed WordPress error codes covering config, HTTP, network, JSON, pagination, section, content, media, and ACF error categories. |
+| `core.error-code` Generic error code field | implemented | 0.2.1 | - | Optional `code` field on `NexusContentErrorDetails` and `NexusContentError` for typed error classification. |
 | `provider.strapi` Strapi provider | planned | - | 0.3.0 | Directional target after WordPress validates the provider contract. |
 | `provider.additional` Additional CMS and API providers | deferred | - | TBD | Directus, Sanity, Contentful, Payload, Storyblok, DatoCMS, and custom APIs require separate scope. |
 

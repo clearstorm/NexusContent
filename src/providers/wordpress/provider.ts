@@ -17,6 +17,28 @@ import {
   type WordPressContentData,
   type WordPressNormalizeContext
 } from "./normalize.ts";
+import type {
+  WordPressAcfConfig,
+  WordPressApiStrategy,
+  WordPressEditorMode,
+  WordPressFixedSectionConfig,
+  WordPressMediaResolution,
+  WordPressUnknownContentPolicy
+} from "./config.ts";
+import {
+  DEFAULT_WORDPRESS_ACF_ENABLED,
+  DEFAULT_WORDPRESS_API_STRATEGY,
+  DEFAULT_WORDPRESS_EDITOR_MODE,
+  DEFAULT_WORDPRESS_MEDIA_RESOLUTION,
+  DEFAULT_WORDPRESS_UNKNOWN_CONTENT_POLICY,
+  isValidApiStrategy,
+  isValidEditorMode,
+  isValidMediaResolution,
+  isValidUnknownContentPolicy
+} from "./config.ts";
+import type { SectionDefinition } from "./sections.ts";
+import type { SectionRegistry } from "./sections.ts";
+import type { WordPressProviderFacingCapabilities } from "./responses.ts";
 
 export interface WordPressCollectionConfig {
   endpoint: string;
@@ -30,6 +52,14 @@ export interface WordPressProviderOptions {
   perPage?: number;
   maxPages?: number;
   timeoutMs?: number;
+  editorMode?: WordPressEditorMode;
+  apiStrategy?: WordPressApiStrategy;
+  unknownContentPolicy?: WordPressUnknownContentPolicy;
+  mediaResolution?: WordPressMediaResolution;
+  acf?: WordPressAcfConfig;
+  fixedSections?: Partial<Record<string, WordPressFixedSectionConfig>>;
+  customSections?: ReadonlyArray<SectionDefinition>;
+  sectionRegistry?: SectionRegistry;
 }
 
 const DEFAULT_PER_PAGE = 100;
@@ -42,6 +72,12 @@ export class WordPressProvider implements ContentProvider {
   private readonly collections: Map<string, string>;
   private readonly maxPages: number;
   private readonly perPage: number;
+  readonly editorMode: WordPressEditorMode;
+  readonly apiStrategy: WordPressApiStrategy;
+  readonly unknownContentPolicy: WordPressUnknownContentPolicy;
+  readonly mediaResolution: WordPressMediaResolution;
+  readonly acfEnabled: boolean;
+  readonly sectionRegistry: SectionRegistry | undefined;
 
   constructor(options: WordPressProviderOptions) {
     this.name = options?.name ?? "wordpress";
@@ -62,6 +98,33 @@ export class WordPressProvider implements ContentProvider {
       "timeoutMs",
       this.name
     );
+    this.editorMode = validateEnumOption(
+      options?.editorMode ?? DEFAULT_WORDPRESS_EDITOR_MODE,
+      "editorMode",
+      this.name,
+      isValidEditorMode
+    );
+    this.apiStrategy = validateEnumOption(
+      options?.apiStrategy ?? DEFAULT_WORDPRESS_API_STRATEGY,
+      "apiStrategy",
+      this.name,
+      isValidApiStrategy
+    );
+    this.unknownContentPolicy = validateEnumOption(
+      options?.unknownContentPolicy ?? DEFAULT_WORDPRESS_UNKNOWN_CONTENT_POLICY,
+      "unknownContentPolicy",
+      this.name,
+      isValidUnknownContentPolicy
+    );
+    this.mediaResolution = validateEnumOption(
+      options?.mediaResolution ?? DEFAULT_WORDPRESS_MEDIA_RESOLUTION,
+      "mediaResolution",
+      this.name,
+      isValidMediaResolution
+    );
+    this.acfEnabled =
+      options?.acf?.enabled ?? DEFAULT_WORDPRESS_ACF_ENABLED;
+    this.sectionRegistry = options?.sectionRegistry;
 
     this.collections = new Map([["posts", "posts"]]);
     for (const [collection, config] of Object.entries(options?.collections ?? {})) {
@@ -83,6 +146,21 @@ export class WordPressProvider implements ContentProvider {
       providerName: this.name,
       timeoutMs
     });
+  }
+
+  capabilities(): WordPressProviderFacingCapabilities {
+    return {
+      visualEditor: this.editorMode === "visual",
+      codeEditor: this.editorMode === "code",
+      blocksEditor: this.editorMode === "blocks",
+      acfFields: this.acfEnabled,
+      mediaLibrary: this.mediaResolution !== "off",
+      customPostTypes: this.collections.size > 1,
+      sections: this.sectionRegistry !== undefined,
+      localeAware: false,
+      previewSupport: false,
+      webhookSupport: false
+    };
   }
 
   async getPage<TData = WordPressContentData>(
@@ -411,6 +489,18 @@ function readPaginationHeader(headers: Headers, name: string): number | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function validateEnumOption<T extends string>(
+  value: T,
+  option: string,
+  provider: string,
+  predicate: (v: string) => v is T
+): T {
+  if (!predicate(value)) {
+    throw configurationError(provider, `${option} has an invalid value.`);
+  }
+  return value;
 }
 
 function configurationError(provider: string, reason: string): ProviderError {

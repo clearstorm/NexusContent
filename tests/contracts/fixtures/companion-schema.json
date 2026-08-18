@@ -1,0 +1,31 @@
+{
+  "contractVersion": 1,
+  "contract": "companion-schema",
+  "sections": [
+    {
+      "type": "hero",
+      "sourceType": "hero",
+      "fields": [
+        { "name": "heading", "type": "string", "required": true },
+        { "name": "subheading", "type": "string" }
+      ]
+    },
+    {
+      "type": "features",
+      "sourceType": "features",
+      "fields": [
+        { "name": "items", "type": "json", "required": true }
+      ]
+    }
+  ],
+  "capabilities": {
+    "visualEditor": false,
+    "codeEditor": false,
+    "blocksEditor": true,
+    "acfFields": true,
+    "mediaLibrary": true,
+    "customPostTypes": false,
+    "sections": true
+  },
+  "diagnostics": []
+}

@@ -1,0 +1,12 @@
+{
+  "acfKey": "section_hero",
+  "fallbackType": "hero",
+  "label": "Hero Section",
+  "fields": {
+    "heading": { "type": "text", "required": true },
+    "subheading": { "type": "text" },
+    "background_image": { "type": "image" },
+    "cta_text": { "type": "text" },
+    "cta_url": { "type": "url" }
+  }
+}

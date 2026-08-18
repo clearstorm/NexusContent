@@ -124,6 +124,43 @@ The exit criteria are satisfied by `0.1.4`.
 
 The exit criteria are satisfied by `0.2.0`.
 
+## 0.2.1 - WordPress Phase 1 Contracts
+
+**State:** Implemented but unreleased. Internal scope change from the originally planned `0.2.0` WordPress provider scope. Included in the upcoming `0.2.1` package release.
+
+**Goal:** Define WordPress configuration contracts, section registry, companion wire protocol, provider capabilities, diagnostics, and typed error codes without changing runtime retrieval semantics.
+
+**Implemented capabilities:**
+
+- Core `ContentSection<TData>`, `SectionSettings`, and `PageStatus` types for structured page sections, added as optional fields on `PageContent`.
+- WordPress config enums and defaults: `WordPressEditorMode`, `WordPressApiStrategy`, `WordPressUnknownContentPolicy`, `WordPressMediaResolution`, `WordPressAcfConfig`, `WordPressFixedSectionConfig`.
+- Constructor validation rejecting invalid enum values for `editorMode`, `apiStrategy`, `unknownContentPolicy`, and `mediaResolution`.
+- Runtime section registry with 13 built-in section definitions using canonical `content/<type>` source type convention, `sourceKey` ACF field group identifiers, custom section support, deterministic registry merge, and ACF key resolution.
+- Companion wire contract types and Zod validation schemas for `companion-page`, `companion-pages`, `companion-schema`, `companion-sections`, and `companion-health` responses with contract version, diagnostics, and reserved namespace.
+- `WordPressProviderFacingCapabilities` type and `capabilities()` method on `WordPressProvider` returning provider-facing capability report for editor mode, ACF, media, sections, and future operations.
+- 32 typed WordPress error codes organized by category: configuration, HTTP, network, JSON, pagination, section, content, media, and ACF errors.
+- Optional generic `code` field on `NexusContentErrorDetails` and `NexusContentError` for typed error classification across all providers.
+- Diagnostic severity enum, diagnostic entry schema, and structured diagnostic support for companion wire responses.
+- JSON fixture-based contract tests, Zod schema validation tests, provider config validation tests, and public export verification.
+
+**Explicit exclusions:**
+
+- No changes to existing runtime retrieval semantics; `getPage`, `getCollection`, and `getItem` behave identically to `0.2.0`.
+- No companion wire protocol HTTP endpoint implementation; only types and schemas are defined.
+- No shortcode conversion, Gutenberg renderer, taxonomy cache, media synchronization, plugin SEO, or WordPress localisation-plugin integration.
+- No preview, webhooks, mutations, synchronization, retries, or caching.
+- No rendering, parsing, or transport behavior beyond existing provider boundary.
+- No new runtime dependencies; Zod validation schemas are internal to the companion contract definitions.
+
+**Exit criteria:**
+
+- All existing `0.2.0` tests, type checks, and builds remain green.
+- Phase 1 contract tests and Zod validation tests pass.
+- Provider constructor validates enum options and rejects invalid configuration.
+- Section registry uses canonical `content/<type>` naming convention.
+- Public exports include all new types, schemas, and predicates.
+- Project state documentation is synchronized.
+
 ## 0.2.x - Localisation Continuation
 
 **State:** Directional. These items remain `planned` after the `0.2.0` WordPress milestone and do not block the recommended `0.3.0` Strapi work.

@@ -1,0 +1,33 @@
+{
+  "id": "1",
+  "key": "home",
+  "slug": "home",
+  "title": "Home",
+  "status": "published",
+  "excerpt": "Welcome to our site",
+  "modifiedAt": "2026-08-18T10:00:00Z",
+  "sections": [
+    {
+      "type": "hero",
+      "settings": { "visible": true },
+      "data": { "heading": "Welcome", "subheading": "Hello world" }
+    },
+    {
+      "type": "features",
+      "data": { "items": [{ "title": "Feature 1" }] }
+    }
+  ],
+  "seo": {
+    "title": "Home",
+    "description": "The homepage"
+  },
+  "data": {
+    "content": "<p>Home content</p>",
+    "hero": { "heading": "Welcome" }
+  },
+  "meta": {
+    "source": "wordpress",
+    "sourceId": "1",
+    "updatedAt": "2026-08-18T10:00:00Z"
+  }
+}

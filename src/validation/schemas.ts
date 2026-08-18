@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { JsonObject, NavigationItem } from "../core/types.ts";
+import type { JsonObject, NavigationItem, PageStatus } from "../core/types.ts";
 
 export const mediaAssetSchema = z.object({
   id: z.string().optional(),
@@ -92,6 +92,23 @@ export const contentMetaSchema = z.object({
 
 export const dataSchema = z.record(z.string(), z.unknown());
 
+export const sectionSettingsSchema = z.record(
+  z.string(),
+  z.unknown()
+);
+
+export const contentSectionSchema = z.object({
+  type: z.string(),
+  settings: sectionSettingsSchema.optional(),
+  data: dataSchema
+});
+
+export const pageStatusSchema: z.ZodType<PageStatus> = z.enum([
+  "draft",
+  "published",
+  "archived"
+]);
+
 export const navigationItemSchema: z.ZodType<NavigationItem> = z.lazy(() =>
   z.object({
     label: z.string(),
@@ -121,6 +138,11 @@ export const pageSchema = z.object({
   key: z.string(),
   slug: z.string().optional(),
   title: z.string().optional(),
+  status: pageStatusSchema.optional(),
+  excerpt: z.string().optional(),
+  featuredImage: mediaAssetSchema.optional(),
+  modifiedAt: z.string().optional(),
+  sections: z.array(contentSectionSchema).optional(),
   seo: seoSchema.optional(),
   data: dataSchema,
   meta: contentMetaSchema

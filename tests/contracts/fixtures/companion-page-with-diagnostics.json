@@ -1,0 +1,21 @@
+{
+  "contractVersion": 1,
+  "contract": "companion-page",
+  "id": "1",
+  "key": "home",
+  "sections": [
+    {
+      "type": "custom-widget",
+      "data": { "text": "Hello" }
+    }
+  ],
+  "rawFields": {},
+  "diagnostics": [
+    {
+      "code": "wordpress/section/unknown-type",
+      "message": "Section type \"custom-widget\" is not in the registry",
+      "severity": "warning",
+      "path": "sections.0"
+    }
+  ]
+}

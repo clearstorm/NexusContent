@@ -1813,6 +1813,14 @@ export interface WordPressProviderOptions {
   perPage?: number; // default: 100; valid range: 1..100
   maxPages?: number; // default: 100; positive integer
   timeoutMs?: number; // default: 10000; positive integer
+  editorMode?: "visual" | "code" | "blocks"; // default: "blocks"
+  apiStrategy?: "rest-v2" | "rest-v1" | "application-password"; // default: "rest-v2"
+  unknownContentPolicy?: "ignore" | "throw"; // default: "ignore"
+  mediaResolution?: "embed" | "fetch" | "off"; // default: "embed"
+  acf?: { enabled: boolean; fieldPrefix?: string }; // default: { enabled: true }
+  fixedSections?: Partial<Record<string, { visible: boolean; background?: string; containerClass?: string }>>;
+  customSections?: ReadonlyArray<SectionDefinition>;
+  sectionRegistry?: SectionRegistry;
 }
 ```
 
@@ -1922,7 +1930,7 @@ WordPress response objects stop at the provider boundary. Core remains unaware o
 
 ## Public exports
 
-The package root exports `WordPressProvider` and the `WordPressProviderOptions`, `WordPressCollectionConfig`, and `WordPressContentData` types.
+The package root exports `WordPressProvider` and the `WordPressProviderOptions`, `WordPressProviderFacingCapabilities`, and `WordPressContentData` types. Phase 1 adds configuration enums, section registry utilities, companion wire contract types and Zod validation schemas, typed error codes, and provider capabilities.
 
 ---
 
@@ -2520,7 +2528,7 @@ Core APIs must be stable before CLI abstractions are introduced.
 
 # Current Milestone
 
-The current internal milestone, version `0.2.0`, adds the WordPress provider to the proven Core, Git provider, framework-neutrality, localisation, and SEO foundations. It was released internally on 2026-08-18 and is not a public package release.
+The current internal milestone, version `0.2.1`, extends the WordPress provider with Phase 1 contracts. The `0.2.0` WordPress provider base was released internally on 2026-08-18. Phase 1 adds configuration validation, section registry, companion wire protocols, provider capabilities, diagnostics, and typed error codes without changing runtime retrieval semantics. No public package release has been made.
 
 ## Required
 
@@ -2534,6 +2542,7 @@ The current internal milestone, version `0.2.0`, adds the WordPress provider to 
 * structured errors
 * optional locale configuration and fallback-chain resolution
 * normalized SEO types and deterministic `resolveSeo`
+* `ContentSection<TData>`, `SectionSettings`, and `PageStatus` types for structured page sections
 
 ### Git Provider
 
@@ -2554,6 +2563,12 @@ The current internal milestone, version `0.2.0`, adds the WordPress provider to 
 * rendered content, ACF field, relationship ID, and featured-media normalization
 * actionable provider errors and explicit header authentication
 * Astro and plain Node compatibility coverage
+* configuration enums with constructor validation (editorMode, apiStrategy, unknownContentPolicy, mediaResolution)
+* runtime section registry with 13 built-in sections, custom section support, and deterministic merge
+* companion wire contract types and Zod validation schemas (page, pages, schema, sections, health)
+* provider capabilities() method returning capability report
+* 32 typed WordPress error codes organized by category
+* generic `code` field on NexusContentErrorDetails and NexusContentError
 
 ### Validation
 
@@ -2587,7 +2602,7 @@ The current internal milestone, version `0.2.0`, adds the WordPress provider to 
 
 ---
 
-# Not Part of Version 0.2.0
+# Not Part of Version 0.2.1
 
 Do not implement the following during the current milestone:
 
@@ -2612,7 +2627,7 @@ Do not implement the following during the current milestone:
 * sitemap, robots.txt, redirects, metadata scraping, keyword analysis, or analytics
 * provider-specific SEO plugin behavior in Core
 * framework SEO rendering components in the public package
-* WordPress preview, webhooks, mutations, retries, or caching
+* WordPress preview, webhooks, mutations, retries, caching, or companion wire endpoint implementation
 * WordPress shortcode conversion, Gutenberg rendering, taxonomy caching, or media synchronization
 * WordPress plugin SEO, localisation-plugin integration, discovery, WooCommerce, or verified multisite support
 

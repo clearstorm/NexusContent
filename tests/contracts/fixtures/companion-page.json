@@ -1,0 +1,23 @@
+{
+  "contractVersion": 1,
+  "contract": "companion-page",
+  "id": "1",
+  "key": "home",
+  "slug": "home",
+  "title": "Home",
+  "status": "publish",
+  "excerpt": "Welcome to our site",
+  "modifiedAt": "2026-08-18T10:00:00Z",
+  "sections": [
+    {
+      "type": "hero",
+      "settings": { "visible": true },
+      "data": { "heading": "Welcome", "subheading": "Hello world" }
+    }
+  ],
+  "rawFields": {
+    "hero_heading": "Welcome",
+    "hero_subheading": "Hello world"
+  },
+  "diagnostics": []
+}

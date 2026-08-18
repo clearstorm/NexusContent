@@ -97,6 +97,36 @@ export interface SettingsContent<TData = Record<string, unknown>> {
   meta: ContentMeta;
 }
 
+export type PageStatus = "draft" | "published" | "archived";
+
+export interface SectionSettings {
+  readonly visible?: boolean;
+  readonly background?: string;
+  readonly containerClass?: string;
+  readonly [key: string]: JsonValue | undefined;
+}
+
+export interface ContentSection<TData = Record<string, unknown>> {
+  readonly type: string;
+  readonly settings?: SectionSettings;
+  readonly data: TData;
+}
+
+export interface PageContent<TData = Record<string, unknown>> {
+  id: string;
+  key: string;
+  slug?: string;
+  title?: string;
+  status?: PageStatus;
+  excerpt?: string;
+  featuredImage?: MediaAsset;
+  modifiedAt?: string;
+  sections?: ContentSection[];
+  seo?: SeoData;
+  data: TData;
+  meta: ContentMeta;
+}
+
 export interface CollectionItem<TData = Record<string, unknown>> {
   id: string;
   key: string;

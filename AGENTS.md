@@ -1388,15 +1388,17 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.2.0
+**CURRENT MILESTONE:** 0.2.1
 
-The WordPress provider release was completed internally on 2026-08-18. Its goal is published WordPress REST content through the existing normalized provider contract without leaking WordPress behavior into Core or consumers.
+The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The `0.2.1` Phase 1 contracts milestone extends the provider with configuration validation, section registry, companion wire protocols, provider capabilities, diagnostics, and typed error codes. Phase 1 is implemented but not yet released; no runtime retrieval semantics were changed.
 
-No implementation is currently active. The recommended next implementation milestone is the directional `0.3.0` Strapi provider.
+The recommended next implementation milestone is the directional `0.3.0` Strapi provider.
 
 ---
 
-# 33. Required Scope for 0.2.0
+# 33. Required Scope for 0.2.0 and 0.2.1
+
+## 0.2.0 WordPress Provider (Released)
 
 The released milestone includes:
 
@@ -1417,6 +1419,58 @@ The released milestone includes:
 - Plain Node compatibility coverage through the package public API.
 - `examples/astro-wordpress/` for pages and posts.
 - Deterministic provider tests and local REST fixture builds.
+
+## 0.2.1 WordPress Phase 1 Contracts (Implemented, Unreleased)
+
+### Core Section Types
+
+- `ContentSection<TData>` with optional `settings` and required `data`.
+- `SectionSettings` as JSON-compatible key-value settings.
+- `PageStatus` union type for draft, published, and archived statuses.
+- Optional `status`, `excerpt`, `featuredImage`, `modifiedAt`, and `sections` fields on `PageContent`.
+
+### WordPress Configuration
+
+- `WordPressEditorMode`, `WordPressApiStrategy`, `WordPressUnknownContentPolicy`, `WordPressMediaResolution` enums with predicate helpers and defaults.
+- `WordPressAcfConfig` and `WordPressFixedSectionConfig` configuration types.
+- Constructor validation rejecting invalid enum values for `editorMode`, `apiStrategy`, `unknownContentPolicy`, and `mediaResolution`.
+
+### Section Registry
+
+- 13 built-in section definitions with canonical `content/<type>` source type convention.
+- `sourceKey` field mapping to WordPress ACF field group identifiers.
+- `SectionDefinition`, `SectionRegistryEntry`, `SectionRegistry`, and `SectionRegistryOptions` types.
+- `buildSectionRegistry()` with custom section support and deterministic fixed section merge.
+- `mergeSectionRegistry()` overlaying custom definitions on built-in ones.
+- `lookupSectionSourceAlias()` resolving ACF field group keys to canonical section types.
+
+### Companion Wire Contracts
+
+- `WordPressPageResponse`, `WordPressPagesResponse`, `WordPressSchemaResponse`, `WordPressSectionsResponse`, `WordPressHealthResponse` TypeScript interfaces.
+- Zod validation schemas for all companion wire response types.
+- `COMPANION_CONTRACT_VERSION`, `COMPANION_WIRE_NAMESPACE`, `COMPANION_WIRE_ENDPOINTS` constants.
+- `buildCompanionContractVersion()` and `isValidCompanionContractVersion()` helpers.
+- Reserved `nc-` and `nexus-` companion prefixes.
+- Structured diagnostic entries with severity, code, message, and optional path.
+- `WordPressCapabilities` type for companion schema responses.
+
+### Provider Capabilities
+
+- `WordPressProviderFacingCapabilities` type with `visualEditor`, `codeEditor`, `blocksEditor`, `acfFields`, `mediaLibrary`, `customPostTypes`, `sections`, `localeAware`, `previewSupport`, and `webhookSupport` fields.
+- `capabilities()` method on `WordPressProvider` returning current provider capability report.
+
+### Error Codes
+
+- `WORDPRESS_ERROR_CODES` object with 32 typed error codes covering config, HTTP, network, JSON, pagination, section, content, media, and ACF error categories.
+- `WordPressErrorCode` type and `isWordPressErrorCode()` predicate.
+- Optional generic `code` field on `NexusContentErrorDetails` and `NexusContentError`.
+
+### Verification
+
+- JSON fixture-based contract tests for all companion wire response shapes.
+- Zod schema validation tests for valid and invalid fixtures.
+- Provider config validation tests for invalid enum values.
+- Public export verification for all new types, schemas, and predicates.
 
 ## Explicit Scope Boundaries
 
@@ -1473,7 +1527,7 @@ The established foundation includes:
 - Locale-aware pages and content-driven language switching
 - Static build
 - No direct provider calls from Astro components
-- Separate WordPress single-locale and localised consumers
+- Separate WordPress single-locale consumer
 
 ## Plain Node Compatibility
 
