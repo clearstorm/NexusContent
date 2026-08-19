@@ -43,11 +43,11 @@ import {
   isValidUnknownContentPolicy,
   lookupSectionSourceAlias,
   mergeSectionRegistry,
+  companionCapabilitiesResponseSchema,
   companionPageResponseSchema,
   companionPagesResponseSchema,
   companionSchemaResponseSchema,
-  companionHealthResponseSchema,
-  companionSectionsResponseSchema
+  paginationSchema
 } from "../../src/index.ts";
 import type {
   WordPressErrorCode,
@@ -55,7 +55,7 @@ import type {
   WordPressPageResponse,
   WordPressPagesResponse,
   WordPressSchemaResponse,
-  WordPressHealthResponse,
+  WordPressCapabilitiesResponse,
   SectionDefinition
 } from "../../src/index.ts";
 
@@ -189,6 +189,20 @@ test("accepts section settings with arbitrary JSON-compatible values", () => {
   assert.doesNotThrow(() => validatePageContent(page));
 });
 
+test("rejects non-JSON section settings", () => {
+  const page = {
+    ...validCanonicalPage,
+    sections: [
+      {
+        type: "hero",
+        settings: { invalid: () => "not JSON" },
+        data: {}
+      }
+    ]
+  } as unknown as PageContent;
+  assert.throws(() => validatePageContent(page), ValidationError);
+});
+
 test("accepts empty sections array", () => {
   const page = { ...validCanonicalPage, sections: [] };
   assert.doesNotThrow(() => validatePageContent(page));
@@ -200,8 +214,17 @@ test("accepts featured image on page", () => {
     featuredImage: {
       url: "https://example.com/hero.jpg",
       alt: "Hero image",
+      caption: "A hero image",
+      mimeType: "image/jpeg",
       width: 1920,
-      height: 1080
+      height: 1080,
+      sizes: {
+        thumbnail: {
+          url: "https://example.com/hero-thumbnail.jpg",
+          width: 300,
+          height: 169
+        }
+      }
     }
   };
   assert.doesNotThrow(() => validatePageContent(page));
@@ -252,59 +275,57 @@ test("page schema rejects invalid status in fixture file", () => {
 // ─── WordPress Config Enums ──────────────────────────────────────
 
 test("editor mode enum covers expected values", () => {
-  assert.ok(isValidEditorMode("visual"));
-  assert.ok(isValidEditorMode("code"));
-  assert.ok(isValidEditorMode("blocks"));
+  assert.ok(isValidEditorMode("gutenberg"));
+  assert.ok(isValidEditorMode("acf_flexible"));
+  assert.ok(isValidEditorMode("acf_fixed"));
+  assert.ok(!isValidEditorMode("blocks"));
   assert.ok(!isValidEditorMode("unknown"));
   assert.ok(!isValidEditorMode(""));
   assert.ok(!isValidEditorMode("Visual"));
 });
 
 test("API strategy enum covers expected values", () => {
-  assert.ok(isValidApiStrategy("rest-v2"));
-  assert.ok(isValidApiStrategy("rest-v1"));
-  assert.ok(isValidApiStrategy("application-password"));
+  assert.ok(isValidApiStrategy("auto"));
+  assert.ok(isValidApiStrategy("companion"));
+  assert.ok(isValidApiStrategy("core"));
   assert.ok(!isValidApiStrategy("graphql"));
   assert.ok(!isValidApiStrategy(""));
 });
 
 test("unknown content policy enum covers expected values", () => {
+  assert.ok(isValidUnknownContentPolicy("error"));
   assert.ok(isValidUnknownContentPolicy("ignore"));
-  assert.ok(isValidUnknownContentPolicy("throw"));
+  assert.ok(isValidUnknownContentPolicy("html"));
   assert.ok(!isValidUnknownContentPolicy("skip"));
   assert.ok(!isValidUnknownContentPolicy(""));
 });
 
 test("media resolution enum covers expected values", () => {
-  assert.ok(isValidMediaResolution("embed"));
-  assert.ok(isValidMediaResolution("fetch"));
-  assert.ok(isValidMediaResolution("off"));
+  assert.ok(isValidMediaResolution("none"));
+  assert.ok(isValidMediaResolution("embedded"));
+  assert.ok(isValidMediaResolution("full"));
   assert.ok(!isValidMediaResolution("lazy"));
   assert.ok(!isValidMediaResolution(""));
 });
 
 test("default config values are defined", () => {
-  assert.equal(DEFAULT_WORDPRESS_EDITOR_MODE, "blocks");
-  assert.equal(DEFAULT_WORDPRESS_API_STRATEGY, "rest-v2");
-  assert.equal(DEFAULT_WORDPRESS_UNKNOWN_CONTENT_POLICY, "ignore");
-  assert.equal(DEFAULT_WORDPRESS_MEDIA_RESOLUTION, "embed");
+  assert.equal(DEFAULT_WORDPRESS_EDITOR_MODE, "gutenberg");
+  assert.equal(DEFAULT_WORDPRESS_API_STRATEGY, "auto");
+  assert.equal(DEFAULT_WORDPRESS_UNKNOWN_CONTENT_POLICY, "error");
+  assert.equal(DEFAULT_WORDPRESS_MEDIA_RESOLUTION, "full");
   assert.equal(DEFAULT_WORDPRESS_ACF_ENABLED, true);
 });
 
 // ─── Fixed Section Types ─────────────────────────────────────────
 
-test("FIXED_SECTION_TYPES contains all 13 canonical section types with content/ prefix", () => {
-  assert.equal(FIXED_SECTION_TYPES.length, 13);
+test("section type constants distinguish built-in and fixed canonical types", () => {
+  assert.equal(BUILTIN_SECTION_TYPES.length, 12);
   const expected = [
-    "content/header", "content/footer", "content/sidebar", "content/breadcrumb",
-    "content/hero", "content/cta", "content/features", "content/testimonials",
-    "content/pricing", "content/faq", "content/team", "content/gallery", "content/newsletter"
+    "hero", "intro", "rich_text", "image_text", "features", "statistics",
+    "testimonials", "gallery", "cta", "faq", "logo_grid", "form_embed"
   ];
-  assert.deepEqual([...FIXED_SECTION_TYPES], expected);
-});
-
-test("BUILTIN_SECTION_TYPES matches FIXED_SECTION_TYPES", () => {
-  assert.deepEqual([...BUILTIN_SECTION_TYPES], [...FIXED_SECTION_TYPES]);
+  assert.deepEqual([...BUILTIN_SECTION_TYPES], expected);
+  assert.deepEqual([...FIXED_SECTION_TYPES], ["hero", "intro", "cta"]);
 });
 
 test("isFixedSectionType recognizes all built-in types", () => {
@@ -319,25 +340,26 @@ test("isFixedSectionType recognizes all built-in types", () => {
 
 test("buildSectionRegistry creates registry with all built-in sections", () => {
   const registry = buildSectionRegistry();
-  assert.equal(registry.size, 13);
-  for (const sectionType of FIXED_SECTION_TYPES) {
+  assert.equal(registry.size, 12);
+  for (const sectionType of BUILTIN_SECTION_TYPES) {
     assert.ok(registry.has(sectionType), `expected registry to contain ${sectionType}`);
   }
 });
 
 test("buildSectionRegistry applies fixed section overrides", () => {
   const fixedOverrides: Partial<Record<string, WordPressFixedSectionConfig>> = {
-    "content/hero": { visible: false, background: "#000" },
-    "content/footer": { visible: true, containerClass: "wide" }
+    hero: { visible: false, background: "#000" },
+    intro: { visible: true, containerClass: "wide" }
   };
   const registry = buildSectionRegistry({ fixedSections: fixedOverrides });
-  const hero = registry.get("content/hero");
+  const hero = registry.get("hero");
   assert.ok(hero?.fixed);
   assert.equal(hero?.fixed.visible, false);
   assert.equal(hero?.fixed.background, "#000");
-  const footer = registry.get("content/footer");
-  assert.ok(footer?.fixed);
-  assert.equal(footer?.fixed.containerClass, "wide");
+  const intro = registry.get("intro");
+  assert.ok(intro?.fixed);
+  assert.equal(intro?.fixed.containerClass, "wide");
+  assert.equal(registry.get("features")?.fixed, undefined);
 });
 
 test("buildSectionRegistry adds custom sections", () => {
@@ -351,7 +373,7 @@ test("buildSectionRegistry adds custom sections", () => {
   };
   const registry = buildSectionRegistry({ customSections: [custom] });
   assert.ok(registry.has("custom-banner"));
-  assert.equal(registry.size, 14);
+  assert.equal(registry.size, 13);
   const entry = registry.get("custom-banner");
   assert.equal(entry?.definition.sourceKey, "banner_acf");
 });
@@ -359,21 +381,23 @@ test("buildSectionRegistry adds custom sections", () => {
 test("mergeSectionRegistry overlays custom on built-in", () => {
   const base = buildSectionRegistry();
   const override: SectionDefinition = {
-    type: "content/hero",
+    type: "hero",
     sourceType: "hero_acf",
     dataSchema: { fields: [] }
   };
-  const overrideRegistry = new Map([["content/hero", { definition: override }]]);
+  const overrideRegistry = new Map([["hero", { definition: override }]]);
   const merged = mergeSectionRegistry(base, overrideRegistry);
-  const hero = merged.get("content/hero");
+  const hero = merged.get("hero");
   assert.equal(hero?.definition.sourceType, "hero_acf");
-  assert.equal(merged.size, 13);
+  assert.equal(merged.size, 12);
 });
 
 test("lookupSectionSourceAlias resolves ACF key to section type", () => {
   const registry = buildSectionRegistry();
-  assert.equal(lookupSectionSourceAlias("hero", registry), "content/hero");
-  assert.equal(lookupSectionSourceAlias("features", registry), "content/features");
+  assert.equal(lookupSectionSourceAlias("nexuscontent/hero", registry), "hero");
+  assert.equal(lookupSectionSourceAlias("acf/hero", registry), "hero");
+  assert.equal(lookupSectionSourceAlias("hero", registry), "hero");
+  assert.equal(lookupSectionSourceAlias("acf/features", registry), "features");
   assert.equal(lookupSectionSourceAlias("nonexistent", registry), undefined);
 });
 
@@ -386,9 +410,10 @@ test("WordPressProvider exposes capabilities() method", async () => {
     name: "test-capabilities"
   });
   const caps = provider.capabilities();
-  assert.equal(caps.blocksEditor, true);
-  assert.equal(caps.visualEditor, false);
-  assert.equal(caps.codeEditor, false);
+  assert.equal(caps.editorMode, "gutenberg");
+  assert.equal(caps.gutenberg, true);
+  assert.equal(caps.acfFlexible, false);
+  assert.equal(caps.acfFixed, false);
   assert.equal(caps.acfFields, true);
   assert.equal(caps.mediaLibrary, true);
   assert.equal(caps.localeAware, false);
@@ -396,16 +421,16 @@ test("WordPressProvider exposes capabilities() method", async () => {
   assert.equal(caps.webhookSupport, false);
 });
 
-test("WordPressProvider reflects editor mode in capabilities", async () => {
+test("WordPressProvider reflects ACF editor mode in capabilities", async () => {
   const { WordPressProvider } = await import("../../src/providers/wordpress/provider.ts");
-  const visualProvider = new WordPressProvider({
+  const flexibleProvider = new WordPressProvider({
     baseUrl: "https://example.com/wp-json/wp/v2",
-    name: "test-visual",
-    editorMode: "visual"
+    name: "test-flexible",
+    editorMode: "acf_flexible"
   });
-  const caps = visualProvider.capabilities();
-  assert.equal(caps.visualEditor, true);
-  assert.equal(caps.blocksEditor, false);
+  const caps = flexibleProvider.capabilities();
+  assert.equal(caps.acfFlexible, true);
+  assert.equal(caps.gutenberg, false);
 });
 
 test("WordPressProvider exposes new Phase 1 config options", async () => {
@@ -413,16 +438,16 @@ test("WordPressProvider exposes new Phase 1 config options", async () => {
   const provider = new WordPressProvider({
     baseUrl: "https://example.com/wp-json/wp/v2",
     name: "test-phase1",
-    editorMode: "code",
-    apiStrategy: "rest-v1",
-    unknownContentPolicy: "throw",
-    mediaResolution: "fetch",
+    editorMode: "acf_fixed",
+    apiStrategy: "companion",
+    unknownContentPolicy: "ignore",
+    mediaResolution: "embedded",
     acf: { enabled: false, fieldPrefix: "acf_" }
   });
-  assert.equal(provider.editorMode, "code");
-  assert.equal(provider.apiStrategy, "rest-v1");
-  assert.equal(provider.unknownContentPolicy, "throw");
-  assert.equal(provider.mediaResolution, "fetch");
+  assert.equal(provider.editorMode, "acf_fixed");
+  assert.equal(provider.apiStrategy, "companion");
+  assert.equal(provider.unknownContentPolicy, "ignore");
+  assert.equal(provider.mediaResolution, "embedded");
   assert.equal(provider.acfEnabled, false);
 });
 
@@ -432,47 +457,52 @@ test("companion page response JSON has correct contract version", () => {
   const fixture = readJsonFixture("companion-page.json") as WordPressPageResponse;
   assert.equal(fixture.contractVersion, COMPANION_CONTRACT_VERSION);
   assert.ok(isValidCompanionContractVersion(fixture.contractVersion));
-  assert.equal(fixture.contract, "companion-page");
-  assert.ok(Array.isArray(fixture.sections));
+  assert.ok(Array.isArray(fixture.data.sections));
   assert.ok(Array.isArray(fixture.diagnostics));
-  assert.ok(typeof fixture.rawFields === "object");
+  assert.ok(typeof fixture.data.rawFields === "object");
+  assert.equal(fixture.data.featuredImage?.sizes?.thumbnail?.width, 300);
 });
 
 test("companion pages response JSON has correct structure", () => {
   const fixture = readJsonFixture("companion-pages.json") as WordPressPagesResponse;
   assert.equal(fixture.contractVersion, COMPANION_CONTRACT_VERSION);
-  assert.equal(fixture.contract, "companion-pages");
-  assert.ok(Array.isArray(fixture.items));
-  assert.equal(fixture.items.length, 2);
-  assert.ok(typeof fixture.pagination === "object");
-  assert.equal(fixture.pagination.total, 2);
-  assert.equal(fixture.pagination.totalPages, 1);
+  assert.ok(Array.isArray(fixture.data.items));
+  assert.equal(fixture.data.items.length, 2);
+  assert.ok(typeof fixture.data.pagination === "object");
+  assert.equal(fixture.data.pagination.total, 2);
+  assert.equal(fixture.data.pagination.totalPages, 1);
 });
 
 test("companion schema response JSON has correct structure", () => {
   const fixture = readJsonFixture("companion-schema.json") as WordPressSchemaResponse;
   assert.equal(fixture.contractVersion, COMPANION_CONTRACT_VERSION);
-  assert.equal(fixture.contract, "companion-schema");
-  assert.ok(Array.isArray(fixture.sections));
-  assert.ok(typeof fixture.capabilities === "object");
-  assert.equal(fixture.capabilities.blocksEditor, true);
+  assert.deepEqual(fixture.data.editorModes, [
+    "gutenberg",
+    "acf_flexible",
+    "acf_fixed"
+  ]);
+  assert.ok(Array.isArray(fixture.data.sectionDefinitions));
+  assert.equal(fixture.data.sourceMappings["nexuscontent/hero"], "hero");
+  assert.equal(fixture.data.sourceMappings["acf/hero"], "hero");
+  assert.equal(fixture.data.sourceMappings.hero, "hero");
 });
 
-test("companion health response JSON has correct structure", () => {
-  const fixture = readJsonFixture("companion-health.json") as WordPressHealthResponse;
+test("companion capabilities response JSON has exact capability data", () => {
+  const fixture = readJsonFixture("companion-capabilities.json") as WordPressCapabilitiesResponse;
   assert.equal(fixture.contractVersion, COMPANION_CONTRACT_VERSION);
-  assert.equal(fixture.contract, "companion-health");
-  assert.equal(fixture.status, "healthy");
-  assert.equal(fixture.editorMode, "blocks");
-  assert.equal(fixture.apiStrategy, "rest-v2");
+  assert.equal(fixture.data.pluginVersion, "0.1.0");
+  assert.equal(fixture.data.wordpressVersion, "6.8.2");
+  assert.equal(fixture.data.gutenberg, true);
+  assert.equal(fixture.data.acfPro, true);
+  assert.deepEqual(fixture.data.sectionTypes, [...BUILTIN_SECTION_TYPES]);
 });
 
 test("companion page with diagnostics has correct shape", () => {
   const fixture = readJsonFixture("companion-page-with-diagnostics.json") as WordPressPageResponse;
   assert.equal(fixture.contractVersion, COMPANION_CONTRACT_VERSION);
-  assert.equal(fixture.diagnostics.length, 1);
-  assert.equal(fixture.diagnostics[0]?.code, "wordpress/section/unknown-type");
-  assert.equal(fixture.diagnostics[0]?.severity, "warning");
+  assert.equal(fixture.diagnostics?.length, 1);
+  assert.equal(fixture.diagnostics?.[0]?.code, "wordpress/block/unknown");
+  assert.equal(fixture.diagnostics?.[0]?.severity, "warning");
 });
 
 test("companion contract version is exactly 1", () => {
@@ -481,16 +511,18 @@ test("companion contract version is exactly 1", () => {
 });
 
 test("companion wire endpoints are reserved paths", () => {
-  assert.ok(COMPANION_WIRE_ENDPOINTS.includes("companion/page"));
-  assert.ok(COMPANION_WIRE_ENDPOINTS.includes("companion/pages"));
-  assert.ok(COMPANION_WIRE_ENDPOINTS.includes("companion/schema"));
-  assert.ok(COMPANION_WIRE_ENDPOINTS.includes("companion/sections"));
-  assert.ok(COMPANION_WIRE_ENDPOINTS.includes("companion/health"));
+  assert.deepEqual([...COMPANION_WIRE_ENDPOINTS], [
+    "pages",
+    "pages/{id}",
+    "pages/slug/{slug}",
+    "schema",
+    "capabilities"
+  ]);
   assert.equal(COMPANION_WIRE_ENDPOINTS.length, 5);
 });
 
 test("companion wire namespace is defined", () => {
-  assert.equal(COMPANION_WIRE_NAMESPACE, "companion");
+  assert.equal(COMPANION_WIRE_NAMESPACE, "nexuscontent/v1");
 });
 
 test("reserved companion prefixes include nc- and nexus-", () => {
@@ -527,9 +559,9 @@ test("companion schema response Zod schema validates valid fixture", () => {
   assert.ok(result.success, `expected success, got: ${JSON.stringify(result.error?.issues)}`);
 });
 
-test("companion health response Zod schema validates valid fixture", () => {
-  const fixture = readJsonFixture("companion-health.json");
-  const result = companionHealthResponseSchema.safeParse(fixture);
+test("companion capabilities response Zod schema validates valid fixture", () => {
+  const fixture = readJsonFixture("companion-capabilities.json");
+  const result = companionCapabilitiesResponseSchema.safeParse(fixture);
   assert.ok(result.success, `expected success, got: ${JSON.stringify(result.error?.issues)}`);
 });
 
@@ -545,34 +577,56 @@ test("Zod schema rejects page response with wrong contract version", () => {
   assert.ok(!result.success);
 });
 
-test("Zod schema rejects page response with missing meta field", () => {
-  const fixture = readJsonFixture("invalid-page-no-meta.json");
+test("Zod schema rejects an envelope with missing data", () => {
+  const fixture = readJsonFixture("invalid-companion-envelope.json");
   const result = companionPageResponseSchema.safeParse(fixture);
   assert.ok(!result.success);
 });
 
-test("Zod schema rejects response with missing contract field", () => {
+test("Zod schema rejects a page envelope with missing data", () => {
   const result = companionPageResponseSchema.safeParse({
     contractVersion: 1,
-    id: "1",
-    key: "test",
-    sections: [],
-    rawFields: {},
     diagnostics: []
   });
   assert.ok(!result.success);
 });
 
-test("Zod schema rejects health response with invalid status value", () => {
-  const result = companionHealthResponseSchema.safeParse({
-    contractVersion: 1,
-    contract: "companion-health",
-    status: "unknown",
-    editorMode: "blocks",
-    apiStrategy: "rest-v2",
-    diagnostics: []
+test("Zod schema rejects companion sections without stable IDs", () => {
+  const fixture = readJsonFixture("companion-page.json") as {
+    data: { sections: Array<Record<string, unknown>> };
+  };
+  const section = { ...fixture.data.sections[0] };
+  delete section.id;
+  const result = companionPageResponseSchema.safeParse({
+    ...fixture,
+    data: { ...fixture.data, sections: [section] }
   });
   assert.ok(!result.success);
+});
+
+test("Zod schema rejects capabilities with an invalid editor mode", () => {
+  const result = companionCapabilitiesResponseSchema.safeParse({
+    contractVersion: 1,
+    data: {
+      pluginVersion: "0.1.0",
+      wordpressVersion: "6.8.2",
+      gutenberg: true,
+      acf: false,
+      acfPro: false,
+      acfBlocks: false,
+      flexibleContent: false,
+      editorModes: ["blocks"],
+      sectionTypes: ["hero"]
+    }
+  });
+  assert.ok(!result.success);
+});
+
+test("pagination schema rejects unsafe, fractional, and out-of-range values", () => {
+  assert.ok(!paginationSchema.safeParse({ total: Number.MAX_SAFE_INTEGER + 1, totalPages: 1, page: 1, perPage: 10 }).success);
+  assert.ok(!paginationSchema.safeParse({ total: 2, totalPages: 1, page: 1.5, perPage: 10 }).success);
+  assert.ok(!paginationSchema.safeParse({ total: 20, totalPages: 2, page: 3, perPage: 10 }).success);
+  assert.ok(paginationSchema.safeParse({ total: 0, totalPages: 0, page: 1, perPage: 10 }).success);
 });
 
 // ─── WordPress Provider Config Validation ──────────────────────────
@@ -641,8 +695,9 @@ test("WordPressProvider rejects invalid mediaResolution", async () => {
 
 test("source ACF section fixture has expected structure", () => {
   const fixture = readJsonFixture("source-acf-section.json") as Record<string, unknown>;
-  assert.equal(fixture.acfKey, "section_hero");
-  assert.equal(fixture.fallbackType, "hero");
+  assert.equal(fixture.blockName, "nexuscontent/hero");
+  assert.equal(fixture.acfBlock, "acf/hero");
+  assert.equal(fixture.acfLayout, "hero");
   assert.equal(fixture.label, "Hero Section");
   assert.ok(typeof fixture.fields === "object");
 });
@@ -665,6 +720,23 @@ test("isWordPressErrorCode recognizes all defined codes", () => {
   }
   assert.ok(!isWordPressErrorCode("random/error"));
   assert.ok(!isWordPressErrorCode(""));
+});
+
+test("WordPress error vocabulary covers Phase 2 normalization failures", () => {
+  const requiredCodes = [
+    WORDPRESS_ERROR_CODES.UNSUPPORTED_EDITOR_MODE,
+    WORDPRESS_ERROR_CODES.MALFORMED_BLOCK_CONTENT,
+    WORDPRESS_ERROR_CODES.UNKNOWN_BLOCK,
+    WORDPRESS_ERROR_CODES.UNKNOWN_ACF_BLOCK,
+    WORDPRESS_ERROR_CODES.UNKNOWN_ACF_LAYOUT,
+    WORDPRESS_ERROR_CODES.INVALID_FIXED_SECTION,
+    WORDPRESS_ERROR_CODES.INVALID_SECTION,
+    WORDPRESS_ERROR_CODES.MEDIA_RESOLUTION_FAILED,
+    WORDPRESS_ERROR_CODES.CONFLICTING_SECTION_SOURCES,
+    WORDPRESS_ERROR_CODES.INVALID_COMPANION_RESPONSE
+  ];
+  assert.equal(new Set(requiredCodes).size, 10);
+  requiredCodes.forEach((code) => assert.ok(isWordPressErrorCode(code)));
 });
 
 test("WordPressErrorCode type is assignable from WORDPRESS_ERROR_CODES values", () => {
@@ -732,7 +804,9 @@ test("all new types and values are exported from the package root", async () => 
     "DEFAULT_WORDPRESS_API_STRATEGY",
     "DEFAULT_WORDPRESS_UNKNOWN_CONTENT_POLICY",
     "DEFAULT_WORDPRESS_MEDIA_RESOLUTION",
-    "DEFAULT_WORDPRESS_ACF_ENABLED"
+    "DEFAULT_WORDPRESS_ACF_ENABLED",
+    "companionCapabilitiesResponseSchema",
+    "companionEnvelopeSchema"
   ];
   for (const name of expectedExports) {
     assert.ok(
@@ -760,6 +834,6 @@ test("WordPress config enums and section utilities are exported from WordPress i
   assert.ok("companionPageResponseSchema" in mod);
   assert.ok("companionPagesResponseSchema" in mod);
   assert.ok("companionSchemaResponseSchema" in mod);
-  assert.ok("companionHealthResponseSchema" in mod);
-  assert.ok("companionSectionsResponseSchema" in mod);
+  assert.ok("companionCapabilitiesResponseSchema" in mod);
+  assert.ok("companionEnvelopeSchema" in mod);
 });

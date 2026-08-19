@@ -1,0 +1,761 @@
+/* ---------------------------------------------------------------
+ * NexusContent editor preview – layout-aware block styles
+ * --------------------------------------------------------------- */
+
+/* Wrapper around the block preview rendered inside Gutenberg. */
+.nexuscontent-editor-preview {
+	background: #f7f7f4;
+	border: 1px solid #d8d8d0;
+	border-radius: 3px;
+	color: #1d2327;
+	min-height: 10rem;
+	padding: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+/* ---------------------------------------------------------------
+ * Shared preview primitives
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev__eyebrow {
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	margin: 0 0 0.5rem;
+	text-transform: uppercase;
+	color: #636363;
+}
+.nexuscontent-prev__eyebrow--placeholder {
+	color: #a0a0a0;
+}
+.nexuscontent-prev__heading {
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1.25;
+	margin: 0 0 0.75rem;
+}
+.nexuscontent-prev__heading--placeholder {
+	color: #a0a0a0;
+}
+.nexuscontent-prev__body {
+	font-size: 0.9rem;
+	line-height: 1.6;
+	color: #444;
+	margin: 0 0 1rem;
+	max-width: 40rem;
+}
+.nexuscontent-prev__actions {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+	flex-wrap: wrap;
+}
+.nexuscontent-prev__btn {
+	display: inline-block;
+	background: #2271b1;
+	color: #fff;
+	font-size: 0.8rem;
+	font-weight: 600;
+	padding: 0.45rem 1rem;
+	border-radius: 3px;
+	text-decoration: none;
+	line-height: 1.4;
+}
+.nexuscontent-prev__btn + .nexuscontent-prev__btn {
+	background: transparent;
+	color: #2271b1;
+	border: 1px solid #2271b1;
+}
+.nexuscontent-prev__media img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: 3px;
+	object-fit: cover;
+}
+
+/* ---------------------------------------------------------------
+ * Placeholder elements
+ * --------------------------------------------------------------- */
+
+.nexuscontent-ph {
+	background: #e0e0e0;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #999;
+}
+.nexuscontent-ph--image {
+	width: 100%;
+	min-height: 12rem;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+.nexuscontent-ph--image.nexuscontent-ph--wide {
+	min-height: 10rem;
+}
+.nexuscontent-ph--line {
+	height: 0.65rem;
+	background: #d0d0d0;
+	border-radius: 2px;
+	margin-bottom: 0.4rem;
+}
+.nexuscontent-ph--text {
+	background: transparent;
+	display: block;
+	padding: 0;
+	max-width: 28rem;
+}
+.nexuscontent-ph--avatar {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+	min-width: 2rem;
+}
+.nexuscontent-ph--thumb {
+	background: #d8d8d0;
+	border-radius: 3px;
+	aspect-ratio: 1;
+	width: 100%;
+}
+.nexuscontent-ph--logo {
+	width: 4rem;
+	height: 2.5rem;
+	background: #d8d8d0;
+	border-radius: 3px;
+}
+.nexuscontent-ph__label {
+	font-size: 0.75rem;
+	color: #999;
+}
+
+/* ---------------------------------------------------------------
+ * Hero – split layout
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--hero {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.5rem;
+	align-items: center;
+	min-height: 14rem;
+}
+.nexuscontent-prev--hero .nexuscontent-prev__media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.nexuscontent-prev--hero .nexuscontent-ph--image {
+	min-height: 10rem;
+}
+
+/* ---------------------------------------------------------------
+ * Intro – flexible image-text layout
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--intro {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.5rem;
+	align-items: center;
+}
+.nexuscontent-prev--intro .nexuscontent-prev__media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.nexuscontent-prev--image-left {
+	direction: rtl;
+}
+.nexuscontent-prev--image-left > * {
+	direction: ltr;
+}
+
+/* ---------------------------------------------------------------
+ * Rich text – simple stacked
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--rich-text {
+	max-width: 40rem;
+}
+
+/* ---------------------------------------------------------------
+ * Image + Text – flexible image-text layout
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--image-text {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.5rem;
+	align-items: center;
+}
+.nexuscontent-prev--image-text .nexuscontent-prev__media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ---------------------------------------------------------------
+ * Features – card grid
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--features .nexuscontent-prev__grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1rem;
+	margin-top: 1rem;
+}
+.nexuscontent-prev__card {
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	padding: 1rem;
+}
+.nexuscontent-prev__card-icon {
+	font-size: 1.2rem;
+	color: #2271b1;
+	margin-bottom: 0.5rem;
+	line-height: 1;
+}
+.nexuscontent-prev__card-heading {
+	font-size: 0.9rem;
+	font-weight: 600;
+	margin: 0 0 0.35rem;
+}
+.nexuscontent-prev__card-heading--placeholder {
+	color: #a0a0a0;
+}
+.nexuscontent-prev__card-body {
+	font-size: 0.8rem;
+	color: #666;
+	margin: 0;
+	line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------
+ * Statistics – stat boxes
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--statistics .nexuscontent-prev__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+}
+.nexuscontent-prev--statistics .nexuscontent-prev__card {
+	text-align: center;
+	padding: 1.25rem 1rem;
+}
+.nexuscontent-prev__stat-value {
+	display: block;
+	font-size: 2rem;
+	font-weight: 700;
+	color: #2271b1;
+	line-height: 1.2;
+	margin-bottom: 0.3rem;
+}
+.nexuscontent-prev__stat-value--placeholder {
+	color: #bbb;
+}
+.nexuscontent-prev__stat-label {
+	display: block;
+	font-size: 0.8rem;
+	color: #666;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+/* ---------------------------------------------------------------
+ * Testimonials – quote cards
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--testimonials .nexuscontent-prev__row {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+}
+.nexuscontent-prev--testimonials .nexuscontent-prev__card {
+	padding: 1.25rem;
+	background: #fafafa;
+}
+.nexuscontent-prev__quote {
+	font-style: italic;
+	font-size: 0.85rem;
+	line-height: 1.55;
+	color: #444;
+	margin: 0 0 0.75rem;
+	padding: 0;
+	border: none;
+}
+.nexuscontent-prev__quote--placeholder {
+	color: #aaa;
+}
+.nexuscontent-prev__attribution {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #333;
+}
+.nexuscontent-prev__name--placeholder {
+	color: #aaa;
+}
+
+/* ---------------------------------------------------------------
+ * Gallery – thumbnail grid
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--gallery .nexuscontent-prev__gallery {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 0.4rem;
+	margin-top: 1rem;
+}
+.nexuscontent-prev--gallery img {
+	width: 100%;
+	aspect-ratio: 1;
+	object-fit: cover;
+	border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------
+ * CTA – full-width with background
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--cta {
+	position: relative;
+	background: #2271b1;
+	color: #fff;
+	border-radius: 4px;
+	padding: 2rem;
+	text-align: center;
+	overflow: hidden;
+	min-height: 10rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.nexuscontent-prev--cta .nexuscontent-prev__cta-bg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0.25;
+}
+.nexuscontent-prev--cta .nexuscontent-prev__cta-content {
+	position: relative;
+	z-index: 1;
+	max-width: 32rem;
+}
+.nexuscontent-prev--cta .nexuscontent-prev__heading {
+	color: #fff;
+}
+.nexuscontent-prev--cta .nexuscontent-prev__heading--placeholder {
+	color: rgba(255, 255, 255, 0.5);
+}
+.nexuscontent-prev--cta .nexuscontent-prev__body {
+	color: rgba(255, 255, 255, 0.9);
+}
+.nexuscontent-prev--cta .nexuscontent-prev__btn {
+	background: #fff;
+	color: #2271b1;
+}
+.nexuscontent-prev--cta .nexuscontent-prev__btn + .nexuscontent-prev__btn {
+	background: transparent;
+	color: #fff;
+	border-color: #fff;
+}
+
+/* ---------------------------------------------------------------
+ * FAQ – question/answer list
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--faq .nexuscontent-prev__faq-list {
+	margin: 1rem 0 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+.nexuscontent-prev__faq-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+	padding-bottom: 0.75rem;
+	border-bottom: 1px solid #e0e0e0;
+}
+.nexuscontent-prev__faq-row:last-child {
+	border-bottom: none;
+}
+.nexuscontent-prev__faq-q {
+	font-weight: 600;
+	font-size: 0.9rem;
+	margin: 0;
+}
+.nexuscontent-prev__faq-q--placeholder {
+	color: #a0a0a0;
+}
+.nexuscontent-prev__faq-a {
+	font-size: 0.85rem;
+	color: #555;
+	margin: 0;
+	line-height: 1.55;
+}
+
+/* ---------------------------------------------------------------
+ * Logo grid – row of logos
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--logo-grid .nexuscontent-prev__logos {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	align-items: center;
+	margin-top: 1rem;
+}
+.nexuscontent-prev__logo-item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+}
+.nexuscontent-prev__logo-item img {
+	max-height: 2.5rem;
+	max-width: 6rem;
+	object-fit: contain;
+}
+.nexuscontent-prev__logo-text {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #555;
+	padding: 0.5rem 1rem;
+	background: #f0f0f0;
+	border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------
+ * Form embed – centered placeholder
+ * --------------------------------------------------------------- */
+
+.nexuscontent-prev--form-embed {
+	text-align: center;
+}
+.nexuscontent-prev--form-embed .nexuscontent-prev__heading {
+	text-align: left;
+}
+.nexuscontent-prev__form-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	background: #f0f0f0;
+	border: 2px dashed #ccc;
+	border-radius: 6px;
+	padding: 2rem;
+	margin-top: 1rem;
+	color: #999;
+}
+.nexuscontent-prev__form-label {
+	font-size: 0.85rem;
+	color: #888;
+}
+
+/* ---------------------------------------------------------------
+ * Content area – inline editing layout
+ * --------------------------------------------------------------- */
+
+.nexuscontent-editor-content {
+	background: #f7f7f4;
+	border: 1px solid #d8d8d0;
+	border-radius: 3px;
+	color: #1d2327;
+	min-height: 6rem;
+	padding: clamp(1rem, 2vw, 1.75rem);
+}
+
+/* Two-column row (hero, intro, image+text). */
+.nc-content-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.5rem;
+	align-items: start;
+}
+.nc-content-row--media-first {
+	direction: rtl;
+}
+.nc-content-row--media-first > * {
+	direction: ltr;
+}
+.nc-content-col--text {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+.nc-content-col--media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 8rem;
+}
+.nc-content-image {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: 3px;
+	object-fit: cover;
+}
+.nc-content-media-placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 8rem;
+	background: #e8e8e4;
+	border: 2px dashed #ccc;
+	border-radius: 4px;
+	color: #999;
+	font-size: 0.8rem;
+}
+
+/* Stacked layout (features, statistics, testimonials, etc.). */
+.nc-content-stack {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	max-width: 40rem;
+}
+.nc-content-stack--centered {
+	align-items: center;
+	text-align: center;
+	max-width: 32rem;
+}
+
+/* Inline RichText styling. */
+.nc-content-heading {
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1.25;
+	margin: 0;
+	min-height: 1.8rem;
+	outline: none;
+}
+.nc-content-heading:empty::before {
+	content: attr(data-placeholder);
+	color: #a0a0a0;
+}
+.nc-content-body {
+	font-size: 0.9rem;
+	line-height: 1.6;
+	color: #444;
+	margin: 0;
+	min-height: 1.5rem;
+	outline: none;
+	max-width: 36rem;
+}
+.nc-content-body:empty::before {
+	content: attr(data-placeholder);
+	color: #a0a0a0;
+}
+.nc-content-body p {
+	margin: 0 0 0.5rem;
+}
+.nc-content-body p:last-child {
+	margin-bottom: 0;
+}
+
+/* Hint text for sidebar references. */
+.nc-content-hint {
+	font-size: 0.75rem;
+	color: #999;
+	font-style: italic;
+	margin-top: 0.25rem;
+}
+
+/* Form embed info in content area. */
+.nc-content-form-info {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 1rem;
+	background: #f0f0f0;
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	color: #666;
+	font-size: 0.85rem;
+	margin-top: 0.5rem;
+}
+.nc-content-form-info-icon {
+	font-size: 1.2rem;
+}
+
+/* ---------------------------------------------------------------
+ * RepeatControl – structured item editor
+ * --------------------------------------------------------------- */
+
+.nc-repeater {
+	margin-top: 0.5rem;
+}
+.nc-repeater-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.5rem;
+}
+.nc-repeater-header-label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #1d2327;
+}
+.nc-repeater-count {
+	font-size: 0.75rem;
+	color: #999;
+}
+.nc-repeater-items {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+.nc-repeater-item {
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	overflow: hidden;
+}
+.nc-repeater-item-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.6rem 0.75rem;
+	cursor: pointer;
+	user-select: none;
+	border-bottom: 1px solid transparent;
+}
+.nc-repeater-item-header:hover {
+	background: #f9f9f9;
+}
+.nc-repeater-item-number {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.4rem;
+	height: 1.4rem;
+	background: #2271b1;
+	color: #fff;
+	font-size: 0.7rem;
+	font-weight: 600;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+.nc-repeater-item-label {
+	flex: 1;
+	font-size: 0.8rem;
+	color: #333;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.nc-repeater-item-toggle {
+	font-size: 0.6rem;
+	color: #999;
+	transition: transform 0.15s ease;
+	flex-shrink: 0;
+}
+.nc-repeater-item-toggle--collapsed {
+	transform: rotate(-90deg);
+}
+.nc-repeater-item-body {
+	padding: 0.75rem;
+	border-top: 1px solid #e0e0e0;
+}
+.nc-repeater-item-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+.nc-repeater-item-fields .components-base-control {
+	margin-bottom: 0;
+}
+.nc-repeater-item-fields .components-textarea-control__input {
+	min-height: 3.5rem;
+}
+.nc-repeater-item-actions {
+	display: flex;
+	gap: 0.35rem;
+	margin-top: 0.5rem;
+	padding-top: 0.5rem;
+	border-top: 1px solid #f0f0f0;
+}
+.nc-repeater-add {
+	margin-top: 0.25rem;
+}
+
+/* Repeater media field – inline image picker. */
+.nc-repeater-media-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+.nc-repeater-media-label {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #1d2327;
+	margin-bottom: 0.15rem;
+}
+.nc-repeater-media-thumb {
+	width: 100%;
+	max-height: 6rem;
+	object-fit: contain;
+	border-radius: 3px;
+	background: #f7f7f4;
+	margin-bottom: 0.25rem;
+}
+
+/* ---------------------------------------------------------------
+ * Gallery preview sidebar thumbnails (existing)
+ * --------------------------------------------------------------- */
+
+.nexuscontent-gallery-preview {
+	display: grid;
+	gap: 0.35rem;
+	grid-template-columns: repeat(3, 1fr);
+	margin-bottom: 0.75rem;
+}
+.nexuscontent-gallery-preview img {
+	aspect-ratio: 1;
+	height: 100%;
+	object-fit: cover;
+	width: 100%;
+}
+
+/* ---------------------------------------------------------------
+ * Media control sidebar thumbnail (existing)
+ * --------------------------------------------------------------- */
+
+.nexuscontent-media-control img {
+	display: block;
+	height: auto;
+	margin: 1rem 0;
+	max-height: 18rem;
+	max-width: 100%;
+	object-fit: cover;
+}
+.nexuscontent-media-control .components-button + .components-button {
+	margin-left: 0.5rem;
+}
+
+/* Static block illustrations used by the inserter and inspector. */
+.nc-block-preview {
+	background: #f7f7f4;
+	padding: 0;
+}
+.nc-block-preview-image {
+	display: block;
+	height: auto;
+	max-width: 100%;
+	width: 100%;
+}

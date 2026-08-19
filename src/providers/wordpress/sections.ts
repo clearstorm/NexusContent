@@ -3,7 +3,7 @@ import type {
   FixedSectionType,
   WordPressFixedSectionConfig
 } from "./config.ts";
-import { FIXED_SECTION_TYPES } from "./config.ts";
+import { BUILTIN_SECTION_TYPES, FIXED_SECTION_TYPES } from "./config.ts";
 
 export interface SectionDataSchema {
   readonly fields: ReadonlyArray<SectionFieldDefinition>;
@@ -36,201 +36,167 @@ export interface SectionRegistryOptions {
   readonly fixedSections?: Partial<Record<FixedSectionType, WordPressFixedSectionConfig>>;
 }
 
-function createFixedSectionMap(
-  overrides?: Partial<Record<FixedSectionType, WordPressFixedSectionConfig>>
-): Map<FixedSectionType, WordPressFixedSectionConfig> {
-  const map = new Map<FixedSectionType, WordPressFixedSectionConfig>();
-  for (const sectionType of FIXED_SECTION_TYPES) {
-    map.set(sectionType, { visible: true });
-  }
-  if (overrides) {
-    for (const [key, value] of Object.entries(overrides)) {
-      if (isFixedSectionTypeKey(key) && value !== undefined) {
-        map.set(key, value);
-      }
-    }
-  }
-  return map;
-}
+const FIELD_SCHEMAS: Record<
+  (typeof BUILTIN_SECTION_TYPES)[number],
+  ReadonlyArray<SectionFieldDefinition>
+> = {
+  hero: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "body", type: "string" },
+    { name: "image", type: "media" },
+    { name: "primary_action_label", type: "string" },
+    { name: "primary_action_url", type: "string" },
+    { name: "secondary_action_label", type: "string" },
+    { name: "secondary_action_url", type: "string" },
+    { name: "theme", type: "string" }
+  ],
+  intro: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "body", type: "string" },
+    { name: "image", type: "media" },
+    { name: "image_position", type: "string" },
+    { name: "theme", type: "string" }
+  ],
+  rich_text: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "body", type: "string" },
+    { name: "theme", type: "string" }
+  ],
+  image_text: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "body", type: "string" },
+    { name: "image", type: "media" },
+    { name: "image_position", type: "string" },
+    { name: "action_label", type: "string" },
+    { name: "action_url", type: "string" },
+    { name: "theme", type: "string" }
+  ],
+  features: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "body", type: "string" },
+    { name: "items", type: "json" },
+    { name: "theme", type: "string" }
+  ],
+  statistics: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "items", type: "json" },
+    { name: "theme", type: "string" }
+  ],
+  testimonials: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "items", type: "json" },
+    { name: "theme", type: "string" }
+  ],
+  gallery: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "images", type: "json" },
+    { name: "theme", type: "string" }
+  ],
+  cta: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "body", type: "string" },
+    { name: "primary_action_label", type: "string" },
+    { name: "primary_action_url", type: "string" },
+    { name: "secondary_action_label", type: "string" },
+    { name: "secondary_action_url", type: "string" },
+    { name: "background_image", type: "media" },
+    { name: "theme", type: "string" }
+  ],
+  faq: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "items", type: "json" },
+    { name: "theme", type: "string" }
+  ],
+  logo_grid: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "eyebrow", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "items", type: "json" },
+    { name: "theme", type: "string" }
+  ],
+  form_embed: [
+    { name: "section_id", type: "string" },
+    { name: "variant", type: "string" },
+    { name: "heading", type: "string" },
+    { name: "provider", type: "string" },
+    { name: "form_id", type: "string" },
+    { name: "embed_code", type: "string" },
+    { name: "theme", type: "string" }
+  ]
+};
+
+const WORDPRESS_SECTION_NAMES: Readonly<
+  Record<(typeof BUILTIN_SECTION_TYPES)[number], string>
+> = {
+  hero: "hero",
+  intro: "intro",
+  rich_text: "rich-text",
+  image_text: "image-text",
+  features: "features",
+  statistics: "statistics",
+  testimonials: "testimonials",
+  gallery: "gallery",
+  cta: "cta",
+  faq: "faq",
+  logo_grid: "logo-grid",
+  form_embed: "form-embed"
+};
+
+export const BUILTIN_SECTIONS: readonly SectionDefinition[] =
+  BUILTIN_SECTION_TYPES.map((type) => ({
+    type,
+    sourceType: `nexuscontent/${WORDPRESS_SECTION_NAMES[type]}`,
+    sourceKey: `acf/${WORDPRESS_SECTION_NAMES[type]}`,
+    dataSchema: { fields: FIELD_SCHEMAS[type] }
+  }));
 
 function isFixedSectionTypeKey(value: string): value is FixedSectionType {
   return (FIXED_SECTION_TYPES as readonly string[]).includes(value);
 }
 
-const BUILTIN_SECTIONS: readonly SectionDefinition[] = [
-  {
-    type: "content/header",
-    sourceType: "content/header",
-    sourceKey: "header",
-    dataSchema: {
-      fields: [
-        { name: "logo", type: "media" },
-        { name: "menu", type: "json" },
-        { name: "ctaText", type: "string" },
-        { name: "ctaUrl", type: "string" }
-      ]
-    }
-  },
-  {
-    type: "content/footer",
-    sourceType: "content/footer",
-    sourceKey: "footer",
-    dataSchema: {
-      fields: [
-        { name: "copyright", type: "string" },
-        { name: "links", type: "json" },
-        { name: "socialLinks", type: "json" }
-      ]
-    }
-  },
-  {
-    type: "content/sidebar",
-    sourceType: "content/sidebar",
-    sourceKey: "sidebar",
-    dataSchema: {
-      fields: [
-        { name: "widgets", type: "json" },
-        { name: "position", type: "string" }
-      ]
-    }
-  },
-  {
-    type: "content/breadcrumb",
-    sourceType: "content/breadcrumb",
-    sourceKey: "breadcrumb",
-    dataSchema: {
-      fields: [
-        { name: "items", type: "json" },
-        { name: "separator", type: "string" }
-      ]
-    }
-  },
-  {
-    type: "content/hero",
-    sourceType: "content/hero",
-    sourceKey: "hero",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string", required: true },
-        { name: "subheading", type: "string" },
-        { name: "backgroundImage", type: "media" },
-        { name: "ctaText", type: "string" },
-        { name: "ctaUrl", type: "string" }
-      ]
-    }
-  },
-  {
-    type: "content/cta",
-    sourceType: "content/cta",
-    sourceKey: "cta",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string", required: true },
-        { name: "text", type: "string" },
-        { name: "ctaText", type: "string" },
-        { name: "ctaUrl", type: "string" }
-      ]
-    }
-  },
-  {
-    type: "content/features",
-    sourceType: "content/features",
-    sourceKey: "features",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string" },
-        { name: "items", type: "json", required: true }
-      ]
-    }
-  },
-  {
-    type: "content/testimonials",
-    sourceType: "content/testimonials",
-    sourceKey: "testimonials",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string" },
-        { name: "items", type: "json", required: true }
-      ]
-    }
-  },
-  {
-    type: "content/pricing",
-    sourceType: "content/pricing",
-    sourceKey: "pricing",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string" },
-        { name: "plans", type: "json", required: true }
-      ]
-    }
-  },
-  {
-    type: "content/faq",
-    sourceType: "content/faq",
-    sourceKey: "faq",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string" },
-        { name: "items", type: "json", required: true }
-      ]
-    }
-  },
-  {
-    type: "content/team",
-    sourceType: "content/team",
-    sourceKey: "team",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string" },
-        { name: "members", type: "json", required: true }
-      ]
-    }
-  },
-  {
-    type: "content/gallery",
-    sourceType: "content/gallery",
-    sourceKey: "gallery",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string" },
-        { name: "images", type: "json", required: true }
-      ]
-    }
-  },
-  {
-    type: "content/newsletter",
-    sourceType: "content/newsletter",
-    sourceKey: "newsletter",
-    dataSchema: {
-      fields: [
-        { name: "heading", type: "string" },
-        { name: "text", type: "string" },
-        { name: "formAction", type: "string" }
-      ]
-    }
-  }
-];
-
 export function buildSectionRegistry(
   options: SectionRegistryOptions = {}
 ): SectionRegistry {
   const map = new Map<string, SectionRegistryEntry>();
-  const fixedMap = createFixedSectionMap(options.fixedSections);
 
   for (const definition of BUILTIN_SECTIONS) {
-    const sectionType = definition.type;
-    const fixed = fixedMap.get(sectionType as FixedSectionType);
-    map.set(sectionType, {
-      definition,
-      fixed: fixed ?? { visible: true }
-    });
+    const fixed = isFixedSectionTypeKey(definition.type)
+      ? options.fixedSections?.[definition.type] ?? { visible: true }
+      : undefined;
+    map.set(definition.type, { definition, ...(fixed ? { fixed } : {}) });
   }
 
-  if (options.customSections) {
-    for (const definition of options.customSections) {
-      map.set(definition.type, { definition });
-    }
+  for (const definition of options.customSections ?? []) {
+    map.set(definition.type, { definition });
   }
 
   return map;
@@ -248,14 +214,15 @@ export function mergeSectionRegistry(
 }
 
 export function lookupSectionSourceAlias(
-  acfKey: string,
+  source: string,
   registry: SectionRegistry
 ): string | undefined {
   for (const [sectionType, entry] of registry) {
-    if (entry.definition.sourceType === acfKey) {
-      return sectionType;
-    }
-    if (entry.definition.sourceKey === acfKey) {
+    if (
+      sectionType === source ||
+      entry.definition.sourceType === source ||
+      entry.definition.sourceKey === source
+    ) {
       return sectionType;
     }
   }

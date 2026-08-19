@@ -1,0 +1,680 @@
+/**
+ * NexusContent admin page styles.
+ *
+ * Uses WordPress admin color scheme variables for theme compatibility.
+ *
+ * @package NexusContentCompanion
+ */
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+
+.nc-admin-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 20px 20px 0 0;
+	padding: 16px 20px;
+	background: var(--wp-admin-color-background, #fff);
+	border: 1px solid var(--wp-admin-color-border, #c3c4c7);
+	border-radius: 4px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.nc-admin-header-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	background: var(--wp-admin-color-accent, #2271b1);
+	border-radius: 8px;
+	color: #fff;
+	flex-shrink: 0;
+}
+
+.nc-admin-header-icon .dashicons {
+	font-size: 22px;
+	width: 22px;
+	height: 22px;
+	line-height: 22px;
+}
+
+.nc-admin-header-text {
+	flex: 1;
+}
+
+.nc-admin-header-title {
+	margin: 0;
+	font-size: 23px;
+	font-weight: 400;
+	line-height: 1.3;
+	padding: 0;
+}
+
+.nc-admin-header-version {
+	display: inline-block;
+	margin-left: 8px;
+	padding: 2px 8px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.4;
+	background: var(--wp-admin-color-accent, #2271b1);
+	color: #fff;
+	border-radius: 10px;
+	vertical-align: middle;
+}
+
+.nc-admin-header-subtitle {
+	margin: 2px 0 0;
+	color: var(--wp-admin-color-text, #1d2327);
+	opacity: 0.7;
+	font-size: 13px;
+}
+
+/* ── Settings form ──────────────────────────────────────────────────── */
+
+.nc-admin-settings-form {
+	margin-top: 0;
+}
+
+/* ── Card sections ──────────────────────────────────────────────────── */
+
+.nc-admin-cards {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin: 16px 20px 20px 0;
+}
+
+.nc-admin-card {
+	background: var(--wp-admin-color-background, #fff);
+	border: 1px solid var(--wp-admin-color-border, #c3c4c7);
+	border-radius: 4px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+	overflow: hidden;
+}
+
+.nc-admin-card-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--wp-admin-color-border, #c3c4c7);
+	background: var(--wp-admin-color-light, #f0f0f1);
+}
+
+.nc-admin-card-header .dashicons {
+	color: var(--wp-admin-color-accent, #2271b1);
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
+.nc-admin-card-title {
+	margin: 0;
+	padding: 0;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.nc-admin-card-body {
+	padding: 16px;
+}
+
+.nc-admin-card-footer {
+	margin: 12px 0 0;
+	padding-top: 12px;
+	border-top: 1px solid var(--wp-admin-color-border, #c3c4c7);
+	text-align: right;
+}
+
+.nc-admin-card-footer a {
+	font-size: 13px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+/* ── Status grid ────────────────────────────────────────────────────── */
+
+.nc-admin-status-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 12px;
+}
+
+.nc-admin-status-item {
+	padding: 12px;
+	background: var(--wp-admin-color-light, #f0f0f1);
+	border-radius: 4px;
+}
+
+.nc-admin-status-label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--wp-admin-color-text, #1d2327);
+	opacity: 0.6;
+}
+
+.nc-admin-status-value {
+	display: block;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--wp-admin-color-text, #1d2327);
+	word-break: break-word;
+}
+
+/* ── Status indicators ──────────────────────────────────────────────── */
+
+.nc-admin-indicator {
+	display: inline-flex;
+	align-items: center;
+	vertical-align: middle;
+}
+
+.nc-admin-indicator-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-right: 6px;
+	flex-shrink: 0;
+}
+
+.nc-admin-indicator-dot--green {
+	background: #00a32a;
+}
+
+.nc-admin-indicator-dot--muted {
+	background: var(--wp-admin-color-text, #1d2327);
+	opacity: 0.2;
+}
+
+/* ── Mode badges ────────────────────────────────────────────────────── */
+
+.nc-admin-mode-badge {
+	display: inline-block;
+	padding: 3px 10px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.5;
+	border-radius: 10px;
+	white-space: nowrap;
+}
+
+.nc-admin-mode-badge--gutenberg {
+	background: #2271b1;
+	color: #fff;
+}
+
+.nc-admin-mode-badge--acf_flexible {
+	background: #8b5cf6;
+	color: #fff;
+}
+
+.nc-admin-mode-badge--acf_fixed {
+	background: #e27800;
+	color: #fff;
+}
+
+.nc-admin-mode-badge--muted {
+	background: var(--wp-admin-color-text, #1d2327);
+	color: #fff;
+	opacity: 0.5;
+}
+
+/* ── Page breakdown ─────────────────────────────────────────────────── */
+
+.nc-admin-breakdown {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	gap: 10px;
+}
+
+.nc-admin-breakdown-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px;
+	background: var(--wp-admin-color-light, #f0f0f1);
+	border-radius: 4px;
+}
+
+.nc-admin-breakdown-count {
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--wp-admin-color-accent, #2271b1);
+	min-width: 40px;
+	text-align: center;
+}
+
+.nc-admin-breakdown-label {
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.3;
+	color: var(--wp-admin-color-text, #1d2327);
+}
+
+.nc-admin-empty-state {
+	padding: 24px;
+	text-align: center;
+	color: var(--wp-admin-color-text, #1d2327);
+	opacity: 0.6;
+}
+
+.nc-admin-empty-state p {
+	margin: 4px 0;
+}
+
+.nc-admin-empty-state p:first-child {
+	font-size: 15px;
+	font-weight: 600;
+	opacity: 1;
+}
+
+.nc-admin-empty-state p:last-child {
+	font-size: 13px;
+}
+
+/* ── Toggle switches ────────────────────────────────────────────────── */
+
+.nc-admin-toggles-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 8px;
+}
+
+.nc-admin-toggle-item {
+	display: flex;
+	align-items: center;
+}
+
+.nc-admin-toggle {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+	padding: 10px 12px;
+	background: var(--wp-admin-color-light, #f0f0f1);
+	border: 1px solid transparent;
+	border-radius: 4px;
+	transition: border-color 0.15s ease, background 0.15s ease;
+	width: 100%;
+	margin: 0;
+}
+
+.nc-admin-toggle:hover {
+	border-color: var(--wp-admin-color-accent, #2271b1);
+}
+
+.nc-admin-toggle input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.nc-admin-toggle-track {
+	position: relative;
+	display: inline-block;
+	width: 36px;
+	height: 20px;
+	background: var(--wp-admin-color-text, #1d2327);
+	opacity: 0.3;
+	border-radius: 10px;
+	transition: background 0.2s ease, opacity 0.2s ease;
+	flex-shrink: 0;
+}
+
+.nc-admin-toggle-thumb {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	background: #fff;
+	border-radius: 50%;
+	transition: transform 0.2s ease;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.nc-admin-toggle input:checked + .nc-admin-toggle-track {
+	background: #00a32a;
+	opacity: 1;
+}
+
+.nc-admin-toggle input:checked + .nc-admin-toggle-track .nc-admin-toggle-thumb {
+	transform: translateX(16px);
+}
+
+.nc-admin-toggle input:focus + .nc-admin-toggle-track {
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--wp-admin-color-accent, #2271b1);
+}
+
+.nc-admin-toggle-label {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	color: var(--wp-admin-color-text, #1d2327);
+}
+
+.nc-admin-toggle-label .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	color: var(--wp-admin-color-accent, #2271b1);
+	flex-shrink: 0;
+}
+
+/* ── Blocks overview grid ───────────────────────────────────────────── */
+
+.nc-admin-blocks-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 8px;
+}
+
+.nc-admin-block-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 12px;
+	background: var(--wp-admin-color-light, #f0f0f1);
+	border-radius: 4px;
+	font-size: 13px;
+}
+
+.nc-admin-block-icon {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+}
+
+.nc-admin-block-item--on .nc-admin-block-icon {
+	color: #00a32a;
+}
+
+.nc-admin-block-item--off .nc-admin-block-icon {
+	color: var(--wp-admin-color-text, #1d2327);
+	opacity: 0.3;
+}
+
+.nc-admin-block-name {
+	flex: 1;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+.nc-admin-block-status {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	padding: 2px 6px;
+	border-radius: 3px;
+}
+
+.nc-admin-block-item--on .nc-admin-block-status {
+	background: #00a32a;
+	color: #fff;
+}
+
+.nc-admin-block-item--off .nc-admin-block-status {
+	background: var(--wp-admin-color-text, #1d2327);
+	color: #fff;
+	opacity: 0.4;
+}
+
+/* ── Recent pages table ─────────────────────────────────────────────── */
+
+.nc-admin-recent-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.nc-admin-recent-table th {
+	text-align: left;
+	padding: 8px 12px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--wp-admin-color-text, #1d2327);
+	opacity: 0.6;
+	border-bottom: 1px solid var(--wp-admin-color-border, #c3c4c7);
+}
+
+.nc-admin-recent-table td {
+	padding: 10px 12px;
+	font-size: 13px;
+	border-bottom: 1px solid var(--wp-admin-color-border, #c3c4c7);
+}
+
+.nc-admin-recent-table tr:last-child td {
+	border-bottom: none;
+}
+
+.nc-admin-recent-table td a {
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.nc-admin-recent-date {
+	color: var(--wp-admin-color-text, #1d2327);
+	opacity: 0.6;
+	white-space: nowrap;
+}
+
+/* ── Quick links grid ───────────────────────────────────────────────── */
+
+.nc-admin-links-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	gap: 10px;
+}
+
+.nc-admin-link-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 20px 16px;
+	background: var(--wp-admin-color-light, #f0f0f1);
+	border: 1px solid transparent;
+	border-radius: 4px;
+	text-decoration: none;
+	color: var(--wp-admin-color-text, #1d2327);
+	transition: border-color 0.15s ease, background 0.15s ease;
+	text-align: center;
+}
+
+.nc-admin-link-card:hover {
+	border-color: var(--wp-admin-color-accent, #2271b1);
+	background: var(--wp-admin-color-background, #fff);
+	color: var(--wp-admin-color-text, #1d2327);
+}
+
+.nc-admin-link-card .dashicons {
+	font-size: 28px;
+	width: 28px;
+	height: 28px;
+	color: var(--wp-admin-color-accent, #2271b1);
+}
+
+.nc-admin-link-label {
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+/* ── Settings form overrides ────────────────────────────────────────── */
+
+.nc-admin-settings-card .form-table {
+	margin: 0;
+	padding: 0;
+}
+
+.nc-admin-settings-card .form-table th {
+	padding: 12px 16px;
+	vertical-align: top;
+	background: var(--wp-admin-color-light, #f0f0f1);
+	border-bottom: 1px solid var(--wp-admin-color-border, #c3c4c7);
+	width: 200px;
+}
+
+.nc-admin-settings-card .form-table td {
+	padding: 12px 16px;
+}
+
+.nc-admin-settings-card .form-table tr:last-child th,
+.nc-admin-settings-card .form-table tr:last-child td {
+	border-bottom: none;
+}
+
+.nc-admin-settings-card .description {
+	margin-top: 6px;
+}
+
+.nc-admin-settings-card select {
+	max-width: 280px;
+}
+
+/* ── Submit row ─────────────────────────────────────────────────────── */
+
+.nc-admin-submit {
+	padding: 12px 16px;
+	border-top: 1px solid var(--wp-admin-color-border, #c3c4c7);
+	background: var(--wp-admin-color-light, #f0f0f1);
+	text-align: right;
+}
+
+.nc-admin-submit .button-primary {
+	margin: 0;
+}
+
+/* ── About page ─────────────────────────────────────────────────────── */
+
+.nc-admin-about-section {
+	margin-bottom: 20px;
+}
+
+.nc-admin-about-section:last-child {
+	margin-bottom: 0;
+}
+
+.nc-admin-about-section h3 {
+	margin: 0 0 8px;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.nc-admin-about-section p {
+	margin: 0 0 8px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--wp-admin-color-text, #1d2327);
+}
+
+.nc-admin-about-section ul,
+.nc-admin-about-section ol {
+	margin: 0;
+	padding-left: 20px;
+	font-size: 14px;
+	line-height: 1.8;
+}
+
+.nc-admin-about-steps {
+	margin: 0;
+	padding-left: 0;
+	list-style: none;
+	counter-reset: nc-steps;
+}
+
+.nc-admin-about-steps li {
+	counter-increment: nc-steps;
+	position: relative;
+	padding: 12px 12px 12px 50px;
+	margin-bottom: 8px;
+	background: var(--wp-admin-color-light, #f0f0f1);
+	border-radius: 4px;
+}
+
+.nc-admin-about-steps li:last-child {
+	margin-bottom: 0;
+}
+
+.nc-admin-about-steps li::before {
+	content: counter(nc-steps);
+	position: absolute;
+	left: 12px;
+	top: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	background: var(--wp-admin-color-accent, #2271b1);
+	color: #fff;
+	border-radius: 50%;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.nc-admin-about-steps li strong {
+	display: block;
+	font-size: 14px;
+	margin-bottom: 4px;
+}
+
+.nc-admin-about-steps li p {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	opacity: 0.8;
+}
+
+.nc-admin-about-features {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 12px;
+}
+
+.nc-admin-about-feature {
+	padding: 16px;
+	background: var(--wp-admin-color-light, #f0f0f1);
+	border-radius: 4px;
+	text-align: center;
+}
+
+.nc-admin-about-feature .dashicons {
+	font-size: 28px;
+	width: 28px;
+	height: 28px;
+	color: var(--wp-admin-color-accent, #2271b1);
+	margin-bottom: 8px;
+}
+
+.nc-admin-about-feature h4 {
+	margin: 0 0 6px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.nc-admin-about-feature p {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	opacity: 0.7;
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "nexuscontent/logo-grid",
+  "version": "0.1.0",
+  "title": "Logo Grid",
+  "category": "nexuscontent",
+  "icon": "building",
+  "description": "A grid of partner, client, or accreditation logos with optional labels.",
+  "textdomain": "nexuscontent",
+  "attributes": {
+    "section_id": { "type": "string", "default": "" },
+    "variant": { "type": "string", "default": "" },
+    "eyebrow": { "type": "string", "default": "" },
+    "heading": { "type": "string", "default": "" },
+    "items": { "type": "array", "default": [] },
+    "theme": { "type": "string", "default": "" },
+    "preview": { "type": "boolean", "default": false }
+  },
+  "example": { "attributes": { "preview": true } },
+  "supports": { "anchor": true, "html": false },
+  "editorScript": "nexuscontent-editor",
+  "editorStyle": "nexuscontent-editor"
+}

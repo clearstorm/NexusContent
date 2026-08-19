@@ -1,0 +1,16 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - nexuscontent.php
+        - includes
+    scanFiles:
+        - scripts/phpstan-acf-stubs.php
+    bootstrapFiles:
+        - scripts/phpstan-bootstrap.php
+    treatPhpDocTypesAsCertain: false
+    tmpDir: .phpstan-cache
+    parallel:
+        maximumNumberOfProcesses: 1

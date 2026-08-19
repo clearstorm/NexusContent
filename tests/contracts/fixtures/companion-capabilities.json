@@ -1,0 +1,28 @@
+{
+  "contractVersion": 1,
+  "data": {
+    "pluginVersion": "0.1.0",
+    "wordpressVersion": "6.8.2",
+    "gutenberg": true,
+    "acf": true,
+    "acfVersion": "6.4.2",
+    "acfPro": true,
+    "acfBlocks": true,
+    "flexibleContent": true,
+    "editorModes": ["gutenberg", "acf_flexible", "acf_fixed"],
+    "sectionTypes": [
+      "hero",
+      "intro",
+      "rich_text",
+      "image_text",
+      "features",
+      "statistics",
+      "testimonials",
+      "gallery",
+      "cta",
+      "faq",
+      "logo_grid",
+      "form_embed"
+    ]
+  }
+}

@@ -9,6 +9,7 @@ export type {
   LocaleConfig,
   LocaleVariantInfo,
   MediaAsset,
+  MediaSize,
   NavigationContent,
   NavigationItem,
   NexusConfig,

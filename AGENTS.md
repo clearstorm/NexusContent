@@ -137,7 +137,7 @@ Before completing a state-changing task, run `npm run validate:project-state` in
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.2.0
+- **Current milestone:** 0.2.1-wordpress-companion
 - **Primary implementation language:** TypeScript
 - **Primary initial consumer:** Astro (reference consumer only)
 
@@ -416,6 +416,8 @@ examples/astro-wordpress/
 ```
 
 The example remains a consumer and must not become an implementation location for the WordPress provider.
+
+There is no localised WordPress Astro example. Do not describe `examples/astro-wordpress/` as a locale-aware consumer.
 
 The Astro examples must not become the implementation location for NexusContent Core.
 
@@ -1234,11 +1236,33 @@ Preserve these permanent boundaries:
 - Authentication belongs in explicit request headers supplied by the consumer. The provider and Core must not read environment variables or expose credentials, authorization headers, or header values in errors.
 - Rendered WordPress HTML remains untrusted external content. The consumer owns trust and sanitization decisions.
 
+## 25.1 WordPress Companion Plugin Boundary
+
+The optional companion plugin is isolated at:
+
+```text
+integrations/wordpress/nexuscontent/
+```
+
+It is WordPress integration code, not Core code and not the standard REST provider implementation. The plugin owns WordPress editor modes, Gutenberg and optional ACF registration, server-side source normalization, companion capabilities and diagnostics, secured companion REST routes, a WordPress admin status/settings page, and layout-aware Gutenberg block previews. The TypeScript provider owns NexusContent-facing discovery, transport, contract validation, fallback, and normalized retrieval when Phase 3 is implemented.
+
+Preserve these rules:
+
+- Released `0.2.0` standard REST retrieval remains plugin-neutral and must not require or call the companion plugin.
+- Plugin PHP, JavaScript, WordPress tooling, and packaging stay under the integration directory; do not move them into `src/core/`, `src/providers/`, or consumer examples.
+- Contract v1 responses use `{ contractVersion: 1, data, diagnostics? }` under `nexuscontent/v1` routes for pages, page by ID, page by slug, schema, and capabilities.
+- Canonical editor modes are exactly `gutenberg`, `acf_flexible`, and `acf_fixed`.
+- Canonical section names are exactly `hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`, `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, and `form_embed`. Do not restore `content/*` names or a thirteenth section.
+- ACF is optional. ACF Free supports fixed Hero, Introduction, and Call to Action fields; legally supplied ACF Pro may enable flexible layouts and opt-in ACF Blocks. Never download or distribute ACF Pro.
+- Public and privileged companion routes must preserve WordPress REST permission boundaries and must not introduce custom credential storage.
+- Contract changes before release must update TypeScript and plugin definitions together. After release, use explicit contract-version negotiation rather than silent shape drift.
+- Phase 3 must consume only the repaired contract and must not begin treating the plugin as verified until WordPress integration passes in CI.
+
 ---
 
 # 26. Strapi
 
-Strapi is the recommended next directional provider milestone for `0.3.0`.
+Strapi is the directional provider milestone for `0.3.0`, after the `0.2.1` companion work.
 
 Do not expand its scope beyond the reviewed milestone merely because adjacent capabilities might be useful.
 
@@ -1388,11 +1412,11 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.2.1
+**CURRENT MILESTONE:** 0.2.1-wordpress-companion
 
-The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The `0.2.1` Phase 1 contracts milestone extends the provider with configuration validation, section registry, companion wire protocols, provider capabilities, diagnostics, and typed error codes. Phase 1 is implemented but not yet released; no runtime retrieval semantics were changed.
+The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The unreleased `0.2.1` milestone contains repaired Phase 1 contracts and the Phase 2 companion plugin. Phase 2 remains `in_progress` until the existing WordPress integration suite passes in CI; local unit, lint, static-analysis, contract, asset, and packaging gates pass, but Docker, MySQL, SVN, and WP-CLI are unavailable locally.
 
-The recommended next implementation milestone is the directional `0.3.0` Strapi provider.
+The recommended next focus is planned Phase 3 companion provider integration. The directional `0.3.0` Strapi provider follows it.
 
 ---
 
@@ -1437,7 +1461,7 @@ The released milestone includes:
 
 ### Section Registry
 
-- 13 built-in section definitions with canonical `content/<type>` source type convention.
+- Exactly 12 built-in canonical short names: `hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`, `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, and `form_embed`.
 - `sourceKey` field mapping to WordPress ACF field group identifiers.
 - `SectionDefinition`, `SectionRegistryEntry`, `SectionRegistry`, and `SectionRegistryOptions` types.
 - `buildSectionRegistry()` with custom section support and deterministic fixed section merge.
@@ -1446,8 +1470,8 @@ The released milestone includes:
 
 ### Companion Wire Contracts
 
-- `WordPressPageResponse`, `WordPressPagesResponse`, `WordPressSchemaResponse`, `WordPressSectionsResponse`, `WordPressHealthResponse` TypeScript interfaces.
-- Zod validation schemas for all companion wire response types.
+- Contract v1 envelopes shaped as `{ contractVersion: 1, data, diagnostics? }`.
+- TypeScript interfaces and Zod schemas for pages, page by ID, page by slug, schema, and capabilities responses.
 - `COMPANION_CONTRACT_VERSION`, `COMPANION_WIRE_NAMESPACE`, `COMPANION_WIRE_ENDPOINTS` constants.
 - `buildCompanionContractVersion()` and `isValidCompanionContractVersion()` helpers.
 - Reserved `nc-` and `nexus-` companion prefixes.
@@ -1456,12 +1480,12 @@ The released milestone includes:
 
 ### Provider Capabilities
 
-- `WordPressProviderFacingCapabilities` type with `visualEditor`, `codeEditor`, `blocksEditor`, `acfFields`, `mediaLibrary`, `customPostTypes`, `sections`, `localeAware`, `previewSupport`, and `webhookSupport` fields.
+- `WordPressProviderFacingCapabilities` type with `editorMode`, `gutenberg`, `acfFlexible`, `acfFixed`, `acfFields`, `mediaLibrary`, `customPostTypes`, `sections`, `localeAware`, `previewSupport`, and `webhookSupport` fields.
 - `capabilities()` method on `WordPressProvider` returning current provider capability report.
 
 ### Error Codes
 
-- `WORDPRESS_ERROR_CODES` object with 32 typed error codes covering config, HTTP, network, JSON, pagination, section, content, media, and ACF error categories.
+- `WORDPRESS_ERROR_CODES` includes provider categories plus companion response, editor, block, ACF layout/block, fixed section, section-source, media-resolution, and conflicting-source codes.
 - `WordPressErrorCode` type and `isWordPressErrorCode()` predicate.
 - Optional generic `code` field on `NexusContentErrorDetails` and `NexusContentError`.
 
@@ -1472,10 +1496,24 @@ The released milestone includes:
 - Provider config validation tests for invalid enum values.
 - Public export verification for all new types, schemas, and predicates.
 
+## 0.2.1 WordPress Phase 2 Companion Plugin (In Progress, Unreleased)
+
+- Plugin `0.1.0` source is isolated under `integrations/wordpress/nexuscontent/` and requires WordPress 6.6+ and PHP 8.1+.
+- Native Gutenberg, optional ACF Free 6.2+ fixed fields, optional ACF Pro 6.2+ flexible layouts for all 12 sections, and opt-in ACF Blocks are implemented.
+- Page mode UI, server-side source normalization, expanded media metadata, exact capability reporting, diagnostics, secured REST routes, tests, tooling, documentation, and ZIP packaging exist.
+- Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and packaging pass; `dist/nexuscontent-0.1.0.zip` is the current artifact.
+- The feature remains `in_progress` until WordPress integration passes in CI. Do not mark it implemented or finalize `0.2.1` before that gate passes.
+
+## 0.2.1 WordPress Phase 3 Companion Integration (Planned)
+
+- Provider discovery, companion calls, contract-version negotiation, caching, and fallback remain pending.
+- Phase 3 must consume only the repaired contract after plugin integration verification.
+- Released `0.2.0` standard REST retrieval remains unchanged and does not call the plugin.
+
 ## Explicit Scope Boundaries
 
 - Published-content-only, read-only retrieval.
-- No preview, webhooks, mutations, synchronization, retries, or caching.
+- No preview, webhooks, mutations, synchronization, or retries. Released base-provider retrieval has no cache; a scoped companion cache belongs only to planned Phase 3.
 - No shortcode conversion, Gutenberg renderer, taxonomy cache, media synchronization, plugin SEO, WordPress localisation plugins, endpoint discovery, WooCommerce, or multisite verification.
 - Rendered HTML remains untrusted and consumer-owned.
 

@@ -1,35 +1,29 @@
 {
   "contractVersion": 1,
-  "contract": "companion-pages",
-  "items": [
-    {
-      "contractVersion": 1,
-      "contract": "companion-page",
-      "id": "1",
-      "key": "home",
-      "slug": "home",
-      "title": "Home",
-      "sections": [],
-      "rawFields": {},
-      "diagnostics": []
-    },
-    {
-      "contractVersion": 1,
-      "contract": "companion-page",
-      "id": "2",
-      "key": "about",
-      "slug": "about",
-      "title": "About",
-      "sections": [],
-      "rawFields": {},
-      "diagnostics": []
+  "data": {
+    "items": [
+      {
+        "id": "1",
+        "key": "home",
+        "slug": "home",
+        "title": "Home",
+        "sections": [],
+        "rawFields": {}
+      },
+      {
+        "id": "2",
+        "key": "about",
+        "slug": "about",
+        "title": "About",
+        "sections": [],
+        "rawFields": {}
+      }
+    ],
+    "pagination": {
+      "total": 2,
+      "totalPages": 1,
+      "page": 1,
+      "perPage": 100
     }
-  ],
-  "pagination": {
-    "total": 2,
-    "totalPages": 1,
-    "page": 1,
-    "perPage": 100
-  },
-  "diagnostics": []
+  }
 }

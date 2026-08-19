@@ -60,7 +60,7 @@ async function withServer<T>(handler: Handler, run: (baseUrl: string) => Promise
 }
 
 function provider(baseUrl: string, options: Partial<WordPressProviderOptions> = {}): WordPressProvider {
-  return new WordPressProvider({ baseUrl, ...options });
+  return new WordPressProvider({ apiStrategy: "core", baseUrl, ...options });
 }
 
 function entry(id: number, slug = `post-${id}`): Record<string, unknown> {

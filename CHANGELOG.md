@@ -14,17 +14,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `contentSectionSchema`, `sectionSettingsSchema`, and `pageStatusSchema` Zod validation schemas for the new section contracts.
 - Generic optional `code` field on `NexusContentErrorDetails` and `NexusContentError` for typed error classification.
 - WordPress Phase 1 configuration options: `editorMode`, `apiStrategy`, `unknownContentPolicy`, `mediaResolution`, `acf`, `fixedSections`, `customSections`, and `sectionRegistry` on `WordPressProviderOptions`.
-- WordPress Phase 1 section registry: `buildSectionRegistry`, `mergeSectionRegistry`, `lookupSectionSourceAlias`, `SectionDefinition`, `SectionRegistry`, and all 13 built-in fixed section types.
+- WordPress Phase 1 section registry: `buildSectionRegistry`, `mergeSectionRegistry`, `lookupSectionSourceAlias`, `SectionDefinition`, `SectionRegistry`, and exactly 12 canonical short section names (`hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`, `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, `form_embed`).
 - WordPress Phase 1 `capabilities()` method on `WordPressProvider` returning provider-facing capability report.
-- WordPress Phase 1 companion wire contracts: `WordPressPageResponse`, `WordPressPagesResponse`, `WordPressSchemaResponse`, `WordPressSectionsResponse`, `WordPressHealthResponse`, `WordPressDiagnostic`, `WordPressCapabilities`, and `WordPressProviderFacingCapabilities` with contract version 1 and reserved `companion/` namespace.
-- WordPress Phase 1 error codes: 32 typed error codes under `WORDPRESS_ERROR_CODES` covering config, HTTP, network, JSON, pagination, section, content, media, and ACF categories.
+- WordPress Phase 1 companion wire contracts for pages, page by ID, page by slug, schema, and capabilities under `nexuscontent/v1`.
+- Expanded typed WordPress errors for companion response, editor mode, block, ACF block/layout, fixed section, section source, media resolution, and conflicting-source failures.
 - Canonical test fixtures for companion wire responses, source ACF sections, and invalid contract shapes.
 - Contract validation tests for section schemas, config enums, registry operations, capabilities, wire contract structure, error codes, and public exports.
+- WordPress companion plugin `0.1.0` source under `integrations/wordpress/nexuscontent`, isolated from Core and the standard REST provider.
+- Native Gutenberg normalization, ACF Free fixed Hero/Introduction/Call to Action fields, ACF Pro flexible layouts for all 12 canonical sections, opt-in ACF Blocks, and page editor-mode controls.
+- Server-side page, section, media, capability, and diagnostic normalization with secured read-only REST routes.
+- Companion plugin unit, integration, contract, lint, static-analysis, asset, documentation, CI, and ZIP packaging infrastructure; the package artifact is `dist/nexuscontent-0.1.0.zip`.
+- WordPress companion plugin admin page with plugin status dashboard (version, WordPress/PHP version, ACF detection, editor modes, page breakdown, section registry count) and settings (default editor mode, enabled section types, media resolution).
+- Packaged static inserter and inspector illustrations for all 12 NexusContent blocks, plus editable Gutenberg layouts with inline primary content and additional section fields.
+- Admin page card-based layout with status indicators, colored mode badges, and a responsive section-checkbox grid.
+- Admin page CSS (`assets/build/admin.css`) using WordPress admin color scheme variables for theme compatibility.
+- Admin page split into two separate pages: a focused Dashboard (plugin status + pages-by-editor-mode breakdown) and a dedicated Settings page (default editor mode, enabled sections, media resolution).
+- Block preview rendering: removed server-side `getBlockType` bail-out check so client-side `registerBlockType()` always merges the `edit` function, enabling static SVG previews for all 12 blocks.
+- Admin dashboard redesigned with five cards: Plugin Status, Pages by editor mode, Blocks overview (enabled/disabled count with shortcut to Settings), Recent pages (last 5 modified with mode badge), and Quick links.
+- Admin Settings page now uses toggle switches for each of the 12 section types; disabled blocks are hidden from the Gutenberg block inserter both server-side (PHP) and client-side (JS).
+- Admin About page with plugin info, requirements, 5-step getting started guide, documentation links, and feature highlights.
+- Block loader reads the `nexuscontent_settings` option's `enabled_sections` array and passes it to the editor via `wp_localize_script`; disabled types are excluded from server-side registration and unregistered client-side.
 
 ### Changed
 
+- Exposed Gutenberg eyebrow, section ID, variant, and theme controls in an Additional fields panel; generated section IDs now preserve manual overrides.
+- Expanded Gutenberg Logo Grid items to accept a label, a logo image, or both while retaining the existing ACF `name` and `logo` storage keys.
 - Extended `PageContent` with optional canonical fields for status, excerpt, featured image, modified date, and sections; all fields remain optional and do not break existing consumers.
 - Updated `pageSchema` validation to accept the new optional fields without changing required field semantics.
+- Repaired the unreleased contract v1 to use `{ contractVersion: 1, data, diagnostics? }`, editor modes `gutenberg` / `acf_flexible` / `acf_fixed`, the 12 canonical short section names, expanded media metadata, exact runtime capabilities, and the five `nexuscontent/v1` route contracts.
+- Kept released `0.2.0` standard REST provider retrieval unchanged; it does not call the companion plugin.
+
+### Fixed
+
+- Admin page "Pages by editor mode" now counts all published pages, including those without an explicit `nexus_editor_mode` meta row. Pages without the meta value default to the Block editor count, matching the `Editor_Mode::get()` fallback behaviour.
+- Block previews now render in the editor. Removed the `wp.blocks.getBlockType()` bail-out check that prevented client-side `registerBlockType()` from merging the `edit` function with SVG preview support.
+
+### In Progress
+
+- Companion plugin local unit, PHP lint, PHPCS, PHPStan, contract, JavaScript build/lint/format, and ZIP packaging checks pass. WordPress integration tests exist but still require a successful CI run because Docker, MySQL, SVN, and WP-CLI are unavailable locally.
+- Phase 3 provider discovery, companion calls, contract-version negotiation, caching, and fallback remain planned. Phase 3 must consume only the repaired contract after plugin integration verification.
+- Version `0.2.1` and the companion plugin are unreleased; the root package remains `0.2.0`.
 
 ## [0.2.0] - 2026-08-18
 
@@ -53,7 +82,7 @@ WordPress provider release.
 
 - WordPress access is published-content-only and read-only; preview, webhooks, mutations, synchronization, retries, and caching are not implemented.
 - The base provider does not implement shortcode conversion, Gutenberg rendering, taxonomy caching, media synchronization, plugin SEO, WordPress localisation plugins, endpoint discovery, WooCommerce, or verified multisite behavior.
-- Locale retrieval options are ignored by the base provider; the localised Astro example intentionally renders the same WordPress source content under English and French consumer-owned routes.
+- Locale retrieval options are ignored by the base provider; no localised WordPress Astro example is included.
 - Rendered WordPress HTML must be trusted or sanitized by the consuming application.
 - Embedded featured-media requests increase REST payload and processing cost.
 

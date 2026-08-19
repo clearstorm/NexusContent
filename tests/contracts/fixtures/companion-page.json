@@ -1,23 +1,42 @@
 {
   "contractVersion": 1,
-  "contract": "companion-page",
-  "id": "1",
-  "key": "home",
-  "slug": "home",
-  "title": "Home",
-  "status": "publish",
-  "excerpt": "Welcome to our site",
-  "modifiedAt": "2026-08-18T10:00:00Z",
-  "sections": [
-    {
-      "type": "hero",
-      "settings": { "visible": true },
-      "data": { "heading": "Welcome", "subheading": "Hello world" }
+  "data": {
+    "id": "1",
+    "key": "home",
+    "slug": "home",
+    "title": "Home",
+    "status": "published",
+    "excerpt": "Welcome to our site",
+    "featuredImage": {
+      "id": "42",
+      "url": "https://example.com/hero.jpg",
+      "alt": "Welcome",
+      "caption": "Homepage hero",
+      "mimeType": "image/jpeg",
+      "width": 1600,
+      "height": 900,
+      "sizes": {
+        "thumbnail": {
+          "url": "https://example.com/hero-300.jpg",
+          "width": 300,
+          "height": 169,
+          "mimeType": "image/jpeg"
+        }
+      }
+    },
+    "modifiedAt": "2026-08-18T10:00:00Z",
+    "sections": [
+      {
+        "id": "hero-main",
+        "type": "hero",
+        "settings": { "visible": true },
+        "data": { "heading": "Welcome", "background_image": 42 }
+      }
+    ],
+    "rawFields": {
+      "hero_heading": "Welcome",
+      "hero_background_image": 42
     }
-  ],
-  "rawFields": {
-    "hero_heading": "Welcome",
-    "hero_subheading": "Hello world"
   },
   "diagnostics": []
 }

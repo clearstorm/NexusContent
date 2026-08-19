@@ -1,12 +1,22 @@
 import { z } from "zod";
 import type { JsonObject, NavigationItem, PageStatus } from "../core/types.ts";
 
+export const mediaSizeSchema = z.object({
+  url: z.string(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  mimeType: z.string().optional()
+});
+
 export const mediaAssetSchema = z.object({
   id: z.string().optional(),
   url: z.string(),
   alt: z.string().optional(),
+  caption: z.string().optional(),
+  mimeType: z.string().optional(),
   width: z.number().optional(),
-  height: z.number().optional()
+  height: z.number().optional(),
+  sizes: z.record(z.string(), mediaSizeSchema).optional()
 });
 
 export const seoRobotsSchema = z.object({
@@ -94,10 +104,14 @@ export const dataSchema = z.record(z.string(), z.unknown());
 
 export const sectionSettingsSchema = z.record(
   z.string(),
-  z.unknown()
+  z.custom<import("../core/types.ts").JsonValue>(
+    (value) => isJsonValue(value, new Set()),
+    { message: "Expected a JSON-compatible value" }
+  )
 );
 
 export const contentSectionSchema = z.object({
+  id: z.string().optional(),
   type: z.string(),
   settings: sectionSettingsSchema.optional(),
   data: dataSchema

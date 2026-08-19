@@ -55,7 +55,7 @@ NexusContent Core
 
 # Project Status
 
-NexusContent is at version `0.2.0`, released internally on 2026-08-18 as an early-development private package. The framework-neutral Core, Git JSON provider, WordPress REST provider, validation pipeline, localisation and SEO foundations, Astro reference consumers, and plain Node compatibility proofs are implemented. No feature is currently marked in progress; the recommended next focus is the directional `0.3.0` Strapi provider milestone.
+NexusContent is at version `0.2.0`, released internally on 2026-08-18 as an early-development private package. The unreleased `0.2.1-wordpress-companion` milestone is in progress: the Phase 2 companion plugin exists and passes local quality gates, but still requires its WordPress integration suite to pass in CI. Phase 3 companion provider integration is the recommended next focus, followed by the directional `0.3.0` Strapi provider.
 
 For authoritative project tracking:
 
@@ -1813,7 +1813,7 @@ export interface WordPressProviderOptions {
   perPage?: number; // default: 100; valid range: 1..100
   maxPages?: number; // default: 100; positive integer
   timeoutMs?: number; // default: 10000; positive integer
-  editorMode?: "visual" | "code" | "blocks"; // default: "blocks"
+  editorMode?: "gutenberg" | "acf_flexible" | "acf_fixed"; // default: "gutenberg"
   apiStrategy?: "rest-v2" | "rest-v1" | "application-password"; // default: "rest-v2"
   unknownContentPolicy?: "ignore" | "throw"; // default: "ignore"
   mediaResolution?: "embed" | "fetch" | "off"; // default: "embed"
@@ -1927,6 +1927,41 @@ The `0.2.0` provider supports public or header-authenticated reads of published 
 - retries or response caching
 
 WordPress response objects stop at the provider boundary. Core remains unaware of WordPress, and framework rendering remains consumer-owned.
+
+## WordPress companion plugin
+
+The optional **NexusContent Companion** plugin exposes normalized, contract-versioned WordPress page data and editor capabilities for future provider integration. Its source is isolated at `integrations/wordpress/nexuscontent/`; released `0.2.0` standard REST retrieval remains plugin-neutral and does not call it.
+
+Plugin `0.1.0` requires WordPress 6.6+ and PHP 8.1+. Gutenberg is native. ACF is optional: ACF Free 6.2+ enables fixed Hero, Introduction, and Call to Action fields, while a legally supplied ACF Pro 6.2+ enables flexible layouts for all 12 canonical sections and opt-in ACF Blocks. Pages select exactly one source mode: `gutenberg`, `acf_fixed`, or `acf_flexible`.
+
+Install `dist/nexuscontent-0.1.0.zip` through **Plugins > Add New > Upload Plugin**, or extract it as `wp-content/plugins/nexuscontent`. Read-only routes are under `/wp-json/nexuscontent/v1`:
+
+- `/pages`
+- `/pages/{id}`
+- `/pages/slug/{slug}`
+- `/schema`
+- `/capabilities`
+
+Contract v1 responses use `{ "contractVersion": 1, "data": ..., "diagnostics"?: [...] }`. Published content, schema, and capabilities are public where WordPress permits; non-public content uses normal WordPress REST permissions and authentication.
+
+Build and local checks run from the plugin directory:
+
+```bash
+npm install
+npm run build
+npm run lint-js
+npm run format:check
+npm run package
+composer validate --strict --no-check-lock
+composer lint
+composer phpcs
+composer phpstan
+composer test-unit
+```
+
+WordPress integration uses `npm run env:start`, `npm run test:integration`, and `npm run env:stop` with Docker/wp-env. The suite and CI workflow exist, but Docker, MySQL, SVN, and WP-CLI are unavailable locally, so Phase 2 remains `in_progress` until CI integration passes. See the [companion plugin README](integrations/wordpress/nexuscontent/README.md) for complete installation, editor, route, security, build, test, hook, and ACF guidance.
+
+The contract repair and plugin are pre-release. No released `0.2.0` retrieval behavior changed. Planned Phase 3 provider discovery, calls, version negotiation, caching, and fallback must consume only the repaired contract after plugin integration verification.
 
 ## Public exports
 
@@ -2528,7 +2563,7 @@ Core APIs must be stable before CLI abstractions are introduced.
 
 # Current Milestone
 
-The current internal milestone, version `0.2.1`, extends the WordPress provider with Phase 1 contracts. The `0.2.0` WordPress provider base was released internally on 2026-08-18. Phase 1 adds configuration validation, section registry, companion wire protocols, provider capabilities, diagnostics, and typed error codes without changing runtime retrieval semantics. No public package release has been made.
+The current internal milestone is `0.2.1-wordpress-companion`. The `0.2.0` WordPress provider base was released internally on 2026-08-18. Phase 1 contracts were repaired before release, Phase 2 plugin implementation is `in_progress` pending CI integration verification, and Phase 3 provider integration remains planned. The root package remains `0.2.0`; `0.2.1` has not been finalized or released.
 
 ## Required
 
@@ -2564,11 +2599,22 @@ The current internal milestone, version `0.2.1`, extends the WordPress provider 
 * actionable provider errors and explicit header authentication
 * Astro and plain Node compatibility coverage
 * configuration enums with constructor validation (editorMode, apiStrategy, unknownContentPolicy, mediaResolution)
-* runtime section registry with 13 built-in sections, custom section support, and deterministic merge
-* companion wire contract types and Zod validation schemas (page, pages, schema, sections, health)
+* runtime section registry with exactly 12 canonical short section names, custom section support, and deterministic merge
+* contract v1 envelopes and Zod validation for pages, page by ID, page by slug, schema, and capabilities under `nexuscontent/v1`
 * provider capabilities() method returning capability report
-* 32 typed WordPress error codes organized by category
+* expanded typed WordPress error codes including companion, editor, block, ACF, section-source, and media-resolution failures
 * generic `code` field on NexusContentErrorDetails and NexusContentError
+
+### WordPress Companion Plugin
+
+* plugin `0.1.0` isolated under `integrations/wordpress/nexuscontent/`
+* native Gutenberg, optional ACF fixed/flexible modes, opt-in ACF Blocks, and page mode controls
+* editable eyebrow, section ID, variant, and theme fields plus packaged static previews for all 12 blocks
+* Logo Grid items with optional labels and logo images
+* server normalization, expanded media, exact capabilities, diagnostics, and secured REST routes
+* local quality gates and `dist/nexuscontent-0.1.0.zip` packaging pass
+* WordPress integration remains a required CI gate before the feature is implemented
+* Phase 3 provider discovery, calls, version negotiation, caching, and fallback remain planned
 
 ### Validation
 
@@ -2627,13 +2673,13 @@ Do not implement the following during the current milestone:
 * sitemap, robots.txt, redirects, metadata scraping, keyword analysis, or analytics
 * provider-specific SEO plugin behavior in Core
 * framework SEO rendering components in the public package
-* WordPress preview, webhooks, mutations, retries, caching, or companion wire endpoint implementation
+* WordPress preview, webhooks, mutations, or retries
 * WordPress shortcode conversion, Gutenberg rendering, taxonomy caching, or media synchronization
 * WordPress plugin SEO, localisation-plugin integration, discovery, WooCommerce, or verified multisite support
 
 These features come later.
 
-The purpose of `0.2.0` is to add a practical WordPress REST boundary without moving CMS-specific behavior into Core or rendering into the provider.
+The purpose of `0.2.1` is to establish and verify the optional companion boundary without moving WordPress-specific behavior into Core or changing released `0.2.0` standard REST retrieval.
 
 ---
 

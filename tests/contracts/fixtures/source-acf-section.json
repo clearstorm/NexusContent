@@ -1,6 +1,7 @@
 {
-  "acfKey": "section_hero",
-  "fallbackType": "hero",
+  "blockName": "nexuscontent/hero",
+  "acfBlock": "acf/hero",
+  "acfLayout": "hero",
   "label": "Hero Section",
   "fields": {
     "heading": { "type": "text", "required": true },

@@ -1,21 +1,23 @@
 {
   "contractVersion": 1,
-  "contract": "companion-page",
-  "id": "1",
-  "key": "home",
-  "sections": [
-    {
-      "type": "custom-widget",
-      "data": { "text": "Hello" }
-    }
-  ],
-  "rawFields": {},
+  "data": {
+    "id": "1",
+    "key": "home",
+    "sections": [
+      {
+        "id": "form-contact",
+        "type": "form_embed",
+        "data": { "embed_code": "[contact-form]" }
+      }
+    ],
+    "rawFields": {}
+  },
   "diagnostics": [
     {
-      "code": "wordpress/section/unknown-type",
-      "message": "Section type \"custom-widget\" is not in the registry",
+      "code": "wordpress/block/unknown",
+      "message": "An unknown block was omitted",
       "severity": "warning",
-      "path": "sections.0"
+      "path": "data.sections.0"
     }
   ]
 }

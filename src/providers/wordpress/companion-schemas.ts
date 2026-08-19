@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { mediaAssetSchema, pageStatusSchema } from "../../validation/schemas.ts";
 import { COMPANION_CONTRACT_VERSION } from "./config.ts";
 
 export const diagnosticSeveritySchema = z.enum(["error", "warning", "info"]);
@@ -10,12 +11,24 @@ export const diagnosticSchema = z.object({
   path: z.string().optional()
 });
 
-export const paginationSchema = z.object({
-  total: z.number(),
-  totalPages: z.number(),
-  page: z.number(),
-  perPage: z.number()
-});
+const nonNegativeSafeIntegerSchema = z
+  .number()
+  .int()
+  .min(0)
+  .max(Number.MAX_SAFE_INTEGER);
+const positiveSafeIntegerSchema = nonNegativeSafeIntegerSchema.min(1);
+
+export const paginationSchema = z
+  .object({
+    total: nonNegativeSafeIntegerSchema,
+    totalPages: nonNegativeSafeIntegerSchema,
+    page: positiveSafeIntegerSchema,
+    perPage: positiveSafeIntegerSchema
+  })
+  .refine(
+    ({ page, totalPages }) => totalPages === 0 ? page === 1 : page <= totalPages,
+    { message: "page must be within the available page range", path: ["page"] }
+  );
 
 export const jsonValueSchema: z.ZodType<unknown> = z.lazy(() =>
   z.union([
@@ -31,78 +44,71 @@ export const jsonValueSchema: z.ZodType<unknown> = z.lazy(() =>
 export const sectionSettingsWireSchema = z.record(z.string(), jsonValueSchema);
 
 export const pageSectionWireSchema = z.object({
-  type: z.string(),
+  id: z.string().min(1),
+  type: z.string().min(1),
   settings: sectionSettingsWireSchema.optional(),
   data: z.record(z.string(), jsonValueSchema)
 });
 
-export const capabilitiesSchema = z.object({
-  visualEditor: z.boolean(),
-  codeEditor: z.boolean(),
-  blocksEditor: z.boolean(),
-  acfFields: z.boolean(),
-  mediaLibrary: z.boolean(),
-  customPostTypes: z.boolean(),
-  sections: z.boolean()
-});
-
-export const companionPageResponseSchema = z.object({
-  contractVersion: z.literal(COMPANION_CONTRACT_VERSION),
-  contract: z.literal("companion-page"),
+export const pageDataSchema = z.object({
   id: z.string(),
   key: z.string(),
   slug: z.string().optional(),
   title: z.string().optional(),
-  status: z.string().optional(),
+  status: pageStatusSchema.optional(),
   excerpt: z.string().optional(),
+  featuredImage: mediaAssetSchema.optional(),
   modifiedAt: z.string().optional(),
   sections: z.array(pageSectionWireSchema),
-  rawFields: z.record(z.string(), jsonValueSchema),
-  diagnostics: z.array(diagnosticSchema)
+  rawFields: z.record(z.string(), jsonValueSchema)
 });
 
-export const companionPagesResponseSchema = z.object({
-  contractVersion: z.literal(COMPANION_CONTRACT_VERSION),
-  contract: z.literal("companion-pages"),
-  items: z.array(companionPageResponseSchema),
-  pagination: paginationSchema,
-  diagnostics: z.array(diagnosticSchema)
+export const pagesDataSchema = z.object({
+  items: z.array(pageDataSchema),
+  pagination: paginationSchema
 });
 
 export const sectionSchemaFieldSchema = z.object({
   name: z.string(),
-  type: z.string(),
+  type: z.enum(["string", "number", "boolean", "json", "media"]),
   required: z.boolean().optional(),
   default: jsonValueSchema.optional()
 });
 
 export const sectionSchemaSchema = z.object({
-  type: z.string(),
-  sourceType: z.string(),
-  sourceKey: z.string().optional(),
+  type: z.string().min(1),
   fields: z.array(sectionSchemaFieldSchema)
 });
 
-export const companionSchemaResponseSchema = z.object({
-  contractVersion: z.literal(COMPANION_CONTRACT_VERSION),
-  contract: z.literal("companion-schema"),
-  sections: z.array(sectionSchemaSchema),
-  capabilities: capabilitiesSchema,
-  diagnostics: z.array(diagnosticSchema)
+export const schemaDataSchema = z.object({
+  editorModes: z.array(z.enum(["gutenberg", "acf_flexible", "acf_fixed"])),
+  sectionDefinitions: z.array(sectionSchemaSchema),
+  sourceMappings: z.record(z.string(), z.string().min(1))
 });
 
-export const companionSectionsResponseSchema = z.object({
-  contractVersion: z.literal(COMPANION_CONTRACT_VERSION),
-  contract: z.literal("companion-sections"),
-  sections: z.array(pageSectionWireSchema),
-  diagnostics: z.array(diagnosticSchema)
+export const capabilitiesSchema = z.object({
+  pluginVersion: z.string(),
+  wordpressVersion: z.string(),
+  gutenberg: z.boolean(),
+  acf: z.boolean(),
+  acfVersion: z.string().optional(),
+  acfPro: z.boolean(),
+  acfBlocks: z.boolean(),
+  flexibleContent: z.boolean(),
+  editorModes: z.array(z.enum(["gutenberg", "acf_flexible", "acf_fixed"])),
+  sectionTypes: z.array(z.string().min(1))
 });
 
-export const companionHealthResponseSchema = z.object({
-  contractVersion: z.literal(COMPANION_CONTRACT_VERSION),
-  contract: z.literal("companion-health"),
-  status: z.enum(["healthy", "degraded"]),
-  editorMode: z.string(),
-  apiStrategy: z.string(),
-  diagnostics: z.array(diagnosticSchema)
-});
+export function companionEnvelopeSchema<T extends z.ZodType>(data: T) {
+  return z.object({
+    contractVersion: z.literal(COMPANION_CONTRACT_VERSION),
+    data,
+    diagnostics: z.array(diagnosticSchema).optional()
+  });
+}
+
+export const companionPageResponseSchema = companionEnvelopeSchema(pageDataSchema);
+export const companionPagesResponseSchema = companionEnvelopeSchema(pagesDataSchema);
+export const companionSchemaResponseSchema = companionEnvelopeSchema(schemaDataSchema);
+export const companionCapabilitiesResponseSchema =
+  companionEnvelopeSchema(capabilitiesSchema);

@@ -32,7 +32,22 @@ export const WORDPRESS_ERROR_CODES = {
   CONTENT_UNKNOWN_COLLECTION: "wordpress/content/unknown-collection",
   MEDIA_FETCH_FAILED: "wordpress/media/fetch-failed",
   MEDIA_INVALID_RESPONSE: "wordpress/media/invalid-response",
-  ACF_FIELD_ERROR: "wordpress/acf/field-error"
+  ACF_FIELD_ERROR: "wordpress/acf/field-error",
+  UNSUPPORTED_EDITOR_MODE: "wordpress/editor/unsupported-mode",
+  MALFORMED_BLOCK_CONTENT: "wordpress/block/malformed-content",
+  UNKNOWN_BLOCK: "wordpress/block/unknown",
+  UNKNOWN_ACF_BLOCK: "wordpress/acf/unknown-block",
+  UNKNOWN_ACF_LAYOUT: "wordpress/acf/unknown-layout",
+  INVALID_FIXED_SECTION: "wordpress/section/invalid-fixed",
+  INVALID_SECTION: "wordpress/section/invalid",
+  MEDIA_RESOLUTION_FAILED: "wordpress/media/resolution-failed",
+  CONFLICTING_SECTION_SOURCES: "wordpress/section/conflicting-sources",
+  INVALID_COMPANION_RESPONSE: "wordpress/companion/invalid-response",
+  COMPANION_NOT_FOUND: "wordpress/companion/not-found",
+  COMPANION_FORBIDDEN: "wordpress/companion/forbidden",
+  COMPANION_MISSING: "wordpress/companion/missing",
+  COMPANION_UNAVAILABLE: "wordpress/companion/unavailable",
+  COMPANION_VERSION_MISMATCH: "wordpress/companion/version-mismatch"
 } as const;
 
 export type WordPressErrorCode =

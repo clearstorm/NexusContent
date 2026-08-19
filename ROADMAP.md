@@ -111,7 +111,7 @@ The exit criteria are satisfied by `0.1.4`.
 
 - Published content only; no draft preview, webhooks, mutations, synchronization, retries, or caching.
 - No shortcode conversion, Gutenberg block renderer, taxonomy cache, media synchronization, plugin SEO, WordPress localisation-plugin integration, endpoint discovery, WooCommerce support, or multisite verification.
-- The base provider ignores locale retrieval options; the localised example uses the same source content for English and French consumer routes.
+- The base provider ignores locale retrieval options; there is no localised WordPress Astro example.
 - Rendered WordPress HTML remains untrusted consumer input and must be trusted or sanitized by the application.
 - Featured media uses `_embed`, increasing response payload and request processing cost.
 
@@ -124,42 +124,54 @@ The exit criteria are satisfied by `0.1.4`.
 
 The exit criteria are satisfied by `0.2.0`.
 
-## 0.2.1 - WordPress Phase 1 Contracts
+## 0.2.1 - WordPress Companion
 
-**State:** Implemented but unreleased. Internal scope change from the originally planned `0.2.0` WordPress provider scope. Included in the upcoming `0.2.1` package release.
+**State:** In progress and unreleased. The root package remains `0.2.0`.
 
-**Goal:** Define WordPress configuration contracts, section registry, companion wire protocol, provider capabilities, diagnostics, and typed error codes without changing runtime retrieval semantics.
+**Goal:** Establish a versioned companion boundary that gives WordPress editors Gutenberg and optional ACF authoring modes while preserving the released plugin-neutral standard REST provider.
 
-**Implemented capabilities:**
+### Phase 1 - Repaired Contracts
 
-- Core `ContentSection<TData>`, `SectionSettings`, and `PageStatus` types for structured page sections, added as optional fields on `PageContent`.
-- WordPress config enums and defaults: `WordPressEditorMode`, `WordPressApiStrategy`, `WordPressUnknownContentPolicy`, `WordPressMediaResolution`, `WordPressAcfConfig`, `WordPressFixedSectionConfig`.
-- Constructor validation rejecting invalid enum values for `editorMode`, `apiStrategy`, `unknownContentPolicy`, and `mediaResolution`.
-- Runtime section registry with 13 built-in section definitions using canonical `content/<type>` source type convention, `sourceKey` ACF field group identifiers, custom section support, deterministic registry merge, and ACF key resolution.
-- Companion wire contract types and Zod validation schemas for `companion-page`, `companion-pages`, `companion-schema`, `companion-sections`, and `companion-health` responses with contract version, diagnostics, and reserved namespace.
-- `WordPressProviderFacingCapabilities` type and `capabilities()` method on `WordPressProvider` returning provider-facing capability report for editor mode, ACF, media, sections, and future operations.
-- 32 typed WordPress error codes organized by category: configuration, HTTP, network, JSON, pagination, section, content, media, and ACF errors.
-- Optional generic `code` field on `NexusContentErrorDetails` and `NexusContentError` for typed error classification across all providers.
-- Diagnostic severity enum, diagnostic entry schema, and structured diagnostic support for companion wire responses.
-- JSON fixture-based contract tests, Zod schema validation tests, provider config validation tests, and public export verification.
+**State:** Implemented but unreleased.
 
-**Explicit exclusions:**
+- Core structured-page types, WordPress configuration validation, section registry, diagnostics, capabilities, and typed errors are implemented.
+- Contract v1 uses `{ contractVersion: 1, data, diagnostics? }` envelopes.
+- Editor modes are exactly `gutenberg`, `acf_flexible`, and `acf_fixed`.
+- Canonical section names are exactly `hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`, `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, and `form_embed`.
+- The `nexuscontent/v1` contract covers `pages`, `pages/{id}`, `pages/slug/{slug}`, `schema`, and `capabilities`.
+- Media supports caption, MIME type, and registered sizes in addition to baseline normalized fields; capability reporting reflects the exact runtime installation.
+- Error codes include companion response, editor, block, ACF layout/block, fixed section, section-source, media-resolution, and conflicting-source failures.
 
-- No changes to existing runtime retrieval semantics; `getPage`, `getCollection`, and `getItem` behave identically to `0.2.0`.
-- No companion wire protocol HTTP endpoint implementation; only types and schemas are defined.
-- No shortcode conversion, Gutenberg renderer, taxonomy cache, media synchronization, plugin SEO, or WordPress localisation-plugin integration.
-- No preview, webhooks, mutations, synchronization, retries, or caching.
-- No rendering, parsing, or transport behavior beyond existing provider boundary.
-- No new runtime dependencies; Zod validation schemas are internal to the companion contract definitions.
+This was a pre-release contract repair because the earlier committed definitions contradicted Phase 2. No released `0.2.0` retrieval behavior changed.
 
-**Exit criteria:**
+### Phase 2 - Companion Plugin
 
-- All existing `0.2.0` tests, type checks, and builds remain green.
-- Phase 1 contract tests and Zod validation tests pass.
-- Provider constructor validates enum options and rejects invalid configuration.
-- Section registry uses canonical `content/<type>` naming convention.
-- Public exports include all new types, schemas, and predicates.
-- Project state documentation is synchronized.
+**State:** `in_progress`; implementation and local verification exist, but WordPress integration must pass in CI.
+
+- Plugin `0.1.0` is isolated under `integrations/wordpress/nexuscontent/` and requires WordPress 6.6+ and PHP 8.1+.
+- Native Gutenberg, ACF Free 6.2+ fixed Hero/Introduction/Call to Action fields, ACF Pro 6.2+ flexible layouts for all 12 sections, opt-in ACF Blocks, and page mode UI are implemented.
+- Server-side source normalization, expanded media, exact capabilities, diagnostics, secured REST routes, tests, tooling, documentation, and packaging exist.
+- Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and ZIP packaging pass. The artifact is `dist/nexuscontent-0.1.0.zip`.
+- WordPress integration tests and CI workflow exist. Docker, MySQL, SVN, and WP-CLI are unavailable locally, so the integration gate cannot be completed locally.
+
+**Phase 2 exit criteria:**
+
+- The WordPress integration suite passes in CI.
+- Existing local quality gates remain green.
+- Only then may `provider.wordpress.companion-plugin` move from `in_progress` to `implemented`.
+
+### Phase 3 - Companion Provider Integration
+
+**State:** `planned`; recommended next focus after the Phase 2 CI gate.
+
+- Add provider discovery, companion calls, explicit contract-version negotiation, caching, and fallback.
+- Consume only the repaired contract and do not treat the plugin handshake as verified before Phase 2 integration passes.
+- Preserve released `0.2.0` standard REST retrieval unchanged; it must not require or call the plugin.
+
+**0.2.1 exclusions:**
+
+- No preview, webhooks, mutations, synchronization, retries, plugin SEO, WordPress localisation-plugin integration, WooCommerce, or multisite verification.
+- No release or root package version change until the milestone exit criteria are met.
 
 ## 0.2.x - Localisation Continuation
 
@@ -191,7 +203,7 @@ The exit criteria are satisfied by `0.2.0`.
 
 ## 0.3.0 - Strapi Provider
 
-**State:** Directional; recommended next focus.
+**State:** Directional; planned after `0.2.1` companion integration.
 
 **Goal:** Add structured Strapi REST content while preserving the Core contract proven by Git and WordPress.
 

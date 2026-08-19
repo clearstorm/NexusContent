@@ -33,9 +33,10 @@ export class WordPressClient {
   async request(
     endpoint: string,
     query: Record<string, QueryValue>,
-    context: WordPressRequestContext
+    context: WordPressRequestContext,
+    options?: { skipStatus?: boolean }
   ): Promise<WordPressClientResponse> {
-    const url = this.buildUrl(endpoint, query);
+    const url = this.buildUrl(endpoint, query, options?.skipStatus);
     const controller = new AbortController();
     let timedOut = false;
     const timeout = setTimeout(() => {
@@ -100,7 +101,8 @@ export class WordPressClient {
 
   private buildUrl(
     endpoint: string,
-    query: Record<string, QueryValue>
+    query: Record<string, QueryValue>,
+    skipStatus?: boolean
   ): URL {
     const baseUrl = new URL(this.baseUrl.toString());
     if (!baseUrl.pathname.endsWith("/")) {
@@ -116,7 +118,9 @@ export class WordPressClient {
     for (const [name, value] of Object.entries(query)) {
       url.searchParams.set(name, String(value));
     }
-    url.searchParams.set("status", "publish");
+    if (!skipStatus) {
+      url.searchParams.set("status", "publish");
+    }
 
     return url;
   }

@@ -1,8 +1,0 @@
-{
-  "contractVersion": 1,
-  "contract": "companion-health",
-  "status": "healthy",
-  "editorMode": "blocks",
-  "apiStrategy": "rest-v2",
-  "diagnostics": []
-}

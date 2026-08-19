@@ -1,0 +1,146 @@
+name: WordPress Companion
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "integrations/wordpress/nexuscontent/**"
+      - "src/core/types.ts"
+      - "src/providers/wordpress/**"
+      - "src/validation/**"
+      - "tests/contracts/**"
+      - ".github/workflows/wordpress-companion.yml"
+  pull_request:
+    paths:
+      - "integrations/wordpress/nexuscontent/**"
+      - "src/core/types.ts"
+      - "src/providers/wordpress/**"
+      - "src/validation/**"
+      - "tests/contracts/**"
+      - ".github/workflows/wordpress-companion.yml"
+
+defaults:
+  run:
+    working-directory: integrations/wordpress/nexuscontent
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+        working-directory: .
+      - run: npm run typecheck
+        working-directory: .
+      - run: node --test tests/contracts/contracts.test.ts
+        working-directory: .
+
+  php-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+      - run: bash scripts/lint-php.sh
+
+  composer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer:v2
+      - run: composer validate --strict --no-check-lock
+      - run: composer install --no-interaction --no-progress --prefer-dist
+
+  phpcs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer:v2
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: composer phpcs
+
+  phpstan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer:v2
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: composer phpstan
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer:v2
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: composer test-unit
+
+  js-build-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - run: npm run lint-js
+      - run: npm run format:check
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --no-audit --no-fund
+      - run: npm run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nexuscontent-0.1.0
+          path: dist/nexuscontent-0.1.0.zip
+          if-no-files-found: error
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer:v2
+      - run: npm ci --no-audit --no-fund
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: npm run env:start
+      - run: npm run test:integration
+      - run: npm run env:acf-free:test
+      - run: npm run test:integration:acf-free
+      - if: always()
+        run: npm run env:stop

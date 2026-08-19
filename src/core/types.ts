@@ -1,13 +1,5 @@
 export type ContentSource = string;
 
-export interface MediaAsset {
-  id?: string;
-  url: string;
-  alt?: string;
-  width?: number;
-  height?: number;
-}
-
 export type JsonValue =
   | string
   | number
@@ -17,6 +9,24 @@ export type JsonValue =
   | { [key: string]: JsonValue };
 
 export type JsonObject = { [key: string]: JsonValue };
+
+export interface MediaSize {
+  url: string;
+  width?: number;
+  height?: number;
+  mimeType?: string;
+}
+
+export interface MediaAsset {
+  id?: string;
+  url: string;
+  alt?: string;
+  caption?: string;
+  mimeType?: string;
+  width?: number;
+  height?: number;
+  sizes?: Record<string, MediaSize>;
+}
 
 export interface SeoRobots {
   index?: boolean;
@@ -60,16 +70,6 @@ export interface ContentMeta {
   locale?: string;
 }
 
-export interface PageContent<TData = Record<string, unknown>> {
-  id: string;
-  key: string;
-  slug?: string;
-  title?: string;
-  seo?: SeoData;
-  data: TData;
-  meta: ContentMeta;
-}
-
 export interface SingletonContent<TData = Record<string, unknown>> {
   id: string;
   key: string;
@@ -107,6 +107,7 @@ export interface SectionSettings {
 }
 
 export interface ContentSection<TData = Record<string, unknown>> {
+  readonly id?: string;
   readonly type: string;
   readonly settings?: SectionSettings;
   readonly data: TData;

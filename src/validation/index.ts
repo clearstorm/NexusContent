@@ -4,6 +4,7 @@ export {
   contentSectionSchema,
   dataSchema,
   mediaAssetSchema,
+  mediaSizeSchema,
   navigationItemSchema,
   navigationSchema,
   pageSchema,

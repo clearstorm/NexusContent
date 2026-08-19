@@ -42,7 +42,8 @@ test("WordPress public API works in plain Node without Astro", async () => {
     const wordpress = new WordPressProvider({
       baseUrl: `http://127.0.0.1:${address.port}/wp-json/wp/v2`,
       name: "wordpressNode",
-      perPage: 2
+      perPage: 2,
+      apiStrategy: "core"
     });
     const nexus = new NexusContent({
       content: {

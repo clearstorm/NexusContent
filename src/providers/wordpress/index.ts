@@ -4,6 +4,11 @@ export type {
   WordPressProviderOptions
 } from "./provider.ts";
 export type { WordPressContentData } from "./normalize.ts";
+export {
+  normalizeCompanionPage,
+  normalizeCompanionPageItem
+} from "./companion-normalize.ts";
+export { WordPressCompanionClient, deriveRestRoot } from "./companion-client.ts";
 
 export type {
   WordPressAcfConfig,
@@ -31,7 +36,7 @@ export {
   isValidMediaResolution,
   isValidUnknownContentPolicy
 } from "./config.ts";
-export type { FixedSectionType } from "./config.ts";
+export type { BuiltinSectionType, FixedSectionType } from "./config.ts";
 
 export type {
   SectionDataSchema,
@@ -49,18 +54,22 @@ export {
 
 export type {
   WordPressCapabilities,
+  WordPressCapabilitiesData,
+  WordPressCapabilitiesResponse,
+  WordPressCompanionEnvelope,
   WordPressDiagnostic,
   WordPressDiagnosticsSeverity,
-  WordPressHealthResponse,
+  WordPressPageData,
   WordPressPageResponse,
   WordPressPageSection,
+  WordPressPagesData,
   WordPressPagesResponse,
   WordPressPagination,
   WordPressProviderFacingCapabilities,
+  WordPressSchemaData,
   WordPressSchemaResponse,
   WordPressSectionSchema,
-  WordPressSectionSchemaField,
-  WordPressSectionsResponse
+  WordPressSectionSchemaField
 } from "./responses.ts";
 export {
   buildCompanionContractVersion,
@@ -72,17 +81,43 @@ export type { WordPressErrorCode } from "./errors.ts";
 
 export {
   capabilitiesSchema,
-  companionHealthResponseSchema,
+  companionCapabilitiesResponseSchema,
+  companionEnvelopeSchema,
   companionPageResponseSchema,
   companionPagesResponseSchema,
   companionSchemaResponseSchema,
-  companionSectionsResponseSchema,
   diagnosticSchema,
   diagnosticSeveritySchema,
   jsonValueSchema,
+  pageDataSchema,
   pageSectionWireSchema,
+  pagesDataSchema,
   paginationSchema,
+  schemaDataSchema,
   sectionSchemaSchema,
   sectionSchemaFieldSchema,
   sectionSettingsWireSchema
 } from "./companion-schemas.ts";
+
+export {
+  parseGutenbergBlocks,
+  parseGutenbergToSections
+} from "./core-gutenberg.ts";
+
+export {
+  extractAcfFields,
+  extractAcfFixedFields,
+  extractAcfBlocks
+} from "./core-acf-blocks.ts";
+
+export {
+  normalizeAcfImageToMediaAsset,
+  normalizeFeaturedMedia,
+  createMediaAssetFromId
+} from "./core-media.ts";
+
+export {
+  generateDeterministicSectionId,
+  resolveSectionIds,
+  ensureUniqueSectionIds
+} from "./core-section-ids.ts";

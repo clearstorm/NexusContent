@@ -122,13 +122,24 @@ if (missingFromState.length > 0) {
   );
 }
 
-if (state.currentFocus?.status !== "unassigned") {
-  fail(
-    "currentFocus.status must be unassigned when no active implementation is identified",
-  );
-}
-if (state.currentFocus.id !== null || state.currentFocus.label !== null) {
-  fail("unassigned currentFocus must have null id and label");
+if (state.currentFocus?.status === "unassigned") {
+  if (state.currentFocus.id !== null || state.currentFocus.label !== null) {
+    fail("unassigned currentFocus must have null id and label");
+  }
+} else {
+  if (state.currentFocus?.status !== "in_progress") {
+    fail("assigned currentFocus.status must be in_progress");
+  }
+  if (
+    typeof state.currentFocus.id !== "string" ||
+    typeof state.currentFocus.label !== "string" ||
+    state.currentFocus.label.length === 0
+  ) {
+    fail("assigned currentFocus must have a feature id and non-empty label");
+  }
+  if (!state.features.inProgress.includes(state.currentFocus.id)) {
+    fail("assigned currentFocus.id must reference an inProgress feature");
+  }
 }
 
 if (

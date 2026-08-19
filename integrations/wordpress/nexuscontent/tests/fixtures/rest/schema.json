@@ -1,0 +1,1 @@
+{"contractVersion":1,"data":{"editorModes":["gutenberg"],"sectionDefinitions":[{"type":"hero","fields":[{"name":"heading","type":"string","required":true}]}],"sourceMappings":{"nexuscontent/hero":"hero","acf/hero":"hero","hero":"hero"}}}

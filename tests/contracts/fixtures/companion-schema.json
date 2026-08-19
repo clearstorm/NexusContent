@@ -1,31 +1,31 @@
 {
   "contractVersion": 1,
-  "contract": "companion-schema",
-  "sections": [
-    {
-      "type": "hero",
-      "sourceType": "hero",
-      "fields": [
-        { "name": "heading", "type": "string", "required": true },
-        { "name": "subheading", "type": "string" }
-      ]
-    },
-    {
-      "type": "features",
-      "sourceType": "features",
-      "fields": [
-        { "name": "items", "type": "json", "required": true }
-      ]
+  "data": {
+    "editorModes": ["gutenberg", "acf_flexible", "acf_fixed"],
+    "sectionDefinitions": [
+      {
+        "type": "hero",
+        "fields": [
+          { "name": "heading", "type": "string", "required": true },
+          { "name": "background_image", "type": "media" }
+        ]
+      },
+      {
+        "type": "image_text",
+        "fields": [
+          { "name": "image_position", "type": "string" },
+          { "name": "image", "type": "media", "required": true }
+        ]
+      }
+    ],
+    "sourceMappings": {
+      "nexuscontent/hero": "hero",
+      "acf/hero": "hero",
+      "hero": "hero",
+      "nexuscontent/image_text": "image_text",
+      "acf/image_text": "image_text",
+      "image_text": "image_text"
     }
-  ],
-  "capabilities": {
-    "visualEditor": false,
-    "codeEditor": false,
-    "blocksEditor": true,
-    "acfFields": true,
-    "mediaLibrary": true,
-    "customPostTypes": false,
-    "sections": true
   },
   "diagnostics": []
 }
