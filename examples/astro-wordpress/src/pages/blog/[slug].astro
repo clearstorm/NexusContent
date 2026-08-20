@@ -33,10 +33,11 @@ if (!post) {
 
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
+const excerpt = post.excerpt ?? (post.data as WordPressExampleContent).excerpt;
 const seo = resolveSeo({
   title: `${postTitle} - NexusContent WordPress Example`,
   seo: {
-    description: post.data.excerpt,
+    description: excerpt,
     canonicalUrl: postUrl,
     openGraph: { type: "article" },
     structuredData: [
@@ -59,6 +60,7 @@ const seo = resolveSeo({
     </p>
     <h1>{post.title}</h1>
     {post.data.publishedAt && <time>{post.data.publishedAt}</time>}
+    {excerpt && <p class="excerpt">{excerpt}</p>}
     {post.data.content && <div class="body wordpress-content" set:html={post.data.content} />}
   </article>
 
@@ -82,6 +84,13 @@ const seo = resolveSeo({
       margin-top: 0.5rem;
       color: var(--muted);
       font-size: 0.9rem;
+    }
+
+    .excerpt {
+      margin-top: 0.75rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
     }
 
     .body {

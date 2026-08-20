@@ -28,7 +28,7 @@ const seo = resolveSeo({
           title={post.title}
           slug={post.slug ?? post.key}
           date={(post.data as WordPressExampleContent).publishedAt}
-          excerpt={(post.data as WordPressExampleContent).excerpt}
+          excerpt={post.excerpt ?? (post.data as WordPressExampleContent).excerpt}
         />
       ))
     }

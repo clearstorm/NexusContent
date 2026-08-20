@@ -1,0 +1,327 @@
+---
+import Hero from "./Hero.astro";
+import CTA from "./CTA.astro";
+import Testimonials from "./Testimonials.astro";
+import type { ContentSection, JsonValue } from "@nexuscontent/core";
+
+interface Props {
+  section: ContentSection;
+}
+
+const { section } = Astro.props;
+const { type, data } = section;
+
+function str(value: JsonValue | undefined): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function num(value: JsonValue | undefined): number | undefined {
+  return typeof value === "number" ? value : undefined;
+}
+
+function obj(value: JsonValue | undefined): Record<string, JsonValue> | undefined {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, JsonValue>)
+    : undefined;
+}
+
+function arr(value: JsonValue | undefined): JsonValue[] | undefined {
+  return Array.isArray(value) ? value : undefined;
+}
+
+const d = data as Record<string, JsonValue>;
+---
+
+{type === "hero" && (
+  <Hero
+    eyebrow={str(d.eyebrow)}
+    heading={str(d.heading) ?? ""}
+    intro={str(d.body) ?? ""}
+    cta={str(d.primary_action_label) && str(d.primary_action_url)
+      ? { label: d.primary_action_label as string, href: d.primary_action_url as string }
+      : undefined}
+  />
+)}
+
+{type === "cta" && (
+  <CTA
+    heading={str(d.heading) ?? ""}
+    intro={str(d.body) ?? ""}
+    label={str(d.primary_action_label) ?? "Learn more"}
+    href={str(d.primary_action_url) ?? "#"}
+  />
+)}
+
+{type === "testimonials" && (
+  <Testimonials
+    heading={str(d.heading) ?? "Testimonials"}
+    items={arr(d.items)?.map((item) => {
+      const o = obj(item);
+      return { quote: str(o?.quote) ?? "", author: str(o?.author) ?? "" };
+    }) ?? []}
+  />
+)}
+
+{type === "intro" && (
+  <section class="section">
+    {str(d.eyebrow) && <p class="eyebrow">{d.eyebrow}</p>}
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    {str(d.body) && <p class="section-body">{d.body}</p>}
+  </section>
+)}
+
+{type === "rich_text" && (
+  <section class="section">
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    {str(d.body) && <div class="section-body" set:html={d.body} />}
+  </section>
+)}
+
+{type === "image_text" && (
+  <section class="section image-text">
+    {str(d.eyebrow) && <p class="eyebrow">{d.eyebrow}</p>}
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    <div class="image-text-inner">
+      {obj(d.image) && str(obj(d.image)?.url) && (
+        <img src={obj(d.image)?.url as string} alt={str(obj(d.image)?.alt) ?? ""} />
+      )}
+      <div>
+        {str(d.body) && <div class="section-body" set:html={d.body} />}
+        {str(d.action_label) && str(d.action_url) && (
+          <a class="btn btn-primary" href={d.action_url as string}>{d.action_label}</a>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+
+{type === "features" && (
+  <section class="section">
+    {str(d.eyebrow) && <p class="eyebrow">{d.eyebrow}</p>}
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    {str(d.body) && <p class="section-lede">{d.body}</p>}
+    <div class="features-grid">
+      {arr(d.items)?.map((item) => {
+        const o = obj(item);
+        return (
+          <article class="feature-card">
+            {str(o?.title) && <h3>{o.title}</h3>}
+            {str(o?.description) && <p>{o.description}</p>}
+          </article>
+        );
+      })}
+    </div>
+  </section>
+)}
+
+{type === "statistics" && (
+  <section class="section">
+    {str(d.eyebrow) && <p class="eyebrow">{d.eyebrow}</p>}
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    <div class="stats-grid">
+      {arr(d.items)?.map((item) => {
+        const o = obj(item);
+        return (
+          <div class="stat">
+            {str(o?.value) && <span class="stat-value">{o.value}</span>}
+            {str(o?.label) && <span class="stat-label">{o.label}</span>}
+          </div>
+        );
+      })}
+    </div>
+  </section>
+)}
+
+{type === "gallery" && (
+  <section class="section">
+    {str(d.eyebrow) && <p class="eyebrow">{d.eyebrow}</p>}
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    <div class="gallery-grid">
+      {arr(d.images)?.map((img) => {
+        const o = obj(img);
+        return str(o?.url) ? (
+          <img src={o.url as string} alt={str(o?.alt) ?? ""} />
+        ) : null;
+      })}
+    </div>
+  </section>
+)}
+
+{type === "faq" && (
+  <section class="section">
+    {str(d.eyebrow) && <p class="eyebrow">{d.eyebrow}</p>}
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    <dl class="faq-list">
+      {arr(d.items)?.map((item) => {
+        const o = obj(item);
+        return (
+          <>
+            {str(o?.question) && <dt>{o.question}</dt>}
+            {str(o?.answer) && <dd set:html={o.answer} />}
+          </>
+        );
+      })}
+    </dl>
+  </section>
+)}
+
+{type === "logo_grid" && (
+  <section class="section">
+    {str(d.eyebrow) && <p class="eyebrow">{d.eyebrow}</p>}
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    <div class="logo-grid">
+      {arr(d.items)?.map((item) => {
+        const o = obj(item);
+        return str(o?.url) ? (
+          <img src={o.url as string} alt={str(o?.alt) ?? ""} class="logo" />
+        ) : null;
+      })}
+    </div>
+  </section>
+)}
+
+{type === "form_embed" && (
+  <section class="section">
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    {str(d.embed_code) && <div set:html={d.embed_code} />}
+  </section>
+)}
+
+{![
+  "hero", "cta", "testimonials", "intro", "rich_text", "image_text",
+  "features", "statistics", "gallery", "faq", "logo_grid", "form_embed"
+].includes(type) && (
+  <section class="section">
+    {str(d.heading) && <h2>{d.heading}</h2>}
+    {str(d.body) && <div class="section-body" set:html={d.body} />}
+  </section>
+)}
+
+<style>
+  .section-body {
+    color: var(--muted);
+    max-width: 44rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+
+  .section-lede {
+    color: var(--muted);
+    max-width: 44rem;
+  }
+
+  .image-text-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin-top: 1.5rem;
+  }
+
+  .image-text-inner img {
+    width: 100%;
+    border-radius: var(--radius);
+  }
+
+  @media (max-width: 48rem) {
+    .image-text-inner {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .feature-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .feature-card h3 {
+    margin-top: 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .gallery-grid img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+
+  .faq-list {
+    margin-top: 1.5rem;
+    max-width: 44rem;
+  }
+
+  .faq-list dt {
+    font-weight: 700;
+    margin-top: 1.25rem;
+  }
+
+  .faq-list dt:first-child {
+    margin-top: 0;
+  }
+
+  .faq-list dd {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .logo-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: center;
+    margin-top: 1.5rem;
+  }
+
+  .logo {
+    height: 2.5rem;
+    width: auto;
+    opacity: 0.7;
+    filter: grayscale(100%);
+    transition: opacity 0.2s, filter 0.2s;
+  }
+
+  .logo:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+  }
+</style>

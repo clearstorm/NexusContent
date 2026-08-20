@@ -19,7 +19,21 @@ if (username && appPassword) {
 
 export const wordpressProviderOptions = {
   baseUrl: wordpressApiUrl,
-  headers: authHeaders
+  headers: authHeaders,
+
+  // "auto" tries the companion plugin first, falls back to standard REST.
+  apiStrategy: "auto",
+
+  // "gutenberg" parses WordPress block markup into canonical sections.
+  // "acf_flexible" extracts from ACF Flexible Content layouts.
+  // "acf_fixed" extracts from fixed ACF field groups.
+  editorMode: "gutenberg",
+
+  // "error" throws on unknown sections, "ignore" skips, "html" preserves raw.
+  unknownContentPolicy: "error",
+
+  // "full" resolves all media, "embedded" uses _embedded only, "none" skips.
+  mediaResolution: "full"
 } satisfies WordPressProviderOptions;
 
 export const nexusConfig = {

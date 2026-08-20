@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import CTA from "../components/CTA.astro";
+import SectionRenderer from "../components/SectionRenderer.astro";
 import { getPageContent } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
@@ -12,6 +13,8 @@ const page = await getPageContent<WordPressExampleContent>("services");
 if (!page) {
   throw new Error(`Required WordPress page "services" was not found.`);
 }
+
+const hasSections = Array.isArray(page.sections) && page.sections.length > 0;
 
 const fields = (page.data.fields ?? {}) as Record<string, unknown>;
 
@@ -43,30 +46,34 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  <Hero {...hero} />
+  {hasSections ? (
+    page.sections!.map((section) => <SectionRenderer section={section} />)
+  ) : (
+    <Hero {...hero} />
 
-  <section class="section services">
-    <h2>{services.heading}</h2>
-    {services.intro && <p class="lede">{services.intro}</p>}
-    <div class="grid">
-      {
-        serviceItems.map((service, index) => (
-          <article class="card">
-            <span class="num">{index + 1}</span>
-            <h3>{service.title}</h3>
-            <p>{service.description}</p>
-            <ul>
-              {service.points.map((point) => (
-                <li>{point}</li>
-              ))}
-            </ul>
-          </article>
-        ))
-      }
-    </div>
-  </section>
+    <section class="section services">
+      <h2>{services.heading}</h2>
+      {services.intro && <p class="lede">{services.intro}</p>}
+      <div class="grid">
+        {
+          serviceItems.map((service, index) => (
+            <article class="card">
+              <span class="num">{index + 1}</span>
+              <h3>{service.title}</h3>
+              <p>{service.description}</p>
+              <ul>
+                {service.points.map((point) => (
+                  <li>{point}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+    </section>
 
-  <CTA {...cta} />
+    <CTA {...cta} />
+  )}
 
   <style>
     .lede {

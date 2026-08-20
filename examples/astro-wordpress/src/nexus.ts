@@ -1,12 +1,25 @@
 import { NexusContent, WordPressProvider } from "@nexuscontent/core";
-import type { RetrievalOptions, WordPressContentData } from "@nexuscontent/core";
+import type { ContentSection, MediaAsset, PageStatus, RetrievalOptions, WordPressContentData } from "@nexuscontent/core";
 import { nexusConfig, wordpressProviderOptions } from "./nexus.config";
 
 const nexus = new NexusContent(nexusConfig);
 
 nexus.register("wordpress", new WordPressProvider(wordpressProviderOptions));
 
-export type WordPressExampleContent = WordPressContentData & Record<string, unknown>;
+/**
+ * Content shape that works for both standard REST and companion plugin modes.
+ *
+ * Standard REST: data.fields contains ACF fields, data.content is rendered HTML.
+ * Companion: sections[] contains structured ContentSection array, data contains
+ * raw fields from the plugin.
+ */
+export type WordPressExampleContent = WordPressContentData & {
+  sections?: ContentSection[];
+  status?: PageStatus;
+  excerpt?: string;
+  featuredImage?: MediaAsset;
+  modifiedAt?: string;
+};
 
 export function getPageContent<TData extends Record<string, unknown>>(
   name: string,

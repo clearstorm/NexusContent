@@ -4,6 +4,7 @@ import Hero from "../components/Hero.astro";
 import Services from "../components/Services.astro";
 import Testimonials from "../components/Testimonials.astro";
 import CTA from "../components/CTA.astro";
+import SectionRenderer from "../components/SectionRenderer.astro";
 import { getPageContent } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
@@ -14,6 +15,8 @@ const page = await getPageContent<WordPressExampleContent>("home");
 if (!page) {
   throw new Error(`Required WordPress page "home" was not found.`);
 }
+
+const hasSections = Array.isArray(page.sections) && page.sections.length > 0;
 
 const fields = (page.data.fields ?? {}) as Record<string, unknown>;
 
@@ -52,8 +55,12 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  <Hero {...hero} />
-  <Services heading={services.heading} intro={services.intro} items={serviceItems} />
-  <Testimonials heading={testimonials.heading} items={testimonialItems} />
-  <CTA {...cta} />
+  {hasSections ? (
+    page.sections!.map((section) => <SectionRenderer section={section} />)
+  ) : (
+    <Hero {...hero} />
+    <Services heading={services.heading} intro={services.intro} items={serviceItems} />
+    <Testimonials heading={testimonials.heading} items={testimonialItems} />
+    <CTA {...cta} />
+  )}
 </BaseLayout>
