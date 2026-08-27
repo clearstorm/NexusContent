@@ -12,9 +12,15 @@
     }
   },
   "files": [
-    "dist"
+    "dist/core",
+    "dist/formats",
+    "dist/providers",
+    "dist/validation",
+    "dist/index.d.ts",
+    "dist/index.js",
+    "dist/index.js.map"
   ],
-  "private": true,
+  "private": false,
   "workspaces": [
     "examples/astro-basic",
     "examples/astro-basic-localised",

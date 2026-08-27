@@ -32,7 +32,7 @@ final class RegistrationIntegrationTest extends IntegrationTestCase {
 		}
 
 		$routes = rest_get_server()->get_routes();
-		foreach ( array( '/nexuscontent/v1/pages', '/nexuscontent/v1/pages/(?P<id>\d+)', '/nexuscontent/v1/pages/slug/(?P<slug>[a-zA-Z0-9_-]+)', '/nexuscontent/v1/schema', '/nexuscontent/v1/capabilities' ) as $route ) {
+		foreach ( array( '/nexuscontent/v1/pages', '/nexuscontent/v1/pages/(?P<id>\d+)', '/nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', '/nexuscontent/v1/schema', '/nexuscontent/v1/capabilities' ) as $route ) {
 			self::assertArrayHasKey( $route, $routes );
 		}
 	}

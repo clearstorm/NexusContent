@@ -9,7 +9,7 @@ use NexusContent\Companion\Editor_Mode;
 
 final class RestPagesIntegrationTest extends IntegrationTestCase {
 	public function test_published_page_is_anonymous_by_id_and_slug_with_stable_identity(): void {
-		$id = self::$factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_name' => 'public-page', 'post_title' => 'Public page' ) );
+		$id = $this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_name' => 'public-page', 'post_title' => 'Public page' ) );
 		foreach ( array( '/nexuscontent/v1/pages/' . $id, '/nexuscontent/v1/pages/slug/public-page' ) as $route ) {
 			$response = $this->request( $route );
 			self::assertSame( 200, $response->get_status() );
@@ -22,9 +22,9 @@ final class RestPagesIntegrationTest extends IntegrationTestCase {
 	}
 
 	public function test_draft_requires_edit_permission_and_is_available_to_an_editor(): void {
-		$id = self::$factory->post->create( array( 'post_type' => 'page', 'post_status' => 'draft', 'post_name' => 'draft-page' ) );
+		$id = $this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'draft', 'post_name' => 'draft-page' ) );
 		self::assertSame( 401, $this->request( '/nexuscontent/v1/pages/' . $id )->get_status() );
-		$editor = self::$factory->user->create( array( 'role' => 'editor' ) );
+		$editor = $this->factory->user->create( array( 'role' => 'editor' ) );
 		wp_set_current_user( $editor );
 		$response = $this->request( '/nexuscontent/v1/pages/' . $id );
 		self::assertSame( 200, $response->get_status() );
@@ -32,14 +32,14 @@ final class RestPagesIntegrationTest extends IntegrationTestCase {
 	}
 
 	public function test_password_page_is_not_public_and_is_excluded_from_anonymous_collection(): void {
-		$id = self::$factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_password' => 'secret', 'post_name' => 'protected-page' ) );
+		$id = $this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_password' => 'secret', 'post_name' => 'protected-page' ) );
 		self::assertSame( 401, $this->request( '/nexuscontent/v1/pages/' . $id )->get_status() );
 		$items = $this->envelope( $this->request( '/nexuscontent/v1/pages' ) )['data']['items'];
 		self::assertNotContains( (string) $id, array_column( $items, 'id' ) );
 	}
 
 	public function test_empty_page_returns_valid_empty_sections(): void {
-		$id = self::$factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_content' => '', 'post_excerpt' => '' ) );
+		$id = $this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_content' => '', 'post_excerpt' => '' ) );
 		$page = $this->envelope( $this->request( '/nexuscontent/v1/pages/' . $id ) )['data'];
 		self::assertSame( array(), $page['sections'] );
 		self::assertSame( array( 'editorMode' => 'gutenberg' ), $page['rawFields'] );
@@ -47,7 +47,7 @@ final class RestPagesIntegrationTest extends IntegrationTestCase {
 
 	public function test_collection_paginates_and_emits_consistent_headers(): void {
 		foreach ( range( 1, 5 ) as $number ) {
-			self::$factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Page ' . $number ) );
+			$this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Page ' . $number ) );
 		}
 		$response = $this->request( '/nexuscontent/v1/pages', array( 'page' => 2, 'per_page' => 2, 'order' => 'asc', 'orderby' => 'id' ) );
 		self::assertSame( 200, $response->get_status() );
@@ -73,7 +73,7 @@ final class RestPagesIntegrationTest extends IntegrationTestCase {
 
 	public function test_conflicting_sources_export_only_active_mode_and_report_diagnostic_without_deleting_data(): void {
 		$content = '<!-- wp:nexuscontent/intro {"text":"Active block"} /-->';
-		$id = self::$factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_content' => $content ) );
+		$id = $this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_content' => $content ) );
 		update_post_meta( $id, Editor_Mode::META_KEY, Editor_Mode::GUTENBERG );
 		update_post_meta( $id, 'hero_heading', 'Inactive fixed hero' );
 		update_post_meta( $id, 'nexus_sections', array( array( 'acf_fc_layout' => 'cta', 'heading' => 'Inactive flexible CTA' ) ) );

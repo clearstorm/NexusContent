@@ -8,8 +8,6 @@ require_once dirname( __DIR__ ) . '/TestCase.php';
 use NexusContent\Companion\Capabilities;
 use NexusContent\Companion\Editor_Mode;
 use NexusContent\Companion\Tests\TestCase;
-use PHPUnit\Framework\Attributes\PreserveGlobalState;
-use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 
 final class EditorModeCapabilitiesTest extends TestCase {
 	public function test_sanitize_accepts_only_declared_modes_and_defaults_safely(): void {
@@ -44,8 +42,10 @@ final class EditorModeCapabilitiesTest extends TestCase {
 		self::assertSame( array(), ( new Capabilities() )->editor_modes() );
 	}
 
-	#[RunInSeparateProcess]
-	#[PreserveGlobalState( false )]
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
 	public function test_mocked_acf_free_exposes_fixed_fields_but_not_pro_features(): void {
 		eval( 'class ACF {}' ); // Deliberate ACF Free feature double; no commercial package is loaded.
 		$capabilities = new Capabilities();
@@ -55,8 +55,10 @@ final class EditorModeCapabilitiesTest extends TestCase {
 		self::assertFalse( $capabilities->get()['acfPro'] );
 	}
 
-	#[RunInSeparateProcess]
-	#[PreserveGlobalState( false )]
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
 	public function test_mocked_acf_pro_features_are_detected_by_feature_not_brand_assumption(): void {
 		eval( 'class ACF {}' ); // Deliberate ACF feature double; no commercial package is loaded.
 		$GLOBALS['nc_test']['acf_field_types']['flexible_content'] = true;

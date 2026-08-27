@@ -131,7 +131,8 @@ final class REST_Controller extends WP_REST_Controller {
 		$status = $request->get_param( 'status' );
 		$status = is_string( $status ) && '' !== $status ? $status : 'publish';
 
-		$orderby = (string) $request->get_param( 'orderby' );
+		$orderby = $request->get_param( 'orderby' );
+		$orderby = is_string( $orderby ) ? $orderby : 'date';
 		$orderby = match ( $orderby ) {
 			'id'   => 'ID',
 			'slug' => 'name',
@@ -142,9 +143,9 @@ final class REST_Controller extends WP_REST_Controller {
 			'post_status'         => $status,
 			'paged'               => max( 1, (int) $request->get_param( 'page' ) ),
 			'posts_per_page'      => min( 100, max( 1, (int) $request->get_param( 'per_page' ) ) ),
-			's'                   => (string) $request->get_param( 'search' ),
-			'name'                => (string) $request->get_param( 'slug' ),
-			'order'               => (string) $request->get_param( 'order' ),
+			's'                   => is_string( $request->get_param( 'search' ) ) ? $request->get_param( 'search' ) : '',
+			'name'                => is_string( $request->get_param( 'slug' ) ) ? $request->get_param( 'slug' ) : '',
+			'order'               => is_string( $request->get_param( 'order' ) ) ? $request->get_param( 'order' ) : 'desc',
 			'orderby'             => $orderby,
 			'has_password'        => false,
 			'ignore_sticky_posts' => true,
@@ -285,6 +286,7 @@ final class REST_Controller extends WP_REST_Controller {
 				'default'           => 1,
 				'minimum'           => 1,
 				'sanitize_callback' => 'absint',
+				'validate_callback' => static fn( $value ): bool => is_numeric( $value ) && (int) $value >= 1,
 			),
 			'per_page' => array(
 				'type'              => 'integer',
@@ -292,6 +294,7 @@ final class REST_Controller extends WP_REST_Controller {
 				'minimum'           => 1,
 				'maximum'           => 100,
 				'sanitize_callback' => 'absint',
+				'validate_callback' => static fn( $value ): bool => is_numeric( $value ) && (int) $value >= 1 && (int) $value <= 100,
 			),
 			'search'   => array(
 				'type'              => 'string',
@@ -308,12 +311,14 @@ final class REST_Controller extends WP_REST_Controller {
 				'default'           => 'publish',
 				'enum'              => array( 'publish', 'future', 'draft', 'pending', 'private' ),
 				'sanitize_callback' => 'sanitize_key',
+				'validate_callback' => static fn( $value ): bool => in_array( (string) $value, array( 'publish', 'future', 'draft', 'pending', 'private' ), true ),
 			),
 			'order'    => array(
 				'type'              => 'string',
 				'default'           => 'desc',
 				'enum'              => array( 'asc', 'desc' ),
 				'sanitize_callback' => static fn( $value ): string => strtolower( sanitize_key( (string) $value ) ),
+				'validate_callback' => static fn( $value ): bool => in_array( strtolower( (string) $value ), array( 'asc', 'desc' ), true ),
 			),
 			'orderby'  => array(
 				'type'              => 'string',

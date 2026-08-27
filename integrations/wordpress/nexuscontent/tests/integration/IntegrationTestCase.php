@@ -9,10 +9,11 @@ use WP_REST_Request;
 abstract class IntegrationTestCase extends \WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
-		if ( ! function_exists( 'rest_get_server' ) || ! isset( self::$factory ) ) {
+		if ( ! function_exists( 'rest_get_server' ) || ! isset( $this->factory ) ) {
 			$this->markTestSkipped( 'WordPress integration harness is unavailable.' );
 		}
 		wp_set_current_user( 0 );
+		do_action( 'init' );
 		do_action( 'rest_api_init' );
 	}
 

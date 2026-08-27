@@ -75,14 +75,14 @@ See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 Phase 2 supplies plugin `0.1.0` under `integrations/wordpress/nexuscontent`. It includes native Gutenberg support, editable additional section fields, static inserter and inspector illustrations for all 12 blocks, ACF Free fixed Hero/Introduction/Call to Action fields, ACF Pro flexible layouts for all 12 canonical sections, opt-in ACF Blocks, page mode controls, server-side normalization, media, capabilities, diagnostics, secured REST routes, card-based admin page with status indicators and mode badges, tests, tooling, documentation, and packaging. The ZIP is `dist/nexuscontent-0.1.0.zip`.
 
-Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and ZIP packaging pass. WordPress integration tests and their CI workflow exist, but Docker, MySQL, SVN, and WP-CLI are unavailable locally, so CI integration verification is still required.
+Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and ZIP packaging pass. WordPress integration tests now also pass locally via Docker wp-env (75 unit tests, 417 assertions; 12 integration tests, 114 assertions). The remaining gate is CI verification.
 
 **Recommended next focus:** `provider.wordpress.companion-integration`, Phase 3 provider discovery, calls, contract-version negotiation, caching, and fallback. Strapi remains planned after it.
 
 ## Next
 
 1. Run and pass the companion plugin WordPress integration suite in CI, then reassess `provider.wordpress.companion-plugin` against the implemented definition.
-2. Implement Phase 3 provider integration against only the repaired contract v1.
+2. Phase 3 provider integration is implemented with tests; verify it passes CI and confirm it against the repaired contract.
 3. Confirm the Strapi provider's minimum REST API scope and contract test strategy.
 4. Consider the directional localisation continuation once provider breadth is proven.
 

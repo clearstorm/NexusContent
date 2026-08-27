@@ -19,6 +19,7 @@ examples/astro-wordpress/.astro/
 
 integrations/wordpress/nexuscontent/vendor/
 integrations/wordpress/nexuscontent/.phpunit.cache/
+integrations/wordpress/nexuscontent/.phpunit.result.cache
 integrations/wordpress/nexuscontent/.phpstan-cache/
 integrations/wordpress/nexuscontent/.wp-env/
 integrations/wordpress/nexuscontent/.local/

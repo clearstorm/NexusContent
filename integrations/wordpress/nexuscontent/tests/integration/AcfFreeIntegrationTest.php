@@ -4,9 +4,9 @@ namespace NexusContent\Companion\Tests\Integration;
 
 require_once __DIR__ . '/IntegrationTestCase.php';
 
-use PHPUnit\Framework\Attributes\Group;
-
-#[Group( 'acf-real' )]
+/**
+ * @group acf-real
+ */
 final class AcfFreeIntegrationTest extends IntegrationTestCase {
 	public function test_real_acf_free_registers_fixed_fields(): void {
 		self::assertTrue( defined( 'ACF_VERSION' ) );

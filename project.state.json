@@ -130,7 +130,7 @@
     "SEO canonical URLs are supplied by content or consumers; Core does not infer deployment URLs.",
     "The package remains private while the pre-1.0 architecture is proven.",
     "The repaired pre-release WordPress companion contract uses version 1 envelopes with data and optional diagnostics, three editor modes, 12 canonical short section names, and five nexuscontent/v1 route contracts.",
-    "The companion plugin remains in progress until its WordPress integration suite passes in CI; local Docker, MySQL, SVN, and WP-CLI are unavailable.",
+    "The companion plugin remains in progress until its WordPress integration suite passes in CI; local integration tests now pass via Docker wp-env.",
     "Released 0.2.0 standard WordPress REST provider retrieval remains unchanged and does not call the companion plugin."
   ],
   "architecturalDecisions": [

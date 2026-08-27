@@ -51,8 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### In Progress
 
-- Companion plugin local unit, PHP lint, PHPCS, PHPStan, contract, JavaScript build/lint/format, and ZIP packaging checks pass. WordPress integration tests exist but still require a successful CI run because Docker, MySQL, SVN, and WP-CLI are unavailable locally.
-- Phase 3 provider discovery, companion calls, contract-version negotiation, caching, and fallback remain planned. Phase 3 must consume only the repaired contract after plugin integration verification.
+- Companion plugin local unit, PHP lint, PHPCS, PHPStan, contract, JavaScript build/lint/format, ZIP packaging, and WordPress integration tests (75 unit tests, 417 assertions; 12 integration tests, 114 assertions) pass. CI verification remains the final gate.
+- Phase 3 provider discovery, companion calls, contract-version negotiation, caching, and fallback are implemented with tests. Phase 3 must consume only the repaired contract after plugin integration verification passes.
 - Version `0.2.1` and the companion plugin are unreleased; the root package remains `0.2.0`.
 
 ## [0.2.0] - 2026-08-18

@@ -6,15 +6,17 @@ require_once __DIR__ . '/IntegrationTestCase.php';
 
 use NexusContent\Companion\ACF_Loader;
 use NexusContent\Companion\Section_Registry;
-use PHPUnit\Framework\Attributes\PreserveGlobalState;
-use PHPUnit\Framework\Attributes\RunInSeparateProcess;
-use PHPUnit\Framework\Attributes\Group;
 
-/** These tests use feature doubles only; neither ACF Free nor ACF Pro is bundled. */
+/**
+ * These tests use feature doubles only; neither ACF Free nor ACF Pro is bundled.
+ *
+ * @group acf-doubles
+ */
 final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
-	#[Group( 'acf-doubles' )]
-	#[RunInSeparateProcess]
-	#[PreserveGlobalState( false )]
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
 	public function test_mock_acf_free_registers_fixed_groups_without_commercial_fields(): void {
 		if ( function_exists( 'acf_add_local_field_group' ) ) {
 			$this->markTestSkipped( 'A real ACF installation is active.' );
@@ -30,9 +32,10 @@ final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
 		}
 	}
 
-	#[Group( 'acf-doubles' )]
-	#[RunInSeparateProcess]
-	#[PreserveGlobalState( false )]
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
 	public function test_mock_acf_pro_features_register_flexible_layouts_without_commercial_package(): void {
 		if ( function_exists( 'acf_add_local_field_group' ) ) {
 			$this->markTestSkipped( 'A real ACF installation is active.' );
