@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Admin Settings page now uses toggle switches for each of the 12 section types; disabled blocks are hidden from the Gutenberg block inserter both server-side (PHP) and client-side (JS).
 - Admin About page with plugin info, requirements, 5-step getting started guide, documentation links, and feature highlights.
 - Block loader reads the `nexuscontent_settings` option's `enabled_sections` array and passes it to the editor via `wp_localize_script`; disabled types are excluded from server-side registration and unregistered client-side.
+- Phase 3 companion provider integration: provider discovery, companion calls, contract-version negotiation, caching, and fallback against the repaired contract. A live integration test (`tests/providers/wordpress-companion-live.test.ts`) runs the provider against a fresh Docker wp-env companion install in the `ts-integration` CI job; the suite passes, satisfying the enforced live-plugin gate.
 
 ### Changed
 
@@ -51,9 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### In Progress
 
-- Companion plugin Phase 2 is implemented: local unit, PHP lint, PHPCS, PHPStan, contract, JavaScript build/lint/format, ZIP packaging, and WordPress integration tests pass in CI (75 unit tests, 417 assertions; 12 integration tests, 114 assertions).
-- Phase 3 provider discovery, companion calls, contract-version negotiation, caching, and fallback are implemented with tests. CI verification against the live plugin contract remains the final gate.
-- Version `0.2.1` and the companion plugin are unreleased; the root package remains `0.2.0`.
+- All `0.2.1` phases are implemented and pass CI, but version `0.2.1` and the companion plugin are unreleased; the root package remains `0.2.0`.
 
 ## [0.2.0] - 2026-08-18
 

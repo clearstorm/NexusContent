@@ -126,7 +126,7 @@ The exit criteria are satisfied by `0.2.0`.
 
 ## 0.2.1 - WordPress Companion
 
-**State:** In progress and unreleased. Phase 2 is implemented and passes CI. Phase 3 is in progress. The root package remains `0.2.0`.
+**State:** Implemented but unreleased. Phases 1-3 are complete and pass CI. The root package remains `0.2.0`.
 
 **Goal:** Establish a versioned companion boundary that gives WordPress editors Gutenberg and optional ACF authoring modes while preserving the released plugin-neutral standard REST provider.
 
@@ -155,11 +155,12 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ### Phase 3 - Companion Provider Integration
 
-**State:** `in_progress`; implementation and tests exist; CI verification pending.
+**State:** Implemented and passes CI.
 
-- Add provider discovery, companion calls, explicit contract-version negotiation, caching, and fallback.
-- Consume only the repaired contract.
-- Preserve released `0.2.0` standard REST retrieval unchanged; it must not require or call the plugin.
+- Provider discovery, companion calls, explicit contract-version negotiation, caching, and fallback are implemented.
+- A live integration test runs the provider (auto and core strategies) against a fresh Docker wp-env companion install in the `ts-integration` CI job; it exercises page, collection, and item retrieval plus core fallback against the real plugin.
+- Phase 3 consumes only the repaired contract.
+- Released `0.2.0` standard REST retrieval remains unchanged and does not require or call the plugin.
 
 **0.2.1 exclusions:**
 

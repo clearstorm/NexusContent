@@ -8,9 +8,9 @@
 | Current version | `0.2.0` |
 | Current milestone | `0.2.1-wordpress-companion` |
 | Project status | Active, early development; internal private package |
-| Current focus | `provider.wordpress.companion-integration` (`in_progress`) |
+| Current focus | Unassigned (`0.2.1` complete; next is `provider.strapi`, planned for `0.3.0`) |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The current unreleased `0.2.1` work covers the WordPress companion plugin (Phase 2) and companion provider integration (Phase 3). Phase 2 is now implemented: the companion plugin passes local unit, PHP lint, PHPCS, PHPStan, contract, JavaScript build/lint/format, ZIP packaging, and WordPress integration tests in CI. The current focus is Phase 3 companion provider integration. The directional `0.3.0` Strapi provider follows it.
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The current unreleased `0.2.1` work covers the WordPress companion plugin (Phase 2) and companion provider integration (Phase 3), both now implemented: the companion plugin passes local and CI gates, and Phase 3 passes a live integration test in CI against a fresh companion install. The recommended next focus is the directional `0.3.0` Strapi provider.
 
 ## Current Architecture
 
@@ -74,15 +74,14 @@ See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 ## Current Work
 
-Phase 3 companion provider integration is implemented with tests. It adds provider discovery, companion calls, contract-version negotiation, caching, and fallback against the repaired contract. A live integration test (`tests/providers/wordpress-companion-live.test.ts`) exercises the provider and core fallback against a fresh Docker wp-env companion install and passes locally; the `ts-integration` CI job starts wp-env, enables clean permalinks, and runs that suite. The remaining gate is the CI run against the live companion plugin.
+Phase 3 companion provider integration is implemented and passes CI. It adds provider discovery, companion calls, contract-version negotiation, caching, and fallback against the repaired contract. A live integration test (`tests/providers/wordpress-companion-live.test.ts`) exercises the provider and core fallback against a fresh Docker wp-env companion install; the `ts-integration` CI job passes. All three `0.2.1` phases are now implemented.
 
-**Recommended next focus:** Verify Phase 3 companion provider integration passes CI, then move toward the directional `0.3.0` Strapi provider.
+**Recommended next focus:** Directional `0.3.0` Strapi provider.
 
 ## Next
 
-1. Run and pass the `ts-integration` CI job against the live companion plugin, then reassess `provider.wordpress.companion-integration` against the implemented definition.
-2. Confirm the Strapi provider's minimum REST API scope and contract test strategy.
-3. Consider the directional localisation continuation once provider breadth is proven.
+1. Confirm the Strapi provider's minimum REST API scope and contract test strategy.
+2. Consider the directional localisation continuation once provider breadth is proven.
 
 ## Not Implementing Yet
 
@@ -135,7 +134,7 @@ Phase 3 companion provider integration is implemented with tests. It adds provid
 - Canonical URLs are supplied by content or consumers because Core does not know deployment URLs.
 - The package remains private while the pre-1.0 architecture is proven.
 - The companion plugin is implemented and passes CI. It remains unreleased until `0.2.1` is finalized.
-- Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests. A live integration test passes locally against a fresh Docker wp-env companion install and is wired into CI as the `ts-integration` job; the CI run remains.
+- Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the `ts-integration` CI job passes a live integration test against a fresh Docker wp-env companion install.
 
 ## Project State Authority
 

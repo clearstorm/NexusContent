@@ -9,9 +9,9 @@
     "packagePrivate": true
   },
   "currentFocus": {
-    "id": "provider.wordpress.companion-integration",
-    "label": "WordPress companion provider integration",
-    "status": "in_progress"
+    "id": null,
+    "label": null,
+    "status": "unassigned"
   },
   "recommendedNextFocus": {
     "id": "provider.strapi",
@@ -47,6 +47,7 @@
       "provider.wordpress.phase1.companion",
       "provider.wordpress.phase1.diagnostics",
       "provider.wordpress.phase1.error-codes",
+      "provider.wordpress.companion-integration",
       "provider.wordpress.companion-plugin",
       "provider.wordpress.companion-admin-page",
       "provider.wordpress.companion-block-previews",
@@ -87,9 +88,7 @@
       "docs.contributing",
       "docs.roadmap"
     ],
-    "inProgress": [
-      "provider.wordpress.companion-integration"
-    ],
+    "inProgress": [],
     "planned": [
       "provider.strapi",
       "content.sync",
@@ -131,7 +130,7 @@
     "The package remains private while the pre-1.0 architecture is proven.",
     "The repaired pre-release WordPress companion contract uses version 1 envelopes with data and optional diagnostics, three editor modes, 12 canonical short section names, and five nexuscontent/v1 route contracts.",
     "The companion plugin WordPress integration suite passes in CI; Phase 2 is implemented.",
-    "Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; a live integration test runs the provider against a fresh Docker wp-env companion install and passes locally, wired into CI as the ts-integration job. The CI run against the live plugin contract remains the final gate.",
+    "Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the ts-integration CI job runs a live integration test against a fresh Docker wp-env companion install and passes.",
     "Released 0.2.0 standard WordPress REST provider retrieval remains unchanged and does not call the companion plugin."
   ],
   "architecturalDecisions": [
