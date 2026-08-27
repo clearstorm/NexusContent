@@ -104,7 +104,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm ci --no-audit --no-fund
+      - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: npm run lint-js
       - run: npm run format:check
@@ -116,7 +116,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm ci --no-audit --no-fund
+      - run: npm install --no-audit --no-fund
       - run: npm run package
       - uses: actions/upload-artifact@v4
         with:
@@ -136,7 +136,7 @@ jobs:
           php-version: "8.1"
           coverage: none
           tools: composer:v2
-      - run: npm ci --no-audit --no-fund
+      - run: npm install --no-audit --no-fund
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: npm run env:start
       - run: npm run test:integration
