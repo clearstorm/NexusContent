@@ -315,7 +315,7 @@ final class Block_Loader {
 	private function settings_enabled_sections(): array {
 		$stored   = get_option( 'nexuscontent_settings', array() );
 		$stored   = is_array( $stored ) ? $stored : array();
-		$defaults = array_values( Section_Registry::TYPES );
+		$defaults = Section_Registry::TYPES;
 
 		if ( isset( $stored['enabled_sections'] ) && is_array( $stored['enabled_sections'] ) ) {
 			return array_values( array_intersect( $defaults, $stored['enabled_sections'] ) );
