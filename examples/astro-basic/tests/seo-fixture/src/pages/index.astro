@@ -10,14 +10,14 @@ const seo = {
   openGraph: {
     title: "Open Graph title",
     description: "Open Graph description",
-    image: { url: "https://example.com/open-graph.jpg" },
+    image: { src: "https://example.com/open-graph.jpg" },
     type: "article"
   },
   twitter: {
     card: "summary_large_image" as const,
     title: "Twitter title",
     description: "Twitter description",
-    image: { url: "https://example.com/twitter.jpg" }
+    image: { src: "https://example.com/twitter.jpg" }
   },
   structuredData: [
     { "@context": "https://schema.org", "@type": "WebPage", name: dangerous },

@@ -2,6 +2,7 @@ export interface NexusContentErrorDetails {
   provider?: string;
   operation?: string;
   content?: string;
+  model?: string;
   reason?: string;
   code?: string;
   locale?: string;
@@ -13,6 +14,7 @@ export class NexusContentError extends Error {
   readonly provider?: string;
   readonly operation?: string;
   readonly content?: string;
+  readonly model?: string;
   readonly reason?: string;
   readonly code?: string;
   readonly locale?: string;
@@ -25,6 +27,7 @@ export class NexusContentError extends Error {
     this.provider = details.provider;
     this.operation = details.operation;
     this.content = details.content;
+    this.model = details.model;
     this.reason = details.reason;
     this.code = details.code;
     this.locale = details.locale;
@@ -37,6 +40,7 @@ export class NexusContentError extends Error {
     if (this.provider !== undefined) lines.push(`Provider: ${this.provider}`);
     if (this.operation !== undefined) lines.push(`Operation: ${this.operation}`);
     if (this.content !== undefined) lines.push(`Content: ${this.content}`);
+    if (this.model !== undefined) lines.push(`Model: ${this.model}`);
     if (this.code !== undefined) lines.push(`Code: ${this.code}`);
     if (this.locale !== undefined) lines.push(`Locale: ${this.locale}`);
     if (this.supportedLocales !== undefined) {
@@ -83,6 +87,25 @@ export class ValidationError extends NexusContentError {
     super(message, details);
     this.name = "ValidationError";
     this.issues = issues;
+  }
+}
+
+/**
+ * Raised when provider content does not match the project-level model schema
+ * declared in `schema.models`. Carries the model name, the offending field
+ * path, provider, source key, and locale for actionable diagnostics.
+ */
+export class SchemaError extends ValidationError {
+  override readonly model?: string;
+
+  constructor(
+    message: string,
+    details: NexusContentErrorDetails = {},
+    issues: { path: string; message: string }[] = []
+  ) {
+    super(message, details, issues);
+    this.name = "SchemaError";
+    this.model = details.model;
   }
 }
 

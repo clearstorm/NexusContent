@@ -212,7 +212,7 @@ test("accepts featured image on page", () => {
   const page = {
     ...validCanonicalPage,
     featuredImage: {
-      url: "https://example.com/hero.jpg",
+      src: "https://example.com/hero.jpg",
       alt: "Hero image",
       caption: "A hero image",
       mimeType: "image/jpeg",
@@ -233,14 +233,14 @@ test("accepts featured image on page", () => {
 test("rejects featured image with non-string url", () => {
   const page = {
     ...validCanonicalPage,
-    featuredImage: { url: 42 }
+    featuredImage: { src: 42 }
   } as unknown as PageContent;
   assert.throws(
     () => validatePageContent(page),
     (error: unknown) => {
       assert.ok(error instanceof ValidationError);
       assert.ok(
-        error.issues.some((issue) => issue.path === "featuredImage.url")
+        error.issues.some((issue) => issue.path === "featuredImage.src")
       );
       return true;
     }

@@ -2,33 +2,17 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import CTA from "../components/CTA.astro";
-import { getPageContent } from "../nexus";
+import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
 
-const page = await getPageContent("contact");
+const page = await nexus.getPage("contact");
 
 if (!page) {
   throw new Error(`Required content "contact" was not found.`);
 }
 
-const hero = page.data.hero as {
-  eyebrow?: string;
-  heading: string;
-  intro: string;
-};
-
-const contact = page.data.contact as {
-  heading: string;
-  items: { label: string; value: string; href?: string }[];
-};
-
-const cta = page.data.cta as {
-  heading: string;
-  intro: string;
-  label: string;
-  href: string;
-};
+const { hero, contact, cta } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "Contact",

@@ -1,6 +1,21 @@
 import { z } from "zod";
-import { mediaAssetSchema, pageStatusSchema } from "../../validation/schemas.ts";
+import { pageStatusSchema } from "../../validation/schemas.ts";
 import { COMPANION_CONTRACT_VERSION } from "./config.ts";
+
+/**
+ * The companion wire `featuredImage` keeps the released plugin field name
+ * `url`. It is converted to the normalized `MediaAsset.src` at the provider
+ * boundary so the wire contract stays stable.
+ */
+export const companionMediaSchema = z.object({
+  id: z.string().optional(),
+  url: z.string(),
+  alt: z.string().optional(),
+  caption: z.string().optional(),
+  mimeType: z.string().optional(),
+  width: z.number().optional(),
+  height: z.number().optional()
+});
 
 export const diagnosticSeveritySchema = z.enum(["error", "warning", "info"]);
 
@@ -57,7 +72,7 @@ export const pageDataSchema = z.object({
   title: z.string().optional(),
   status: pageStatusSchema.optional(),
   excerpt: z.string().optional(),
-  featuredImage: mediaAssetSchema.optional(),
+  featuredImage: companionMediaSchema.optional(),
   modifiedAt: z.string().optional(),
   sections: z.array(pageSectionWireSchema),
   rawFields: z.record(z.string(), jsonValueSchema)

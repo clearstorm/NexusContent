@@ -2,152 +2,210 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   ConfigError,
-  resolveContentConfig,
-  resolveNavigationConfig,
-  resolveSettingsConfig
+  defineNexusConfig
 } from "../../src/core/index.ts";
 import type { NexusConfig } from "../../src/core/index.ts";
 
-const config: NexusConfig = {
+const config = {
   providers: {
-    git: { type: "git" },
-    strapi: { type: "strapi" }
+    git: { type: "git" }
   },
-  content: {
-    home: { provider: "git", key: "home" },
-    about: { provider: "git", key: "about" },
-    services: { provider: "strapi", key: "services" }
+  media: {
+    default: "remote",
+    providers: {
+      local: { type: "local", options: { root: "../media", publicPath: "/media" } },
+      remote: { type: "remote" }
+    }
   },
-  navigation: {
-    primary: { provider: "git", key: "primary" }
-  },
-  settings: {
-    site: { provider: "strapi", key: "site" }
+  schema: {
+    models: {
+      home: {
+        kind: "singleton",
+        source: { provider: "git", key: "home", mode: "page" },
+        fields: {
+          hero: { type: "object", fields: { heading: { type: "string" } } }
+        }
+      },
+      site: {
+        kind: "settings",
+        source: { provider: "git", key: "site" }
+      },
+      posts: {
+        kind: "collection",
+        source: { provider: "git", key: "posts" }
+      }
+    }
   }
-};
+} satisfies NexusConfig;
 
-test("resolves a content name to its provider configuration", () => {
-  const entry = resolveContentConfig(config, "about");
-
-  assert.deepEqual(entry, { provider: "git", key: "about" });
+test("accepts a valid schema-based configuration", () => {
+  const returned = defineNexusConfig(config);
+  assert.equal(returned, config);
 });
 
-test("resolves content that uses a different provider", () => {
-  const entry = resolveContentConfig(config, "services");
-
-  assert.deepEqual(entry, { provider: "strapi", key: "services" });
+test("accepts a config without providers or media sections", () => {
+  const minimal = defineNexusConfig({
+    schema: { models: {} }
+  });
+  assert.deepEqual(minimal.schema.models, {});
 });
 
-test("resolves navigation from the dedicated configuration section", () => {
-  const entry = resolveNavigationConfig(config, "primary");
-
-  assert.deepEqual(entry, { provider: "git", key: "primary" });
-});
-
-test("resolves settings from the dedicated configuration section", () => {
-  const entry = resolveSettingsConfig(config, "site");
-
-  assert.deepEqual(entry, { provider: "strapi", key: "site" });
-});
-
-test("throws a ConfigError for missing navigation names", () => {
+test("rejects an undeclared provider reference", () => {
   assert.throws(
-    () => resolveNavigationConfig(config, "footer"),
+    () =>
+      defineNexusConfig({
+        providers: { git: { type: "git" } },
+        schema: { models: { home: { kind: "singleton", source: { provider: "strapi", key: "home" } } } }
+      }),
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
-      assert.equal(error.content, "footer");
-      assert.equal(error.operation, "resolveNavigation");
-      assert.match(error.message, /Navigation/);
-      assert.match(error.message, /primary/);
+      assert.match(error.message, /strapi/);
       return true;
     }
   );
 });
 
-test("throws a ConfigError when the navigation section is absent", () => {
-  const withoutNavigation: NexusConfig = { content: {} };
-
+test("rejects a source.mode on a non-singleton model", () => {
   assert.throws(
-    () => resolveNavigationConfig(withoutNavigation, "primary"),
+    () =>
+      defineNexusConfig({
+        providers: { git: { type: "git" } },
+        schema: {
+          models: {
+            posts: {
+              kind: "collection",
+              source: { provider: "git", key: "posts", mode: "page" }
+            }
+          }
+        }
+      }),
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
-      assert.equal(error.operation, "resolveNavigation");
-      assert.match(error.message, /Navigation "primary" is not configured/);
+      assert.match(error.message, /source.mode/);
       return true;
     }
   );
 });
 
-test("throws a ConfigError for missing settings names", () => {
+test("rejects a reference field that targets a missing model", () => {
   assert.throws(
-    () => resolveSettingsConfig(config, "theme"),
+    () =>
+      defineNexusConfig({
+        providers: { git: { type: "git" } },
+        schema: {
+          models: {
+            home: {
+              kind: "singleton",
+              source: { provider: "git", key: "home" },
+              fields: {
+                featured: { type: "reference", collection: "missing" }
+              }
+            }
+          }
+        }
+      }),
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
-      assert.equal(error.content, "theme");
-      assert.equal(error.operation, "resolveSettings");
-      assert.match(error.message, /Settings/);
-      assert.match(error.message, /site/);
+      assert.match(error.message, /references collection "missing"/);
       return true;
     }
   );
 });
 
-test("throws a ConfigError for malformed settings entries", () => {
-  const bad: NexusConfig = {
-    content: {},
-    settings: { site: { provider: "git", key: "" } }
-  };
-
+test("rejects a reference field that targets a non-collection model", () => {
   assert.throws(
-    () => resolveSettingsConfig(bad, "site"),
+    () =>
+      defineNexusConfig({
+        providers: { git: { type: "git" } },
+        schema: {
+          models: {
+            home: {
+              kind: "singleton",
+              source: { provider: "git", key: "home" }
+            },
+            post: {
+              kind: "singleton",
+              source: { provider: "git", key: "post" }
+            },
+            page: {
+              kind: "singleton",
+              source: { provider: "git", key: "page" },
+              fields: { related: { type: "reference", collection: "home" } }
+            }
+          }
+        }
+      }),
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
-      assert.equal(error.operation, "resolveSettings");
-      assert.match(error.message, /key/);
+      assert.match(error.message, /"home" but that model kind is/);
       return true;
     }
   );
 });
 
-test("throws a ConfigError for missing content names", () => {
+test("rejects a media field whose provider is not declared", () => {
   assert.throws(
-    () => resolveContentConfig(config, "missing"),
+    () =>
+      defineNexusConfig({
+        providers: { git: { type: "git" } },
+        media: { providers: { local: { type: "local", options: { root: "../media", publicPath: "/media" } } } },
+        schema: {
+          models: {
+            home: {
+              kind: "singleton",
+              source: { provider: "git", key: "home" },
+              fields: { logo: { type: "media", media: "cloudinary" } }
+            }
+          }
+        }
+      }),
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
-      assert.equal(error.content, "missing");
-      assert.equal(error.operation, "resolve");
-      assert.match(error.message, /"missing"/);
-      assert.match(error.message, /home, about, services/);
+      assert.match(error.message, /media provider "cloudinary"/);
       return true;
     }
   );
 });
 
-test("throws a ConfigError when the entry has no provider", () => {
-  const bad: NexusConfig = {
-    content: { home: { provider: "", key: "home" } }
-  };
-
+test("rejects an unknown field type", () => {
   assert.throws(
-    () => resolveContentConfig(bad, "home"),
+    () =>
+      defineNexusConfig({
+        providers: { git: { type: "git" } },
+        schema: {
+          models: {
+            home: {
+              kind: "singleton",
+              source: { provider: "git", key: "home" },
+              fields: {
+                bogus: {
+                  type: "icon",
+                  media: "remote"
+                } as unknown as import("../../src/core/index.ts").FieldSchema
+              }
+            }
+          }
+        }
+      }),
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
-      assert.match(error.message, /provider/);
+      assert.match(error.message, /Invalid NexusContent configuration/);
       return true;
     }
   );
 });
 
-test("throws a ConfigError when the entry has no key", () => {
-  const bad: NexusConfig = {
-    content: { home: { provider: "git", key: "" } }
-  };
-
+test("rejects a default media provider that is not declared", () => {
   assert.throws(
-    () => resolveContentConfig(bad, "home"),
+    () =>
+      defineNexusConfig({
+        providers: {},
+        media: { default: "cdn", providers: { local: { type: "local", options: { root: "../media", publicPath: "/media" } } } },
+        schema: { models: {} }
+      }),
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
-      assert.match(error.message, /key/);
+      assert.match(error.message, /"cdn"/);
       return true;
     }
   );

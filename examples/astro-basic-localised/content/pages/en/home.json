@@ -11,7 +11,7 @@
     "intro": "Content providers own the content. NexusContent sits between them with normalized types, provenance, validation, and locale-aware resolution.",
     "cta": {
       "label": "About us",
-      "href": "/about"
+      "href": "/company"
     }
   },
   "services": {

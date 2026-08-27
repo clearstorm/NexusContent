@@ -85,15 +85,25 @@ class RecordingProvider implements ContentProvider {
 function buildConfig(): NexusConfig {
   return {
     providers: { recording: { type: "test" } },
-    content: {
-      home: { provider: "recording", key: "home" },
-      blog: { provider: "recording", key: "posts" }
-    },
-    navigation: {
-      primary: { provider: "recording", key: "primary" }
-    },
-    settings: {
-      site: { provider: "recording", key: "site" }
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "recording", key: "home", mode: "page" }
+        },
+        blog: {
+          kind: "collection",
+          source: { provider: "recording", key: "posts" }
+        },
+        primary: {
+          kind: "navigation",
+          source: { provider: "recording", key: "primary" }
+        },
+        site: {
+          kind: "settings",
+          source: { provider: "recording", key: "site" }
+        }
+      }
     },
     locales: {
       default: "en",
@@ -192,7 +202,14 @@ test("forwards locale options for navigation, settings, collections, and items",
 test("does not forward provider options when locales are not configured", async () => {
   const service = new NexusContent({
     providers: { recording: { type: "test" } },
-    content: { home: { provider: "recording", key: "home" } }
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "recording", key: "home", mode: "page" }
+        }
+      }
+    }
   });
   const provider = new RecordingProvider();
   service.register("recording", provider);
@@ -205,7 +222,14 @@ test("does not forward provider options when locales are not configured", async 
 test("rejects a locale request when no locales are configured", async () => {
   const service = new NexusContent({
     providers: { recording: { type: "test" } },
-    content: { home: { provider: "recording", key: "home" } }
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "recording", key: "home", mode: "page" }
+        }
+      }
+    }
   });
   const provider = new RecordingProvider();
   service.register("recording", provider);
@@ -224,7 +248,14 @@ test("rejects a locale request when no locales are configured", async () => {
 test("ignores a fallback-only request when no locales are configured", async () => {
   const service = new NexusContent({
     providers: { recording: { type: "test" } },
-    content: { home: { provider: "recording", key: "home" } }
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "recording", key: "home", mode: "page" }
+        }
+      }
+    }
   });
   const provider = new RecordingProvider();
   service.register("recording", provider);
@@ -253,7 +284,7 @@ test("rejects invalid locale configuration at construction", () => {
   assert.throws(
     () =>
       new NexusContent({
-        content: {},
+        schema: { models: {} },
         locales: { default: "fr", supported: ["en"] }
       }),
     (error: unknown) => {

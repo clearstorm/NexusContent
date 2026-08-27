@@ -12,7 +12,7 @@
     "openGraph": {
       "type": "website",
       "image": {
-        "url": "https://example.com/social.jpg",
+        "src": "https://example.com/social.jpg",
         "alt": "NexusContent"
       }
     },

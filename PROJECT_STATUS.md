@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | Project name | NexusContent |
-| Current version | `0.2.0` |
-| Current milestone | `0.2.1-wordpress-companion` |
+| Current version | `0.2.2` |
+| Current milestone | `0.2.2-core-contract` |
 | Project status | Active, early development; internal private package |
-| Current focus | Unassigned (`0.2.1` complete; next is `provider.strapi`, planned for `0.3.0`) |
+| Current focus | `core.schema.models` — model schema and field contracts (`in_progress`) |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The current unreleased `0.2.1` work covers the WordPress companion plugin (Phase 2) and companion provider integration (Phase 3), both now implemented: the companion plugin passes local and CI gates, and Phase 3 passes a live integration test in CI against a fresh companion install. The recommended next focus is the directional `0.3.0` Strapi provider.
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion work (Phases 1-3) is implemented and passes CI. The current unreleased `0.2.2` work is the core content contract: a unified `schema.models` configuration (model kinds, field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, and a `nexus.media` resolution entry point).
 
 ## Current Architecture
 
@@ -69,19 +69,28 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Fixed admin page "Pages by editor mode" to count all published pages, including those without an explicit `nexus_editor_mode` meta row.
 - Companion plugin WordPress integration tests passing in CI (75 unit tests, 417 assertions; 12 integration tests, 114 assertions).
 - Type checking, tests, package build, Astro example build, and Node example execution in CI.
+- Unified `schema.models` configuration with model kinds and provider sources; `source.mode: "page"` vs `"singleton"` selects the provider operation.
+- Declarative field schemas with required/list/options/nested-object/reference/media/richText support and retrieval-time `SchemaError` validation.
+- Provider-neutral media: `MediaAsset.src`, `MediaReference`, `MediaProviderRegistry`, `ResolveMediaService`, declared-and-auto-built local/remote providers, and a `WordPressMediaProvider` for id lookup.
+- Migrated astro-basic, astro-basic-localised, astro-wordpress, and node-basic consumers to `defineNexusConfig` with `schema.models`.
 
 See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 ## Current Work
 
-Phase 3 companion provider integration is implemented and passes CI. It adds provider discovery, companion calls, contract-version negotiation, caching, and fallback against the repaired contract. A live integration test (`tests/providers/wordpress-companion-live.test.ts`) exercises the provider and core fallback against a fresh Docker wp-env companion install; the `ts-integration` CI job passes. All three `0.2.1` phases are now implemented.
+The `0.2.2` core content contract is in progress:
 
-**Recommended next focus:** Directional `0.3.0` Strapi provider.
+- `schema.models` unifies logical content mapping: every model declares a `kind` (`singleton`, `collection`, `navigation`, `settings`) and a provider `source` (with `mode: "page"` vs `"singleton"`), replacing the root `content` / `navigation` / `settings` configuration.
+- Declarative field schemas (`string`, `number`, `boolean`, `datetime`, `object`, `reference`, `media`, `richText`) validate model data at retrieval time with `SchemaError`, while undeclared fields pass through.
+- `MediaAsset` now uses `src` (with `provider` and `sourceId`) instead of the legacy `url`; `MediaSize`/`sizes` keep `url`. The companion wire contract and plugin keep `featuredImage.url`; the TypeScript boundary converts it to `src`.
+- Media providers are provider-neutral: `defineLocalMediaProvider` (root-relative `src` to `publicPath`, traversal-safe), `defineRemoteMediaProvider` (absolute http(s) validation, no fetching), and `WordPressMediaProvider` (id lookup via the WordPress media endpoint). Local and remote providers are declared in `media.providers` and auto-built by Core; WordPress media registers via `nexus.registerMedia`.
+- **Recommended next focus:** finish `core.schema.models`, then the directional `0.3.0` Strapi provider.
 
 ## Next
 
-1. Confirm the Strapi provider's minimum REST API scope and contract test strategy.
-2. Consider the directional localisation continuation once provider breadth is proven.
+1. Finish the in-progress `core.schema.models` contract (field schema edge cases and example coverage).
+2. Confirm the Strapi provider's minimum REST API scope and contract test strategy for `0.3.0`.
+3. Consider the directional localisation continuation once provider breadth is proven.
 
 ## Not Implementing Yet
 
@@ -110,7 +119,7 @@ Phase 3 companion provider integration is implemented and passes CI. It adds pro
 - Provider-specific response structures stop at the provider boundary.
 - Multiple instances of the same provider type must remain possible.
 - Generic singleton retrieval is provider-neutral; Git stores arbitrary singleton content under `singletons/<key>.json`.
-- Navigation and settings are dedicated provider operations with separate configuration sections and Git directories.
+- Navigation and settings remain dedicated provider operations and Git directories, declared as distinct model kinds under `schema.models`.
 - Locale resolution is centralized in Core; providers implement variant file resolution; format adapters and validators implement no locale logic.
 - Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged.
 - Core owns normalized SEO data, validation, and deterministic fallback resolution; providers map source-specific fields and consumers render metadata.
@@ -118,6 +127,8 @@ Phase 3 companion provider integration is implemented and passes CI. It adds pro
 - WordPress collection pages are loaded sequentially and inconsistent or excessive pagination fails explicitly.
 - The companion plugin is isolated under `integrations/wordpress/nexuscontent`; it owns WordPress editor integration and companion REST transport, while the TypeScript provider owns consumer-facing retrieval and normalization.
 - The repaired contract is pre-release. It does not alter released `0.2.0` retrieval behavior, and Phase 3 must not consume it until plugin integration verification passes.
+- The `0.2.2` `schema.models` contract consolidates logical content mapping; media references and fields are value-neutral until resolved through `nexus.media`.
+- Media reference resolution order is the reference provider (carrying any field `media` override), then the per-request `defaultProvider`, then the configured project default.
 
 ## Known Issues or Constraints
 
@@ -135,6 +146,7 @@ Phase 3 companion provider integration is implemented and passes CI. It adds pro
 - The package remains private while the pre-1.0 architecture is proven.
 - The companion plugin is implemented and passes CI. It remains unreleased until `0.2.1` is finalized.
 - Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the `ts-integration` CI job passes a live integration test against a fresh Docker wp-env companion install.
+- The `0.2.2` field schema validates data at retrieval time; models without declared fields skip validation so provider-owned shapes (WordPress, arbitrary fixtures) remain unconstrained.
 
 ## Project State Authority
 

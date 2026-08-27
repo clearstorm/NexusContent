@@ -5,6 +5,10 @@
     "title": "NexusContent Example",
     "description": "A static Astro site powered by NexusContent and a Git content repository, in English and French."
   },
+  "heroImage": {
+    "src": "hero.svg",
+    "alt": "Abstract connected content sources"
+  },
   "hero": {
     "eyebrow": "Content, decoupled",
     "heading": "Astro owns the website.",

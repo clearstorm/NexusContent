@@ -2,7 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Hero from "../../components/Hero.astro";
 import CTA from "../../components/CTA.astro";
-import { getPageContent } from "../../nexus";
+import { nexus } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
@@ -13,32 +13,17 @@ export function getStaticPaths() {
 
 const { locale } = Astro.params;
 
-const page = await getPageContent("about", { locale });
+const page = await nexus.getPage("about", { locale });
 
 if (!page) {
   throw new Error(`Required content "about" was not found for locale "${locale}".`);
 }
 
-const hero = page.data.hero as {
-  eyebrow?: string;
-  heading: string;
-  intro: string;
-};
-
-const mission = page.data.mission as { heading: string; content: string };
-const story = page.data.story as { heading: string; content: string };
-const values = page.data.values as { heading: string; items: string[] };
-
-const cta = page.data.cta as {
-  heading: string;
-  intro: string;
-  label: string;
-  href: string;
-};
+const { hero, mission, story, values, cta } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "About",
-  seo: { ...page.seo, canonicalUrl: canonicalUrl(`/${locale}/about/`) }
+  seo: { ...page.seo, canonicalUrl: canonicalUrl(`/${locale}/company/`) }
 }, siteSeoDefaults());
 ---
 

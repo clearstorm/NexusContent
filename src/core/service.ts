@@ -8,13 +8,25 @@ import type {
   SingletonContent
 } from "./types.ts";
 import type { ContentProvider, ProviderRetrievalOptions } from "./provider.ts";
+import type {
+  CollectionModelNames,
+  NavigationModelNames,
+  ResolvedData,
+  SettingsModelNames,
+  SingletonModelNames,
+  SingletonServiceModelNames
+} from "./inference.ts";
 import { ProviderRegistry } from "./registry.ts";
 import { LocaleResolver } from "./locale.ts";
+import { resolveBuiltinMediaProviders } from "./config.ts";
+import { ModelRegistry } from "./schema.ts";
 import {
-  resolveContentConfig,
-  resolveNavigationConfig,
-  resolveSettingsConfig
-} from "./config.ts";
+  MediaProviderRegistry,
+  ResolveMediaService,
+  defineLocalMediaProvider,
+  defineRemoteMediaProvider
+} from "../media/index.ts";
+import type { MediaProvider } from "../media/types.ts";
 import {
   normalizeCollectionItem,
   normalizeNavigation,
@@ -31,22 +43,67 @@ import {
 } from "../validation/validate.ts";
 import { LocaleError, NexusContentError, ProviderError } from "./errors.ts";
 
-export class NexusContent {
-  private readonly config: NexusConfig;
+export class NexusContent<const TConfig extends NexusConfig = NexusConfig> {
+  private readonly config: TConfig;
   private readonly registry: ProviderRegistry;
+  private readonly mediaRegistry: MediaProviderRegistry;
   private readonly localesConfigured: boolean;
   private readonly localeResolver: LocaleResolver;
+  private readonly models: ModelRegistry;
+
+  /** Framework neutral media resolution entry point. */
+  readonly media: ResolveMediaService;
 
   constructor(
-    config: NexusConfig,
-    registry: ProviderRegistry = new ProviderRegistry()
+    config: TConfig,
+    registry: ProviderRegistry = new ProviderRegistry(),
+    mediaRegistry: MediaProviderRegistry = new MediaProviderRegistry()
   ) {
     this.config = config;
     this.registry = registry;
+    this.mediaRegistry = mediaRegistry;
     this.localesConfigured = config.locales !== undefined;
     // Config validation fails fast here so misconfigured locales surface at
     // construction time rather than during a build.
     this.localeResolver = new LocaleResolver(config.locales);
+
+    const providerNames = Object.keys(config.providers ?? {});
+    const mediaProviderNames = Object.keys(config.media?.providers ?? {});
+    this.models = new ModelRegistry(
+      config.schema,
+      providerNames,
+      mediaProviderNames
+    );
+
+    const builtinMedia = resolveBuiltinMediaProviders(config.media);
+    const defaultMediaProvider =
+      builtinMedia.default ?? config.media?.default;
+
+    for (const [name, providerConfig] of Object.entries(
+      builtinMedia.providers
+    )) {
+      const options = providerConfig.options ?? {};
+      if (providerConfig.type === "local") {
+        this.mediaRegistry.register(
+          name,
+          defineLocalMediaProvider({
+            name,
+            root: String(options.root),
+            publicPath: String(options.publicPath)
+          })
+        );
+      } else if (providerConfig.type === "remote") {
+        this.mediaRegistry.register(
+          name,
+          defineRemoteMediaProvider({ name })
+        );
+      }
+    }
+
+    this.media = new ResolveMediaService(
+      this.mediaRegistry,
+      defaultMediaProvider
+    );
   }
 
   register(name: string, provider: ContentProvider): this {
@@ -54,48 +111,69 @@ export class NexusContent {
     return this;
   }
 
-  async getPage<TData extends Record<string, unknown> = Record<string, unknown>>(
-    contentName: string,
-    options: RetrievalOptions = {}
-  ): Promise<PageContent<TData> | null> {
-    const entry = resolveContentConfig(this.config, contentName);
-    const provider = this.registry.get(entry.provider);
-    const providerOptions = this.resolveLocaleOptions(options);
-
-    let page: PageContent<TData> | null;
-    try {
-      page = await provider.getPage<TData>(entry.key, providerOptions);
-    } catch (error) {
-      throw this.wrapProviderError(error, entry.provider, "getPage", contentName);
-    }
-
-    if (page === null) {
-      return null;
-    }
-
-    const normalized = normalizePage(page, provider.name);
-    validatePageContent(normalized, {
-      provider: provider.name,
-      content: contentName,
-      locale: providerOptions?.locale
-    });
-
-    return normalized;
+  registerMedia(name: string, provider: MediaProvider): this {
+    this.mediaRegistry.register(name, provider);
+    return this;
   }
 
-  async getSingleton<TData extends Record<string, unknown> = Record<string, unknown>>(
-    contentName: string,
+  async getPage<
+    TData extends Record<string, unknown> | undefined = undefined,
+    const TName extends SingletonModelNames<TConfig> = SingletonModelNames<TConfig>
+  >(
+    modelName: TName,
     options: RetrievalOptions = {}
-  ): Promise<SingletonContent<TData> | null> {
-    const entry = resolveContentConfig(this.config, contentName);
-    const provider = this.registry.get(entry.provider);
+  ): Promise<PageContent<ResolvedData<TConfig, TName, TData>> | null> {
+    const model = this.models.assertKind(modelName, "singleton");
+    const provider = this.registry.get(model.source.provider);
     const providerOptions = this.resolveLocaleOptions(options);
 
-    let singleton: SingletonContent<TData> | null;
+    if (model.source.mode === "page") {
+      let page: PageContent | null;
+      try {
+        page = await provider.getPage(model.source.key, providerOptions);
+      } catch (error) {
+        throw this.wrapProviderError(
+          error,
+          provider.name,
+          "getPage",
+          modelName
+        );
+      }
+
+      if (page === null) {
+        return null;
+      }
+
+      const normalized = normalizePage(page, provider.name);
+      validatePageContent(normalized, {
+        provider: provider.name,
+        content: modelName,
+        locale: providerOptions?.locale
+      });
+      const data = this.models.validateData(modelName, normalized.data, {
+        provider: provider.name,
+        content: modelName,
+        sourceKey: model.source.key,
+        locale: providerOptions?.locale,
+        operation: "getPage"
+      }) as ResolvedData<TConfig, TName, TData>;
+
+      return { ...normalized, data };
+    }
+
+    let singleton: SingletonContent | null;
     try {
-      singleton = await provider.getSingleton<TData>(entry.key, providerOptions);
+      singleton = await provider.getSingleton(
+        model.source.key,
+        providerOptions
+      );
     } catch (error) {
-      throw this.wrapProviderError(error, entry.provider, "getSingleton", contentName);
+      throw this.wrapProviderError(
+        error,
+        provider.name,
+        "getSingleton",
+        modelName
+      );
     }
 
     if (singleton === null) {
@@ -105,30 +183,106 @@ export class NexusContent {
     const normalized = normalizeSingleton(singleton, provider.name);
     validateSingletonContent(normalized, {
       provider: provider.name,
-      content: contentName,
+      content: modelName,
       locale: providerOptions?.locale
     });
+    const data = this.models.validateData(modelName, normalized.data, {
+      provider: provider.name,
+      content: modelName,
+      sourceKey: model.source.key,
+      locale: providerOptions?.locale,
+      operation: "getSingleton"
+    }) as ResolvedData<TConfig, TName, TData>;
 
-    return normalized;
+    return {
+      id: normalized.id,
+      key: normalized.key,
+      data,
+      meta: normalized.meta
+    };
   }
 
-  async getNavigation(
-    navigationName: string,
+  async getSingleton<
+    TData extends Record<string, unknown> | undefined = undefined,
+    const TName extends SingletonServiceModelNames<TConfig> = SingletonServiceModelNames<TConfig>
+  >(
+    modelName: TName,
+    options: RetrievalOptions = {}
+  ): Promise<SingletonContent<ResolvedData<TConfig, TName, TData>> | null> {
+    const model = this.models.assertKind(modelName, "singleton");
+    if (model.source.mode === "page") {
+      throw new ProviderError(
+        `Model "${modelName}" routes through the page content operation. Use getPage instead of getSingleton.`,
+        {
+          provider: model.source.provider,
+          model: modelName,
+          operation: "getSingleton",
+          reason: `source.mode is "page" for the "${model.source.key}" provider key.`
+        }
+      );
+    }
+
+    const provider = this.registry.get(model.source.provider);
+    const providerOptions = this.resolveLocaleOptions(options);
+
+    let singleton: SingletonContent | null;
+    try {
+      singleton = await provider.getSingleton(
+        model.source.key,
+        providerOptions
+      );
+    } catch (error) {
+      throw this.wrapProviderError(
+        error,
+        provider.name,
+        "getSingleton",
+        modelName
+      );
+    }
+
+    if (singleton === null) {
+      return null;
+    }
+
+    const normalized = normalizeSingleton(singleton, provider.name);
+    validateSingletonContent(normalized, {
+      provider: provider.name,
+      content: modelName,
+      locale: providerOptions?.locale
+    });
+    const data = this.models.validateData(modelName, normalized.data, {
+      provider: provider.name,
+      content: modelName,
+      sourceKey: model.source.key,
+      locale: providerOptions?.locale,
+      operation: "getSingleton"
+    }) as ResolvedData<TConfig, TName, TData>;
+
+    return { ...normalized, data };
+  }
+
+  async getNavigation<
+    const TName extends NavigationModelNames<TConfig> = NavigationModelNames<TConfig>
+  >(
+    modelName: TName,
     options: RetrievalOptions = {}
   ): Promise<NavigationContent | null> {
-    const entry = resolveNavigationConfig(this.config, navigationName);
-    const provider = this.registry.get(entry.provider);
+    const model = this.models.assertKind(modelName, "navigation");
+    const provider = this.registry.get(model.source.provider);
     const providerOptions = this.resolveLocaleOptions(options);
 
     let navigation: NavigationContent | null;
     try {
-      navigation = await provider.getNavigation(entry.key, providerOptions);
+      navigation = await provider.getNavigation(
+        model.source.key,
+        providerOptions
+      );
     } catch (error) {
       throw this.wrapProviderError(
         error,
-        entry.provider,
+        provider.name,
         "getNavigation",
-        navigationName
+        modelName
       );
     }
 
@@ -139,7 +293,7 @@ export class NexusContent {
     const normalized = normalizeNavigation(navigation, provider.name);
     validateNavigationContent(normalized, {
       provider: provider.name,
-      content: navigationName,
+      content: modelName,
       locale: providerOptions?.locale
     });
 
@@ -147,21 +301,28 @@ export class NexusContent {
   }
 
   async getSettings<
-    TData extends Record<string, unknown> = Record<string, unknown>
-  >(settingsName: string, options: RetrievalOptions = {}): Promise<SettingsContent<TData> | null> {
-    const entry = resolveSettingsConfig(this.config, settingsName);
-    const provider = this.registry.get(entry.provider);
+    TData extends Record<string, unknown> | undefined = undefined,
+    const TName extends SettingsModelNames<TConfig> = SettingsModelNames<TConfig>
+  >(
+    modelName: TName,
+    options: RetrievalOptions = {}
+  ): Promise<SettingsContent<ResolvedData<TConfig, TName, TData>> | null> {
+    const model = this.models.assertKind(modelName, "settings");
+    const provider = this.registry.get(model.source.provider);
     const providerOptions = this.resolveLocaleOptions(options);
 
-    let settings: SettingsContent<TData> | null;
+    let settings: SettingsContent | null;
     try {
-      settings = await provider.getSettings<TData>(entry.key, providerOptions);
+      settings = await provider.getSettings(
+        model.source.key,
+        providerOptions
+      );
     } catch (error) {
       throw this.wrapProviderError(
         error,
-        entry.provider,
+        provider.name,
         "getSettings",
-        settingsName
+        modelName
       );
     }
 
@@ -172,53 +333,86 @@ export class NexusContent {
     const normalized = normalizeSettings(settings, provider.name);
     validateSettingsContent(normalized, {
       provider: provider.name,
-      content: settingsName,
+      content: modelName,
       locale: providerOptions?.locale
     });
+    const data = this.models.validateData(modelName, normalized.data, {
+      provider: provider.name,
+      content: modelName,
+      sourceKey: model.source.key,
+      locale: providerOptions?.locale,
+      operation: "getSettings"
+    }) as ResolvedData<TConfig, TName, TData>;
 
-    return normalized;
+    return { ...normalized, data };
   }
 
-  async getCollection<TData extends Record<string, unknown> = Record<string, unknown>>(
-    collectionName: string,
+  async getCollection<
+    TData extends Record<string, unknown> | undefined = undefined,
+    const TName extends CollectionModelNames<TConfig> = CollectionModelNames<TConfig>
+  >(
+    modelName: TName,
     options: RetrievalOptions = {}
-  ): Promise<CollectionItem<TData>[]> {
-    const entry = resolveContentConfig(this.config, collectionName);
-    const provider = this.registry.get(entry.provider);
+  ): Promise<CollectionItem<ResolvedData<TConfig, TName, TData>>[]> {
+    const model = this.models.assertKind(modelName, "collection");
+    const provider = this.registry.get(model.source.provider);
     const providerOptions = this.resolveLocaleOptions(options);
 
-    let items: CollectionItem<TData>[];
+    let items: CollectionItem[];
     try {
-      items = await provider.getCollection<TData>(entry.key, providerOptions);
+      items = await provider.getCollection(
+        model.source.key,
+        providerOptions
+      );
     } catch (error) {
-      throw this.wrapProviderError(error, entry.provider, "getCollection", collectionName);
+      throw this.wrapProviderError(
+        error,
+        provider.name,
+        "getCollection",
+        modelName
+      );
     }
 
-    return items.map((item) => {
+    return items.map((item): CollectionItem<ResolvedData<TConfig, TName, TData>> => {
       const normalized = normalizeCollectionItem(item, provider.name);
       validateCollectionItem(normalized, {
         provider: provider.name,
-        content: collectionName,
+        content: modelName,
         locale: providerOptions?.locale
       });
-      return normalized;
+      const data = this.models.validateData(modelName, normalized.data, {
+        provider: provider.name,
+        content: modelName,
+        sourceKey: model.source.key,
+        locale: providerOptions?.locale,
+        operation: "getCollection"
+      }) as ResolvedData<TConfig, TName, TData>;
+
+      return { ...normalized, data };
     });
   }
 
-  async getItem<TData extends Record<string, unknown> = Record<string, unknown>>(
-    collectionName: string,
+  async getItem<
+    TData extends Record<string, unknown> | undefined = undefined,
+    const TName extends CollectionModelNames<TConfig> = CollectionModelNames<TConfig>
+  >(
+    modelName: TName,
     key: string,
     options: RetrievalOptions = {}
-  ): Promise<CollectionItem<TData> | null> {
-    const entry = resolveContentConfig(this.config, collectionName);
-    const provider = this.registry.get(entry.provider);
+  ): Promise<CollectionItem<ResolvedData<TConfig, TName, TData>> | null> {
+    const model = this.models.assertKind(modelName, "collection");
+    const provider = this.registry.get(model.source.provider);
     const providerOptions = this.resolveLocaleOptions(options);
 
-    let item: CollectionItem<TData> | null;
+    let item: CollectionItem | null;
     try {
-      item = await provider.getItem<TData>(entry.key, key, providerOptions);
+      item = await provider.getItem(
+        model.source.key,
+        key,
+        providerOptions
+      );
     } catch (error) {
-      throw this.wrapProviderError(error, entry.provider, "getItem", collectionName);
+      throw this.wrapProviderError(error, provider.name, "getItem", modelName);
     }
 
     if (item === null) {
@@ -228,11 +422,18 @@ export class NexusContent {
     const normalized = normalizeCollectionItem(item, provider.name);
     validateCollectionItem(normalized, {
       provider: provider.name,
-      content: collectionName,
+      content: modelName,
       locale: providerOptions?.locale
     });
+    const data = this.models.validateData(modelName, normalized.data, {
+      provider: provider.name,
+      content: modelName,
+      sourceKey: model.source.key,
+      locale: providerOptions?.locale,
+      operation: "getItem"
+    }) as ResolvedData<TConfig, TName, TData>;
 
-    return normalized;
+    return { ...normalized, data };
   }
 
   /**

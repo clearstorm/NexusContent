@@ -1,6 +1,6 @@
 {
   "name": "@nexuscontent/core",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "An open source, framework neutral content access layer for JavaScript and TypeScript applications.",
   "type": "module",
   "main": "./dist/index.js",
@@ -14,6 +14,7 @@
   "files": [
     "dist/core",
     "dist/formats",
+    "dist/media",
     "dist/providers",
     "dist/validation",
     "dist/index.d.ts",
@@ -51,6 +52,6 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.0"
   }
 }

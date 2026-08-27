@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Unified `schema.models` content configuration replacing the root `content`, `navigation`, and `settings` sections. Each model declares a `kind` (`singleton`, `collection`, `navigation`, `settings`) and a provider `source` (`key`, plus `mode: "page"` or `"singleton"` for singletons). `defineNexusConfig()` validates the shape and provider/source relationships.
+- Declarative field schemas (`core.schema.fields`): `string`, `number`, `boolean`, `datetime`, `object`, `reference`, `media`, and `richText` types with `required`, `list`, `options`, nested `object.fields`, `reference.collection` targets, and `media` overrides. Model data is validated at retrieval time; a mismatch throws `SchemaError` with model and field issue paths. Undeclared data fields pass through.
+- Provider-neutral media architecture: `MediaProvider` contract, `MediaReference`, `MediaProviderRegistry`, `ResolveMediaService`, and the `nexus.media` resolution entry point. `defineLocalMediaProvider` maps root-relative `src` references to `publicPath` web URLs with traversal protection; `defineRemoteMediaProvider` validates absolute http(s) URLs without fetching. Declared `local` and `remote` media providers are auto-built by Core and validated at configuration time.
+- `WordPressMediaProvider` resolving id references through the WordPress `media` endpoint (404 becomes `null`), with src-only passthrough and configurable name for `nexus.registerMedia`.
+- `ModelSchema` relational validation (`validateModelRelations`) covering provider existence, singleton-only `mode`, reference targets, and media overrides for both `defineNexusConfig` and direct `NexusContent` construction.
+- Schema-driven TypeScript inference for model names and returned `data`, including kind-specific retrieval methods and explicit generic overrides where needed.
+- Migrated `astro-basic`, `astro-basic-localised`, `astro-wordpress`, and `node-basic` consumers to `defineNexusConfig` with `schema.models`.
+- Astro example type-checking with `@astrojs/check`, enforced in CI.
+
+### Changed
+
+- `MediaAsset` replaces `url` with `src` and adds `provider` and `sourceId`. `MediaSize` and `sizes` keep `url`. The companion wire contract and plugin keep `featuredImage.url`; the TypeScript boundary converts it to `src`.
+- `NexusContentErrorDetails` and `NexusContentError` support an optional `model` field; `SchemaError` (extends `ValidationError`) carries `model` and field issues.
+- Removed the root `content`, `navigation`, and `settings` configuration sections and the `resolveContentConfig` / `resolveNavigationConfig` / `resolveSettingsConfig` helpers. Consumers must migrate to `schema.models`.
+- WordPress page retrieval routes through `getPage` when the model declares `source.mode: "page"`; `getSingleton` throws a `ProviderError` for page-routed models.
+- Standard REST WordPress ACF fields are flattened onto `data`; reserved normalized keys cannot be replaced by colliding ACF fields. The WordPress Astro example uses the plugin-neutral `core` API strategy and explicit page composition.
+
 - `ContentSection<TData>` and `SectionSettings` types for structured page sections in Core.
 - `PageStatus` type (`"draft" | "published" | "archived"`) and optional `status`, `excerpt`, `featuredImage`, `modifiedAt`, and `sections` fields on `PageContent`.
 - `contentSectionSchema`, `sectionSettingsSchema`, and `pageStatusSchema` Zod validation schemas for the new section contracts.
@@ -52,7 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### In Progress
 
-- All `0.2.1` phases are implemented and pass CI, but version `0.2.1` and the companion plugin are unreleased; the root package remains `0.2.0`.
+- `core.schema.models` (the consolidated `schema.models` contract and media architecture) targets `0.2.2`.
+- All `0.2.1` phases are implemented and pass CI, but version `0.2.1` and the companion plugin are unreleased; the root package is now `0.2.2`.
 
 ## [0.2.0] - 2026-08-18
 

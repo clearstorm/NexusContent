@@ -1,4 +1,6 @@
-import type { NexusConfig, WordPressProviderOptions } from "@nexuscontent/core";
+import { defineNexusConfig } from "@nexuscontent/core";
+import type { WordPressProviderOptions } from "@nexuscontent/core";
+import { models } from "./schema/schema";
 
 const wordpressApiUrl = import.meta.env.WORDPRESS_API_URL as string | undefined;
 
@@ -21,36 +23,19 @@ export const wordpressProviderOptions = {
   baseUrl: wordpressApiUrl,
   headers: authHeaders,
 
-  // "auto" tries the companion plugin first, falls back to standard REST.
-  apiStrategy: "auto",
-
-  // "gutenberg" parses WordPress block markup into canonical sections.
-  // "acf_flexible" extracts from ACF Flexible Content layouts.
-  // "acf_fixed" extracts from fixed ACF field groups.
-  editorMode: "gutenberg",
-
-  // "error" throws on unknown sections, "ignore" skips, "html" preserves raw.
-  unknownContentPolicy: "error",
-
-  // "full" resolves all media, "embedded" uses _embedded only, "none" skips.
-  mediaResolution: "full"
+  // "core" uses standard WordPress REST published-page and post retrieval
+  // only. It never calls the companion plugin, so no editor mode, section,
+  // or companion options are configured in this plugin-neutral consumer.
+  apiStrategy: "core"
 } satisfies WordPressProviderOptions;
 
-export const nexusConfig = {
+// NexusContent configuration declares provider instances and a model schema.
+// The schema in ./schema/schema declares the WordPress ACF blocks each page
+// expects, provider-kind, and post source keys. Navigation and settings are
+// app-owned constants in the layout, so no models are declared for them.
+export const nexusConfig = defineNexusConfig({
   providers: {
     wordpress: { type: "wordpress", options: wordpressProviderOptions }
   },
-  content: {
-    home: { provider: "wordpress", key: "home" },
-    about: { provider: "wordpress", key: "about" },
-    services: { provider: "wordpress", key: "services" },
-    contact: { provider: "wordpress", key: "contact" },
-    blog: { provider: "wordpress", key: "posts" }
-  },
-  navigation: {
-    primary: { provider: "wordpress", key: "primary" }
-  },
-  settings: {
-    site: { provider: "wordpress", key: "site" }
-  }
-} satisfies NexusConfig;
+  schema: { models }
+});

@@ -30,6 +30,18 @@ const SRC_DIR = fileURLToPath(new URL("../../src", import.meta.url));
 const PACKAGE_JSON_PATH = fileURLToPath(
   new URL("../../package.json", import.meta.url)
 );
+const EXAMPLE_SOURCE_DIRS = [
+  "astro-basic",
+  "astro-basic-localised",
+  "astro-wordpress"
+].map((name) => fileURLToPath(new URL(`../../examples/${name}/src`, import.meta.url)));
+
+const LEGACY_EXAMPLE_PATTERNS = [
+  /\bget(?:Page|Collection|Item|Navigation|Settings)Content\b/,
+  /\bdata\.fields\b/,
+  /\bSectionRenderer\b/,
+  /\.image\.url\b/
+];
 
 const FRAMEWORK_MARKERS = [
   /\bAstro\b/,
@@ -50,6 +62,22 @@ async function collectSourceFiles(dir: string): Promise<string[]> {
     if (entry.isDirectory()) {
       files.push(...(await collectSourceFiles(path)));
     } else if (extname(entry.name) === ".ts") {
+      files.push(path);
+    }
+  }
+
+  return files;
+}
+
+async function collectExampleFiles(dir: string): Promise<string[]> {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await collectExampleFiles(path)));
+    } else if ([".ts", ".astro", ".mjs"].includes(extname(entry.name))) {
       files.push(path);
     }
   }
@@ -109,22 +137,47 @@ test("runtime dependencies do not include Astro or any frontend framework", asyn
   }
 });
 
+test("Astro examples use schema-driven APIs and MediaAsset.src", async () => {
+  for (const dir of EXAMPLE_SOURCE_DIRS) {
+    for (const file of await collectExampleFiles(dir)) {
+      const content = await readFile(file, "utf8");
+      for (const pattern of LEGACY_EXAMPLE_PATTERNS) {
+        assert.doesNotMatch(content, pattern, `found a legacy pattern in ${file}`);
+      }
+    }
+  }
+});
+
 test("the public API works from plain Node code without Astro installed", async () => {
   const contentPath = fileURLToPath(
     new URL("../providers/fixtures/content", import.meta.url)
   );
 
   const nexus = new NexusContent({
-    content: {
-      home: { provider: "git", key: "home" },
-      singleton: { provider: "git", key: "navigation" },
-      posts: { provider: "git", key: "posts" }
-    },
-    navigation: {
-      primary: { provider: "git", key: "primary" }
-    },
-    settings: {
-      site: { provider: "git", key: "site" }
+    providers: { git: { type: "git" } },
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "git", key: "home", mode: "page" }
+        },
+        singleton: {
+          kind: "singleton",
+          source: { provider: "git", key: "navigation" }
+        },
+        posts: {
+          kind: "collection",
+          source: { provider: "git", key: "posts" }
+        },
+        primary: {
+          kind: "navigation",
+          source: { provider: "git", key: "primary" }
+        },
+        site: {
+          kind: "settings",
+          source: { provider: "git", key: "site" }
+        }
+      }
     }
   });
 

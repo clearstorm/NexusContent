@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import { getCollectionContent, getItemContent } from "../../../nexus";
+import { nexus } from "../../../nexus";
 import { supportedLocales, localizeHref } from "../../../app/locale";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../../app/seo";
@@ -12,7 +12,7 @@ export async function getStaticPaths() {
   }[] = [];
 
   for (const locale of supportedLocales) {
-    const posts = await getCollectionContent("blog", { locale });
+    const posts = await nexus.getCollection("blog", { locale });
     for (const post of posts) {
       paths.push({
         params: { locale, slug: post.slug ?? post.key },
@@ -25,9 +25,12 @@ export async function getStaticPaths() {
 }
 
 const { locale, slug } = Astro.params;
-const { key } = Astro.props as { key?: string };
+interface Props {
+  key: string;
+}
+const { key } = Astro.props;
 
-const post = await getItemContent("blog", key ?? "", { locale });
+const post = await nexus.getItem("blog", key, { locale });
 
 if (!post) {
   throw new Error(
@@ -35,11 +38,7 @@ if (!post) {
   );
 }
 
-const { body, date, excerpt } = post.data as {
-  body?: string;
-  date?: string;
-  excerpt?: string;
-};
+const { body, date, excerpt } = post.data;
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/${locale}/blog/${post.slug ?? post.key}/`);
 const seo = resolveSeo({

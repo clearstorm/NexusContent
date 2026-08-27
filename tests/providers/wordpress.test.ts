@@ -190,10 +190,11 @@ test("looks up and fully normalizes a page while preserving rendered values", as
     assert.equal(page.data.featuredMediaId, 99);
     assert.deepEqual(page.data.categories, [3, 5]);
     assert.deepEqual(page.data.tags, [8, 13]);
-    assert.deepEqual(page.data.fields, { eyebrow: "About NexusContent", featured: true });
+    assert.equal(page.data.eyebrow, "About NexusContent");
+    assert.equal(page.data.featured, true);
     assert.deepEqual(page.data.featuredImage, {
       id: "99",
-      url: "https://wordpress.example/media/about.jpg",
+      src: "https://wordpress.example/media/about.jpg",
       alt: "The NexusContent team",
       width: 1600,
       height: 900
@@ -212,6 +213,38 @@ test("looks up and fully normalizes a page while preserving rendered values", as
   assert.equal(url.searchParams.get("_embed"), "wp:featuredmedia");
   assert.equal(url.searchParams.get("status"), "publish");
   assert.match(requestedUrl, /slug=About\+team%2F%C3%A9%3F/);
+});
+
+test("flattens ACF fields with reserved normalized keys winning over collisions", async () => {
+  const entry = {
+    ...richPage,
+    acf: { eyebrow: "Custom ACF", content: "ACF content", tags: "not-an-array", extra: { nested: true } }
+  };
+
+  await withServer((_request, response) => sendJson(response, [entry]), async (baseUrl) => {
+    const page = await provider(baseUrl).getPage<WordPressContentData>("about-us");
+    assert.ok(page);
+    assert.equal(page.data.content, "<p>Rendered <strong>page</strong> content.</p>");
+    assert.equal(page.data.eyebrow, "Custom ACF");
+    assert.deepEqual(page.data.tags, [8, 13]);
+    assert.deepEqual(page.data.extra, { nested: true });
+  });
+});
+
+test("drops reserved ACF collisions when WordPress omits the normalized value", async () => {
+  const entry = {
+    ...richPage,
+    tags: undefined,
+    _embedded: undefined,
+    acf: { tags: "not-an-array", featuredImage: "not-media" }
+  };
+
+  await withServer((_request, response) => sendJson(response, [entry]), async (baseUrl) => {
+    const page = await provider(baseUrl).getPage<WordPressContentData>("about-us");
+    assert.ok(page);
+    assert.equal("tags" in page.data, false);
+    assert.equal("featuredImage" in page.data, false);
+  });
 });
 
 test("returns null for a missing page and rejects malformed lookup shapes", async (t) => {
@@ -452,9 +485,18 @@ test("normalized WordPress output passes through the NexusContent service", asyn
     else sendJson(response, posts, { headers: { "X-WP-Total": "2", "X-WP-TotalPages": "1" } });
   }, async (baseUrl) => {
     const nexus = new NexusContent({
-      content: {
-        about: { provider: "cms", key: "about-us" },
-        blog: { provider: "cms", key: "posts" }
+      providers: { cms: { type: "wordpress" } },
+      schema: {
+        models: {
+          about: {
+            kind: "singleton",
+            source: { provider: "cms", key: "about-us", mode: "page" }
+          },
+          blog: {
+            kind: "collection",
+            source: { provider: "cms", key: "posts" }
+          }
+        }
       }
     });
     nexus.register("cms", provider(baseUrl, { name: "cms", perPage: 2 }));

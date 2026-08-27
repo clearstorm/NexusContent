@@ -5,7 +5,7 @@ const siteUrl = "https://nexuscontent.dev";
 export const siteSeoDefaults: SeoDefaults = {
   siteTitle: "NexusContent Example",
   defaultImage: {
-    url: "https://nexuscontent.dev/social-default.jpg",
+    src: "https://nexuscontent.dev/social-default.jpg",
     alt: "NexusContent"
   }
 };

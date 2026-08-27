@@ -4,13 +4,13 @@ import { resolveSeo } from "../../src/index.ts";
 import type { ResolveSeoInput } from "../../src/index.ts";
 
 test("resolves explicit SEO values before content and site fallbacks", () => {
-  const explicitImage = { url: "https://example.com/explicit.jpg" };
+  const explicitImage = { src: "https://example.com/explicit.jpg" };
 
   const resolved = resolveSeo(
     {
       title: "Content title",
       excerpt: "Content excerpt",
-      featuredImage: { url: "https://example.com/featured.jpg" },
+      featuredImage: { src: "https://example.com/featured.jpg" },
       seo: {
         title: "SEO title",
         description: "SEO description",
@@ -33,7 +33,7 @@ test("resolves explicit SEO values before content and site fallbacks", () => {
     },
     {
       siteTitle: "Site title",
-      defaultImage: { url: "https://example.com/default.jpg" }
+      defaultImage: { src: "https://example.com/default.jpg" }
     }
   );
 
@@ -59,7 +59,7 @@ test("resolves explicit SEO values before content and site fallbacks", () => {
 });
 
 test("uses content values before site defaults", () => {
-  const featuredImage = { url: "https://example.com/featured.jpg" };
+  const featuredImage = { src: "https://example.com/featured.jpg" };
   const resolved = resolveSeo(
     {
       title: "Content title",
@@ -69,7 +69,7 @@ test("uses content values before site defaults", () => {
     },
     {
       siteTitle: "Site title",
-      defaultImage: { url: "https://example.com/default.jpg" }
+      defaultImage: { src: "https://example.com/default.jpg" }
     }
   );
 
@@ -90,7 +90,7 @@ test("uses content values before site defaults", () => {
 });
 
 test("uses site defaults only when content values are absent", () => {
-  const defaultImage = { url: "https://example.com/default.jpg" };
+  const defaultImage = { src: "https://example.com/default.jpg" };
 
   assert.deepEqual(resolveSeo({}, { siteTitle: "Site title", defaultImage }), {
     title: "Site title",
@@ -100,7 +100,7 @@ test("uses site defaults only when content values are absent", () => {
 });
 
 test("resolves Open Graph and Twitter fallbacks in order", () => {
-  const image = { url: "https://example.com/social.jpg" };
+  const image = { src: "https://example.com/social.jpg" };
   const resolved = resolveSeo({
     seo: {
       title: "SEO title",

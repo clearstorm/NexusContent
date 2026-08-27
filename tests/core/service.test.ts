@@ -5,6 +5,7 @@ import {
   NexusContentError,
   ProviderError,
   RegistryError,
+  SchemaError,
   ValidationError
 } from "../../src/core/index.ts";
 import type {
@@ -100,16 +101,35 @@ class MockProvider implements ContentProvider {
 function buildConfig(): NexusConfig {
   return {
     providers: { mock: { type: "test" } },
-    content: {
-      home: { provider: "mock", key: "home" },
-      singleton: { provider: "mock", key: "singleton" },
-      blog: { provider: "mock", key: "posts" }
-    },
-    navigation: {
-      primary: { provider: "mock", key: "primary" }
-    },
-    settings: {
-      site: { provider: "mock", key: "site" }
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "mock", key: "home", mode: "page" },
+          fields: {
+            hero: {
+              type: "object",
+              fields: { heading: { type: "string", required: true } }
+            }
+          }
+        },
+        singleton: {
+          kind: "singleton",
+          source: { provider: "mock", key: "singleton" }
+        },
+        blog: {
+          kind: "collection",
+          source: { provider: "mock", key: "posts" }
+        },
+        primary: {
+          kind: "navigation",
+          source: { provider: "mock", key: "primary" }
+        },
+        site: {
+          kind: "settings",
+          source: { provider: "mock", key: "site" }
+        }
+      }
     }
   };
 }
@@ -150,7 +170,7 @@ test("getPage preserves normalized SEO mapped by a custom provider", async () =>
       canonicalUrl: "https://example.com/",
       openGraph: {
         title: "Mapped provider title",
-        image: { url: "https://example.com/social.jpg" }
+        image: { src: "https://example.com/social.jpg" }
       }
     },
     data: {},
@@ -161,7 +181,7 @@ test("getPage preserves normalized SEO mapped by a custom provider", async () =>
 
   assert.ok(page);
   assert.equal(page.seo?.openGraph?.title, "Mapped provider title");
-  assert.equal(page.seo?.openGraph?.image?.url, "https://example.com/social.jpg");
+  assert.equal(page.seo?.openGraph?.image?.src, "https://example.com/social.jpg");
   assert.equal(page.meta.source, "custom-api");
 });
 
@@ -209,6 +229,26 @@ test("getPage throws a ValidationError for invalid provider content", async () =
       assert.ok(error instanceof ValidationError);
       assert.ok(error instanceof NexusContentError);
       assert.ok(error.issues.some((issue) => issue.path === "data"));
+      return true;
+    }
+  );
+});
+
+test("getPage throws a SchemaError before returning invalid model data", async () => {
+  const { service, mock } = buildService();
+  mock.setPage({
+    id: "home",
+    key: "home",
+    data: { hero: { heading: 42 } },
+    meta: { source: "mock" }
+  });
+
+  await assert.rejects(
+    () => service.getPage("home"),
+    (error: unknown) => {
+      assert.ok(error instanceof SchemaError);
+      assert.equal(error.model, "home");
+      assert.ok(error.issues.some((issue) => issue.path === "hero.heading"));
       return true;
     }
   );
@@ -321,7 +361,7 @@ test("getSingleton throws a ConfigError for unconfigured content", async () => {
     () => service.getSingleton("missing"),
     (error: unknown) => {
       assert.ok(error instanceof NexusContentError);
-      assert.match(error.message, /"missing"/);
+      assert.match(error.message, /Model "missing"/);
       return true;
     }
   );
@@ -428,8 +468,7 @@ test("getNavigation throws a ConfigError for unconfigured navigation", async () 
     () => service.getNavigation("missing"),
     (error: unknown) => {
       assert.ok(error instanceof NexusContentError);
-      assert.match(error.message, /Navigation/);
-      assert.match(error.message, /"missing"/);
+      assert.match(error.message, /Model "missing"/);
       return true;
     }
   );
@@ -526,8 +565,7 @@ test("getSettings throws a ConfigError for unconfigured settings", async () => {
     () => service.getSettings("missing"),
     (error: unknown) => {
       assert.ok(error instanceof NexusContentError);
-      assert.match(error.message, /Settings/);
-      assert.match(error.message, /"missing"/);
+      assert.match(error.message, /Model "missing"/);
       return true;
     }
   );
@@ -653,7 +691,7 @@ test("getPage throws a ConfigError for unconfigured content", async () => {
     () => service.getPage("missing"),
     (error: unknown) => {
       assert.ok(error instanceof NexusContentError);
-      assert.match(error.message, /"missing"/);
+      assert.match(error.message, /Model "missing"/);
       return true;
     }
   );

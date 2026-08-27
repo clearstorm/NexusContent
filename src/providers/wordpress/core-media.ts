@@ -21,7 +21,7 @@ export function normalizeAcfImageToMediaAsset(
 
   if (!url) return undefined;
 
-  const asset: MediaAsset = { url };
+  const asset: MediaAsset = { src: url };
 
   if (typeof obj.id === "number") {
     asset.id = String(obj.id);
@@ -147,7 +147,7 @@ export function createMediaAssetFromId(
 ): MediaAsset {
   return {
     id: String(id),
-    url: options.url ?? "",
+    src: options.url ?? "",
     alt: options.alt,
     width: options.width,
     height: options.height,
@@ -170,7 +170,7 @@ export function normalizeFeaturedMedia(
 
   const asset: MediaAsset = {
     id: id !== undefined ? String(id) : undefined,
-    url: sourceUrl
+    src: sourceUrl
   };
 
   if (typeof media.alt_text === "string") {

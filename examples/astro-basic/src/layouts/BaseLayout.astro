@@ -2,7 +2,7 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import NexusSeo from "../components/NexusSeo.astro";
-import { getNavigationContent, getSettingsContent } from "../nexus";
+import { nexus } from "../nexus";
 import type { SeoData } from "@nexuscontent/core";
 
 interface Props {
@@ -12,8 +12,8 @@ interface Props {
 const { seo } = Astro.props;
 const lang = "en";
 
-const navigation = await getNavigationContent("primary");
-const site = await getSettingsContent("site");
+const navigation = await nexus.getNavigation("primary");
+const site = await nexus.getSettings("site");
 
 if (!navigation) {
   throw new Error(`Required navigation "primary" was not found.`);

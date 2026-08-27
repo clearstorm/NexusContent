@@ -89,7 +89,7 @@ test("accepts complete normalized SEO and legacy canonical strings", () => {
         type: "website",
         image: {
           id: "social",
-          url: "https://example.com/social.jpg",
+          src: "https://example.com/social.jpg",
           alt: "Social image",
           width: 1200,
           height: 630
@@ -99,7 +99,7 @@ test("accepts complete normalized SEO and legacy canonical strings", () => {
         card: "summary_large_image",
         title: "Twitter title",
         description: "Twitter description",
-        image: { url: "https://example.com/twitter.jpg" }
+        image: { src: "https://example.com/twitter.jpg" }
       },
       structuredData: [
         {
@@ -196,8 +196,8 @@ test("rejects invalid canonical, robots, social, media, and structured SEO field
     { seo: { robots: { index: "yes" } }, path: "seo.robots.index" },
     { seo: { openGraph: { title: 42 } }, path: "seo.openGraph.title" },
     {
-      seo: { openGraph: { image: { url: 42 } } },
-      path: "seo.openGraph.image.url"
+      seo: { openGraph: { image: { src: 42 } } },
+      path: "seo.openGraph.image.src"
     },
     { seo: { twitter: { card: "large" } }, path: "seo.twitter.card" },
     {

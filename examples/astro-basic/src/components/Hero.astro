@@ -7,9 +7,13 @@ interface Props {
     label: string;
     href: string;
   };
+  image?: {
+    src: string;
+    alt?: string;
+  };
 }
 
-const { eyebrow, heading, intro, cta } = Astro.props;
+const { eyebrow, heading, intro, cta, image } = Astro.props;
 ---
 
 <section class="hero">
@@ -21,6 +25,7 @@ const { eyebrow, heading, intro, cta } = Astro.props;
       {cta.label}
     </a>
   )}
+  {image && <img class="hero-image" src={image.src} alt={image.alt ?? ""} width={1200} height={630} />}
   <style>
     .hero {
       position: relative;
@@ -62,6 +67,16 @@ const { eyebrow, heading, intro, cta } = Astro.props;
     }
 
     .hero .btn {
+      position: relative;
+    }
+
+    .hero .hero-image {
+      display: block;
+      margin-top: 1.75rem;
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
       position: relative;
     }
   </style>

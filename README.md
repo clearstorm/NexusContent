@@ -49,18 +49,39 @@ Works identically in Astro, Next.js, plain Node scripts, or any JavaScript runti
 Content lives in a separate repository. Point NexusContent at it:
 
 ```ts
-const nexus = new NexusContent({
-  providers: {
-    content: {
-      type: "git",
-      options: { contentPath: "../client-content" }
+import { defineNexusConfig, NexusContent } from "@nexuscontent/core";
+
+const nexus = new NexusContent(
+  defineNexusConfig({
+    providers: {
+      content: {
+        type: "git",
+        options: { contentPath: "../client-content" }
+      }
+    },
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "content", key: "home", mode: "page" },
+          fields: {
+            hero: {
+              type: "object",
+              fields: {
+                heading: { type: "string", required: true },
+                intro: { type: "string" }
+              }
+            }
+          }
+        },
+        about: {
+          kind: "singleton",
+          source: { provider: "content", key: "about", mode: "page" }
+        }
+      }
     }
-  },
-  content: {
-    home: { provider: "content", key: "home" },
-    about: { provider: "content", key: "about" }
-  }
-});
+  })
+);
 ```
 
 Content structure:
@@ -81,29 +102,99 @@ client-content/
 ### WordPress Provider
 
 ```ts
-import { NexusContent, WordPressProvider } from "@nexuscontent/core";
+import {
+  defineNexusConfig,
+  NexusContent,
+  WordPressMediaProvider,
+  WordPressProvider
+} from "@nexuscontent/core";
 
 const wordpress = new WordPressProvider({
   baseUrl: "https://wordpress.example.com/wp-json/wp/v2"
 });
 
-const nexus = new NexusContent({
-  providers: {
-    wordpress: {
-      type: "wordpress",
-      options: { baseUrl: "https://wordpress.example.com/wp-json/wp/v2" }
+const nexus = new NexusContent(
+  defineNexusConfig({
+    providers: {
+      wordpress: {
+        type: "wordpress",
+        options: { baseUrl: "https://wordpress.example.com/wp-json/wp/v2" }
+      }
+    },
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "wordpress", key: "home", mode: "page" }
+        },
+        posts: {
+          kind: "collection",
+          source: { provider: "wordpress", key: "posts" }
+        }
+      }
     }
-  },
-  content: {
-    home: { provider: "wordpress", key: "home" },
-    posts: { provider: "wordpress", key: "posts" }
-  }
-});
+  })
+);
 
 nexus.register("wordpress", wordpress);
 
 const home = await nexus.getPage("home");
 const posts = await nexus.getCollection("posts");
+```
+
+### Model Schema
+
+The `schema.models` contract declares where each logical model's content comes
+from and what its data should look like. Model `kind` selects the retrieval
+operation: `singleton` (via `getPage` or `getSingleton`), `collection`,
+`navigation`, or `settings`. For singletons, `source.mode` selects the
+provider operation: `"page"` routes to `getPage` (Git `pages/<key>.json`),
+`"singleton"` (the default) routes to `getSingleton` (Git
+`singletons/<key>.json`).
+
+Field types are `string`, `number`, `boolean`, `datetime`, `object`,
+`reference`, `media`, and `richText`. Fields support `required`, `list`,
+`options` (enum strings), nested `object.fields`, `reference.collection`
+references, and `media` overrides. Data is validated at retrieval time; a
+mismatch throws a `SchemaError`. Undeclared data fields pass through.
+`defineNexusConfig()` preserves literal model names and field declarations, so
+retrieval methods accept only compatible model kinds and infer each result's
+`data` shape without explicit generic parameters.
+
+```ts
+fields: {
+  title: { type: "string", required: true },
+  status: { type: "string", options: ["draft", "published"] },
+  tags: { type: "string", list: true },
+  cover: { type: "media" },
+  author: { type: "reference", collection: "people" }
+}
+```
+
+### Media
+
+Media references stay neutral. Providers normalize source media into
+`MediaAsset` where `src` is the URL source (migrated from the legacy `url`
+field in `0.2.2`):
+
+```ts
+media: {
+  default: "remote",
+  providers: {
+    local: { type: "local", options: { root: "../client-content/media", publicPath: "/media" } },
+    remote: { type: "remote" }
+  }
+}
+```
+
+`local` maps root-relative paths to `publicPath` web URLs with traversal
+protection. `remote` validates absolute http(s) URLs without fetching. A
+WordPress media provider resolves ids through the WordPress media endpoint and
+is registered manually:
+
+```ts
+nexus.registerMedia("wordpress", new WordPressMediaProvider({ baseUrl }));
+const asset = await nexus.media.resolve({ id: "9" }); // or { src: "..." }
 ```
 
 ### WordPress Options
@@ -142,14 +233,16 @@ new WordPressProvider({
 ## Localisation (Optional)
 
 ```ts
-const nexus = new NexusContent({
-  locales: {
-    default: "en",
-    supported: ["en", "fr"],
-    fallback: { fr: "en" }
-  }
-  // providers and content as usual
-});
+const nexus = new NexusContent(
+  defineNexusConfig({
+    locales: {
+      default: "en",
+      supported: ["en", "fr"],
+      fallback: { fr: "en" }
+    },
+    // providers and a schema.models contract as usual
+  })
+);
 
 const page = await nexus.getPage("about", { locale: "fr" });
 ```
@@ -202,7 +295,7 @@ import { resolveSeo } from "@nexuscontent/core";
 
 const seo = resolveSeo(
   { title: page.title, excerpt: page.data.excerpt, featuredImage: page.data.featuredImage },
-  { siteTitle: "My Site", defaultImage: { url: "https://example.com/social.jpg" } }
+  { siteTitle: "My Site", defaultImage: { src: "https://example.com/social.jpg" } }
 );
 ```
 
@@ -210,7 +303,9 @@ const seo = resolveSeo(
 
 - **Framework neutral** — Core never imports Astro, Next.js, React, or any frontend framework
 - **Normalized content** — Every provider returns the same `PageContent` and `CollectionItem` shapes
+- **Model contracts** — `schema.models` declares sources and validates field data per logical model
 - **Content provenance** — Every result includes `meta.source` and `meta.sourceId`
+- **Media** — Provider-neutral `MediaAsset` and `MediaReference` with local, remote, and WordPress resolution
 - **Validation** — Runtime schema validation with Zod; project-level schemas where practical
 - **Static first** — Works at build time without a persistent server
 

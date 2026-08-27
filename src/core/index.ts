@@ -1,22 +1,39 @@
 export type {
+  BaseFieldSchema,
+  BooleanFieldSchema,
   CollectionItem,
-  ContentConfig,
   ContentMeta,
+  ContentReference,
   ContentSection,
   ContentSource,
+  DatetimeFieldSchema,
+  FieldMap,
+  FieldSchema,
+  FieldType,
   JsonObject,
   JsonValue,
   LocaleConfig,
   LocaleVariantInfo,
   MediaAsset,
+  MediaConfig,
+  MediaFieldSchema,
+  MediaProviderConfig,
+  MediaReference,
   MediaSize,
+  ModelKind,
+  ModelSchema,
+  ModelSource,
   NavigationContent,
   NavigationItem,
   NexusConfig,
+  NumberFieldSchema,
+  ObjectFieldSchema,
   PageContent,
   PageStatus,
   ProviderConfig,
+  ReferenceFieldSchema,
   RetrievalOptions,
+  RichTextFieldSchema,
   SeoData,
   SeoOpenGraph,
   SeoRobots,
@@ -24,6 +41,7 @@ export type {
   SectionSettings,
   SettingsContent,
   SingletonContent,
+  StringFieldSchema,
   TranslationState
 } from "./types.ts";
 
@@ -40,6 +58,7 @@ export {
   NotFoundError,
   ProviderError,
   RegistryError,
+  SchemaError,
   UnsupportedLocaleError,
   ValidationError
 } from "./errors.ts";
@@ -49,11 +68,28 @@ export { LocaleResolver } from "./locale.ts";
 export type { LocaleResolution } from "./locale.ts";
 
 export { ProviderRegistry } from "./registry.ts";
-export {
-  resolveContentConfig,
-  resolveNavigationConfig,
-  resolveSettingsConfig
-} from "./config.ts";
+export { defineNexusConfig } from "./config.ts";
+export type { ResolvedBuiltinMediaConfig } from "./config.ts";
+
+export { ModelRegistry, validateModelRelations } from "./schema.ts";
+
+export type {
+  CollectionModelNames,
+  InferField,
+  InferFields,
+  InferModel,
+  InferModelData,
+  ModelNameOf,
+  ModelNamesByKind,
+  ModelOf,
+  ModelsOf,
+  NavigationModelNames,
+  ResolvedData,
+  SettingsModelNames,
+  SingletonModelNames,
+  SingletonServiceModelNames
+} from "./inference.ts";
+
 export {
   normalizeCollectionItem,
   normalizeNavigation,

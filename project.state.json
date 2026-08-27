@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "project": {
     "name": "NexusContent",
-    "version": "0.2.0",
+    "version": "0.2.2",
     "status": "active",
     "stage": "early-development",
-    "milestone": "0.2.1-wordpress-companion",
+    "milestone": "0.2.2-core-contract",
     "packagePrivate": true
   },
   "currentFocus": {
-    "id": null,
-    "label": null,
-    "status": "unassigned"
+    "id": "core.schema.models",
+    "label": "Model schema and field contracts",
+    "status": "in_progress"
   },
   "recommendedNextFocus": {
     "id": "provider.strapi",
@@ -68,6 +68,11 @@
       "core.singleton",
       "core.collection",
       "core.item",
+      "core.schema.fields",
+      "content.media",
+      "media.provider.local",
+      "media.provider.remote",
+      "provider.wordpress.media-provider",
       "content.navigation",
       "content.settings",
       "localisation.foundations",
@@ -88,7 +93,9 @@
       "docs.contributing",
       "docs.roadmap"
     ],
-    "inProgress": [],
+    "inProgress": [
+      "core.schema.models"
+    ],
     "planned": [
       "provider.strapi",
       "content.sync",
@@ -131,7 +138,12 @@
     "The repaired pre-release WordPress companion contract uses version 1 envelopes with data and optional diagnostics, three editor modes, 12 canonical short section names, and five nexuscontent/v1 route contracts.",
     "The companion plugin WordPress integration suite passes in CI; Phase 2 is implemented.",
     "Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the ts-integration CI job runs a live integration test against a fresh Docker wp-env companion install and passes.",
-    "Released 0.2.0 standard WordPress REST provider retrieval remains unchanged and does not call the companion plugin."
+    "Released 0.2.0 standard WordPress REST provider retrieval remains unchanged and does not call the companion plugin.",
+    "The 0.2.2 core contract replaces the previous content/navigation/settings root configuration with a unified schema.models contract; each model declares its kind, provider source, and optional field schema.",
+    "Media is provider-neutral: local and remote media providers are declared in media.providers (Core auto-builds them), WordPress media is registered manually, and value-level media resolution stays with the consumer-facing nexus.media entry point.",
+    "Named media providers are required at configuration time; a missing default or unknown media provider is rejected early.",
+    "Model field validation produces SchemaError with model, issues, provider, content, locale, and operation context; relational checks also run for direct NexusContent construction.",
+    "The companion wire contract and plugin keep featuredImage.url; the TypeScript boundary converts it to MediaAsset.src."
   ],
   "architecturalDecisions": [
     "Core is framework neutral.",
@@ -142,16 +154,20 @@
     "Ordinary content retrieval does not perform Git synchronization.",
     "Deployment is outside Core.",
     "Astro is a reference consumer, not a Core dependency.",
-    "Generic singleton content remains available for arbitrary singleton data, while navigation and settings use dedicated APIs, types, configuration sections, and Git directories.",
+    "Generic singleton content remains available for arbitrary singleton data, while navigation and settings use dedicated APIs, types, schema.models kinds, and Git directories.",
     "Multiple instances of the same provider type must remain possible.",
     "Locale resolution is centralized in Core; providers implement variant file resolution; format adapters and validators implement no locale logic.",
     "Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged.",
     "Core owns normalized SEO data, validation, and deterministic resolution; providers map source data and consumers own metadata rendering.",
     "The WordPress companion plugin is isolated under integrations/wordpress/nexuscontent and does not change Core or released standard REST provider retrieval.",
-    "Phase 3 provider integration must consume only the repaired contract and is not verified until integration passes CI."
+    "Phase 3 provider integration must consume only the repaired contract and is not verified until integration passes CI.",
+    "The 0.2.2 schema.models contract consolidates logical content mapping; singleton models use source.mode page or singleton to select the provider operation, while navigation and settings remain distinct kinds.",
+    "Field schema defines the content contract between NexusContent and the consumer; optional fields are truly optional, list fields are arrays, and undeclared data fields pass through validation.",
+    "Media reference resolution order is the reference provider (which carries any field media override), then the per-request defaultProvider, then the configured project default.",
+    "Built-in local and remote media providers are declared, validated, and auto-built by Core; providers never reach the network from Core."
   ],
   "next": [
-    "provider.wordpress.companion-integration",
+    "core.schema.models",
     "provider.strapi",
     "content.sync",
     "content.webhooks",
@@ -171,6 +187,12 @@
     "provider.wordpress.companion-admin-page": "0.2.1",
     "provider.wordpress.companion-block-previews": "0.2.1",
     "provider.wordpress.companion-integration": "0.2.1",
+    "core.schema.models": "0.2.2",
+    "core.schema.fields": "0.2.2",
+    "content.media": "0.2.2",
+    "media.provider.local": "0.2.2",
+    "media.provider.remote": "0.2.2",
+    "provider.wordpress.media-provider": "0.2.2",
     "provider.strapi": "0.3.0",
     "content.sync": "0.4.0",
     "content.webhooks": "0.5.0",

@@ -1,40 +1,27 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollectionContent, getItemContent } from "../../nexus";
+import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
 
 export async function getStaticPaths() {
-  const paths: {
-    params: { slug: string };
-    props: { key: string };
-  }[] = [];
-
-  const posts = await getCollectionContent("blog");
-  for (const post of posts) {
-    paths.push({
+  const posts = await nexus.getCollection("blog");
+  return posts.map((post) => ({
       params: { slug: post.slug ?? post.key },
       props: { key: post.key }
-    });
-  }
-
-  return paths;
+    }));
 }
 
 const { slug } = Astro.params;
 const { key } = Astro.props as { key?: string };
 
-const post = await getItemContent("blog", key ?? "");
+const post = await nexus.getItem("blog", key ?? "");
 
 if (!post) {
   throw new Error(`Required content "${key ?? slug}" was not found.`);
 }
 
-const { body, date, excerpt } = post.data as {
-  body?: string;
-  date?: string;
-  excerpt?: string;
-};
+const { body, date, excerpt } = post.data;
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
 const seo = resolveSeo({

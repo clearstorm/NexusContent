@@ -17,15 +17,34 @@ export interface MediaSize {
   mimeType?: string;
 }
 
+/**
+ * A normalized media asset. `src` is the resolved display URL.
+ *
+ * Media providers that resolve media references always set `provider` and
+ * `sourceId`. Content-embedded media produced by content providers may omit
+ * them until a media provider resolves the reference.
+ */
 export interface MediaAsset {
   id?: string;
-  url: string;
+  src: string;
   alt?: string;
   caption?: string;
   mimeType?: string;
   width?: number;
   height?: number;
   sizes?: Record<string, MediaSize>;
+  provider?: string;
+  sourceId?: string;
+}
+
+/**
+ * Provider neutral media reference. At least one of `id` or `src` is
+ * required; `provider` overrides the project default media provider.
+ */
+export interface MediaReference {
+  provider?: string;
+  id?: string;
+  src?: string;
 }
 
 export interface SeoRobots {
@@ -138,13 +157,24 @@ export interface CollectionItem<TData = Record<string, unknown>> {
 }
 
 export interface ProviderConfig {
-  type: string;
-  options?: Record<string, unknown>;
+  readonly type: string;
+  readonly options?: Record<string, unknown>;
 }
 
-export interface ContentConfig {
-  provider: string;
-  key: string;
+/**
+ * A media provider declaration. Core auto-builds the framework-neutral
+ * built-ins (`local` and `remote`) from these entries. Other types (for
+ * example `wordpress`) must be registered by the consumer through
+ * `registerMedia`.
+ */
+export interface MediaProviderConfig {
+  readonly type: string;
+  readonly options?: Record<string, unknown>;
+}
+
+export interface MediaConfig {
+  readonly default?: string;
+  readonly providers: Readonly<Record<string, MediaProviderConfig>>;
 }
 
 /**
@@ -156,9 +186,9 @@ export interface ContentConfig {
  * configured default locale. Fallback chains must not be circular.
  */
 export interface LocaleConfig {
-  default: string;
-  supported: string[];
-  fallback?: Record<string, string | null>;
+  readonly default: string;
+  readonly supported: readonly string[];
+  readonly fallback?: Readonly<Record<string, string | null>>;
 }
 
 /**
@@ -199,10 +229,109 @@ export interface LocaleVariantInfo {
   sourceId?: string;
 }
 
+export type ModelKind = "singleton" | "collection" | "navigation" | "settings";
+
+export type FieldType =
+  | "string"
+  | "number"
+  | "boolean"
+  | "datetime"
+  | "object"
+  | "reference"
+  | "media"
+  | "richText";
+
+export interface BaseFieldSchema {
+  readonly required?: boolean;
+  readonly list?: boolean;
+}
+
+export interface StringFieldSchema extends BaseFieldSchema {
+  readonly type: "string";
+  readonly options?: readonly string[];
+}
+
+export interface NumberFieldSchema extends BaseFieldSchema {
+  readonly type: "number";
+}
+
+export interface BooleanFieldSchema extends BaseFieldSchema {
+  readonly type: "boolean";
+}
+
+export interface DatetimeFieldSchema extends BaseFieldSchema {
+  readonly type: "datetime";
+}
+
+export interface ObjectFieldSchema extends BaseFieldSchema {
+  readonly type: "object";
+  readonly fields?: FieldMap;
+}
+
+export interface ReferenceFieldSchema extends BaseFieldSchema {
+  readonly type: "reference";
+  readonly collection: string;
+}
+
+export interface MediaFieldSchema extends BaseFieldSchema {
+  readonly type: "media";
+  readonly media?: string;
+}
+
+export interface RichTextFieldSchema extends BaseFieldSchema {
+  readonly type: "richText";
+}
+
+export type FieldSchema =
+  | StringFieldSchema
+  | NumberFieldSchema
+  | BooleanFieldSchema
+  | DatetimeFieldSchema
+  | ObjectFieldSchema
+  | ReferenceFieldSchema
+  | MediaFieldSchema
+  | RichTextFieldSchema;
+
+/**
+ * A declarative field map. Concrete literal configs assigned through
+ * `satisfies FieldMap` keep literal field shapes for type inference.
+ */
+export type FieldMap = Readonly<Record<string, FieldSchema>>;
+
+/**
+ * A provider neutral reference to a collection item. `key` must match the
+ * `key` of an item in the referenced collection model.
+ */
+export interface ContentReference {
+  model: string;
+  key: string;
+}
+
+/**
+ * Declares where a model's content is retrieved. `mode` is valid only for
+ * `singleton` models: `"page"` routes to the provider's `getPage` operation
+ * (Git `pages/<key>.json`, WordPress pages), `"singleton"` (the default)
+ * routes to `getSingleton` (Git `singletons/<key>.json`).
+ */
+export interface ModelSource {
+  readonly provider: string;
+  readonly key: string;
+  readonly mode?: "page" | "singleton";
+}
+
+export interface ModelSchema {
+  readonly kind: ModelKind;
+  readonly source: ModelSource;
+  readonly fields?: FieldMap;
+}
+
+export interface SchemaConfig {
+  readonly models: Readonly<Record<string, ModelSchema>>;
+}
+
 export interface NexusConfig {
-  providers?: Record<string, ProviderConfig>;
-  content: Record<string, ContentConfig>;
-  navigation?: Record<string, ContentConfig>;
-  settings?: Record<string, ContentConfig>;
-  locales?: LocaleConfig;
+  readonly providers?: Readonly<Record<string, ProviderConfig>>;
+  readonly media?: MediaConfig;
+  readonly schema: SchemaConfig;
+  readonly locales?: LocaleConfig;
 }

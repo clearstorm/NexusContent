@@ -1,12 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/PostCard.astro";
-import { getCollectionContent } from "../../nexus";
+import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
-import type { WordPressExampleContent } from "../../nexus";
 
-const posts = await getCollectionContent<WordPressExampleContent>("blog");
+const posts = await nexus.getCollection("blog");
 
 const intro = "Posts from the WordPress content source.";
 const seo = resolveSeo({
@@ -27,8 +26,8 @@ const seo = resolveSeo({
         <PostCard
           title={post.title}
           slug={post.slug ?? post.key}
-          date={(post.data as WordPressExampleContent).publishedAt}
-          excerpt={post.excerpt ?? (post.data as WordPressExampleContent).excerpt}
+          date={post.data.publishedAt}
+          excerpt={post.data.excerpt}
         />
       ))
     }

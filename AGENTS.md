@@ -137,7 +137,7 @@ Before completing a state-changing task, run `npm run validate:project-state` in
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.2.1-wordpress-companion
+- **Current milestone:** 0.2.2-core-contract
 - **Primary implementation language:** TypeScript
 - **Primary initial consumer:** Astro (reference consumer only)
 
@@ -1412,11 +1412,11 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.2.1-wordpress-companion
+**CURRENT MILESTONE:** 0.2.2-core-contract
 
-The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The unreleased `0.2.1` milestone contains repaired Phase 1 contracts and the Phase 2 companion plugin. Phase 2 remains `in_progress` until the existing WordPress integration suite passes in CI; local unit, lint, static-analysis, contract, asset, and packaging gates pass, but Docker, MySQL, SVN, and WP-CLI are unavailable locally.
+The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The unreleased `0.2.1` companion work (repaired Phase 1 contracts, Phase 2 plugin, Phase 3 integration) is implemented and passes CI. The current unreleased `0.2.2` milestone is the core content contract: a unified `schema.models` configuration (model kinds, provider sources, declarative field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, `nexus.media` resolution).
 
-The recommended next focus is planned Phase 3 companion provider integration. The directional `0.3.0` Strapi provider follows it.
+The recommended next focus after `0.2.2` is the directional `0.3.0` Strapi provider.
 
 ---
 
@@ -1496,24 +1496,24 @@ The released milestone includes:
 - Provider config validation tests for invalid enum values.
 - Public export verification for all new types, schemas, and predicates.
 
-## 0.2.1 WordPress Phase 2 Companion Plugin (In Progress, Unreleased)
+## 0.2.1 WordPress Phase 2 Companion Plugin (Implemented, Unreleased)
 
 - Plugin `0.1.0` source is isolated under `integrations/wordpress/nexuscontent/` and requires WordPress 6.6+ and PHP 8.1+.
 - Native Gutenberg, optional ACF Free 6.2+ fixed fields, optional ACF Pro 6.2+ flexible layouts for all 12 sections, and opt-in ACF Blocks are implemented.
 - Page mode UI, server-side source normalization, expanded media metadata, exact capability reporting, diagnostics, secured REST routes, tests, tooling, documentation, and ZIP packaging exist.
 - Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and packaging pass; `dist/nexuscontent-0.1.0.zip` is the current artifact.
-- The feature remains `in_progress` until WordPress integration passes in CI. Do not mark it implemented or finalize `0.2.1` before that gate passes.
+- WordPress integration passes in CI (tests and the escaping gate satisfied). `0.2.1` itself remains unreleased; the feature is `implemented` and the milestone awaits release alongside `0.2.2`.
 
-## 0.2.1 WordPress Phase 3 Companion Integration (Planned)
+## 0.2.1 WordPress Phase 3 Companion Integration (Implemented, Unreleased)
 
-- Provider discovery, companion calls, contract-version negotiation, caching, and fallback remain pending.
-- Phase 3 must consume only the repaired contract after plugin integration verification.
+- Provider discovery, companion calls, contract-version negotiation, caching, and fallback are implemented with tests.
+- Phase 3 must consume only the repaired contract after plugin integration verification; the `ts-integration` CI job runs the live integration gate against a fresh Docker wp-env companion install and passes.
 - Released `0.2.0` standard REST retrieval remains unchanged and does not call the plugin.
 
 ## Explicit Scope Boundaries
 
 - Published-content-only, read-only retrieval.
-- No preview, webhooks, mutations, synchronization, or retries. Released base-provider retrieval has no cache; a scoped companion cache belongs only to planned Phase 3.
+- No preview, webhooks, mutations, synchronization, or retries. Released base-provider retrieval has no cache; the scoped companion cache belongs to implemented Phase 3.
 - No shortcode conversion, Gutenberg renderer, taxonomy cache, media synchronization, plugin SEO, WordPress localisation plugins, endpoint discovery, WooCommerce, or multisite verification.
 - Rendered HTML remains untrusted and consumer-owned.
 
@@ -1582,6 +1582,16 @@ The established foundation includes:
 - AGENTS.md
 - License
 - Basic contribution documentation
+
+## 0.2.2 Core Content Contract and Media (In Progress, Unreleased)
+
+- Root `content`, `navigation`, and `settings` configuration sections are replaced by a unified `schema.models` contract. Each model declares a `kind` (`singleton`, `collection`, `navigation`, `settings`) and a provider `source` (`provider`, `key`, and `mode: "page"` or `"singleton"` for singletons).
+- `defineNexusConfig()` validates the model shape and provider/source/media relationships and returns a `NexusConfig`. `validateNexusConfig` and `resolveBuiltinMediaProviders` back it. Relational checks also run for direct `NexusContent` construction.
+- Declarative field schemas (`core.schema.fields`) cover `string`, `number`, `boolean`, `datetime`, `object`, `reference`, `media`, and `richText` with `required`, `list`, `options`, nested `object.fields`, `reference.collection`, and `media` overrides. Model data is validated at retrieval time; mismatches throw `SchemaError` (with `model` and field issue paths). Undeclared data fields pass through. Models without declared fields skip validation.
+- Media is provider-neutral. `MediaAsset` uses `src` plus optional `provider` and `sourceId` (legacy `url` is removed; `MediaSize`/`sizes` keep `url`). Local and remote media providers are declared in `media.providers` and auto-built by Core; WordPress media is registered manually via `nexus.registerMedia`. Resolution order is reference provider (carrying any field `media` override), per-request `defaultProvider`, then the configured project default.
+- `nexus.media.resolve(reference, options?)` is the media resolution entry point; Core never fetches media. Local resolution is traversal-safe; remote resolution validates absolute http(s) URLs only.
+- The companion wire contract and plugin keep `featuredImage.url`; the TypeScript boundary converts it to `src`.
+- Cloudinary and other CDN providers, editor UI, uploads, media transforms, and renderers are not part of `0.2.2`.
 
 ---
 

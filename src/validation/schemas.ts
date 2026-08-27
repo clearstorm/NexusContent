@@ -10,13 +10,15 @@ export const mediaSizeSchema = z.object({
 
 export const mediaAssetSchema = z.object({
   id: z.string().optional(),
-  url: z.string(),
+  src: z.string(),
   alt: z.string().optional(),
   caption: z.string().optional(),
   mimeType: z.string().optional(),
   width: z.number().optional(),
   height: z.number().optional(),
-  sizes: z.record(z.string(), mediaSizeSchema).optional()
+  sizes: z.record(z.string(), mediaSizeSchema).optional(),
+  provider: z.string().optional(),
+  sourceId: z.string().optional()
 });
 
 export const seoRobotsSchema = z.object({

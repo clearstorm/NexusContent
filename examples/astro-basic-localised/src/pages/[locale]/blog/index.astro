@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import PostCard from "../../../components/PostCard.astro";
-import { getCollectionContent } from "../../../nexus";
+import { nexus } from "../../../nexus";
 import { supportedLocales } from "../../../app/locale";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../../app/seo";
@@ -12,7 +12,7 @@ export function getStaticPaths() {
 
 const { locale } = Astro.params;
 
-const posts = await getCollectionContent("blog", { locale });
+const posts = await nexus.getCollection("blog", { locale });
 
 const intro =
   locale === "fr"
@@ -40,8 +40,8 @@ const seo = resolveSeo({
           locale={locale}
           title={post.title}
           slug={post.slug ?? post.key}
-          date={(post.data as { date?: string }).date}
-          excerpt={(post.data as { excerpt?: string }).excerpt}
+          date={post.data.date}
+          excerpt={post.data.excerpt}
         />
       ))
     }

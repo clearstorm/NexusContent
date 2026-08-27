@@ -2,42 +2,19 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import CTA from "../components/CTA.astro";
-import SectionRenderer from "../components/SectionRenderer.astro";
-import { getPageContent } from "../nexus";
+import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import type { WordPressExampleContent } from "../nexus";
 
-const page = await getPageContent<WordPressExampleContent>("services");
+const page = await nexus.getPage("services");
 
 if (!page) {
   throw new Error(`Required WordPress page "services" was not found.`);
 }
 
-const hasSections = Array.isArray(page.sections) && page.sections.length > 0;
-
-const fields = (page.data.fields ?? {}) as Record<string, unknown>;
-
-const hero = (fields.hero ?? {}) as {
-  eyebrow?: string;
-  heading: string;
-  intro: string;
-};
-
-const services = (fields.services ?? {}) as {
-  heading: string;
-  intro?: string;
-  items: { title: string; description: string; points: string[] }[];
-};
-
-const serviceItems = Array.isArray(services.items) ? services.items : [];
-
-const cta = (fields.cta ?? {}) as {
-  heading: string;
-  intro: string;
-  label: string;
-  href: string;
-};
+const { hero } = page.data;
+const { services } = page.data;
+const { cta } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "Services",
@@ -46,34 +23,32 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  {hasSections ? (
-    page.sections!.map((section) => <SectionRenderer section={section} />)
-  ) : (
-    <Hero {...hero} />
+  <Hero {...hero} />
 
-    <section class="section services">
-      <h2>{services.heading}</h2>
-      {services.intro && <p class="lede">{services.intro}</p>}
-      <div class="grid">
-        {
-          serviceItems.map((service, index) => (
-            <article class="card">
-              <span class="num">{index + 1}</span>
-              <h3>{service.title}</h3>
-              <p>{service.description}</p>
+  <section class="section services">
+    <h2>{services.heading}</h2>
+    {services.intro && <p class="lede">{services.intro}</p>}
+    <div class="grid">
+      {
+        services.items.map((service, index) => (
+          <article class="card">
+            <span class="num">{index + 1}</span>
+            <h3>{service.title}</h3>
+            <p>{service.description}</p>
+            {service.points && (
               <ul>
                 {service.points.map((point) => (
                   <li>{point}</li>
                 ))}
               </ul>
-            </article>
-          ))
-        }
-      </div>
-    </section>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </section>
 
-    <CTA {...cta} />
-  )}
+  {cta && <CTA {...cta} />}
 
   <style>
     .lede {

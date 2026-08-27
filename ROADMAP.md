@@ -126,7 +126,7 @@ The exit criteria are satisfied by `0.2.0`.
 
 ## 0.2.1 - WordPress Companion
 
-**State:** Implemented but unreleased. Phases 1-3 are complete and pass CI. The root package remains `0.2.0`.
+**State:** Implemented but unreleased. Phases 1-3 are complete and pass CI. The root package is now `0.2.2` for the core content contract milestone.
 
 **Goal:** Establish a versioned companion boundary that gives WordPress editors Gutenberg and optional ACF authoring modes while preserving the released plugin-neutral standard REST provider.
 
@@ -167,6 +167,33 @@ This was a pre-release contract repair because the earlier committed definitions
 - No preview, webhooks, mutations, synchronization, retries, plugin SEO, WordPress localisation-plugin integration, WooCommerce, or multisite verification.
 - No release or root package version change until the milestone exit criteria are met.
 
+## 0.2.2 - Core Content Contract and Media
+
+**State:** In progress (unreleased; root package `0.2.2`).
+
+**Goal:** Consolidate logical content mapping into a unified `schema.models` contract and establish provider-neutral media, without changing provider semantics or leaked framework dependencies.
+
+**Required capabilities:**
+
+- `schema.models` with model kinds (`singleton`, `collection`, `navigation`, `settings`) and provider sources carrying `mode: "page"` or `"singleton"`.
+- Declarative field schemas (`string`, `number`, `boolean`, `datetime`, `object`, `reference`, `media`, `richText`) with `required`, `list`, `options`, nested objects, reference targets, and media overrides; retrieval-time `SchemaError` validation with pass-through for undeclared fields.
+- `defineNexusConfig()` validation of shape, provider/source relationships, and media declarations.
+- Provider-neutral media: `MediaAsset.src` (with `provider` / `sourceId`), `MediaReference`, `MediaProviderRegistry`, `ResolveMediaService`, and the `nexus.media` entry point. `MediaSize` and `sizes` keep `url`.
+- Built-in local (root-relative to `publicPath`, traversal-safe) and remote (absolute http(s), no fetching) media providers; a `WordPressMediaProvider` for id lookup through the WordPress media endpoint.
+- Companion wire contract and plugin keep `featuredImage.url`; the TypeScript boundary converts it to `src`.
+
+**Explicit exclusions:**
+
+- Content reference resolution (remains value-neutral; the consumer calls `nexus.media.resolve`). Cloudinary and additional CDN providers.
+- Editor UI, uploads, media transforms, and renderers.
+- Changing provider retrieval semantics or Core leakage of provider-specific structures.
+
+**Exit criteria:**
+
+- Core, media, contract, and example tests pass; plain Node and Astro examples build against `defineNexusConfig` + `schema.models`.
+- `npm run validate:project-state` and all required CI gates pass.
+- Public behavior, README, and project state documentation are updated.
+
 ## 0.2.x - Localisation Continuation
 
 **State:** Directional. These items remain `planned` after the `0.2.0` WordPress milestone and do not block the recommended `0.3.0` Strapi work.
@@ -197,7 +224,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ## 0.3.0 - Strapi Provider
 
-**State:** Directional; planned after `0.2.1` companion integration.
+**State:** Directional; planned after `0.2.2` core content contract.
 
 **Goal:** Add structured Strapi REST content while preserving the Core contract proven by Git and WordPress.
 

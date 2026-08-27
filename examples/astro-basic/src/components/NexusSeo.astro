@@ -23,13 +23,11 @@ const robots = [
 {openGraph?.type !== undefined && <meta property="og:type" content={openGraph.type} />}
 {openGraph?.title !== undefined && <meta property="og:title" content={openGraph.title} />}
 {openGraph?.description !== undefined && <meta property="og:description" content={openGraph.description} />}
-{openGraph?.image && (
-  <meta property="og:image" content={openGraph.image.url} />
-)}
+{openGraph?.image && <meta property="og:image" content={openGraph.image.src} />}
 {twitter?.card && <meta name="twitter:card" content={twitter.card} />}
 {twitter?.title !== undefined && <meta name="twitter:title" content={twitter.title} />}
 {twitter?.description !== undefined && <meta name="twitter:description" content={twitter.description} />}
-{twitter?.image && <meta name="twitter:image" content={twitter.image.url} />}
+{twitter?.image && <meta name="twitter:image" content={twitter.image.src} />}
 {seo.structuredData?.map((value) => (
   <script type="application/ld+json" is:inline set:html={serializeJsonLd(value)} />
 ))}

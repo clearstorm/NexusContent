@@ -1,31 +1,21 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollectionContent, getItemContent } from "../../nexus";
+import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
-import type { WordPressExampleContent } from "../../nexus";
 
 export async function getStaticPaths() {
-  const paths: {
-    params: { slug: string };
-    props: { key: string };
-  }[] = [];
-
-  const posts = await getCollectionContent<WordPressExampleContent>("blog");
-  for (const post of posts) {
-    paths.push({
-      params: { slug: post.slug ?? post.key },
-      props: { key: post.key }
-    });
-  }
-
-  return paths;
+  const posts = await nexus.getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.slug ?? post.key },
+    props: { key: post.key }
+  }));
 }
 
 const { slug } = Astro.params;
 const { key } = Astro.props as { key?: string };
 
-const post = await getItemContent<WordPressExampleContent>("blog", key ?? "");
+const post = await nexus.getItem("blog", key ?? "");
 
 if (!post) {
   throw new Error(`Required WordPress post "${key ?? slug}" was not found.`);
@@ -33,7 +23,7 @@ if (!post) {
 
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
-const excerpt = post.excerpt ?? (post.data as WordPressExampleContent).excerpt;
+const excerpt = post.data.excerpt;
 const seo = resolveSeo({
   title: `${postTitle} - NexusContent WordPress Example`,
   seo: {
@@ -61,7 +51,7 @@ const seo = resolveSeo({
     <h1>{post.title}</h1>
     {post.data.publishedAt && <time>{post.data.publishedAt}</time>}
     {excerpt && <p class="excerpt">{excerpt}</p>}
-    {post.data.content && <div class="body wordpress-content" set:html={post.data.content} />}
+    <div class="body wordpress-content" set:html={post.data.content} />
   </article>
 
   <style>

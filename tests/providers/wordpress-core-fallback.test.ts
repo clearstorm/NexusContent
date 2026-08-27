@@ -338,7 +338,7 @@ test("normalizeAcfImageToMediaAsset normalizes ACF image object", () => {
   const asset = normalizeAcfImageToMediaAsset(acfImage);
   assert.ok(asset);
   assert.equal(asset.id, "123");
-  assert.equal(asset.url, "https://example.com/image.jpg");
+  assert.equal(asset.src, "https://example.com/image.jpg");
   assert.equal(asset.alt, "Test image");
   assert.equal(asset.width, 800);
   assert.equal(asset.height, 600);
@@ -385,7 +385,7 @@ test("normalizeFeaturedMedia normalizes WordPress featured media", () => {
   const asset = normalizeFeaturedMedia(media);
   assert.ok(asset);
   assert.equal(asset.id, "789");
-  assert.equal(asset.url, "https://example.com/featured.jpg");
+  assert.equal(asset.src, "https://example.com/featured.jpg");
   assert.equal(asset.alt, "Featured image");
   assert.equal(asset.caption, "Image caption");
   assert.equal(asset.width, 1200);

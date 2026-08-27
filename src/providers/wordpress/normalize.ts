@@ -15,8 +15,12 @@ export interface WordPressContentData {
   featuredMediaId?: number;
   categories?: number[];
   tags?: number[];
-  fields?: Record<string, unknown>;
   featuredImage?: MediaAsset;
+  /**
+   * Optional ACF fields are flattened onto the top level of `data`. Reserved
+   * normalized keys always win over identically named ACF fields.
+   */
+  [key: string]: unknown;
 }
 
 export interface WordPressNormalizeContext {
@@ -125,7 +129,23 @@ function parseEntry(
 }
 
 function buildData(entry: WordPressEntry): WordPressContentData {
-  const data: WordPressContentData = { content: entry.content };
+  // ACF fields are flattened so project schemas can declare them directly.
+  // Reserved normalized values are assigned last so they always win over a
+  // field name collision with an ACF key.
+  const data: WordPressContentData = {
+    ...(entry.fields ?? {}),
+    content: entry.content
+  };
+
+  delete data.excerpt;
+  delete data.publishedAt;
+  delete data.modifiedAt;
+  delete data.url;
+  delete data.authorId;
+  delete data.featuredMediaId;
+  delete data.categories;
+  delete data.tags;
+  delete data.featuredImage;
 
   if (entry.excerpt !== undefined) data.excerpt = entry.excerpt;
   if (entry.publishedAt !== undefined) data.publishedAt = entry.publishedAt;
@@ -137,7 +157,6 @@ function buildData(entry: WordPressEntry): WordPressContentData {
   }
   if (entry.categories !== undefined) data.categories = entry.categories;
   if (entry.tags !== undefined) data.tags = entry.tags;
-  if (entry.fields !== undefined) data.fields = entry.fields;
   if (entry.featuredImage !== undefined) {
     data.featuredImage = entry.featuredImage;
   }
@@ -250,7 +269,7 @@ function readFeaturedImage(value: unknown): MediaAsset | undefined {
     : undefined;
   const image: MediaAsset = {
     id: String(id),
-    url: media.source_url
+    src: media.source_url
   };
 
   if (typeof media.alt_text === "string") {

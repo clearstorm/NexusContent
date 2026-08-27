@@ -2,41 +2,19 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import CTA from "../components/CTA.astro";
-import SectionRenderer from "../components/SectionRenderer.astro";
-import { getPageContent } from "../nexus";
+import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import type { WordPressExampleContent } from "../nexus";
 
-const page = await getPageContent<WordPressExampleContent>("contact");
+const page = await nexus.getPage("contact");
 
 if (!page) {
   throw new Error(`Required WordPress page "contact" was not found.`);
 }
 
-const hasSections = Array.isArray(page.sections) && page.sections.length > 0;
-
-const fields = (page.data.fields ?? {}) as Record<string, unknown>;
-
-const hero = (fields.hero ?? {}) as {
-  eyebrow?: string;
-  heading: string;
-  intro: string;
-};
-
-const contact = (fields.contact ?? {}) as {
-  heading: string;
-  items: { label: string; value: string; href?: string }[];
-};
-
-const contactItems = Array.isArray(contact.items) ? contact.items : [];
-
-const cta = (fields.cta ?? {}) as {
-  heading: string;
-  intro: string;
-  label: string;
-  href: string;
-};
+const { hero } = page.data;
+const { contact } = page.data;
+const { cta } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "Contact",
@@ -45,31 +23,27 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  {hasSections ? (
-    page.sections!.map((section) => <SectionRenderer section={section} />)
-  ) : (
-    <Hero {...hero} />
+  <Hero {...hero} />
 
-    <section class="section details">
-      <h2>{contact.heading}</h2>
-      <div class="grid">
-        {
-          contactItems.map((detail) => (
-            <article class="card">
-              <h3>{detail.label}</h3>
-              {detail.href ? (
-                <a href={detail.href}>{detail.value}</a>
-              ) : (
-                <p>{detail.value}</p>
-              )}
-            </article>
-          ))
-        }
-      </div>
-    </section>
+  <section class="section details">
+    <h2>{contact.heading}</h2>
+    <div class="grid">
+      {
+        contact.items.map((detail) => (
+          <article class="card">
+            <h3>{detail.label}</h3>
+            {detail.href ? (
+              <a href={detail.href}>{detail.value}</a>
+            ) : (
+              <p>{detail.value}</p>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </section>
 
-    <CTA {...cta} />
-  )}
+  {cta && <CTA {...cta} />}
 
   <style>
     .grid {

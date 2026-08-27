@@ -2,7 +2,7 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import NexusSeo from "../components/NexusSeo.astro";
-import { getNavigationContent, getSettingsContent } from "../nexus";
+import { nexus } from "../nexus";
 import { defaultLocale, isSupportedLocale } from "../app/locale";
 import type { SeoData } from "@nexuscontent/core";
 
@@ -14,8 +14,8 @@ interface Props {
 const { seo, locale } = Astro.props;
 const lang = isSupportedLocale(locale) ? locale : defaultLocale;
 
-const navigation = await getNavigationContent("primary", { locale: lang });
-const site = await getSettingsContent("site", { locale: lang });
+const navigation = await nexus.getNavigation("primary", { locale: lang });
+const site = await nexus.getSettings("site", { locale: lang });
 
 if (!navigation) {
   throw new Error(

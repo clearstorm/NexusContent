@@ -2,7 +2,6 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import NexusSeo from "../components/NexusSeo.astro";
-import { getNavigationContent, getSettingsContent } from "../nexus";
 import type { SeoData } from "@nexuscontent/core";
 
 interface Props {
@@ -12,12 +11,9 @@ interface Props {
 const { seo } = Astro.props;
 const lang = "en";
 
-const navigation = await getNavigationContent("primary");
-const site = await getSettingsContent("site");
-
-// WordPress provider returns null for navigation and settings.
-// Fall back to local constants.
-const navItems = navigation?.items ?? [
+// The WordPress provider only serves pages and posts, so navigation and site
+// data are app-owned constants declared here in the layout.
+const navItems = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
@@ -25,7 +21,7 @@ const navItems = navigation?.items ?? [
   { label: "Contact", href: "/contact" }
 ];
 
-const siteData = site?.data ?? {
+const siteData = {
   siteName: "NexusContent WordPress",
   tagline: "Content abstraction for the modern web",
   footer: {

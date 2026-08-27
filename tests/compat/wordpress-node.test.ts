@@ -46,9 +46,18 @@ test("WordPress public API works in plain Node without Astro", async () => {
       apiStrategy: "core"
     });
     const nexus = new NexusContent({
-      content: {
-        home: { provider: "wordpressNode", key: "home" },
-        posts: { provider: "wordpressNode", key: "posts" }
+      providers: { wordpressNode: { type: "wordpress" } },
+      schema: {
+        models: {
+          home: {
+            kind: "singleton",
+            source: { provider: "wordpressNode", key: "home", mode: "page" }
+          },
+          posts: {
+            kind: "collection",
+            source: { provider: "wordpressNode", key: "posts" }
+          }
+        }
       }
     });
     nexus.register("wordpressNode", wordpress);

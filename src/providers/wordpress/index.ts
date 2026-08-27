@@ -3,6 +3,8 @@ export type {
   WordPressCollectionConfig,
   WordPressProviderOptions
 } from "./provider.ts";
+export { WordPressMediaProvider } from "./media.ts";
+export type { WordPressMediaProviderOptions } from "./media.ts";
 export type { WordPressContentData } from "./normalize.ts";
 export {
   normalizeCompanionPage,

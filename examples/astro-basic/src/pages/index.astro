@@ -4,40 +4,20 @@ import Hero from "../components/Hero.astro";
 import Services from "../components/Services.astro";
 import Testimonials from "../components/Testimonials.astro";
 import CTA from "../components/CTA.astro";
-import { getPageContent } from "../nexus";
+import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
 
-const page = await getPageContent("home");
+const page = await nexus.getPage("home");
 
 if (!page) {
   throw new Error(`Required content "home" was not found.`);
 }
 
-const hero = page.data.hero as {
-  eyebrow?: string;
-  heading: string;
-  intro: string;
-  cta?: { label: string; href: string };
-};
-
-const services = page.data.services as {
-  heading: string;
-  intro?: string;
-  items: { title: string; description: string }[];
-};
-
-const testimonials = page.data.testimonials as {
-  heading: string;
-  items: { quote: string; author: string }[];
-};
-
-const cta = page.data.cta as {
-  heading: string;
-  intro: string;
-  label: string;
-  href: string;
-};
+// Explicit media resolution: home.heroImage carries no provider, so it
+// resolves through the configured default "local" media provider.
+const heroImage = await nexus.media.resolve(page.data.heroImage);
+const { hero, services, testimonials, cta } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "NexusContent Example",
@@ -46,7 +26,7 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  <Hero {...hero} />
+  <Hero {...hero} image={heroImage ?? undefined} />
   <Services {...services} />
   <Testimonials {...testimonials} />
   <CTA {...cta} />

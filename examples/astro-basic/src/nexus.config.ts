@@ -1,29 +1,40 @@
-import type { NexusConfig } from "@nexuscontent/core";
+import { defineNexusConfig } from "@nexuscontent/core";
+import { models } from "./schema/schema";
 
 // Provider setup is application-owned and may combine committed defaults with
 // environment-specific values. Secrets must remain in environment variables.
 export const gitProviderOptions = {
   contentPath:
-    (import.meta.env.NEXUS_GIT_CONTENT_PATH as string | undefined) ?? "content"
+    (import.meta.env.NEXUS_GIT_CONTENT_PATH as string | undefined) ?? "content",
+  mediaRoot: "public/media",
+  mediaPublicPath: "/media"
 };
 
-// NexusContent configuration declares provider instances, logical content
-// mappings, and dedicated navigation and settings sections.
-export const nexusConfig = {
+// NexusContent configuration declares provider instances, media providers,
+// and a model schema. Each model maps a logical content name to a provider
+// source and its field schema. Content mapping does not create frontend routes.
+//
+// `media.default` is "local": home.heroImage resolves public/media references
+// to /media web URLs. The "remote" provider validates absolute http(s) URLs
+// and is used by the about page field override.
+export const nexusConfig = defineNexusConfig({
   providers: {
     git: { type: "git", options: gitProviderOptions }
   },
-  content: {
-    home: { provider: "git", key: "home" },
-    about: { provider: "git", key: "about" },
-    services: { provider: "git", key: "services" },
-    contact: { provider: "git", key: "contact" },
-    blog: { provider: "git", key: "posts" }
+  media: {
+    default: "local",
+    providers: {
+      local: {
+        type: "local",
+        options: {
+          root: gitProviderOptions.mediaRoot,
+          publicPath: gitProviderOptions.mediaPublicPath
+        }
+      },
+      remote: {
+        type: "remote"
+      }
+    }
   },
-  navigation: {
-    primary: { provider: "git", key: "primary" }
-  },
-  settings: {
-    site: { provider: "git", key: "site" }
-  }
-} satisfies NexusConfig;
+  schema: { models }
+});

@@ -2,39 +2,21 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import CTA from "../components/CTA.astro";
-import SectionRenderer from "../components/SectionRenderer.astro";
-import { getPageContent } from "../nexus";
+import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import type { WordPressExampleContent } from "../nexus";
 
-const page = await getPageContent<WordPressExampleContent>("about");
+const page = await nexus.getPage("about");
 
 if (!page) {
   throw new Error(`Required WordPress page "about" was not found.`);
 }
 
-const hasSections = Array.isArray(page.sections) && page.sections.length > 0;
-
-const fields = (page.data.fields ?? {}) as Record<string, unknown>;
-
-const hero = (fields.hero ?? {}) as {
-  eyebrow?: string;
-  heading: string;
-  intro: string;
-};
-
-const mission = (fields.mission ?? {}) as { heading: string; content: string };
-const story = (fields.story ?? {}) as { heading: string; content: string };
-const values = (fields.values ?? {}) as { heading: string; items: string[] };
-const valueItems = Array.isArray(values.items) ? values.items : [];
-
-const cta = (fields.cta ?? {}) as {
-  heading: string;
-  intro: string;
-  label: string;
-  href: string;
-};
+const { hero } = page.data;
+const { mission } = page.data;
+const { story } = page.data;
+const { values } = page.data;
+const { cta } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "About",
@@ -43,32 +25,28 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  {hasSections ? (
-    page.sections!.map((section) => <SectionRenderer section={section} />)
-  ) : (
-    <Hero {...hero} />
+  <Hero {...hero} />
 
-    <section class="section mission">
-      <h2>{mission.heading}</h2>
-      <p>{mission.content}</p>
-    </section>
+  <section class="section mission">
+    <h2>{mission.heading}</h2>
+    <p>{mission.content}</p>
+  </section>
 
-    <section class="section story">
-      <h2>{story.heading}</h2>
-      <p>{story.content}</p>
-    </section>
+  <section class="section story">
+    <h2>{story.heading}</h2>
+    <p>{story.content}</p>
+  </section>
 
-    <section class="section values">
-      <h2>{values.heading}</h2>
-      <ul>
-        {valueItems.map((item) => (
-          <li>{item}</li>
-        ))}
-      </ul>
-    </section>
+  <section class="section values">
+    <h2>{values.heading}</h2>
+    <ul>
+      {values.items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </section>
 
-    <CTA {...cta} />
-  )}
+  {cta && <CTA {...cta} />}
 
   <style>
     .mission p,

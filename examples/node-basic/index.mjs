@@ -1,22 +1,46 @@
 import { fileURLToPath } from "node:url";
-import { GitProvider, NexusContent } from "@nexuscontent/core";
+import { defineNexusConfig, GitProvider, NexusContent } from "@nexuscontent/core";
 
 const contentPath =
   process.env.NEXUS_GIT_CONTENT_PATH ??
   fileURLToPath(new URL("./content", import.meta.url));
 
-const nexus = new NexusContent({
-  providers: {
-    git: { type: "git", options: { contentPath } },
-  },
-  content: {
-    home: { provider: "git", key: "home" },
-    blog: { provider: "git", key: "posts" },
-  },
-  settings: {
-    site: { provider: "git", key: "site" },
-  },
-});
+const nexus = new NexusContent(
+  defineNexusConfig({
+    providers: {
+      git: { type: "git", options: { contentPath } },
+    },
+    schema: {
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "git", key: "home", mode: "page" },
+          fields: {
+            hero: {
+              type: "object",
+              fields: {
+                heading: { type: "string" },
+                intro: { type: "string" },
+              },
+            },
+          },
+        },
+        blog: {
+          kind: "collection",
+          source: { provider: "git", key: "posts" },
+        },
+        site: {
+          kind: "settings",
+          source: { provider: "git", key: "site" },
+          fields: {
+            siteName: { type: "string" },
+            locale: { type: "string" },
+          },
+        },
+      },
+    },
+  }),
+);
 
 nexus.register("git", new GitProvider({ contentPath }));
 
