@@ -9,15 +9,15 @@
     "packagePrivate": true
   },
   "currentFocus": {
-    "id": "provider.wordpress.companion-plugin",
-    "label": "WordPress companion plugin",
+    "id": "provider.wordpress.companion-integration",
+    "label": "WordPress companion provider integration",
     "status": "in_progress"
   },
   "recommendedNextFocus": {
-    "id": "provider.wordpress.companion-integration",
-    "label": "WordPress companion provider integration",
+    "id": "provider.strapi",
+    "label": "Strapi provider",
     "status": "planned",
-    "target": "0.2.1"
+    "target": "0.3.0"
   },
   "features": {
     "implemented": [
@@ -47,6 +47,9 @@
       "provider.wordpress.phase1.companion",
       "provider.wordpress.phase1.diagnostics",
       "provider.wordpress.phase1.error-codes",
+      "provider.wordpress.companion-plugin",
+      "provider.wordpress.companion-admin-page",
+      "provider.wordpress.companion-block-previews",
       "core.error-code",
       "format.adapter",
       "provider.git.json",
@@ -85,12 +88,9 @@
       "docs.roadmap"
     ],
     "inProgress": [
-      "provider.wordpress.companion-plugin",
-      "provider.wordpress.companion-admin-page",
-      "provider.wordpress.companion-block-previews"
+      "provider.wordpress.companion-integration"
     ],
     "planned": [
-      "provider.wordpress.companion-integration",
       "provider.strapi",
       "content.sync",
       "content.webhooks",
@@ -130,7 +130,8 @@
     "SEO canonical URLs are supplied by content or consumers; Core does not infer deployment URLs.",
     "The package remains private while the pre-1.0 architecture is proven.",
     "The repaired pre-release WordPress companion contract uses version 1 envelopes with data and optional diagnostics, three editor modes, 12 canonical short section names, and five nexuscontent/v1 route contracts.",
-    "The companion plugin remains in progress until its WordPress integration suite passes in CI; local integration tests now pass via Docker wp-env.",
+    "The companion plugin WordPress integration suite passes in CI; Phase 2 is implemented.",
+    "Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests but CI verification against the live plugin contract remains.",
     "Released 0.2.0 standard WordPress REST provider retrieval remains unchanged and does not call the companion plugin."
   ],
   "architecturalDecisions": [
@@ -148,7 +149,7 @@
     "Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged.",
     "Core owns normalized SEO data, validation, and deterministic resolution; providers map source data and consumers own metadata rendering.",
     "The WordPress companion plugin is isolated under integrations/wordpress/nexuscontent and does not change Core or released standard REST provider retrieval.",
-    "Phase 3 provider integration must consume only the repaired contract after companion plugin integration verification passes."
+    "Phase 3 provider integration must consume only the repaired contract and is not verified until integration passes CI."
   ],
   "next": [
     "provider.wordpress.companion-integration",

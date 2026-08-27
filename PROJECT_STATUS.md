@@ -8,9 +8,9 @@
 | Current version | `0.2.0` |
 | Current milestone | `0.2.1-wordpress-companion` |
 | Project status | Active, early development; internal private package |
-| Current focus | `provider.wordpress.companion-plugin` (`in_progress`) |
+| Current focus | `provider.wordpress.companion-integration` (`in_progress`) |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The current unreleased `0.2.1` work is the isolated WordPress companion plugin. Its local quality gates pass, but the feature remains `in_progress` until its WordPress integration suite passes in CI. The recommended next focus is Phase 3 provider integration, followed by the directional `0.3.0` Strapi provider.
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The current unreleased `0.2.1` work covers the WordPress companion plugin (Phase 2) and companion provider integration (Phase 3). Phase 2 is now implemented: the companion plugin passes local unit, PHP lint, PHPCS, PHPStan, contract, JavaScript build/lint/format, ZIP packaging, and WordPress integration tests in CI. The current focus is Phase 3 companion provider integration. The directional `0.3.0` Strapi provider follows it.
 
 ## Current Architecture
 
@@ -67,24 +67,22 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Plain Node compatibility example and framework-neutrality tests.
 - Companion plugin admin page with card-based status dashboard, colored mode badges, responsive section-checkbox grid, and WordPress color scheme variable compatibility.
 - Fixed admin page "Pages by editor mode" to count all published pages, including those without an explicit `nexus_editor_mode` meta row.
+- Companion plugin WordPress integration tests passing in CI (75 unit tests, 417 assertions; 12 integration tests, 114 assertions).
 - Type checking, tests, package build, Astro example build, and Node example execution in CI.
 
 See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 ## Current Work
 
-Phase 2 supplies plugin `0.1.0` under `integrations/wordpress/nexuscontent`. It includes native Gutenberg support, editable additional section fields, static inserter and inspector illustrations for all 12 blocks, ACF Free fixed Hero/Introduction/Call to Action fields, ACF Pro flexible layouts for all 12 canonical sections, opt-in ACF Blocks, page mode controls, server-side normalization, media, capabilities, diagnostics, secured REST routes, card-based admin page with status indicators and mode badges, tests, tooling, documentation, and packaging. The ZIP is `dist/nexuscontent-0.1.0.zip`.
+Phase 3 companion provider integration is implemented with tests. It adds provider discovery, companion calls, contract-version negotiation, caching, and fallback against the repaired contract. The remaining gate is CI verification against the live companion plugin.
 
-Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and ZIP packaging pass. WordPress integration tests now also pass locally via Docker wp-env (75 unit tests, 417 assertions; 12 integration tests, 114 assertions). The remaining gate is CI verification.
-
-**Recommended next focus:** `provider.wordpress.companion-integration`, Phase 3 provider discovery, calls, contract-version negotiation, caching, and fallback. Strapi remains planned after it.
+**Recommended next focus:** Verify Phase 3 companion provider integration passes CI, then move toward the directional `0.3.0` Strapi provider.
 
 ## Next
 
-1. Run and pass the companion plugin WordPress integration suite in CI, then reassess `provider.wordpress.companion-plugin` against the implemented definition.
-2. Phase 3 provider integration is implemented with tests; verify it passes CI and confirm it against the repaired contract.
-3. Confirm the Strapi provider's minimum REST API scope and contract test strategy.
-4. Consider the directional localisation continuation once provider breadth is proven.
+1. Run and pass the Phase 3 companion provider integration suite in CI, then reassess `provider.wordpress.companion-integration` against the implemented definition.
+2. Confirm the Strapi provider's minimum REST API scope and contract test strategy.
+3. Consider the directional localisation continuation once provider breadth is proven.
 
 ## Not Implementing Yet
 
@@ -136,8 +134,8 @@ Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/form
 - No synchronization, webhook, or preview workflow is implemented.
 - Canonical URLs are supplied by content or consumers because Core does not know deployment URLs.
 - The package remains private while the pre-1.0 architecture is proven.
-- The companion plugin is unreleased and remains `in_progress` until WordPress integration passes in CI.
-- Phase 3 provider discovery, calls, version negotiation, caching, and fallback are not implemented.
+- The companion plugin is implemented and passes CI. It remains unreleased until `0.2.1` is finalized.
+- Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; CI verification against the live plugin contract remains.
 
 ## Project State Authority
 

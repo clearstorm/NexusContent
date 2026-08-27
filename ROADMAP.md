@@ -126,7 +126,7 @@ The exit criteria are satisfied by `0.2.0`.
 
 ## 0.2.1 - WordPress Companion
 
-**State:** In progress and unreleased. The root package remains `0.2.0`.
+**State:** In progress and unreleased. Phase 2 is implemented and passes CI. Phase 3 is in progress. The root package remains `0.2.0`.
 
 **Goal:** Establish a versioned companion boundary that gives WordPress editors Gutenberg and optional ACF authoring modes while preserving the released plugin-neutral standard REST provider.
 
@@ -146,26 +146,19 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ### Phase 2 - Companion Plugin
 
-**State:** `in_progress`; implementation and local verification exist, but WordPress integration must pass in CI.
+**State:** Implemented and passes CI.
 
 - Plugin `0.1.0` is isolated under `integrations/wordpress/nexuscontent/` and requires WordPress 6.6+ and PHP 8.1+.
 - Native Gutenberg, ACF Free 6.2+ fixed Hero/Introduction/Call to Action fields, ACF Pro 6.2+ flexible layouts for all 12 sections, opt-in ACF Blocks, and page mode UI are implemented.
 - Server-side source normalization, expanded media, exact capabilities, diagnostics, secured REST routes, tests, tooling, documentation, and packaging exist.
-- Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and ZIP packaging pass. The artifact is `dist/nexuscontent-0.1.0.zip`.
-- WordPress integration tests and CI workflow exist. Docker, MySQL, SVN, and WP-CLI are unavailable locally, so the integration gate cannot be completed locally.
-
-**Phase 2 exit criteria:**
-
-- The WordPress integration suite passes in CI.
-- Existing local quality gates remain green.
-- Only then may `provider.wordpress.companion-plugin` move from `in_progress` to `implemented`.
+- Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, ZIP packaging, and WordPress integration tests pass in CI. The artifact is `dist/nexuscontent-0.1.0.zip`.
 
 ### Phase 3 - Companion Provider Integration
 
-**State:** `planned`; recommended next focus after the Phase 2 CI gate.
+**State:** `in_progress`; implementation and tests exist; CI verification pending.
 
 - Add provider discovery, companion calls, explicit contract-version negotiation, caching, and fallback.
-- Consume only the repaired contract and do not treat the plugin handshake as verified before Phase 2 integration passes.
+- Consume only the repaired contract.
 - Preserve released `0.2.0` standard REST retrieval unchanged; it must not require or call the plugin.
 
 **0.2.1 exclusions:**
