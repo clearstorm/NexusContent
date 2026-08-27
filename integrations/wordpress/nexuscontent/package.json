@@ -15,6 +15,7 @@
     "env:destroy": "wp-env destroy",
     "env:acf-free": "wp-env run cli wp plugin install advanced-custom-fields --activate",
     "env:acf-free:test": "wp-env run tests-cli wp plugin install advanced-custom-fields --activate",
+    "env:permalinks": "wp-env run cli /bin/sh -c 'wp rewrite structure \"/%postname%/\" && wp rewrite flush --hard'",
     "env:no-acf": "wp-env run cli wp plugin deactivate advanced-custom-fields --quiet; wp-env run cli wp plugin delete advanced-custom-fields --quiet",
     "test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/nexuscontent bash scripts/run-test-suite.sh integration",
     "test:integration:acf-free": "wp-env run tests-cli --env-cwd=wp-content/plugins/nexuscontent env NEXUSCONTENT_TEST_ACF=1 vendor/bin/phpunit --configuration phpunit.integration.xml.dist --testsuite integration --exclude-group acf-doubles"

@@ -74,13 +74,13 @@ See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 ## Current Work
 
-Phase 3 companion provider integration is implemented with tests. It adds provider discovery, companion calls, contract-version negotiation, caching, and fallback against the repaired contract. The remaining gate is CI verification against the live companion plugin.
+Phase 3 companion provider integration is implemented with tests. It adds provider discovery, companion calls, contract-version negotiation, caching, and fallback against the repaired contract. A live integration test (`tests/providers/wordpress-companion-live.test.ts`) exercises the provider and core fallback against a fresh Docker wp-env companion install and passes locally; the `ts-integration` CI job starts wp-env, enables clean permalinks, and runs that suite. The remaining gate is the CI run against the live companion plugin.
 
 **Recommended next focus:** Verify Phase 3 companion provider integration passes CI, then move toward the directional `0.3.0` Strapi provider.
 
 ## Next
 
-1. Run and pass the Phase 3 companion provider integration suite in CI, then reassess `provider.wordpress.companion-integration` against the implemented definition.
+1. Run and pass the `ts-integration` CI job against the live companion plugin, then reassess `provider.wordpress.companion-integration` against the implemented definition.
 2. Confirm the Strapi provider's minimum REST API scope and contract test strategy.
 3. Consider the directional localisation continuation once provider breadth is proven.
 
@@ -135,7 +135,7 @@ Phase 3 companion provider integration is implemented with tests. It adds provid
 - Canonical URLs are supplied by content or consumers because Core does not know deployment URLs.
 - The package remains private while the pre-1.0 architecture is proven.
 - The companion plugin is implemented and passes CI. It remains unreleased until `0.2.1` is finalized.
-- Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; CI verification against the live plugin contract remains.
+- Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests. A live integration test passes locally against a fresh Docker wp-env companion install and is wired into CI as the `ts-integration` job; the CI run remains.
 
 ## Project State Authority
 

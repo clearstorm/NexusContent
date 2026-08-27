@@ -131,7 +131,7 @@
     "The package remains private while the pre-1.0 architecture is proven.",
     "The repaired pre-release WordPress companion contract uses version 1 envelopes with data and optional diagnostics, three editor modes, 12 canonical short section names, and five nexuscontent/v1 route contracts.",
     "The companion plugin WordPress integration suite passes in CI; Phase 2 is implemented.",
-    "Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests but CI verification against the live plugin contract remains.",
+    "Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; a live integration test runs the provider against a fresh Docker wp-env companion install and passes locally, wired into CI as the ts-integration job. The CI run against the live plugin contract remains the final gate.",
     "Released 0.2.0 standard WordPress REST provider retrieval remains unchanged and does not call the companion plugin."
   ],
   "architecturalDecisions": [

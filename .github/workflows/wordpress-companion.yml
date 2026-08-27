@@ -9,6 +9,7 @@ on:
       - "src/providers/wordpress/**"
       - "src/validation/**"
       - "tests/contracts/**"
+      - "tests/providers/wordpress-companion*"
       - ".github/workflows/wordpress-companion.yml"
   pull_request:
     paths:
@@ -17,6 +18,7 @@ on:
       - "src/providers/wordpress/**"
       - "src/validation/**"
       - "tests/contracts/**"
+      - "tests/providers/wordpress-companion*"
       - ".github/workflows/wordpress-companion.yml"
 
 defaults:
@@ -142,5 +144,31 @@ jobs:
       - run: npm run test:integration
       - run: npm run env:acf-free:test
       - run: npm run test:integration:acf-free
+      - if: always()
+        run: npm run env:stop
+
+  ts-integration:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations/wordpress/nexuscontent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+          tools: composer:v2
+      - run: npm install --no-audit --no-fund
+      - run: npm run env:start
+      - run: npm run env:permalinks
+      - run: npm ci
+        working-directory: .
+      - run: node --test tests/providers/wordpress-companion-live.test.ts
+        working-directory: .
       - if: always()
         run: npm run env:stop
