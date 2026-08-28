@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Companion collection items now carry normalized sections as `data.sections`, the same canonical `{ type, data }` shape Git blog posts author, so companion-backed WordPress content renders through the identical consumer components as Git content. Posts with no sections keep the raw-HTML fallback.
+- The astro-wordpress reference example now consumes WordPress through the Phase 3 companion path (`apiStrategy: "companion"`): its blog collection builds against a local companion API in CI (capabilities, schema, pages, and page-by-slug routes), and Git- and companion-sourced sections render with parity through the shared `PostSections` components. `auto` and `core` remain available for fallback or plugin-free retrieval.
+
 ## [0.2.2] - 2026-08-29
 
 Core content contract and media release.

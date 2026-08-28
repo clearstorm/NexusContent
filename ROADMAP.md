@@ -202,7 +202,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ## 0.2.3 - WordPress Companion Consumer
 
-**State:** Current milestone (unreleased).
+**State:** Current milestone (implemented, awaiting release).
 
 **Goal:** Prove the Phase 3 companion path through the reference consumer and verify Git-vs-WordPress section parity.
 
