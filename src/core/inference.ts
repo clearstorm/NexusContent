@@ -1,4 +1,5 @@
 import type {
+  ComponentSchema,
   ContentReference,
   FieldMap,
   FieldSchema,
@@ -83,7 +84,7 @@ export type NavigationModelNames<TConfig> = ModelNamesByKind<
 
 export type SettingsModelNames<TConfig> = ModelNamesByKind<TConfig, "settings">;
 
-type InferFieldBase<TField extends FieldSchema> =
+type InferFieldBase<TConfig, TField extends FieldSchema> =
   TField extends { type: "string"; options: readonly string[] }
     ? TField["options"] extends readonly (infer TOption)[]
       ? TOption extends string
@@ -101,38 +102,74 @@ type InferFieldBase<TField extends FieldSchema> =
             : TField extends { type: "richText" }
               ? string
               : TField extends { type: "object"; fields: FieldMap }
-                ? InferFields<TField["fields"]>
+                ? InferFields<TConfig, TField["fields"]>
                 : TField extends { type: "object" }
                   ? Record<string, unknown>
                   : TField extends { type: "reference" }
                     ? ContentReference
                     : TField extends { type: "media" }
                       ? MediaReference
-                      : never;
+                      : TField extends { type: "component"; component: string }
+                        ? InferComponent<TConfig, TField["component"]>
+                        : TField extends {
+                              type: "blocks";
+                              allowedComponents: readonly (infer TAllowed)[];
+                            }
+                          ? InferBlock<TConfig, TAllowed>
+                          : never;
 
-export type InferField<TField extends FieldSchema> =
+export type InferField<TConfig, TField extends FieldSchema> =
   TField extends { list: true }
-    ? Array<InferFieldBase<TField>>
-    : InferFieldBase<TField>;
+    ? Array<InferFieldBase<TConfig, TField>>
+    : InferFieldBase<TConfig, TField>;
+
+/**
+ * Reusable component schemas declared under `schema.components`. Returns
+ * `Record<string, unknown>` when the component is unknown or unavailable so
+ * widened configs keep working.
+ */
+type ComponentsOf<TConfig> = TConfig extends NexusConfig
+  ? TConfig["schema"]["components"]
+  : undefined;
+
+type InferComponent<TConfig, TName extends string> =
+  ComponentsOf<TConfig> extends Readonly<
+    Record<string, ComponentSchema> | undefined
+  >
+    ? TName extends keyof ComponentsOf<TConfig>
+      ? ComponentsOf<TConfig>[TName] extends ComponentSchema
+        ? InferFields<TConfig, ComponentsOf<TConfig>[TName]["fields"]>
+        : Record<string, unknown>
+      : Record<string, unknown>
+    : Record<string, unknown>;
+
+/**
+ * One `blocks` element: a discriminated `_type` plus the resolved shape of
+ * the matching component.
+ */
+type InferBlock<TConfig, TAllowed> =
+  TAllowed extends string
+    ? { _type: TAllowed } & InferComponent<TConfig, TAllowed>
+    : never;
 
 /**
  * The `data` shape declared by a `fields` map. Declared fields are typed
  * precisely; undeclared keys pass through as `unknown`, matching the
  * runtime `.passthrough()` validation.
  */
-export type InferFields<TFields extends FieldMap> = {
+export type InferFields<TConfig, TFields extends FieldMap> = {
   [TName in keyof TFields as TFields[TName] extends { required: true }
     ? TName
-    : never]: InferField<TFields[TName]>;
+    : never]: InferField<TConfig, TFields[TName]>;
 } & {
   [TName in keyof TFields as TFields[TName] extends { required: true }
     ? never
-    : TName]?: InferField<TFields[TName]>;
+    : TName]?: InferField<TConfig, TFields[TName]>;
 } & Record<string, unknown>;
 
 export type InferModelData<TConfig, TName extends ModelNameOf<TConfig>> =
   ModelOf<TConfig, TName> extends { fields: FieldMap }
-    ? InferFields<ModelOf<TConfig, TName>["fields"]>
+    ? InferFields<TConfig, ModelOf<TConfig, TName>["fields"]>
     : Record<string, unknown>;
 
 /**

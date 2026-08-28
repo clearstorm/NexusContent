@@ -5,37 +5,26 @@
     "title": "About - NexusContent Example",
     "description": "How NexusContent separates content from application code."
   },
-  "heroImage": {
-    "src": "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
-    "alt": "A team collaborating around a table"
-  },
   "hero": {
-    "eyebrow": "Who we are",
     "heading": "Separation, by design.",
-    "intro": "NexusContent keeps the boundary between content sources and content consumers clean."
+    "intro": "NexusContent keeps the boundary between content sources and content consumers clean.",
+    "image": {
+      "src": "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
+      "alt": "A team collaborating around a table",
+      "provider": "remote"
+    },
+    "cta": {
+      "label": "Contact us",
+      "href": "/contact"
+    }
   },
   "mission": {
-    "heading": "Our mission",
-    "content": "Give frontend applications a single, predictable content interface regardless of where the content lives."
+    "content": "<p><strong>Our mission.</strong> Give frontend applications a single, predictable content interface regardless of where the content lives.</p>"
   },
   "story": {
-    "heading": "Our story",
-    "content": "NexusContent began with one question: why should a website be rebuilt every time a content source changes? The answer is a thin, framework-neutral layer that normalizes content once and lets applications stay focused on presentation."
+    "content": "<p><strong>Our story.</strong> NexusContent began with one question: why should a website be rebuilt every time a content source changes? The answer is a thin, framework-neutral layer that normalizes content once and lets applications stay focused on presentation.</p>"
   },
-  "values": {
-    "heading": "Principles",
-    "items": [
-      "Astro owns routing.",
-      "Core stays provider independent.",
-      "Editable content lives outside the app.",
-      "Static generation remains the default.",
-      "Missing content fails loudly."
-    ]
-  },
-  "cta": {
-    "heading": "Want to talk?",
-    "intro": "We are happy to explain the architecture.",
-    "label": "Contact us",
-    "href": "/contact"
+  "principles": {
+    "content": "<p><strong>Principles.</strong></p><ul><li>Astro owns routing.</li><li>Core stays provider independent.</li><li>Editable content lives outside the app.</li><li>Static generation remains the default.</li><li>Missing content fails loudly.</li></ul>"
   }
 }

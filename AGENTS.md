@@ -405,7 +405,7 @@ examples/astro-basic-localised/
 
 They exist to prove that NexusContent can be consumed cleanly by Astro.
 
-`examples/astro-basic/` is the single-locale reference. It uses flat content and no locale configuration.
+`examples/astro-basic/` is the single-locale reference. It uses declarative `component` field schemas: pages with known structure declare named component fields and compose components directly in the page template, while blog post bodies use a `blocks` field rendered through a small example-owned block renderer. It uses no locale configuration. Media in either path is resolved through `nexus.media`.
 
 `examples/astro-basic-localised/` is the localised reference. It uses locale-prefixed routes and the same site content in English and French.
 
@@ -1587,7 +1587,7 @@ The established foundation includes:
 
 - Root `content`, `navigation`, and `settings` configuration sections are replaced by a unified `schema.models` contract. Each model declares a `kind` (`singleton`, `collection`, `navigation`, `settings`) and a provider `source` (`provider`, `key`, and `mode: "page"` or `"singleton"` for singletons).
 - `defineNexusConfig()` validates the model shape and provider/source/media relationships and returns a `NexusConfig`. `validateNexusConfig` and `resolveBuiltinMediaProviders` back it. Relational checks also run for direct `NexusContent` construction.
-- Declarative field schemas (`core.schema.fields`) cover `string`, `number`, `boolean`, `datetime`, `object`, `reference`, `media`, and `richText` with `required`, `list`, `options`, nested `object.fields`, `reference.collection`, and `media` overrides. Model data is validated at retrieval time; mismatches throw `SchemaError` (with `model` and field issue paths). Undeclared data fields pass through. Models without declared fields skip validation.
+- Declarative field schemas (`core.schema.fields`) cover `string`, `number`, `boolean`, `datetime`, `object`, `reference`, `media`, `richText`, `component`, and `blocks` with `required`, `list`, `options`, nested `object.fields`, `reference.collection`, `media` overrides, `component` references into `schema.components`, and `blocks` validation of a discriminated `_type` list against `allowedComponents`. Model data is validated at retrieval time; mismatches throw `SchemaError` (with `model` and field issue paths). Undeclared data fields pass through. Models without declared fields skip validation.
 - Media is provider-neutral. `MediaAsset` uses `src` plus optional `provider` and `sourceId` (legacy `url` is removed; `MediaSize`/`sizes` keep `url`). Local and remote media providers are declared in `media.providers` and auto-built by Core; WordPress media is registered manually via `nexus.registerMedia`. Resolution order is reference provider (carrying any field `media` override), per-request `defaultProvider`, then the configured project default.
 - `nexus.media.resolve(reference, options?)` is the media resolution entry point; Core never fetches media. Local resolution is traversal-safe; remote resolution validates absolute http(s) URLs only.
 - The companion wire contract and plugin keep `featuredImage.url`; the TypeScript boundary converts it to `src`.

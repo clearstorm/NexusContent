@@ -3,56 +3,57 @@
   "slug": "home",
   "seo": {
     "title": "NexusContent Example",
-    "description": "A static Astro site powered by NexusContent and a Git content repository, in English and French."
-  },
-  "heroImage": {
-    "src": "hero.svg",
-    "alt": "Abstract connected content sources"
+    "description": "A static Astro site powered by NexusContent and a Git content repository."
   },
   "hero": {
-    "eyebrow": "Content, decoupled",
     "heading": "Astro owns the website.",
     "intro": "Content providers own the content. NexusContent sits between them with normalized types, provenance, validation, and locale-aware resolution.",
+    "image": {
+      "src": "hero.svg",
+      "alt": "Abstract connected content sources"
+    },
     "cta": {
       "label": "About us",
       "href": "/about"
     }
   },
-  "services": {
+  "servicesList": {
     "heading": "What we do",
     "intro": "The same content service powers every page on this site.",
     "items": [
       {
         "title": "Static builds",
-        "description": "Predictable, fast, and portable Astro output."
+        "description": "Predictable, fast, and portable Astro output.",
+        "icon": { "src": "icon.svg", "alt": "Static build icon" }
       },
       {
         "title": "Separated content",
-        "description": "Editable content lives outside the application repository."
+        "description": "Editable content lives outside the application repository.",
+        "icon": { "src": "icon.svg", "alt": "Separated content icon" }
       },
       {
         "title": "Provider freedom",
-        "description": "Swap Git for WordPress or Strapi without rewriting the frontend."
+        "description": "Swap Git for WordPress or Strapi without rewriting the frontend.",
+        "icon": { "src": "icon.svg", "alt": "Provider freedom icon" }
       }
     ]
   },
-  "testimonials": {
+  "testimonialsList": {
     "heading": "What people say",
     "items": [
       {
         "quote": "Content changed without touching a single component.",
-        "author": "Content Editor"
+        "author": "Content Editor",
+        "avatar": { "src": "avatar.svg", "alt": "Content Editor avatar" }
       },
       {
         "quote": "The build failed loudly when content was invalid.",
-        "author": "Developer"
+        "author": "Developer",
+        "avatar": { "src": "avatar.svg", "alt": "Developer avatar" }
       }
     ]
   },
-  "cta": {
-    "heading": "Read our blog",
-    "intro": "Collection-driven pages powered by the same provider.",
-    "label": "View posts",
-    "href": "/blog"
+  "richTextContent": {
+    "content": "<p>This page is composed directly: home.json declares a hero, a services list, testimonials, and this text as named fields, and home.astro renders explicit components. A block-driven renderer is kept for blog posts, whose sections genuinely vary.</p>"
   }
 }

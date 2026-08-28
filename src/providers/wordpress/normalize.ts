@@ -128,12 +128,38 @@ function parseEntry(
   };
 }
 
+function normalizeWpData(val: unknown): unknown {
+  if (Array.isArray(val)) {
+    return val.map((item) => normalizeWpData(item));
+  }
+  if (val !== null && typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    const res: Record<string, unknown> = {};
+    const componentType =
+      (obj._type as string | undefined) ??
+      (obj.acf_fc_layout as string | undefined) ??
+      (obj.component as string | undefined) ??
+      (obj.type as string | undefined);
+
+    if (componentType) {
+      res._type = componentType;
+    }
+
+    for (const [k, v] of Object.entries(obj)) {
+      res[k] = normalizeWpData(v);
+    }
+    return res;
+  }
+  return val;
+}
+
 function buildData(entry: WordPressEntry): WordPressContentData {
   // ACF fields are flattened so project schemas can declare them directly.
   // Reserved normalized values are assigned last so they always win over a
   // field name collision with an ACF key.
+  const normalizedFields = (normalizeWpData(entry.fields ?? {}) as Record<string, unknown>);
   const data: WordPressContentData = {
-    ...(entry.fields ?? {}),
+    ...normalizedFields,
     content: entry.content
   };
 

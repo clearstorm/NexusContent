@@ -3,11 +3,11 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Hero from "../../components/Hero.astro";
 import Services from "../../components/Services.astro";
 import Testimonials from "../../components/Testimonials.astro";
-import CTA from "../../components/CTA.astro";
 import { nexus } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { resolveHero, resolveServices, resolveTestimonials } from "../../app/media";
 
 export function getStaticPaths() {
   return supportedLocales.map((locale) => ({ params: { locale } }));
@@ -21,7 +21,12 @@ if (!page) {
   throw new Error(`Required content "home" was not found for locale "${locale}".`);
 }
 
-const { hero, services, testimonials, cta } = page.data;
+// Named fields carry media as `MediaReference` values, resolved here before
+// components render. The home hero image has no provider, so it resolves
+// through the configured default "local" media provider.
+const hero = await resolveHero(nexus, page.data.hero);
+const services = await resolveServices(nexus, page.data.servicesList);
+const testimonials = await resolveTestimonials(nexus, page.data.testimonialsList);
 
 const seo = resolveSeo({
   title: page.title ?? "NexusContent Example",
@@ -33,8 +38,7 @@ const seo = resolveSeo({
   seo={seo}
   locale={locale}
 >
-  <Hero {...hero} locale={locale} />
-  <Services {...services} />
-  <Testimonials {...testimonials} />
-  <CTA {...cta} locale={locale} />
+  {hero && <Hero {...hero} />}
+  {services && <Services {...services} />}
+  {testimonials && <Testimonials {...testimonials} />}
 </BaseLayout>

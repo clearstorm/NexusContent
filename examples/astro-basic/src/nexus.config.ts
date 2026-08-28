@@ -1,5 +1,5 @@
 import { defineNexusConfig } from "@nexuscontent/core";
-import { models } from "./schema/schema";
+import { schema } from "./schema/schema";
 
 // Provider setup is application-owned and may combine committed defaults with
 // environment-specific values. Secrets must remain in environment variables.
@@ -36,5 +36,5 @@ export const nexusConfig = defineNexusConfig({
       }
     }
   },
-  schema: { models }
+  schema
 });

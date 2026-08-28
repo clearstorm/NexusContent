@@ -70,7 +70,7 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Companion plugin WordPress integration tests passing in CI (75 unit tests, 417 assertions; 12 integration tests, 114 assertions).
 - Type checking, tests, package build, Astro example build, and Node example execution in CI.
 - Unified `schema.models` configuration with model kinds and provider sources; `source.mode: "page"` vs `"singleton"` selects the provider operation.
-- Declarative field schemas with required/list/options/nested-object/reference/media/richText support and retrieval-time `SchemaError` validation.
+- Declarative field schemas with required/list/options/nested-object/reference/media/richText/component/blocks support, `schema.components` references, and retrieval-time `SchemaError` validation.
 - Provider-neutral media: `MediaAsset.src`, `MediaReference`, `MediaProviderRegistry`, `ResolveMediaService`, declared-and-auto-built local/remote providers, and a `WordPressMediaProvider` for id lookup.
 - Migrated astro-basic, astro-basic-localised, astro-wordpress, and node-basic consumers to `defineNexusConfig` with `schema.models`.
 

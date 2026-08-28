@@ -1,31 +1,38 @@
 ---
+import Button from "./Button.astro";
+
 interface Props {
-  eyebrow?: string;
   heading: string;
-  intro: string;
-  cta?: {
-    label: string;
-    href: string;
-  };
-  image?: {
+  intro?: string;
+  image: {
     src: string;
     alt?: string;
   };
+  cta?: {
+    label: string;
+    href: string;
+    variant?: string;
+  };
 }
 
-const { eyebrow, heading, intro, cta, image } = Astro.props;
+const { heading, intro, image, cta } = Astro.props;
 ---
 
 <section class="hero">
-  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
   <h1>{heading}</h1>
-  <p class="intro">{intro}</p>
+  {intro && <p class="intro">{intro}</p>}
   {cta && (
-    <a class="btn btn-light" href={cta.href}>
-      {cta.label}
-    </a>
+    <Button label={cta.label} href={cta.href} variant={cta.variant} />
   )}
-  {image && <img class="hero-image" src={image.src} alt={image.alt ?? ""} width={1200} height={630} />}
+  {image.src && (
+    <img
+      class="hero-image"
+      src={image.src}
+      alt={image.alt ?? ""}
+      width={1200}
+      height={630}
+    />
+  )}
   <style>
     .hero {
       position: relative;
@@ -47,12 +54,8 @@ const { eyebrow, heading, intro, cta, image } = Astro.props;
       background: rgba(255, 255, 255, 0.1);
     }
 
-    .hero .eyebrow {
-      color: #e0e7ff;
-    }
-
     .hero h1 {
-      margin: 0.5rem 0 1rem;
+      margin: 0 0 1rem;
       font-size: clamp(2.25rem, 6vw, 4rem);
       max-width: 32rem;
       position: relative;

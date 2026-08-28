@@ -1,7 +1,10 @@
 export type {
   BaseFieldSchema,
+  BlocksFieldSchema,
   BooleanFieldSchema,
   CollectionItem,
+  ComponentFieldSchema,
+  ComponentSchema,
   ContentMeta,
   ContentReference,
   ContentSection,

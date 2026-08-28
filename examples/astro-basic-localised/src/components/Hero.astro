@@ -1,28 +1,37 @@
 ---
-import { localizeHref } from "../app/locale";
+import Button from "./Button.astro";
 
 interface Props {
-  locale: string;
-  eyebrow?: string;
   heading: string;
-  intro: string;
+  intro?: string;
+  image: {
+    src: string;
+    alt?: string;
+  };
   cta?: {
     label: string;
     href: string;
+    variant?: string;
   };
 }
 
-const { locale, eyebrow, heading, intro, cta } = Astro.props;
+const { heading, intro, image, cta } = Astro.props;
 ---
 
 <section class="hero">
-  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
   <h1>{heading}</h1>
-  <p class="intro">{intro}</p>
+  {intro && <p class="intro">{intro}</p>}
   {cta && (
-    <a class="btn btn-light" href={localizeHref(locale, cta.href)}>
-      {cta.label}
-    </a>
+    <Button label={cta.label} href={cta.href} variant={cta.variant} />
+  )}
+  {image.src && (
+    <img
+      class="hero-image"
+      src={image.src}
+      alt={image.alt ?? ""}
+      width={1200}
+      height={630}
+    />
   )}
   <style>
     .hero {
@@ -45,12 +54,8 @@ const { locale, eyebrow, heading, intro, cta } = Astro.props;
       background: rgba(255, 255, 255, 0.1);
     }
 
-    .hero .eyebrow {
-      color: #e0e7ff;
-    }
-
     .hero h1 {
-      margin: 0.5rem 0 1rem;
+      margin: 0 0 1rem;
       font-size: clamp(2.25rem, 6vw, 4rem);
       max-width: 32rem;
       position: relative;
@@ -65,6 +70,16 @@ const { locale, eyebrow, heading, intro, cta } = Astro.props;
     }
 
     .hero .btn {
+      position: relative;
+    }
+
+    .hero .hero-image {
+      display: block;
+      margin-top: 1.75rem;
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
       position: relative;
     }
   </style>

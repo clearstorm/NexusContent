@@ -1,0 +1,55 @@
+---
+import type { ResolvedBlock } from "../app/media";
+import Hero from "./Hero.astro";
+import Services from "./Services.astro";
+import Testimonials from "./Testimonials.astro";
+import RichTextContent from "./RichTextContent.astro";
+import ImageGallery from "./ImageGallery.astro";
+import CodeSnippet from "./CodeSnippet.astro";
+
+interface Props {
+  blocks: ResolvedBlock[];
+}
+
+const { blocks } = Astro.props;
+---
+
+{
+  blocks.map((block) => {
+    switch (block._type) {
+      case "hero":
+        return (
+          <Hero
+            heading={block.heading}
+            intro={block.intro}
+            image={block.image}
+            cta={block.cta}
+          />
+        );
+      case "servicesList":
+        return (
+          <Services
+            heading={block.heading}
+            intro={block.intro}
+            items={block.items}
+          />
+        );
+      case "testimonialsList":
+        return (
+          <Testimonials heading={block.heading} items={block.items} />
+        );
+      case "richTextContent":
+        return <RichTextContent content={block.content} />;
+      case "imageGallery":
+        return <ImageGallery heading={block.heading} images={block.images} />;
+      case "codeSnippet":
+        return (
+          <CodeSnippet
+            language={block.language}
+            code={block.code}
+            caption={block.caption}
+          />
+        );
+    }
+  })
+}

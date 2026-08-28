@@ -3,38 +3,24 @@
   "slug": "services",
   "seo": {
     "title": "Services - NexusContent Example",
-    "description": "The content services demonstrated by the NexusContent example site."
+    "description": "The services delivered by the NexusContent pipeline."
   },
   "hero": {
-    "eyebrow": "What we do",
-    "heading": "Services built on a clean boundary.",
-    "intro": "Every service on this page is delivered through the same normalized content API."
+    "heading": "What we deliver",
+    "intro": "Normalized content, provenance, validation, and clean consumer boundaries.",
+    "image": { "src": "hero.svg", "alt": "Services from connected content sources" },
+    "cta": { "label": "Contact us", "href": "/contact", "variant": "secondary" }
   },
-  "services": {
-    "heading": "Core services",
-    "intro": "Proven by the pages you are visiting right now.",
+  "servicesList": {
+    "heading": "Key services",
+    "intro": "Each one is a boundary NexusContent owns.",
     "items": [
-      {
-        "title": "Static builds",
-        "description": "Static generation is the default execution mode, from local development to CI.",
-        "points": ["Predictable output", "Fast builds", "Portable dist"]
-      },
-      {
-        "title": "Localised content",
-        "description": "Locale variant directories resolve the right language with fallback support.",
-        "points": ["Two languages", "Explicit fallback", "No locked workflow"]
-      },
-      {
-        "title": "Separated content",
-        "description": "Editable content lives outside the application repository.",
-        "points": ["Client owned content", "Clean diffs", "Editor friendly"]
-      }
+      { "title": "Content retrieval", "description": "Pages, collections, singletons, navigation, and settings through one service.", "icon": { "src": "icon.svg", "alt": "Retrieval" } },
+      { "title": "Normalization", "description": "Provider responses are converted to shared content types at the provider boundary.", "icon": { "src": "icon.svg", "alt": "Normalization" } },
+      { "title": "Validation", "description": "Declared field schemas verify content before it reaches components.", "icon": { "src": "icon.svg", "alt": "Validation" } }
     ]
   },
-  "cta": {
-    "heading": "Ready to start?",
-    "intro": "Contact us and we will show you the architecture.",
-    "label": "Contact us",
-    "href": "/contact"
+  "richTextContent": {
+    "content": "<p>Media is provider-neutral too. References in named fields resolve through the project media providers at build time.</p>"
   }
 }

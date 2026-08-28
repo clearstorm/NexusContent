@@ -2,6 +2,11 @@
   "title": "Bonjour le monde",
   "slug": "hello-world",
   "date": "2026-01-05",
-  "excerpt": "Le premier article du dépôt de contenu Git.",
-  "body": "NexusContent normalise le contenu Git dans une API de contenu cohérente. L'application Astro ne voit jamais que des objets PageContent et CollectionItem normalisés."
+  "excerpt": "Le premier article depuis le dépôt de contenu Git.",
+  "body": [
+    {
+      "_type": "richTextContent",
+      "content": "<p>NexusContent normalise le contenu Git en une API de contenu cohérente. L'application Astro ne voit jamais que des objets <code>PageContent</code> et <code>CollectionItem</code> normalisés.</p>"
+    }
+  ]
 }

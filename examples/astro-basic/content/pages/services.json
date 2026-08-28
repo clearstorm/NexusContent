@@ -6,35 +6,40 @@
     "description": "The content services demonstrated by the NexusContent example site."
   },
   "hero": {
-    "eyebrow": "What we do",
     "heading": "Services built on a clean boundary.",
-    "intro": "Every service on this page is delivered through the same normalized content API."
+    "intro": "Every service on this page is delivered through the same normalized content API.",
+    "image": {
+      "src": "hero.svg",
+      "alt": "Abstract connected content sources"
+    },
+    "cta": {
+      "label": "Contact us",
+      "href": "/contact",
+      "variant": "secondary"
+    }
   },
-  "services": {
+  "servicesList": {
     "heading": "Core services",
     "intro": "Proven by the pages you are visiting right now.",
     "items": [
       {
         "title": "Static builds",
         "description": "Static generation is the default execution mode, from local development to CI.",
-        "points": ["Predictable output", "Fast builds", "Portable dist"]
+        "icon": { "src": "icon.svg", "alt": "Static build icon" }
       },
       {
-        "title": "Localised content",
-        "description": "Locale variant directories resolve the right language with fallback support.",
-        "points": ["Two languages", "Explicit fallback", "No locked workflow"]
+        "title": "Validated content",
+        "description": "Declared field schemas catch invalid content at retrieval time with actionable errors.",
+        "icon": { "src": "icon.svg", "alt": "Validated content icon" }
       },
       {
-        "title": "Separated content",
-        "description": "Editable content lives outside the application repository.",
-        "points": ["Client owned content", "Clean diffs", "Editor friendly"]
+        "title": "Provider freedom",
+        "description": "Swap Git for WordPress or Strapi without rewriting the frontend.",
+        "icon": { "src": "icon.svg", "alt": "Provider freedom icon" }
       }
     ]
   },
-  "cta": {
-    "heading": "Ready to start?",
-    "intro": "Contact us and we will show you the architecture.",
-    "label": "Contact us",
-    "href": "/contact"
+  "richTextContent": {
+    "content": "<p>Each section above is a named content field composed directly by services.astro. A section may be required or optional; the page renders exactly the fields present in content.</p>"
   }
 }

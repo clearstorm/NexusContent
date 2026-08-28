@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type {
+  ComponentSchema,
   FieldSchema,
   ModelKind,
   ModelSchema,
@@ -7,8 +8,11 @@ import type {
 } from "./types.ts";
 import { ConfigError, SchemaError } from "./errors.ts";
 
-function compileField(field: FieldSchema): z.ZodType {
-  const base = compileBaseField(field);
+function compileField(
+  field: FieldSchema,
+  components?: Record<string, ComponentSchema>
+): z.ZodType {
+  const base = compileBaseField(field, components);
 
   if (field.list) {
     return field.required === true
@@ -19,7 +23,10 @@ function compileField(field: FieldSchema): z.ZodType {
   return field.required === true ? base : base.optional();
 }
 
-function compileBaseField(field: FieldSchema): z.ZodType {
+function compileBaseField(
+  field: FieldSchema,
+  components?: Record<string, ComponentSchema>
+): z.ZodType {
   switch (field.type) {
     case "string": {
       if (field.options) {
@@ -42,16 +49,51 @@ function compileBaseField(field: FieldSchema): z.ZodType {
 
     case "object":
       return field.fields
-        ? z.object(mapFields(field.fields)).passthrough()
+        ? z.object(mapFields(field.fields, components)).passthrough()
         : z.record(z.string(), z.unknown());
+
+    case "component": {
+      const comp = components?.[field.component];
+      return comp
+        ? z.object(mapFields(comp.fields, components)).passthrough()
+        : z.record(z.string(), z.unknown());
+    }
+
+    case "blocks": {
+      const allowed = field.allowedComponents;
+      return z
+        .object({
+          _type:
+            allowed && allowed.length > 0
+              ? z.enum(allowed as [string, ...string[]])
+              : z.string()
+        })
+        .passthrough()
+        .transform((data) => {
+          const type = data._type as string;
+          const comp = components?.[type];
+          if (comp && comp.fields) {
+            const validator = z
+              .object(mapFields(comp.fields, components))
+              .passthrough();
+            return validator.parse(data);
+          }
+          return data;
+        });
+    }
 
     case "reference":
       return z
         .object({
-          model: z.string(),
+          model: z.string().optional(),
+          collection: z.string().optional(),
           key: z.string()
         })
-        .passthrough();
+        .passthrough()
+        .refine(
+          (val) => val.model !== undefined || val.collection !== undefined,
+          "Reference fields require a model or collection"
+        );
 
     case "media":
       return z
@@ -74,11 +116,12 @@ function compileBaseField(field: FieldSchema): z.ZodType {
 }
 
 function mapFields(
-  fields: Record<string, FieldSchema>
+  fields: Record<string, FieldSchema>,
+  components?: Record<string, ComponentSchema>
 ): Record<string, z.ZodType> {
   const mapped: Record<string, z.ZodType> = {};
   for (const [name, field] of Object.entries(fields)) {
-    mapped[name] = compileField(field);
+    mapped[name] = compileField(field, components);
   }
   return mapped;
 }
@@ -114,10 +157,11 @@ export class ModelRegistry {
       mediaProviderNames
     );
 
+    const components = config.components;
     for (const [name, model] of Object.entries(config.models)) {
       const compiled: CompiledModel = { schema: model };
       if (model.fields) {
-        compiled.validator = z.object(mapFields(model.fields)).passthrough();
+        compiled.validator = z.object(mapFields(model.fields, components)).passthrough();
       }
       this.models.set(name, compiled);
     }
@@ -214,10 +258,11 @@ function validateFields(
     }
 
     if (field.type === "reference") {
-      const target = models[field.collection];
+      const targetKey = (field.model ?? field.collection)!;
+      const target = models[targetKey];
       if (!target) {
         throw new ConfigError(
-          `Model "${modelName}" field "${fieldName}" references collection "${field.collection}" which does not exist.`,
+          `Model "${modelName}" field "${fieldName}" references collection "${targetKey}" which does not exist.`,
           {
             model: modelName,
             operation: "config",
@@ -227,7 +272,7 @@ function validateFields(
       }
       if (target.kind !== "collection") {
         throw new ConfigError(
-          `Model "${modelName}" field "${fieldName}" references "${field.collection}" but that model kind is "${target.kind}", not "collection".`,
+          `Model "${modelName}" field "${fieldName}" references "${targetKey}" but that model kind is "${target.kind}", not "collection".`,
           {
             model: modelName,
             operation: "config",

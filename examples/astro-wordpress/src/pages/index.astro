@@ -14,10 +14,7 @@ if (!page) {
   throw new Error(`Required WordPress page "home" was not found.`);
 }
 
-const { hero } = page.data;
-const { services } = page.data;
-const { testimonials } = page.data;
-const { cta } = page.data;
+const { hero, services, testimonials, cta, contentBlocks } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "NexusContent WordPress Example",
@@ -26,8 +23,13 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  <Hero {...hero} />
-  <Services heading={services.heading} intro={services.intro} items={services.items} />
-  <Testimonials heading={testimonials.heading} items={testimonials.items} />
+  {hero && <Hero {...hero} />}
+  {services && <Services heading={services.heading} intro={services.intro} items={services.items} />}
+  {testimonials && <Testimonials heading={testimonials.heading} items={testimonials.items} />}
   {cta && <CTA {...cta} />}
+ <!-- 
+ {page.data.content && !(hero || mission || story) && (
+    <article class="prose" set:html={page.data.content} />
+  )}
+  -->
 </BaseLayout>

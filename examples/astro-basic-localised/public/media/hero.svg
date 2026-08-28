@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Connected content sources</title>
+  <desc id="description">Abstract nodes connected through NexusContent to a frontend application.</desc>
+  <rect width="1200" height="630" fill="#1e1b4b"/>
+  <g fill="none" stroke="#a5b4fc" stroke-width="10">
+    <path d="M200 180 520 315 200 450M1000 180 680 315 1000 450"/>
+  </g>
+  <g fill="#818cf8" stroke="#eef2ff" stroke-width="8">
+    <circle cx="200" cy="180" r="70"/>
+    <circle cx="200" cy="450" r="70"/>
+    <circle cx="600" cy="315" r="105"/>
+    <circle cx="1000" cy="180" r="70"/>
+    <circle cx="1000" cy="450" r="70"/>
+  </g>
+  <text x="600" y="330" fill="#fff" font-family="system-ui, sans-serif" font-size="34" font-weight="700" text-anchor="middle">NexusContent</text>
+</svg>

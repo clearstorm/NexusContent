@@ -1,0 +1,33 @@
+---
+interface Props {
+  content: string;
+}
+
+const { content } = Astro.props;
+---
+
+<section class="section rich-text" set:html={content}></section>
+
+<style>
+  .rich-text {
+    max-width: 44rem;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .rich-text :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .rich-text :global(a) {
+    color: var(--accent);
+  }
+
+  .rich-text :global(code) {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.3rem;
+    padding: 0.1rem 0.35rem;
+  }
+</style>

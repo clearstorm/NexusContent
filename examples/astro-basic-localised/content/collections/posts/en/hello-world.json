@@ -3,5 +3,10 @@
   "slug": "hello-world",
   "date": "2026-01-05",
   "excerpt": "The first post from the Git content repository.",
-  "body": "NexusContent normalizes Git content into a consistent content API. The Astro application only ever sees normalized PageContent and CollectionItem objects."
+  "body": [
+    {
+      "_type": "richTextContent",
+      "content": "<p>NexusContent normalizes Git content into a consistent content API. The Astro application only ever sees normalized <code>PageContent</code> and <code>CollectionItem</code> objects.</p>"
+    }
+  ]
 }

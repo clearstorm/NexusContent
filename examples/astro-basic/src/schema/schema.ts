@@ -1,159 +1,120 @@
-import type { ModelSchema } from "@nexuscontent/core";
+import type { ComponentSchema, ModelSchema } from "@nexuscontent/core";
 
-const heroFields = {
-  eyebrow: { type: "string" },
-  heading: { type: "string", required: true },
-  intro: { type: "string", required: true },
-  cta: {
-    type: "object",
+/**
+ * Reusable component schemas. `hero.cta` references `button` by name, so a
+ * component field resolves through another component's fields.
+ */
+export const components = {
+  hero: {
+    fields: {
+      heading: { type: "string", required: true },
+      intro: { type: "string" },
+      image: { type: "media", required: true },
+      cta: { type: "component", component: "button" }
+    }
+  },
+  button: {
     fields: {
       label: { type: "string", required: true },
-      href: { type: "string", required: true }
+      href: { type: "string", required: true },
+      variant: { type: "string" }
+    }
+  },
+  servicesList: {
+    fields: {
+      heading: { type: "string", required: true },
+      intro: { type: "string" },
+      items: {
+        type: "object",
+        list: true,
+        fields: {
+          title: { type: "string", required: true },
+          description: { type: "string", required: true },
+          icon: { type: "media" }
+        }
+      }
+    }
+  },
+  testimonialsList: {
+    fields: {
+      heading: { type: "string", required: true },
+      items: {
+        type: "object",
+        list: true,
+        fields: {
+          quote: { type: "string", required: true },
+          author: { type: "string", required: true },
+          avatar: { type: "media" }
+        }
+      }
+    }
+  },
+  richTextContent: {
+    fields: {
+      heading: { type: "string" },
+      content: { type: "richText", required: true }
+    }
+  },
+  imageGallery: {
+    fields: {
+      heading: { type: "string" },
+      images: { type: "media", list: true, required: true }
+    }
+  },
+  codeSnippet: {
+    fields: {
+      language: { type: "string", required: true },
+      code: { type: "string", required: true },
+      caption: { type: "string" }
     }
   }
-} as const;
-
-const ctaFields = {
-  heading: { type: "string", required: true },
-  intro: { type: "string", required: true },
-  label: { type: "string", required: true },
-  href: { type: "string", required: true }
-} as const;
+} as const satisfies Record<string, ComponentSchema>;
 
 /**
  * Model schemas for the single-locale reference consumer.
  *
- * Required object and field flags match what each page component needs, so a
- * missing block fails loudly at build time. `heroImage` on home resolves
- * through the default "local" media provider; `heroImage` on about declares a
- * "remote" provider override so its resolved URL must be an absolute http(s)
- * URL.
+ * `title`, `slug`, and `seo` live on the content envelope (Git normalize
+ * keeps them there), so only `data` fields are declared here. Pages with a
+ * known structure declare named component fields so components compose
+ * directly; the blog post body stays a `blocks` list because a post's
+ * sections vary.
  */
 export const models = {
   home: {
     kind: "singleton",
     source: { provider: "git", key: "home", mode: "page" },
     fields: {
-      heroImage: { type: "media", required: true },
-      hero: { type: "object", required: true, fields: heroFields },
-      services: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          intro: { type: "string" },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              title: { type: "string", required: true },
-              description: { type: "string", required: true }
-            }
-          }
-        }
-      },
-      testimonials: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              quote: { type: "string", required: true },
-              author: { type: "string", required: true }
-            }
-          }
-        }
-      },
-      cta: { type: "object", required: true, fields: ctaFields }
+      hero: { type: "component", component: "hero", required: true },
+      servicesList: { type: "component", component: "servicesList" },
+      testimonialsList: { type: "component", component: "testimonialsList" },
+      richTextContent: { type: "component", component: "richTextContent" }
     }
   },
   about: {
     kind: "singleton",
     source: { provider: "git", key: "about", mode: "page" },
     fields: {
-      heroImage: { type: "media", media: "remote", required: true },
-      hero: { type: "object", required: true, fields: heroFields },
-      mission: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          content: { type: "string", required: true }
-        }
-      },
-      story: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          content: { type: "string", required: true }
-        }
-      },
-      values: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          items: { type: "string", list: true, required: true }
-        }
-      },
-      cta: { type: "object", required: true, fields: ctaFields }
+      hero: { type: "component", component: "hero", required: true },
+      mission: { type: "component", component: "richTextContent" },
+      story: { type: "component", component: "richTextContent" },
+      principles: { type: "component", component: "richTextContent" }
     }
   },
   services: {
     kind: "singleton",
     source: { provider: "git", key: "services", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
-      services: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          intro: { type: "string" },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              title: { type: "string", required: true },
-              description: { type: "string", required: true },
-              points: { type: "string", list: true }
-            }
-          }
-        }
-      },
-      cta: { type: "object", required: true, fields: ctaFields }
+      hero: { type: "component", component: "hero", required: true },
+      servicesList: { type: "component", component: "servicesList" },
+      richTextContent: { type: "component", component: "richTextContent" }
     }
   },
   contact: {
     kind: "singleton",
     source: { provider: "git", key: "contact", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
-      contact: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              label: { type: "string", required: true },
-              value: { type: "string", required: true },
-              href: { type: "string" }
-            }
-          }
-        }
-      },
-      cta: { type: "object", required: true, fields: ctaFields }
+      hero: { type: "component", component: "hero", required: true },
+      introduction: { type: "component", component: "richTextContent" }
     }
   },
   blog: {
@@ -161,8 +122,12 @@ export const models = {
     source: { provider: "git", key: "posts" },
     fields: {
       date: { type: "datetime" },
-      excerpt: { type: "richText" },
-      body: { type: "richText" }
+      excerpt: { type: "string" },
+      body: {
+        type: "blocks",
+        list: true,
+        allowedComponents: ["richTextContent", "imageGallery", "codeSnippet"]
+      }
     }
   },
   primary: {
@@ -181,7 +146,28 @@ export const models = {
           description: { type: "string" },
           credit: { type: "string" }
         }
+      },
+      contactDetails: {
+        type: "object",
+        fields: {
+          heading: { type: "string", required: true },
+          items: {
+            type: "object",
+            list: true,
+            required: true,
+            fields: {
+              label: { type: "string", required: true },
+              value: { type: "string", required: true },
+              href: { type: "string" }
+            }
+          }
+        }
       }
     }
   }
 } as const satisfies Record<string, ModelSchema>;
+
+export const schema = {
+  models,
+  components
+};

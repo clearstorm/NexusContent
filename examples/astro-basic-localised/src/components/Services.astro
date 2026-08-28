@@ -1,13 +1,17 @@
 ---
-interface Service {
+interface Item {
   title: string;
   description: string;
+  icon?: {
+    src: string;
+    alt?: string;
+  };
 }
 
 interface Props {
   heading: string;
   intro?: string;
-  items: Service[];
+  items: Item[];
 }
 
 const { heading, intro, items } = Astro.props;
@@ -20,6 +24,15 @@ const { heading, intro, items } = Astro.props;
     {
       items.map((service) => (
         <article class="card">
+          {service.icon?.src && (
+            <img
+              class="icon"
+              src={service.icon.src}
+              alt={service.icon.alt ?? ""}
+              width={48}
+              height={48}
+            />
+          )}
           <h3>{service.title}</h3>
           <p>{service.description}</p>
         </article>
@@ -55,6 +68,11 @@ const { heading, intro, items } = Astro.props;
 
     .card h3 {
       margin-top: 0;
+    }
+
+    .card .icon {
+      display: block;
+      margin-bottom: 0.75rem;
     }
   </style>
 </section>

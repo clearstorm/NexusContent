@@ -4,5 +4,14 @@
   "footer": {
     "description": "Un consommateur de référence prouvant qu'Astro et NexusContent partagent une frontière propre.",
     "credit": "Propulsé par NexusContent avec un dépôt de contenu Git."
+  },
+  "contactDetails": {
+    "heading": "Coordonnées",
+    "items": [
+      { "label": "Courriel", "value": "hello@example.com", "href": "mailto:hello@example.com" },
+      { "label": "Téléphone", "value": "+27 11 000 0000", "href": "tel:+27110000000" },
+      { "label": "Adresse", "value": "1 Content Lane, Sandton, Johannesburg" },
+      { "label": "Heures de bureau", "value": "Lun-Ven, 08h00-17h00" }
+    ]
   }
 }

@@ -40,7 +40,8 @@ const fieldSchema: z.ZodType<FieldSchema> = z.discriminatedUnion("type", [
     type: z.literal("reference"),
     required: z.boolean().optional(),
     list: z.boolean().optional(),
-    collection: z.string().min(1)
+    model: z.string().min(1).optional(),
+    collection: z.string().min(1).optional()
   }),
   z.object({
     type: z.literal("media"),
@@ -52,6 +53,18 @@ const fieldSchema: z.ZodType<FieldSchema> = z.discriminatedUnion("type", [
     type: z.literal("richText"),
     required: z.boolean().optional(),
     list: z.boolean().optional()
+  }),
+  z.object({
+    type: z.literal("component"),
+    required: z.boolean().optional(),
+    list: z.boolean().optional(),
+    component: z.string().min(1)
+  }),
+  z.object({
+    type: z.literal("blocks"),
+    required: z.boolean().optional(),
+    list: z.boolean().optional(),
+    allowedComponents: z.array(z.string().min(1)).optional()
   })
 ]);
 
@@ -95,7 +108,15 @@ const nexusConfigShape = z.object({
     })
     .optional(),
   schema: z.object({
-    models: z.record(z.string(), z.lazy(() => modelSchema))
+    models: z.record(z.string(), z.lazy(() => modelSchema)),
+    components: z
+      .record(
+        z.string(),
+        z.object({
+          fields: z.record(z.string(), z.lazy(() => fieldSchema))
+        })
+      )
+      .optional()
   }),
   locales: z
     .object({
@@ -181,14 +202,12 @@ export function defineNexusConfig<const TConfig extends NexusConfig>(
 export function validateNexusConfig(config: NexusConfig): void {
   const parsed = nexusConfigShape.safeParse(config);
   if (!parsed.success) {
-    const issue = parsed.error.issues[0];
+    const issues = parsed.error.issues.map((i) => `"${i.path.join(".")}": ${i.message}`).join("; ");
     throw new ConfigError(
-      `Invalid NexusContent configuration.`,
+      `Invalid NexusContent configuration: ${issues}`,
       {
         operation: "defineNexusConfig",
-        reason: issue
-          ? `"${issue.path.join(".")}": ${issue.message}`
-          : "Config shape does not match the NexusConfig schema."
+        reason: issues || "Config shape does not match the NexusConfig schema."
       }
     );
   }
@@ -219,6 +238,13 @@ export function validateNexusConfig(config: NexusConfig): void {
     );
   }
 
+  const components = config.schema.components ?? {};
+  for (const [compName, comp] of Object.entries(components)) {
+    if (comp.fields) {
+      validateFields(compName, comp.fields, config.schema.models, components, mediaNames);
+    }
+  }
+
   for (const [modelName, model] of Object.entries(config.schema.models)) {
     if (model.source.mode && model.kind !== "singleton") {
       throw new ConfigError(
@@ -241,7 +267,7 @@ export function validateNexusConfig(config: NexusConfig): void {
     }
 
     if (model.fields) {
-      validateFields(modelName, model.fields, config.schema.models, mediaNames);
+      validateFields(modelName, model.fields, config.schema.models, components, mediaNames);
     }
   }
 }
@@ -250,11 +276,38 @@ function validateFields(
   modelName: string,
   fields: Record<string, FieldSchema>,
   models: Record<string, { kind: string }>,
+  components: Record<string, { fields: Record<string, FieldSchema> }>,
   mediaNames: string[]
 ): void {
   for (const [fieldName, field] of Object.entries(fields)) {
     if (field.type === "object" && field.fields) {
-      validateFields(modelName, field.fields, models, mediaNames);
+      validateFields(modelName, field.fields, models, components, mediaNames);
+    }
+
+    if (field.type === "component") {
+      if (!components[field.component]) {
+        throw new ConfigError(
+          `Model/Component "${modelName}" field "${fieldName}" references component "${field.component}" which is not declared in schema.components.`,
+          {
+            operation: "defineNexusConfig",
+            reason: `Declared components: ${Object.keys(components).join(", ") || "none"}.`
+          }
+        );
+      }
+    }
+
+    if (field.type === "blocks" && field.allowedComponents) {
+      for (const allowed of field.allowedComponents) {
+        if (!components[allowed]) {
+          throw new ConfigError(
+            `Model/Component "${modelName}" field "${fieldName}" references allowedComponent "${allowed}" which is not declared in schema.components.`,
+            {
+              operation: "defineNexusConfig",
+              reason: `Declared components: ${Object.keys(components).join(", ") || "none"}.`
+            }
+          );
+        }
+      }
     }
 
     if (field.type === "string" && field.options?.length === 0) {
@@ -268,10 +321,20 @@ function validateFields(
     }
 
     if (field.type === "reference") {
-      const target = models[field.collection];
+      const targetKey = field.model ?? field.collection;
+      if (!targetKey) {
+        throw new ConfigError(
+          `Model "${modelName}" field "${fieldName}" reference field must specify a model or collection.`,
+          {
+            operation: "defineNexusConfig",
+            reason: "Reference fields require a model target."
+          }
+        );
+      }
+      const target = models[targetKey];
       if (!target) {
         throw new ConfigError(
-          `Model "${modelName}" field "${fieldName}" references collection "${field.collection}" which does not exist.`,
+          `Model "${modelName}" field "${fieldName}" references collection "${targetKey}" which does not exist.`,
           {
             operation: "defineNexusConfig",
             reason: `Declared models: ${Object.keys(models).join(", ") || "none"}.`
@@ -280,7 +343,7 @@ function validateFields(
       }
       if (target.kind !== "collection") {
         throw new ConfigError(
-          `Model "${modelName}" field "${fieldName}" references "${field.collection}" but that model kind is "${target.kind}", not "collection".`,
+          `Model "${modelName}" field "${fieldName}" references "${targetKey}" but that model kind is "${target.kind}", not "collection".`,
           {
             operation: "defineNexusConfig",
             reason: "Reference fields must target collection models."

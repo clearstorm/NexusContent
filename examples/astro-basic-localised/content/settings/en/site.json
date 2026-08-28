@@ -4,5 +4,14 @@
   "footer": {
     "description": "A reference consumer proving that Astro and NexusContent share a clean boundary.",
     "credit": "Powered by NexusContent with a Git content repository."
+  },
+  "contactDetails": {
+    "heading": "Contact details",
+    "items": [
+      { "label": "Email", "value": "hello@example.com", "href": "mailto:hello@example.com" },
+      { "label": "Phone", "value": "+27 11 000 0000", "href": "tel:+27110000000" },
+      { "label": "Address", "value": "1 Content Lane, Sandton, Johannesburg" },
+      { "label": "Office hours", "value": "Mon-Fri, 08:00-17:00" }
+    ]
   }
 }

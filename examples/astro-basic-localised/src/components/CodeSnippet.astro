@@ -1,0 +1,47 @@
+---
+interface Props {
+  language: string;
+  code: string;
+  caption?: string;
+}
+
+const { language, code, caption } = Astro.props;
+---
+
+<section class="section snippet">
+  <pre>
+    <code data-language={language}>{code}</code>
+  </pre>
+  {caption && <p class="caption">{caption}</p>}
+  <style>
+    pre {
+      max-width: 100%;
+      overflow-x: auto;
+      margin: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #1e1e2e;
+      color: #e4e4e7;
+      padding: 1.25rem 1.5rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    code[data-language]::before {
+      content: attr(data-language);
+      display: block;
+      margin-bottom: 0.75rem;
+      color: #a1a1aa;
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin: 0.5rem 0 0;
+    }
+  </style>
+</section>

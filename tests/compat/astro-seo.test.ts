@@ -23,7 +23,7 @@ const routeFiles = {
   ],
   "astro-basic-localised": [
     "[locale]/index.astro",
-    "[locale]/about.astro",
+    "[locale]/company.astro",
     "[locale]/services.astro",
     "[locale]/contact.astro",
     "[locale]/blog/index.astro",

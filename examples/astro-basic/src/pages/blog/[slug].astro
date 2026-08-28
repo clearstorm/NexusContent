@@ -1,8 +1,10 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import ContentBlocks from "../../components/ContentBlocks.astro";
 import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { resolveBlocks } from "../../app/media";
 
 export async function getStaticPaths() {
   const posts = await nexus.getCollection("blog");
@@ -21,7 +23,8 @@ if (!post) {
   throw new Error(`Required content "${key ?? slug}" was not found.`);
 }
 
-const { body, date, excerpt } = post.data;
+const { date, excerpt } = post.data;
+const blocks = await resolveBlocks(nexus, post.data.body);
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
 const seo = resolveSeo({
@@ -50,7 +53,7 @@ const seo = resolveSeo({
     </p>
     <h1>{post.title}</h1>
     {date && <time>{date}</time>}
-    {body && <p class="body">{body}</p>}
+    <ContentBlocks blocks={blocks} />
   </article>
 
   <style>
@@ -68,18 +71,15 @@ const seo = resolveSeo({
       color: var(--accent);
     }
 
-    .post time {
-      display: inline-block;
-      margin-top: 0.5rem;
-      color: var(--muted);
-      font-size: 0.9rem;
+    .post h1 {
+      margin-bottom: 0.5rem;
     }
 
-    .body {
-      margin-top: 2rem;
-      font-size: 1.15rem;
+    .post time {
+      display: inline-block;
+      margin-bottom: 1rem;
       color: var(--muted);
-      line-height: 1.8;
+      font-size: 0.9rem;
     }
   </style>
 </BaseLayout>

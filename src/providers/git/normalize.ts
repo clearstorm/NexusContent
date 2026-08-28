@@ -46,6 +46,30 @@ function buildMeta(source: NormalizeSource): ContentMeta {
   return meta;
 }
 
+function normalizeGitValue(val: unknown): unknown {
+  if (Array.isArray(val)) {
+    return val.map((item) => normalizeGitValue(item));
+  }
+  if (val !== null && typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    const res: Record<string, unknown> = {};
+    const componentType =
+      (obj._type as string | undefined) ??
+      (obj.component as string | undefined) ??
+      (obj.type as string | undefined);
+
+    if (componentType) {
+      res._type = componentType;
+    }
+
+    for (const [k, v] of Object.entries(obj)) {
+      res[k] = normalizeGitValue(v);
+    }
+    return res;
+  }
+  return val;
+}
+
 export function normalizeRawPage(
   raw: unknown,
   source: NormalizeSource
@@ -59,7 +83,7 @@ export function normalizeRawPage(
     if (field === "id" || field === "key" || field === "slug" || field === "title" || field === "seo") {
       continue;
     }
-    data[field] = value;
+    data[field] = normalizeGitValue(value);
   }
 
   return {
@@ -84,7 +108,7 @@ export function normalizeRawSingleton(
     if (field === "id" || field === "key") {
       continue;
     }
-    data[field] = value;
+    data[field] = normalizeGitValue(value);
   }
 
   return {

@@ -1,24 +1,59 @@
-import type { ModelSchema } from "@nexuscontent/core";
+import type { ComponentSchema, ModelSchema } from "@nexuscontent/core";
 
-const ctaFields = {
-  heading: { type: "string", required: true },
-  intro: { type: "string", required: true },
-  label: { type: "string", required: true },
-  href: { type: "string", required: true }
-} as const;
-
-const heroFields = {
-  eyebrow: { type: "string" },
-  heading: { type: "string", required: true },
-  intro: { type: "string", required: true },
-  cta: {
-    type: "object",
+export const components = {
+  hero: {
     fields: {
+      eyebrow: { type: "string" },
+      heading: { type: "string", required: true },
+      intro: { type: "string", required: true },
+      cta: {
+        type: "object",
+        fields: {
+          label: { type: "string", required: true },
+          href: { type: "string", required: true }
+        }
+      }
+    }
+  },
+  cta: {
+    fields: {
+      heading: { type: "string", required: true },
+      intro: { type: "string", required: true },
       label: { type: "string", required: true },
       href: { type: "string", required: true }
     }
+  },
+  servicesList: {
+    fields: {
+      heading: { type: "string", required: true },
+      intro: { type: "string" },
+      items: {
+        type: "object",
+        list: true,
+        required: true,
+        fields: {
+          title: { type: "string", required: true },
+          description: { type: "string", required: true },
+          points: { type: "string", list: true }
+        }
+      }
+    }
+  },
+  testimonialsList: {
+    fields: {
+      heading: { type: "string", required: true },
+      items: {
+        type: "object",
+        list: true,
+        required: true,
+        fields: {
+          quote: { type: "string", required: true },
+          author: { type: "string", required: true }
+        }
+      }
+    }
   }
-} as const;
+} as const satisfies Record<string, ComponentSchema>;
 
 /**
  * Model schemas for the WordPress reference consumer.
@@ -33,51 +68,24 @@ export const models = {
     kind: "singleton",
     source: { provider: "wordpress", key: "home", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
-      services: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          intro: { type: "string" },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              title: { type: "string", required: true },
-              description: { type: "string", required: true }
-            }
-          }
-        }
-      },
-      testimonials: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              quote: { type: "string", required: true },
-              author: { type: "string", required: true }
-            }
-          }
-        }
-      },
-      cta: { type: "object", fields: ctaFields }
+      hero: { type: "component", component: "hero" },
+      services: { type: "component", component: "servicesList" },
+      testimonials: { type: "component", component: "testimonialsList" },
+      cta: { type: "component", component: "cta" },
+      contentBlocks: {
+        type: "blocks",
+        list: true,
+        allowedComponents: ["hero", "servicesList", "testimonialsList", "cta"]
+      }
     }
   },
   about: {
     kind: "singleton",
     source: { provider: "wordpress", key: "about", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
+      hero: { type: "component", component: "hero" },
       mission: {
         type: "object",
-        required: true,
         fields: {
           heading: { type: "string", required: true },
           content: { type: "string", required: true }
@@ -85,7 +93,6 @@ export const models = {
       },
       story: {
         type: "object",
-        required: true,
         fields: {
           heading: { type: "string", required: true },
           content: { type: "string", required: true }
@@ -93,49 +100,30 @@ export const models = {
       },
       values: {
         type: "object",
-        required: true,
         fields: {
           heading: { type: "string", required: true },
           items: { type: "string", list: true, required: true }
         }
       },
-      cta: { type: "object", fields: ctaFields }
+      cta: { type: "component", component: "cta" }
     }
   },
   services: {
     kind: "singleton",
     source: { provider: "wordpress", key: "services", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
-      services: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          intro: { type: "string" },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              title: { type: "string", required: true },
-              description: { type: "string", required: true },
-              points: { type: "string", list: true }
-            }
-          }
-        }
-      },
-      cta: { type: "object", fields: ctaFields }
+      hero: { type: "component", component: "hero" },
+      services: { type: "component", component: "servicesList" },
+      cta: { type: "component", component: "cta" }
     }
   },
   contact: {
     kind: "singleton",
     source: { provider: "wordpress", key: "contact", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
+      hero: { type: "component", component: "hero" },
       contact: {
         type: "object",
-        required: true,
         fields: {
           heading: { type: "string", required: true },
           items: {
@@ -150,7 +138,7 @@ export const models = {
           }
         }
       },
-      cta: { type: "object", fields: ctaFields }
+      cta: { type: "component", component: "cta" }
     }
   },
   blog: {
@@ -166,3 +154,8 @@ export const models = {
     }
   }
 } as const satisfies Record<string, ModelSchema>;
+
+export const schema = {
+  models,
+  components
+};

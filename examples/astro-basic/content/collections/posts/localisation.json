@@ -3,5 +3,19 @@
   "slug": "two-languages-one-codebase",
   "date": "2026-03-12",
   "excerpt": "Locale variant directories keep translations close to the content.",
-  "body": "This site is generated in English and French from the same Astro components. Each locale lives in its own variant directory, and NexusContent resolves the right one at build time with optional fallback."
+  "body": [
+    {
+      "_type": "richTextContent",
+      "content": "<p>This site is generated in English and French from the same Astro components. Each locale lives in its own variant directory, and the single-locale example keeps the same flow without locale configuration.</p>"
+    },
+    {
+      "_type": "imageGallery",
+      "heading": "Content abstraction, visualized",
+      "images": [
+        { "src": "hero.svg", "alt": "Content sources connected to a consumer" },
+        { "src": "icon.svg", "alt": "Normalized content model" },
+        { "src": "avatar.svg", "alt": "Consumer rendering clean content" }
+      ]
+    }
+  ]
 }

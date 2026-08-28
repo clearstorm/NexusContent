@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type {
   CollectionItem,
+  ComponentSchema,
   ContentProvider,
   ModelSchema,
   NavigationContent,
@@ -42,7 +43,13 @@ const models = {
       checklist: { type: "string", list: true, required: true },
       featuredImage: { type: "media", media: "local" },
       author: { type: "reference", collection: "team" },
-      publishedAt: { type: "datetime" }
+      publishedAt: { type: "datetime" },
+      body: {
+        type: "blocks",
+        list: true,
+        required: true,
+        allowedComponents: ["heroSection"]
+      }
     }
   },
   team: {
@@ -66,6 +73,22 @@ const models = {
   }
 } as const satisfies Record<string, ModelSchema>;
 
+const components = {
+  heroSection: {
+    fields: {
+      heading: { type: "string", required: true },
+      image: { type: "media" },
+      cta: { type: "component", component: "button" }
+    }
+  },
+  button: {
+    fields: {
+      label: { type: "string", required: true },
+      href: { type: "string", required: true }
+    }
+  }
+} as const satisfies Record<string, ComponentSchema>;
+
 const config = {
   providers: { git: { type: "git" } },
   media: {
@@ -75,7 +98,7 @@ const config = {
       remote: { type: "remote" }
     }
   },
-  schema: { models }
+  schema: { models, components }
 } satisfies NexusConfig;
 
 const nexusConfig = defineNexusConfig(config);
@@ -96,7 +119,8 @@ class StubProvider implements ContentProvider {
       data: {
         hero: { heading: "Hi", intro: "Welcome" },
         checklist: ["a"],
-        featuredImage: { id: "1", src: "logo.png" }
+        featuredImage: { id: "1", src: "logo.png" },
+        body: [{ _type: "heroSection", heading: "Hi", image: { id: "1", src: "logo.png" } }]
       } as TData,
       meta: { source: this.name }
     };
@@ -176,9 +200,27 @@ test("inferred data shapes are structurally correct", () => {
     featuredImage: { id: "1", src: "logo.png" },
     author: { model: "team", key: "ada" },
     publishedAt: "2026-08-01T00:00:00Z",
+    body: [
+      {
+        _type: "heroSection",
+        heading: "Hi",
+        image: { id: "1", src: "logo.png" },
+        cta: { label: "Go", href: "/go" }
+      }
+    ],
     whollyUndeclared: { anything: "goes" }
   };
   expectType(valid);
+
+  // Blocks discriminate on `_type` and resolve the matching component shape.
+  const block = (valid as HomeData).body[0];
+  if (block) {
+    expectType<"heroSection">(block._type);
+    const heading: string = block.heading;
+    expectType(heading);
+    const ctaHref: string | undefined = block.cta?.href;
+    expectType(ctaHref);
+  }
 });
 
 test("retrieval methods infer model data and restrict model names", async () => {

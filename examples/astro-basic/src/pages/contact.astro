@@ -1,10 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
-import CTA from "../components/CTA.astro";
+import RichTextContent from "../components/RichTextContent.astro";
+import ContactDetails from "../components/ContactDetails.astro";
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { resolveHero } from "../app/media";
 
 const page = await nexus.getPage("contact");
 
@@ -12,7 +14,16 @@ if (!page) {
   throw new Error(`Required content "contact" was not found.`);
 }
 
-const { hero, contact, cta } = page.data;
+// Contact details live in the site settings, so every page can reuse them.
+const settings = await nexus.getSettings("site");
+
+if (!settings) {
+  throw new Error(`Required settings "site" was not found.`);
+}
+
+const hero = await resolveHero(nexus, page.data.hero);
+const { introduction } = page.data;
+const { contactDetails } = settings.data;
 
 const seo = resolveSeo({
   title: page.title ?? "Contact",
@@ -21,56 +32,7 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  <Hero {...hero} />
-
-  <section class="section details">
-    <h2>{contact.heading}</h2>
-    <div class="grid">
-      {
-        contact.items.map((detail) => (
-          <article class="card">
-            <h3>{detail.label}</h3>
-            {detail.href ? (
-              <a href={detail.href}>{detail.value}</a>
-            ) : (
-              <p>{detail.value}</p>
-            )}
-          </article>
-        ))
-      }
-    </div>
-  </section>
-
-  <CTA {...cta} />
-
-  <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-
-    .card {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      background: var(--surface);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .card h3 {
-      margin-top: 0;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .card a {
-      font-weight: 600;
-      word-break: break-word;
-    }
-  </style>
+  {hero && <Hero {...hero} />}
+  {introduction && <RichTextContent {...introduction} />}
+  {contactDetails && <ContactDetails {...contactDetails} />}
 </BaseLayout>

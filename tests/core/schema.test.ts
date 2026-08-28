@@ -294,3 +294,41 @@ test("validateModelRelations rejects references to missing collections", () => {
     }
   );
 });
+
+test("validates data matching component and blocks schemas", () => {
+  const registry = new ModelRegistry(
+    {
+      components: {
+        hero: {
+          fields: {
+            heading: { type: "string", required: true }
+          }
+        }
+      },
+      models: {
+        home: {
+          kind: "singleton",
+          source: { provider: "mock", key: "home" },
+          fields: {
+            header: { type: "component", component: "hero" },
+            layout: { type: "blocks", list: true, allowedComponents: ["hero"] }
+          }
+        }
+      }
+    },
+    ["mock"],
+    []
+  );
+
+  const valid = registry.validateData(
+    "home",
+    {
+      header: { heading: "Welcome" },
+      layout: [{ _type: "hero", heading: "Block Heading" }]
+    },
+    { provider: "mock" }
+  );
+
+  assert.equal((valid as any).header.heading, "Welcome");
+  assert.equal((valid as any).layout[0]._type, "hero");
+});

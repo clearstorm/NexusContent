@@ -1,10 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
-import CTA from "../components/CTA.astro";
+import Services from "../components/Services.astro";
+import RichTextContent from "../components/RichTextContent.astro";
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { resolveHero, resolveServices } from "../app/media";
 
 const page = await nexus.getPage("services");
 
@@ -12,7 +14,9 @@ if (!page) {
   throw new Error(`Required content "services" was not found.`);
 }
 
-const { hero, services, cta } = page.data;
+const hero = await resolveHero(nexus, page.data.hero);
+const services = await resolveServices(nexus, page.data.servicesList);
+const { richTextContent } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "Services",
@@ -21,80 +25,7 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  <Hero {...hero} />
-
-  <section class="section services">
-    <h2>{services.heading}</h2>
-    {services.intro && <p class="lede">{services.intro}</p>}
-    <div class="grid">
-      {
-        services.items.map((service, index) => (
-          <article class="card">
-            <span class="num">{index + 1}</span>
-            <h3>{service.title}</h3>
-            <p>{service.description}</p>
-            {service.points && (
-              <ul>
-                {service.points.map((point) => (
-                  <li>{point}</li>
-                ))}
-              </ul>
-            )}
-          </article>
-        ))
-      }
-    </div>
-  </section>
-
-  <CTA {...cta} />
-
-  <style>
-    .lede {
-      color: var(--muted);
-      max-width: 44rem;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-
-    .card {
-      position: relative;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      background: var(--surface);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .card h3 {
-      margin-top: 0.75rem;
-    }
-
-    .card ul {
-      margin: 0.75rem 0 0;
-      padding-left: 1.1rem;
-      color: var(--muted);
-    }
-
-    .card li + li {
-      margin-top: 0.25rem;
-    }
-
-    .num {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 0.5rem;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-  </style>
+  {hero && <Hero {...hero} />}
+  {services && <Services {...services} />}
+  {richTextContent && <RichTextContent {...richTextContent} />}
 </BaseLayout>

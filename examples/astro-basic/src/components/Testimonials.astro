@@ -1,12 +1,16 @@
 ---
-interface Testimonial {
+interface Item {
   quote: string;
   author: string;
+  avatar?: {
+    src: string;
+    alt?: string;
+  };
 }
 
 interface Props {
   heading: string;
-  items: Testimonial[];
+  items: Item[];
 }
 
 const { heading, items } = Astro.props;
@@ -18,6 +22,15 @@ const { heading, items } = Astro.props;
     {
       items.map((item) => (
         <blockquote class="card">
+          {item.avatar?.src && (
+            <img
+              class="avatar"
+              src={item.avatar.src}
+              alt={item.avatar.alt ?? ""}
+              width={48}
+              height={48}
+            />
+          )}
           <p class="quote">"{item.quote}"</p>
           <footer>— {item.author}</footer>
         </blockquote>
@@ -50,6 +63,12 @@ const { heading, items } = Astro.props;
     .card footer {
       color: var(--muted);
       font-size: 0.9rem;
+    }
+
+    .card .avatar {
+      display: block;
+      margin-bottom: 0.75rem;
+      border-radius: 50%;
     }
   </style>
 </section>

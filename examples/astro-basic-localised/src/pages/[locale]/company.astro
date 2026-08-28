@@ -1,11 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Hero from "../../components/Hero.astro";
-import CTA from "../../components/CTA.astro";
+import RichTextContent from "../../components/RichTextContent.astro";
+import ImageGallery from "../../components/ImageGallery.astro";
 import { nexus } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { resolveHero, resolveGallery } from "../../app/media";
 
 export function getStaticPaths() {
   return supportedLocales.map((locale) => ({ params: { locale } }));
@@ -19,7 +21,9 @@ if (!page) {
   throw new Error(`Required content "about" was not found for locale "${locale}".`);
 }
 
-const { hero, mission, story, values, cta } = page.data;
+const hero = await resolveHero(nexus, page.data.hero);
+const gallery = await resolveGallery(nexus, page.data.imageGallery);
+const { richTextContent } = page.data;
 
 const seo = resolveSeo({
   title: page.title ?? "About",
@@ -31,51 +35,7 @@ const seo = resolveSeo({
   seo={seo}
   locale={locale}
 >
-  <Hero {...hero} locale={locale} />
-
-  <section class="section mission">
-    <h2>{mission.heading}</h2>
-    <p>{mission.content}</p>
-  </section>
-
-  <section class="section story">
-    <h2>{story.heading}</h2>
-    <p>{story.content}</p>
-  </section>
-
-  <section class="section values">
-    <h2>{values.heading}</h2>
-    <ul>
-      {values.items.map((item) => (
-        <li>{item}</li>
-      ))}
-    </ul>
-  </section>
-
-  <CTA {...cta} locale={locale} />
-
-  <style>
-    .mission p,
-    .story p {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 44rem;
-    }
-
-    .values ul {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-      gap: 1rem;
-      list-style: none;
-      padding: 0;
-    }
-
-    .values li {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem 1.25rem;
-      background: var(--surface);
-      box-shadow: var(--shadow-sm);
-    }
-  </style>
+  {hero && <Hero {...hero} />}
+  {richTextContent && <RichTextContent {...richTextContent} />}
+  {gallery && <ImageGallery {...gallery} />}
 </BaseLayout>

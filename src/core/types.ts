@@ -239,7 +239,9 @@ export type FieldType =
   | "object"
   | "reference"
   | "media"
-  | "richText";
+  | "richText"
+  | "component"
+  | "blocks";
 
 export interface BaseFieldSchema {
   readonly required?: boolean;
@@ -270,7 +272,8 @@ export interface ObjectFieldSchema extends BaseFieldSchema {
 
 export interface ReferenceFieldSchema extends BaseFieldSchema {
   readonly type: "reference";
-  readonly collection: string;
+  readonly model?: string;
+  readonly collection?: string;
 }
 
 export interface MediaFieldSchema extends BaseFieldSchema {
@@ -282,6 +285,16 @@ export interface RichTextFieldSchema extends BaseFieldSchema {
   readonly type: "richText";
 }
 
+export interface ComponentFieldSchema extends BaseFieldSchema {
+  readonly type: "component";
+  readonly component: string;
+}
+
+export interface BlocksFieldSchema extends BaseFieldSchema {
+  readonly type: "blocks";
+  readonly allowedComponents?: readonly string[];
+}
+
 export type FieldSchema =
   | StringFieldSchema
   | NumberFieldSchema
@@ -290,13 +303,22 @@ export type FieldSchema =
   | ObjectFieldSchema
   | ReferenceFieldSchema
   | MediaFieldSchema
-  | RichTextFieldSchema;
+  | RichTextFieldSchema
+  | ComponentFieldSchema
+  | BlocksFieldSchema;
 
 /**
  * A declarative field map. Concrete literal configs assigned through
  * `satisfies FieldMap` keep literal field shapes for type inference.
  */
 export type FieldMap = Readonly<Record<string, FieldSchema>>;
+
+/**
+ * A reusable component schema containing a map of fields.
+ */
+export interface ComponentSchema {
+  readonly fields: FieldMap;
+}
 
 /**
  * A provider neutral reference to a collection item. `key` must match the
@@ -327,6 +349,7 @@ export interface ModelSchema {
 
 export interface SchemaConfig {
   readonly models: Readonly<Record<string, ModelSchema>>;
+  readonly components?: Readonly<Record<string, ComponentSchema>>;
 }
 
 export interface NexusConfig {

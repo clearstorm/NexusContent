@@ -3,38 +3,24 @@
   "slug": "services",
   "seo": {
     "title": "Services - Exemple NexusContent",
-    "description": "Les services de contenu démontrés par le site d'exemple NexusContent."
+    "description": "Les services livrés par le pipeline NexusContent."
   },
   "hero": {
-    "eyebrow": "Ce que nous faisons",
-    "heading": "Des services bâtis sur une frontière propre.",
-    "intro": "Chaque service de cette page passe par la même API de contenu normalisé."
+    "heading": "Ce que nous livrons",
+    "intro": "Contenu normalisé, provenance, validation et limites claires côté consommateur.",
+    "image": { "src": "hero.svg", "alt": "Services issus de sources de contenu connectées" },
+    "cta": { "label": "Contactez-nous", "href": "/contact", "variant": "secondary" }
   },
-  "services": {
-    "heading": "Services principaux",
-    "intro": "Prouvés par les pages que vous visitez en ce moment.",
+  "servicesList": {
+    "heading": "Services clés",
+    "intro": "Chacun est une limite dont NexusContent est propriétaire.",
     "items": [
-      {
-        "title": "Génération statique",
-        "description": "La génération statique est le mode d'exécution par défaut, du développement local à l'intégration continue.",
-        "points": ["Sortie prévisible", "Générations rapides", "Dist portable"]
-      },
-      {
-        "title": "Contenu localisé",
-        "description": "Les répertoires de variantes linguistiques résolvent la bonne langue avec repli.",
-        "points": ["Deux langues", "Repli explicite", "Aucun workflow imposé"]
-      },
-      {
-        "title": "Contenu séparé",
-        "description": "Le contenu modifiable vit hors du dépôt de l'application.",
-        "points": ["Contenu maîtrisé par le client", "Diffs propres", "Adapté aux éditeurs"]
-      }
+      { "title": "Récupération de contenu", "description": "Pages, collections, singletons, navigation et réglages via un seul service.", "icon": { "src": "icon.svg", "alt": "Récupération" } },
+      { "title": "Normalisation", "description": "Les réponses des fournisseurs sont converties en types partagés à la limite du fournisseur.", "icon": { "src": "icon.svg", "alt": "Normalisation" } },
+      { "title": "Validation", "description": "Les schémas de champs déclaratifs vérifient le contenu avant qu'il n'atteigne les composants.", "icon": { "src": "icon.svg", "alt": "Validation" } }
     ]
   },
-  "cta": {
-    "heading": "Prêt à commencer ?",
-    "intro": "Contactez-nous, nous vous montrerons l'architecture.",
-    "label": "Contactez-nous",
-    "href": "/contact"
+  "richTextContent": {
+    "content": "<p>Le média est aussi neutre vis-à-vis du fournisseur. Les références dans les champs nommés sont résolues via les fournisseurs de médias du projet au moment du build.</p>"
   }
 }

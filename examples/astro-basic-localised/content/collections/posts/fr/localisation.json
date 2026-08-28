@@ -2,6 +2,20 @@
   "title": "Deux langues, un seul code",
   "slug": "two-languages-one-codebase",
   "date": "2026-03-12",
-  "excerpt": "Les répertoires de variantes gardent les traductions près du contenu.",
-  "body": "Ce site est généré en anglais et en français à partir des mêmes composants Astro. Chaque langue vit dans son propre répertoire de variantes, et NexusContent résout la bonne langue à la génération, avec repli optionnel."
+  "excerpt": "Des dossiers de variantes par locale gardent les traductions près du contenu.",
+  "body": [
+    {
+      "_type": "richTextContent",
+      "content": "<p>Ce site est généré en anglais et en français à partir des mêmes composants Astro. Chaque locale vit dans son propre dossier de variantes, résolue via la chaîne de repli configurée.</p>"
+    },
+    {
+      "_type": "imageGallery",
+      "heading": "Abstraction de contenu, visuel",
+      "images": [
+        { "src": "hero.svg", "alt": "Sources de contenu reliées à un consommateur" },
+        { "src": "icon.svg", "alt": "Modèle de contenu normalisé" },
+        { "src": "avatar.svg", "alt": "Consommateur rendant un contenu propre" }
+      ]
+    }
+  ]
 }

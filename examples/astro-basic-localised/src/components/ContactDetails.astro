@@ -1,0 +1,62 @@
+---
+interface Item {
+  label: string;
+  value: string;
+  href?: string;
+}
+
+interface Props {
+  heading: string;
+  items: Item[];
+}
+
+const { heading, items } = Astro.props;
+---
+
+<section class="section details">
+  <h2>{heading}</h2>
+  <div class="grid">
+    {
+      items.map((detail) => (
+        <article class="card">
+          <h3>{detail.label}</h3>
+          {detail.href ? (
+            <a href={detail.href}>{detail.value}</a>
+          ) : (
+            <p>{detail.value}</p>
+          )}
+        </article>
+      ))
+    }
+  </div>
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .card a {
+      font-weight: 600;
+      word-break: break-word;
+    }
+  </style>
+</section>

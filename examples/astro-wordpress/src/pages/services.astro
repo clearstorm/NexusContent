@@ -23,30 +23,38 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  <Hero {...hero} />
+  {hero && <Hero {...hero} />}
 
-  <section class="section services">
-    <h2>{services.heading}</h2>
-    {services.intro && <p class="lede">{services.intro}</p>}
-    <div class="grid">
-      {
-        services.items.map((service, index) => (
-          <article class="card">
-            <span class="num">{index + 1}</span>
-            <h3>{service.title}</h3>
-            <p>{service.description}</p>
-            {service.points && (
-              <ul>
-                {service.points.map((point) => (
-                  <li>{point}</li>
-                ))}
-              </ul>
-            )}
-          </article>
-        ))
-      }
-    </div>
-  </section>
+  {services && (
+    <section class="section services">
+      <h2>{services.heading}</h2>
+      {services.intro && <p class="lede">{services.intro}</p>}
+      <div class="grid">
+        {
+          services.items.map((service, index) => (
+            <article class="card">
+              <span class="num">{index + 1}</span>
+              <h3>{service.title}</h3>
+              <p>{service.description}</p>
+              {service.points && (
+                <ul>
+                  {service.points.map((point) => (
+                    <li>{point}</li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          ))
+        }
+      </div>
+    </section>
+  )}
+
+ <!-- 
+ {page.data.content && !(hero || mission || story) && (
+    <article class="prose" set:html={page.data.content} />
+  )}
+  -->
 
   {cta && <CTA {...cta} />}
 

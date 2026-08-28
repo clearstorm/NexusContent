@@ -3,35 +3,22 @@
   "slug": "about",
   "seo": {
     "title": "À propos - Exemple NexusContent",
-    "description": "Comment NexusContent sépare le contenu du code applicatif."
+    "description": "Comment NexusContent sépare le contenu du code de l'application."
   },
   "hero": {
-    "eyebrow": "Qui nous sommes",
-    "heading": "La séparation, par conception.",
-    "intro": "NexusContent garde une frontière nette entre les sources de contenu et les consommateurs."
+    "heading": "À propos de ce site",
+    "intro": "Un consommateur de référence qui prouve que le Core fonctionne au-delà d'Astro : mêmes contenus, mêmes composants, deux langues.",
+    "image": { "src": "hero.svg", "alt": "Sources de contenu abstraites connectées" },
+    "cta": { "label": "Contactez-nous", "href": "/contact" }
   },
-  "mission": {
-    "heading": "Notre mission",
-    "content": "Offrir aux applications front-end une interface de contenu unique et prévisible, quelle que soit la source."
+  "richTextContent": {
+    "content": "<p>Cet exemple est localisé : les routes sont préfixées par locale et chaque page est résolue via la chaîne de repli configurée dans NexusContent. Les variantes anglaise et française vivent côte à côte dans le dépôt de contenu.</p>"
   },
-  "story": {
-    "heading": "Notre histoire",
-    "content": "NexusContent est né d'une question : pourquoi reconstruire un site à chaque changement de source de contenu ? La réponse est une fine couche indépendante des frameworks qui normalise le contenu une fois, pour que les applications se concentrent sur la présentation."
-  },
-  "values": {
-    "heading": "Principes",
-    "items": [
-      "Astro possède le routage.",
-      "Le noyau reste indépendant des fournisseurs.",
-      "Le contenu modifiable vit hors de l'application.",
-      "La génération statique reste la valeur par défaut.",
-      "Un contenu manquant échoue bruyamment."
+  "imageGallery": {
+    "heading": "Deux locales, un pipeline",
+    "images": [
+      { "src": "icon.svg", "alt": "Modèle de contenu normalisé" },
+      { "src": "avatar.svg", "alt": "Consommateur qui rend le contenu" }
     ]
-  },
-  "cta": {
-    "heading": "Vous voulez en parler ?",
-    "intro": "Nous expliquons volontiers l'architecture.",
-    "label": "Contactez-nous",
-    "href": "/contact"
   }
 }

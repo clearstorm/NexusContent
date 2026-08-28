@@ -1,0 +1,46 @@
+---
+interface Props {
+  heading?: string;
+  images: {
+    src: string;
+    alt?: string;
+  }[];
+}
+
+const { heading, images } = Astro.props;
+---
+
+<section class="section gallery">
+  {heading && <h2>{heading}</h2>}
+  <div class="grid">
+    {
+      images.map((image) => (
+        <figure>
+          <img src={image.src} alt={image.alt ?? ""} loading="lazy" />
+        </figure>
+      ))
+    }
+  </div>
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    figure {
+      margin: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</section>

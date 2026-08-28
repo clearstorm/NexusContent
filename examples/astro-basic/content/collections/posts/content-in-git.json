@@ -3,5 +3,16 @@
   "slug": "git-backed-content",
   "date": "2026-02-10",
   "excerpt": "Content and application code stay separated.",
-  "body": "The Git provider reads pages from the pages directory and collections from the collections directory. Each file keeps its provenance so builds stay auditable."
+  "body": [
+    {
+      "_type": "richTextContent",
+      "content": "<p>The Git provider reads pages from the pages directory and collections from the collections directory. Each file keeps its provenance so builds stay auditable.</p>"
+    },
+    {
+      "_type": "codeSnippet",
+      "language": "json",
+      "code": "{\n  \"contentBlocks\": [\n    {\n      \"_type\": \"richTextContent\",\n      \"content\": \"<p>Blocks keep content in the order the editor intends.</p>\"\n    }\n  ]\n}",
+      "caption": "A minimal page content file."
+    }
+  ]
 }

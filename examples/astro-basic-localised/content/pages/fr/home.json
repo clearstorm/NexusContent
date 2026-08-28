@@ -6,49 +6,25 @@
     "description": "Un site Astro statique propulsé par NexusContent et un dépôt de contenu Git, en anglais et en français."
   },
   "hero": {
-    "eyebrow": "Contenu, découplé",
     "heading": "Astro possède le site web.",
-    "intro": "Les fournisseurs de contenu possèdent le contenu. NexusContent se tient entre eux avec des types normalisés, la provenance, la validation et la résolution multilingue.",
-    "cta": {
-      "label": "À propos",
-      "href": "/company"
-    }
+    "intro": "Les fournisseurs de contenu possèdent le contenu. NexusContent se place entre eux avec des types normalisés, la provenance, la validation et la résolution par locale.",
+    "image": { "src": "hero.svg", "alt": "Sources de contenu reliées à un consommateur" },
+    "cta": { "label": "À propos", "href": "/company" }
   },
-  "services": {
+  "servicesList": {
     "heading": "Ce que nous faisons",
     "intro": "Le même service de contenu alimente chaque page de ce site.",
     "items": [
-      {
-        "title": "Génération statique",
-        "description": "Un rendu Astro prévisible, rapide et portable."
-      },
-      {
-        "title": "Contenu séparé",
-        "description": "Le contenu modifiable vit hors du dépôt de l'application."
-      },
-      {
-        "title": "Liberté du fournisseur",
-        "description": "Remplacez Git par WordPress ou Strapi sans réécrire le front-end."
-      }
+      { "title": "Builds statiques", "description": "Un rendu Astro prévisible, rapide et portable.", "icon": { "src": "icon.svg", "alt": "Fusée" } },
+      { "title": "Contenu séparé", "description": "Le contenu éditable vit hors du dépôt de l'application.", "icon": { "src": "icon.svg", "alt": "Pages" } },
+      { "title": "Liberté de fournisseur", "description": "Remplacez Git par WordPress ou Strapi sans réécrire le frontend.", "icon": { "src": "icon.svg", "alt": "Fournisseurs" } }
     ]
   },
-  "testimonials": {
-    "heading": "Ce qu'ils en disent",
+  "testimonialsList": {
+    "heading": "Ce qu'en disent les gens",
     "items": [
-      {
-        "quote": "Le contenu a changé sans toucher un seul composant.",
-        "author": "Éditrice de contenu"
-      },
-      {
-        "quote": "La génération a échoué bruyamment quand le contenu était invalide.",
-        "author": "Développeur"
-      }
+      { "quote": "Le contenu a changé sans toucher un seul composant.", "author": "Éditrice de contenu", "avatar": { "src": "avatar.svg", "alt": "Éditrice de contenu" } },
+      { "quote": "Le build a échoué bruyamment quand le contenu était invalide.", "author": "Développeur", "avatar": { "src": "avatar.svg", "alt": "Développeur" } }
     ]
-  },
-  "cta": {
-    "heading": "Lisez notre blog",
-    "intro": "Des pages pilotées par des collections et propulsées par le même fournisseur.",
-    "label": "Voir les articles",
-    "href": "/blog"
   }
 }

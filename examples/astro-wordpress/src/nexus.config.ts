@@ -1,6 +1,6 @@
 import { defineNexusConfig } from "@nexuscontent/core";
 import type { WordPressProviderOptions } from "@nexuscontent/core";
-import { models } from "./schema/schema";
+import { schema } from "./schema/schema";
 
 const wordpressApiUrl = import.meta.env.WORDPRESS_API_URL as string | undefined;
 
@@ -37,5 +37,5 @@ export const nexusConfig = defineNexusConfig({
   providers: {
     wordpress: { type: "wordpress", options: wordpressProviderOptions }
   },
-  schema: { models }
+  schema
 });

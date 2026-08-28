@@ -25,27 +25,37 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  <Hero {...hero} />
+  {hero && <Hero {...hero} />}
 
-  <section class="section mission">
-    <h2>{mission.heading}</h2>
-    <p>{mission.content}</p>
-  </section>
+  {mission && (
+    <section class="section mission">
+      <h2>{mission.heading}</h2>
+      <p>{mission.content}</p>
+    </section>
+  )}
 
-  <section class="section story">
-    <h2>{story.heading}</h2>
-    <p>{story.content}</p>
-  </section>
+  {story && (
+    <section class="section story">
+      <h2>{story.heading}</h2>
+      <p>{story.content}</p>
+    </section>
+  )}
 
-  <section class="section values">
-    <h2>{values.heading}</h2>
-    <ul>
-      {values.items.map((item) => (
-        <li>{item}</li>
-      ))}
-    </ul>
-  </section>
-
+  {values && (
+    <section class="section values">
+      <h2>{values.heading}</h2>
+      <ul>
+        {values.items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </section>
+  )}
+ <!-- 
+ {page.data.content && !(hero || mission || story) && (
+    <article class="prose" set:html={page.data.content} />
+  )}
+  -->
   {cta && <CTA {...cta} />}
 
   <style>

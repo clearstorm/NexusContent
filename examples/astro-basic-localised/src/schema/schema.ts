@@ -1,148 +1,110 @@
-import type { ModelSchema } from "@nexuscontent/core";
+import type { ComponentSchema, ModelSchema } from "@nexuscontent/core";
 
 const heroFields = {
-  eyebrow: { type: "string" },
   heading: { type: "string", required: true },
-  intro: { type: "string", required: true },
-  cta: {
-    type: "object",
+  intro: { type: "string" },
+  image: { type: "media", required: true },
+  cta: { type: "component", component: "button" }
+} as const;
+
+export const components = {
+  hero: { fields: heroFields },
+  button: {
     fields: {
       label: { type: "string", required: true },
-      href: { type: "string", required: true }
+      href: { type: "string", required: true },
+      variant: { type: "string" }
+    }
+  },
+  servicesList: {
+    fields: {
+      heading: { type: "string", required: true },
+      intro: { type: "string" },
+      items: {
+        type: "object",
+        list: true,
+        required: true,
+        fields: {
+          title: { type: "string", required: true },
+          description: { type: "string", required: true },
+          icon: { type: "media" }
+        }
+      }
+    }
+  },
+  testimonialsList: {
+    fields: {
+      heading: { type: "string", required: true },
+      items: {
+        type: "object",
+        list: true,
+        required: true,
+        fields: {
+          quote: { type: "string", required: true },
+          author: { type: "string", required: true },
+          avatar: { type: "media" }
+        }
+      }
+    }
+  },
+  richTextContent: {
+    fields: {
+      content: { type: "richText", required: true }
+    }
+  },
+  imageGallery: {
+    fields: {
+      heading: { type: "string" },
+      images: { type: "media", list: true, required: true }
+    }
+  },
+  codeSnippet: {
+    fields: {
+      language: { type: "string", required: true },
+      code: { type: "string", required: true },
+      caption: { type: "string" }
     }
   }
-} as const;
+} as const satisfies Record<string, ComponentSchema>;
 
-const ctaFields = {
-  heading: { type: "string", required: true },
-  intro: { type: "string", required: true },
-  label: { type: "string", required: true },
-  href: { type: "string", required: true }
-} as const;
-
+// Pages with a known structure declare named component fields so components
+// compose directly; the blog post body stays a `blocks` list because a post's
+// sections vary. `title`, `slug`, and `seo` live on the content envelope.
 export const models = {
   home: {
     kind: "singleton",
     source: { provider: "git", key: "home", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
-      services: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          intro: { type: "string" },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              title: { type: "string", required: true },
-              description: { type: "string", required: true }
-            }
-          }
-        }
-      },
-      testimonials: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              quote: { type: "string", required: true },
-              author: { type: "string", required: true }
-            }
-          }
-        }
-      },
-      cta: { type: "object", required: true, fields: ctaFields }
+      hero: { type: "component", component: "hero", required: true },
+      servicesList: { type: "component", component: "servicesList" },
+      testimonialsList: { type: "component", component: "testimonialsList" },
+      richTextContent: { type: "component", component: "richTextContent" }
     }
   },
   about: {
     kind: "singleton",
     source: { provider: "git", key: "about", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
-      mission: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          content: { type: "string", required: true }
-        }
-      },
-      story: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          content: { type: "string", required: true }
-        }
-      },
-      values: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          items: { type: "string", list: true, required: true }
-        }
-      },
-      cta: { type: "object", required: true, fields: ctaFields }
+      hero: { type: "component", component: "hero", required: true },
+      richTextContent: { type: "component", component: "richTextContent" },
+      imageGallery: { type: "component", component: "imageGallery" }
     }
   },
   services: {
     kind: "singleton",
     source: { provider: "git", key: "services", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
-      services: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          intro: { type: "string" },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              title: { type: "string", required: true },
-              description: { type: "string", required: true },
-              points: { type: "string", list: true, required: true }
-            }
-          }
-        }
-      },
-      cta: { type: "object", required: true, fields: ctaFields }
+      hero: { type: "component", component: "hero", required: true },
+      servicesList: { type: "component", component: "servicesList" },
+      richTextContent: { type: "component", component: "richTextContent" }
     }
   },
   contact: {
     kind: "singleton",
     source: { provider: "git", key: "contact", mode: "page" },
     fields: {
-      hero: { type: "object", required: true, fields: heroFields },
-      contact: {
-        type: "object",
-        required: true,
-        fields: {
-          heading: { type: "string", required: true },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              label: { type: "string", required: true },
-              value: { type: "string", required: true },
-              href: { type: "string" }
-            }
-          }
-        }
-      },
-      cta: { type: "object", required: true, fields: ctaFields }
+      hero: { type: "component", component: "hero", required: true },
+      introduction: { type: "component", component: "richTextContent" }
     }
   },
   blog: {
@@ -150,8 +112,17 @@ export const models = {
     source: { provider: "git", key: "posts" },
     fields: {
       date: { type: "datetime" },
-      excerpt: { type: "richText" },
-      body: { type: "richText" }
+      excerpt: { type: "string" },
+      body: {
+        type: "blocks",
+        list: true,
+        required: true,
+        allowedComponents: [
+          "richTextContent",
+          "imageGallery",
+          "codeSnippet"
+        ]
+      }
     }
   },
   primary: {
@@ -170,7 +141,28 @@ export const models = {
           description: { type: "string" },
           credit: { type: "string" }
         }
+      },
+      contactDetails: {
+        type: "object",
+        fields: {
+          heading: { type: "string", required: true },
+          items: {
+            type: "object",
+            list: true,
+            required: true,
+            fields: {
+              label: { type: "string", required: true },
+              value: { type: "string", required: true },
+              href: { type: "string" }
+            }
+          }
+        }
       }
     }
   }
 } as const satisfies Record<string, ModelSchema>;
+
+export const schema = {
+  models,
+  components
+};
