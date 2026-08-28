@@ -34,6 +34,9 @@ jobs:
       - name: Build package
         run: npm run build
 
+      - name: Check generated section schemas are fresh
+        run: npm run check:sections
+
       - name: Check Astro examples
         run: npm run check --workspaces --if-present
 

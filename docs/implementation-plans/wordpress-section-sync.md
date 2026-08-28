@@ -1,7 +1,7 @@
 # Implementation Plan: WordPress Component Synchronisation
 
 Date: 2026-08-28
-Status: planned (not started)
+Status: implemented (phases A-D plus Phase 5 plugin hygiene); verification in progress
 Owner: NexusContent (WordPress provider + companion plugin)
 
 ## Problem
@@ -35,6 +35,19 @@ Failures today:
 
 Outcome: plugin components used on a project stay synchronised with the
 WordPress components, and drift is loud and actionable instead of silent.
+
+### Deployed sync model
+
+Synchronisation happens through HTTP contracts only, never through a shared
+filesystem file across the project and WordPress repository boundaries:
+- Build time: the developer runs the Astro-side validate/generated flow against
+  the monorepo's `sections.json`, and the provider pulls a WordPress site's live
+  `/schema` at build time (Phase 1 A).
+- Runtime: the provider may push the consumer's `projectComponentContract` to a
+  site via the admin-only project-contract route (Phase 4 D). Drift is shown on
+  the plugin admin dashboard and is advisory only.
+No shared file spans project + WordPress; `sections.json` is canonical only
+inside this monorepo.
 
 ## Phase 1 — A: Live registry reconciliation (provider <-> plugin /schema)
 
@@ -112,12 +125,19 @@ changes.
   `{ components: string[], sectionTypes: string[] }`, derived from Phase 2
   resolution.
 - `class-rest-controller.php`: new secured
-  `POST /nexuscontent/v1/project-contract` — `manage_options` permission +
-  nonce, sanitized string arrays, stored as `project_components` inside the
+  `POST /nexuscontent/v1/project-contract` — `manage_options` permission,
+  sanitized string arrays, stored as `project_components` inside the
   existing `nexuscontent_settings` option. Lives outside the content wire
   contract, so no `contractVersion` negotiation change. No custom credential
-  storage (AGENTS §25.1).
-- Optional `scripts/push-project-contract.mjs` for CI pushes.
+  storage (AGENTS §25.1). The route does not verify a REST nonce itself:
+  WordPress core rejects cookie-authenticated requests lacking a valid
+  `X-WP-Nonce` (`rest_cookie_check_errors`) before the permission callback,
+  so the nonce requirement never blocks non-cookie auth (Application
+  Passwords).
+- Consumer-owned push helper: `examples/astro-wordpress/scripts/push-project-contract.mjs`
+  (npm script `push:project-contract` in that example, loading its `.env`) for
+  manual/CI pushes. Installed users push through the public
+  `projectComponentContract()` API plus their own POST or curl.
 
 ### D2 — Admin visibility
 
@@ -135,6 +155,33 @@ changes.
   contract card) and `tests/integration` (wp-env: secured POST, storage,
   permission boundary).
 
+## Phase 5 — Companion plugin hygiene (review follow-up)
+
+WordPress code-review findings folded into this plan:
+
+1. **Vocabulary single-sourcing**: canonical labels, fixed flags, and field
+   definitions now come from `sections.json` via `Section_Registry`
+   (`label()`, `fixed_types()`, `fixed_field_keys()`). Call sites updated:
+   `Editor_Mode`, `Block_Loader`, `Normalizer`, `ACF_Loader`,
+   `ACF_Field_Factory`, `Admin_Page::section_labels()`. `Block_Loader::block_types()`
+   derives hyphenated block names from the registry.
+2. **Dead code removal**: `Block_Loader::panel_available()` and its
+   `nexuscontent_editor_settings_panel_available` filter (plus README row);
+   `block_types()` retained because `BlockMetadataTest` depends on it — it is
+   registry-derived now, not a hard-coded copy.
+3. **Redundant literal removal**: `MAX_BLOCK_DEPTH` reused in `json_value()`;
+   canonical repo URL single-sourced through `Admin_Page::repo_url()`.
+4. **Stale CI docs**: plugin `README.md` / `readme.txt` Phase 3 status corrected
+   (integration passes in CI; the provider calls the routes under the default
+   `auto` strategy); "Tested up to" aligned with the `.wp-env.json` WordPress
+   6.7 target.
+
+Deferred (out of scope for this change): `editor.js` vocabulary/i18n rework
+(needs a wp-env run), deduplicating `implementation_enabled()` across
+Block_Loader/ACF_Loader, `page_breakdown()` unbounded `posts_per_page => -1`,
+and `Block_Normalizer::sanitize_embed()` delegation — each needs a dedicated
+reviewed change.
+
 ## Sequencing & verification
 
 1. A then B (B consumes A's reconciled data) -> TS tests, `npm test`,
@@ -142,6 +189,7 @@ changes.
 2. C -> fixture regeneration, `contracts.test.ts`, plugin unit tests,
    PHP lint/PHPCS/PHPStan + plugin CI, `check:sections`.
 3. D1 then D2 -> plugin unit + wp-env integration, `test:astro`.
+4. Phase 5 plugin hygiene -> plugin unit tests, PHP lint/PHPCS/PHPStan.
 
 ## Documentation & state updates (AGENTS §0.3)
 

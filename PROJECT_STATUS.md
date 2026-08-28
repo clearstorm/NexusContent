@@ -10,7 +10,7 @@
 | Project status | Active, early development; internal private package |
 | Current focus | `core.schema.models` — model schema and field contracts (`in_progress`) |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion work (Phases 1-3) is implemented and passes CI. The current unreleased `0.2.2` work is the core content contract: a unified `schema.models` configuration (model kinds, field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, and a `nexus.media` resolution entry point).
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion work (Phases 1-3) is implemented and passes CI. The current unreleased `0.2.2` work is the core content contract: a unified `schema.models` configuration (model kinds, field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, and a `nexus.media` resolution entry point). Also implemented in `0.2.2`: WordPress section synchronisation (`sections.json` single source with generated TS and `npm run check:sections`, live `/schema` registry reconciliation, `validateWordPressComponents`, and a secured admin-only project-contract push whose Dashboard card shows expected-vs-installed drift), plus companion plugin hygiene (registry-derived labels/fixed keys, repo URL single-sourcing, corrected Phase 3 status docs).
 
 ## Current Architecture
 
@@ -65,9 +65,9 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Git locale variant directories with legacy flat-file fallback and optional `meta.locale` provenance.
 - Astro static-build reference consumers: single-locale and localised Git examples plus a separate single-locale WordPress example, all with explicit consumer-owned routes.
 - Plain Node compatibility example and framework-neutrality tests.
-- Companion plugin admin page with card-based status dashboard, colored mode badges, responsive section-checkbox grid, and WordPress color scheme variable compatibility.
-- Fixed admin page "Pages by editor mode" to count all published pages, including those without an explicit `nexus_editor_mode` meta row.
-- Companion plugin WordPress integration tests passing in CI (75 unit tests, 417 assertions; 12 integration tests, 114 assertions).
+- Companion plugin admin page with card-based status dashboard, colored mode badges, responsive section-checkbox grid, and WordPress color scheme variable compatibility. The editor-mode selector, ACF section field groups (fixed and flexible), meta boxes, and block-editor panels cover standard posts as well as pages.
+- Fixed admin page "Content by editor mode" to count all published pages and posts, including those without an explicit `nexus_editor_mode` meta row.
+- Companion plugin WordPress integration tests passing in CI (84 unit tests, 449 assertions; 13 integration tests, 125 assertions).
 - Type checking, tests, package build, Astro example build, and Node example execution in CI.
 - Unified `schema.models` configuration with model kinds and provider sources; `source.mode: "page"` vs `"singleton"` selects the provider operation.
 - Declarative field schemas with required/list/options/nested-object/reference/media/richText/component/blocks support, `schema.components` references, and retrieval-time `SchemaError` validation.

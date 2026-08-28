@@ -153,10 +153,13 @@ provider operation: `"page"` routes to `getPage` (Git `pages/<key>.json`),
 `singletons/<key>.json`).
 
 Field types are `string`, `number`, `boolean`, `datetime`, `object`,
-`reference`, `media`, and `richText`. Fields support `required`, `list`,
-`options` (enum strings), nested `object.fields`, `reference.collection`
-references, and `media` overrides. Data is validated at retrieval time; a
-mismatch throws a `SchemaError`. Undeclared data fields pass through.
+`reference`, `media`, `richText`, `component`, and `blocks`. Fields support
+`required`, `list`, `options` (enum strings), nested `object.fields`,
+`reference.collection` references, and `media` overrides. `component` fields
+reference declared `schema.components`; `blocks` fields validate a
+discriminated `_type` list against `allowedComponents`. Data is validated at
+retrieval time; a mismatch throws a `SchemaError`. Undeclared data fields pass
+through.
 `defineNexusConfig()` preserves literal model names and field declarations, so
 retrieval methods accept only compatible model kinds and infer each result's
 `data` shape without explicit generic parameters.
@@ -209,6 +212,48 @@ new WordPressProvider({
   timeoutMs: 10000     // request timeout
 });
 ```
+
+### WordPress Components and Synchronisation
+
+Section vocabulary lives in one monorepo canonical file,
+`integrations/wordpress/nexuscontent/sections.json`; the PHP plugin registry and
+the generated `sections.generated.ts` both derive from it (`npm run
+check:sections` enforces freshness in CI).
+
+At build time, validate your declared consumer components against the install:
+
+```ts
+const wordpress = await new WordPressProvider({
+  baseUrl: "...",
+  componentTypeMap: { servicesList: "features" } // rename bridge
+});
+
+// Throws wordpress/unknown-component for unresolvable names.
+wordpress.validateComponents(schema.components);
+
+// Serializable contract to push to a site (see below):
+const contract = wordpress.projectComponentContract(schema); // { components, sectionTypes }
+```
+
+During `auto`/`companion` API strategy, the provider reconciles its effective
+registry against the site's live `/schema` — install-only sections extend the
+registry, and registry-only or conflicting sections surface as structured
+diagnostics (thrown in strict companion mode).
+
+Push the project contract to a WordPress site to see expected-vs-installed drift
+on the plugin Dashboard:
+
+```bash
+curl -X POST "https://wordpress.example.com/wp-json/nexuscontent/v1/project-contract" \
+  -H "X-WP-Nonce: <rest-nonce>" \
+  -H "Content-Type: application/json" \
+  -d '{"components":["hero","servicesList"],"sectionTypes":["hero","features"]}'
+```
+
+The route requires `manage_options`, stores only sanitized string arrays in
+`nexuscontent_settings`, and never reconfigures editor settings automatically.
+It lives outside the content wire contract, so no `contractVersion` negotiation
+applies.
 
 ### Editor Modes
 
