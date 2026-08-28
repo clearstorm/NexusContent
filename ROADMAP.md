@@ -202,14 +202,14 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ## 0.2.3 - WordPress Companion Consumer
 
-**State:** Current milestone (implemented, awaiting release).
+**State:** Released on 2026-08-29 (root package `0.2.3`).
 
 **Goal:** Prove the Phase 3 companion path through the reference consumer and verify Git-vs-WordPress section parity.
 
 **Required capabilities:**
 
 - Surface normalized companion sections onto collection items (`data.sections`) so Git-sourced and companion-backed WordPress content reach pages through the same `blocks` shape.
-- Flip the `astro-wordpress` example to `apiStrategy: "companion"` with fallback to the standard REST path when the plugin is absent.
+- Flip the `astro-wordpress` example to `apiStrategy: "companion"`, built in CI against a local companion API. Posts with no companion sections keep the consumer's raw-HTML fallback; `auto` and `core` strategies remain available for fallback or plugin-free retrieval.
 - Verify section parity (hero, rich_text, faq, cta, gallery, and others) between Git content and companion WordPress content through the shared `PostSections` components, keeping the raw-HTML fallback.
 
 **Explicit exclusions:**

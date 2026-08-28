@@ -5,10 +5,10 @@
 | Field | Value |
 |---|---|
 | Project name | NexusContent |
-| Current version | `0.2.2` |
-| Current milestone | `0.2.3-wordpress-companion-consumer` |
+| Current version | `0.2.3` |
+| Current milestone | `0.3.0-strapi` |
 | Project status | Active, early development; internal private package |
-| Current focus | `0.2.3` companion consumption in the reference example (implemented, unreleased); directional `0.3.0` Strapi next |
+| Current focus | Released `0.2.3`; directional `0.3.0` Strapi provider is next |
 
 The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.2` release closes the `core.schema.models` contract: a unified `schema.models` configuration (model kinds, provider sources, field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, and a `nexus.media` resolution entry point), plus WordPress section synchronisation (`sections.json` single source with generated TS and `npm run check:sections`, live `/schema` registry reconciliation, `validateWordPressComponents`, and a secured admin-only project-contract push whose Dashboard card shows expected-vs-installed drift) and companion plugin hygiene and post support.
 
@@ -79,16 +79,16 @@ See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 ## Current Work
 
-The `0.2.1` WordPress companion and `0.2.2` core content contract milestones are released. The `0.2.3-wordpress-companion-consumer` milestone is implemented and unreleased:
+The `0.2.1` WordPress companion and `0.2.2` core content contract milestones were released together, and the `0.2.3` WordPress companion consumer milestone is now released:
 
-- Companion collection items now carry normalized sections as `data.sections` (the same `{ type, data }` shape Git blog posts author), verified against a live WordPress companion install; section-less posts keep the raw-HTML fallback.
+- Companion collection items carry normalized sections as `data.sections` (the same `{ type, data }` shape Git blog posts author), verified against a live WordPress companion install; section-less posts keep the raw-HTML fallback.
 - The astro-wordpress reference example consumes WordPress through `apiStrategy: "companion"` and builds in CI against a local companion API (capabilities, schema, pages, and page-by-slug routes), rendering Git- and companion-sourced sections with parity through the shared `PostSections` components.
-- The directional `0.3.0` Strapi provider is the recommended next focus after `0.2.3`.
+- The directional `0.3.0` Strapi provider is the recommended next focus.
 
 ## Next
 
-1. Cut a `0.2.3` release once the milestone exit criteria (companion item sections with tests, example companion build with section parity, state and docs updated, gates green) are formally accepted.
-2. Confirm the Strapi provider's minimum REST API scope and contract test strategy for the directional `0.3.0`.
+1. `0.2.3` is released (`v0.2.3`); begin the directional `0.3.0` Strapi milestone.
+2. Confirm the Strapi provider's minimum REST API scope and contract test strategy for `0.3.0`.
 3. Consider the directional localisation continuation once provider breadth is proven.
 
 ## Not Implementing Yet

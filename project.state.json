@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "project": {
     "name": "NexusContent",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "status": "active",
     "stage": "early-development",
-    "milestone": "0.2.3-wordpress-companion-consumer",
+    "milestone": "0.3.0-strapi",
     "packagePrivate": true
   },
   "currentFocus": {
