@@ -19,6 +19,12 @@ final class Admin_Page {
 	private const MENU_SLUG      = 'nexuscontent';
 	private const SETTINGS_SLUG  = 'nexuscontent-settings';
 	private const ABOUT_SLUG     = 'nexuscontent-about';
+	private const REPO_BASE_URL  = 'https://github.com/anomalyco/nexuscontent';
+
+	/** @param string $path Optional URL path or fragment appended to the repository base URL. */
+	private static function repo_url( string $path = '' ): string {
+		return self::REPO_BASE_URL . $path;
+	}
 
 	private Capabilities $capabilities;
 	private Section_Registry $registry;
@@ -130,10 +136,10 @@ final class Admin_Page {
 			return;
 		}
 		$capabilities = $this->capabilities->get();
-		$breakdown    = $this->page_breakdown();
+		$breakdown    = $this->content_breakdown();
 		$settings     = $this->get_settings();
 		$section_defs = $this->registry->definitions();
-		$recent       = $this->recent_pages();
+		$recent       = $this->recent_content();
 		?>
 		<div class="nc-admin-header">
 			<div class="nc-admin-header-icon">
@@ -151,6 +157,7 @@ final class Admin_Page {
 		<div class="nc-admin-cards">
 			<?php $this->dashboard_card_status( $capabilities, $section_defs ); ?>
 			<?php $this->dashboard_card_breakdown( $breakdown ); ?>
+			<?php $this->dashboard_card_project_contract( $settings ); ?>
 			<?php $this->dashboard_card_blocks( $section_defs, $settings ); ?>
 			<?php $this->dashboard_card_recent( $recent ); ?>
 			<?php $this->dashboard_card_links(); ?>
@@ -236,7 +243,7 @@ final class Admin_Page {
 	}
 
 	/**
-	 * Pages by editor mode card.
+	 * Published pages and posts by editor mode card.
 	 *
 	 * @param array<string, int> $breakdown
 	 */
@@ -245,7 +252,7 @@ final class Admin_Page {
 		<div class="nc-admin-card">
 			<div class="nc-admin-card-header">
 				<span class="dashicons dashicons-admin-page"></span>
-				<h2 class="nc-admin-card-title"><?php esc_html_e( 'Pages by editor mode', 'nexuscontent' ); ?></h2>
+				<h2 class="nc-admin-card-title"><?php esc_html_e( 'Content by editor mode', 'nexuscontent' ); ?></h2>
 			</div>
 			<div class="nc-admin-card-body">
 				<?php if ( ! empty( $breakdown ) ) : ?>
@@ -259,8 +266,8 @@ final class Admin_Page {
 					</div>
 				<?php else : ?>
 					<div class="nc-admin-empty-state">
-						<p><?php esc_html_e( 'No pages found.', 'nexuscontent' ); ?></p>
-						<p><?php esc_html_e( 'Published pages will appear here once they exist.', 'nexuscontent' ); ?></p>
+						<p><?php esc_html_e( 'No published content found.', 'nexuscontent' ); ?></p>
+						<p><?php esc_html_e( 'Published pages and posts will appear here once they exist.', 'nexuscontent' ); ?></p>
 					</div>
 				<?php endif; ?>
 			</div>
@@ -315,7 +322,93 @@ final class Admin_Page {
 	}
 
 	/**
-	 * Recent pages card.
+	 * Project contract card with drift comparison.
+	 *
+	 * @param array<string, mixed> $settings
+	 */
+	private function dashboard_card_project_contract( array $settings ): void {
+		$contract = $this->capabilities->project_contract();
+		$enabled  = $settings['enabled_sections'];
+		?>
+		<div class="nc-admin-card">
+			<div class="nc-admin-card-header">
+				<span class="dashicons dashicons-networking"></span>
+				<h2 class="nc-admin-card-title"><?php esc_html_e( 'Project contract', 'nexuscontent' ); ?></h2>
+			</div>
+			<div class="nc-admin-card-body">
+				<?php if ( null === $contract ) : ?>
+					<div class="nc-admin-empty-state">
+						<p><?php esc_html_e( 'No project contract received yet.', 'nexuscontent' ); ?></p>
+						<p><?php esc_html_e( 'Push the consumer schema through POST /nexuscontent/v1/project-contract to see expected components here.', 'nexuscontent' ); ?></p>
+					</div>
+				<?php else : ?>
+					<?php $this->dashboard_project_contract_drift( $contract, $enabled ); ?>
+				<?php endif; ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * @param array<string, array<int, string>> $contract
+	 * @param array<int, string> $enabled
+	 */
+	private function dashboard_project_contract_drift( array $contract, array $enabled ): void {
+		$registry_types = array_keys( $this->registry->definitions() );
+		$expected       = $contract['sectionTypes'];
+		$missing        = array_values( array_diff( $expected, $registry_types ) );
+		$unused         = array_values( array_diff( $registry_types, $expected ) );
+		$disabled       = array_values( array_intersect( array_diff( $expected, $missing ), array_diff( $registry_types, $enabled ) ) );
+		$labels         = self::section_labels();
+		?>
+		<p class="description"><?php esc_html_e( 'Expected section types come from the consumer project contract. The plugin never reconfigures itself automatically.', 'nexuscontent' ); ?></p>
+		<div class="nc-admin-breakdown">
+			<div class="nc-admin-breakdown-item">
+				<span class="nc-admin-breakdown-count"><?php echo esc_html( (string) count( $expected ) ); ?></span>
+				<span class="nc-admin-breakdown-label"><?php esc_html_e( 'expected', 'nexuscontent' ); ?></span>
+			</div>
+			<div class="nc-admin-breakdown-item">
+				<span class="nc-admin-breakdown-count"><?php echo esc_html( (string) count( $missing ) ); ?></span>
+				<span class="nc-admin-breakdown-label"><?php esc_html_e( 'missing from install', 'nexuscontent' ); ?></span>
+			</div>
+			<div class="nc-admin-breakdown-item">
+				<span class="nc-admin-breakdown-count"><?php echo esc_html( (string) count( $disabled ) ); ?></span>
+				<span class="nc-admin-breakdown-label"><?php esc_html_e( 'disabled', 'nexuscontent' ); ?></span>
+			</div>
+		</div>
+		<?php if ( $missing || $unused || $disabled ) : ?>
+			<ul class="nc-admin-project-drift">
+				<?php if ( $missing ) : ?>
+					<li>
+						<strong><?php esc_html_e( 'Missing from install:', 'nexuscontent' ); ?></strong>
+						<?php foreach ( $missing as $type ) : ?>
+							<span class="nc-admin-mode-badge nc-admin-mode-badge--muted"><?php echo esc_html( $labels[ $type ] ?? $type ); ?></span>
+						<?php endforeach; ?>
+					</li>
+				<?php endif; ?>
+				<?php if ( $unused ) : ?>
+					<li>
+						<strong><?php esc_html_e( 'Not used by the project:', 'nexuscontent' ); ?></strong>
+						<?php foreach ( $unused as $type ) : ?>
+							<span class="nc-admin-mode-badge"><?php echo esc_html( $labels[ $type ] ?? $type ); ?></span>
+						<?php endforeach; ?>
+					</li>
+				<?php endif; ?>
+				<?php if ( $disabled ) : ?>
+					<li>
+						<strong><?php esc_html_e( 'Disabled in settings:', 'nexuscontent' ); ?></strong>
+						<?php foreach ( $disabled as $type ) : ?>
+							<span class="nc-admin-mode-badge nc-admin-mode-badge--muted"><?php echo esc_html( $labels[ $type ] ?? $type ); ?></span>
+						<?php endforeach; ?>
+					</li>
+				<?php endif; ?>
+			</ul>
+		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Recent pages and posts card.
 	 *
 	 * @param array<int, array<string, string>> $pages
 	 */
@@ -324,14 +417,14 @@ final class Admin_Page {
 		<div class="nc-admin-card">
 			<div class="nc-admin-card-header">
 				<span class="dashicons dashicons-clock"></span>
-				<h2 class="nc-admin-card-title"><?php esc_html_e( 'Recent pages', 'nexuscontent' ); ?></h2>
+				<h2 class="nc-admin-card-title"><?php esc_html_e( 'Recent content', 'nexuscontent' ); ?></h2>
 			</div>
 			<div class="nc-admin-card-body">
 				<?php if ( ! empty( $pages ) ) : ?>
 					<table class="nc-admin-recent-table">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'Page', 'nexuscontent' ); ?></th>
+								<th><?php esc_html_e( 'Content', 'nexuscontent' ); ?></th>
 								<th><?php esc_html_e( 'Mode', 'nexuscontent' ); ?></th>
 								<th><?php esc_html_e( 'Modified', 'nexuscontent' ); ?></th>
 							</tr>
@@ -382,7 +475,7 @@ final class Admin_Page {
 						<span class="dashicons dashicons-info-outline"></span>
 						<span class="nc-admin-link-label"><?php esc_html_e( 'About', 'nexuscontent' ); ?></span>
 					</a>
-					<a href="https://github.com/anomalyco/nexuscontent" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
+					<a href="<?php echo esc_url( self::repo_url() ); ?>" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
 						<span class="dashicons dashicons-external"></span>
 						<span class="nc-admin-link-label"><?php esc_html_e( 'Documentation', 'nexuscontent' ); ?></span>
 					</a>
@@ -528,19 +621,19 @@ final class Admin_Page {
 				</div>
 				<div class="nc-admin-card-body">
 					<div class="nc-admin-links-grid">
-						<a href="https://github.com/anomalyco/nexuscontent" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
+						<a href="<?php echo esc_url( self::repo_url() ); ?>" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
 							<span class="dashicons dashicons-external"></span>
 							<span class="nc-admin-link-label"><?php esc_html_e( 'GitHub repository', 'nexuscontent' ); ?></span>
 						</a>
-						<a href="https://github.com/anomalyco/nexuscontent#readme" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
+						<a href="<?php echo esc_url( self::repo_url( '#readme' ) ); ?>" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
 							<span class="dashicons dashicons-media-document"></span>
 							<span class="nc-admin-link-label"><?php esc_html_e( 'Documentation', 'nexuscontent' ); ?></span>
 						</a>
-						<a href="https://github.com/anomalyco/nexuscontent/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
+						<a href="<?php echo esc_url( self::repo_url( '/blob/main/CHANGELOG.md' ) ); ?>" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
 							<span class="dashicons dashicons-update"></span>
 							<span class="nc-admin-link-label"><?php esc_html_e( 'Changelog', 'nexuscontent' ); ?></span>
 						</a>
-						<a href="https://github.com/anomalyco/nexuscontent/issues" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
+						<a href="<?php echo esc_url( self::repo_url( '/issues' ) ); ?>" target="_blank" rel="noopener noreferrer" class="nc-admin-link-card">
 							<span class="dashicons dashicons-sos"></span>
 							<span class="nc-admin-link-label"><?php esc_html_e( 'Report an issue', 'nexuscontent' ); ?></span>
 						</a>
@@ -688,11 +781,19 @@ final class Admin_Page {
 		$resolution  = is_string( $input['media_resolution'] ?? null ) ? sanitize_key( $input['media_resolution'] ) : $defaults['media_resolution'];
 		$resolution  = in_array( $resolution, $resolutions, true ) ? $resolution : $defaults['media_resolution'];
 
-		return array(
+		// Preserve the REST-pushed project contract across a settings form save.
+		$project = $this->capabilities->project_contract();
+
+		$result = array(
 			'default_editor_mode' => $mode,
 			'enabled_sections'    => $enabled,
 			'media_resolution'    => $resolution,
 		);
+		if ( null !== $project ) {
+			$result['project_components'] = $project;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -724,10 +825,10 @@ final class Admin_Page {
 	/**
 	 * @return array<string, int>
 	 */
-	private function page_breakdown(): array {
+	private function content_breakdown(): array {
 		$query = new WP_Query(
 			array(
-				'post_type'      => 'page',
+				'post_type'      => array( 'page', 'post' ),
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
 				'fields'         => 'ids',
@@ -747,14 +848,14 @@ final class Admin_Page {
 	}
 
 	/**
-	 * Get the most recently modified published pages.
+	 * Get the most recently modified published pages and posts.
 	 *
 	 * @return array<int, array<string, string>>
 	 */
-	private function recent_pages(): array {
+	private function recent_content(): array {
 		$query = new WP_Query(
 			array(
-				'post_type'      => 'page',
+				'post_type'      => array( 'page', 'post' ),
 				'post_status'    => 'publish',
 				'posts_per_page' => 5,
 				'orderby'        => 'modified',
@@ -797,20 +898,13 @@ final class Admin_Page {
 	 * @return array<string, string>
 	 */
 	private static function section_labels(): array {
-		return array(
-			'hero'         => __( 'Hero', 'nexuscontent' ),
-			'intro'        => __( 'Introduction', 'nexuscontent' ),
-			'rich_text'    => __( 'Rich Text', 'nexuscontent' ),
-			'image_text'   => __( 'Image and Text', 'nexuscontent' ),
-			'features'     => __( 'Features', 'nexuscontent' ),
-			'statistics'   => __( 'Statistics', 'nexuscontent' ),
-			'testimonials' => __( 'Testimonials', 'nexuscontent' ),
-			'gallery'      => __( 'Gallery', 'nexuscontent' ),
-			'cta'          => __( 'Call to Action', 'nexuscontent' ),
-			'faq'          => __( 'FAQ', 'nexuscontent' ),
-			'logo_grid'    => __( 'Logo Grid', 'nexuscontent' ),
-			'form_embed'   => __( 'Form Embed', 'nexuscontent' ),
-		);
+		$registry = new Section_Registry();
+		$labels   = array();
+		foreach ( $registry->definitions() as $type => $definition ) {
+			$labels[ $type ] = $registry->label( $type );
+		}
+
+		return $labels;
 	}
 
 	/**

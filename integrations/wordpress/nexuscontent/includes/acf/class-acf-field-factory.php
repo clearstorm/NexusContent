@@ -58,23 +58,7 @@ final class ACF_Field_Factory {
 	 * @return string
 	 */
 	public static function label( $type ) {
-		$type   = str_replace( '-', '_', (string) $type );
-		$labels = array(
-			'hero'         => __( 'Hero', 'nexuscontent' ),
-			'intro'        => __( 'Introduction', 'nexuscontent' ),
-			'rich_text'    => __( 'Rich Text', 'nexuscontent' ),
-			'image_text'   => __( 'Image and Text', 'nexuscontent' ),
-			'features'     => __( 'Features', 'nexuscontent' ),
-			'statistics'   => __( 'Statistics', 'nexuscontent' ),
-			'testimonials' => __( 'Testimonials', 'nexuscontent' ),
-			'gallery'      => __( 'Gallery', 'nexuscontent' ),
-			'cta'          => __( 'Call to Action', 'nexuscontent' ),
-			'faq'          => __( 'FAQ', 'nexuscontent' ),
-			'logo_grid'    => __( 'Logo Grid', 'nexuscontent' ),
-			'form_embed'   => __( 'Form Embed', 'nexuscontent' ),
-		);
-
-		return isset( $labels[ $type ] ) ? $labels[ $type ] : ucwords( str_replace( '_', ' ', $type ) );
+		return ( new Section_Registry() )->label( (string) $type );
 	}
 
 	/**

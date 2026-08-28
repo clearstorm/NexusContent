@@ -177,7 +177,7 @@ final class AdminPageTest extends TestCase {
 	 * Dashboard — page breakdown
 	 * --------------------------------------------------------------- */
 
-	public function test_page_breakdown_includes_pages_without_explicit_meta(): void {
+	public function test_breakdown_includes_pages_and_posts_without_explicit_meta(): void {
 		$GLOBALS['nc_test']['query_posts'] = array( 10, 20 );
 		$GLOBALS['nc_test']['meta']       = array();
 
@@ -186,7 +186,20 @@ final class AdminPageTest extends TestCase {
 		self::assertStringContainsString( '2', $rendered );
 	}
 
-	public function test_page_breakdown_counts_all_valid_modes(): void {
+	public function test_breakdown_queries_pages_and_posts(): void {
+		$GLOBALS['nc_test']['query_posts'] = array( 10, 20 );
+		$GLOBALS['nc_test']['meta']       = array();
+
+		$this->render_dashboard();
+		$breakdown_args = array_filter(
+			$GLOBALS['nc_test']['query_args'] ?? array(),
+			static fn( array $args ): bool => ( $args['fields'] ?? '' ) === 'ids'
+		);
+		self::assertCount( 1, $breakdown_args );
+		self::assertSame( array( 'page', 'post' ), array_values( reset( $breakdown_args )['post_type'] ) );
+	}
+
+	public function test_breakdown_counts_all_valid_modes(): void {
 		$GLOBALS['nc_test']['query_posts'] = array( 10, 20, 30 );
 		$GLOBALS['nc_test']['meta']        = array(
 			10 => array( Editor_Mode::META_KEY => 'gutenberg' ),
@@ -201,7 +214,7 @@ final class AdminPageTest extends TestCase {
 		self::assertStringContainsString( 'ACF fixed fields', $rendered );
 	}
 
-	public function test_page_breakdown_defaults_invalid_meta_to_gutenberg(): void {
+	public function test_breakdown_defaults_invalid_meta_to_gutenberg(): void {
 		$GLOBALS['nc_test']['query_posts'] = array( 10, 20 );
 		$GLOBALS['nc_test']['meta']        = array(
 			10 => array( Editor_Mode::META_KEY => 'invalid_mode' ),
@@ -211,12 +224,12 @@ final class AdminPageTest extends TestCase {
 		self::assertStringContainsString( '2', $rendered );
 	}
 
-	public function test_page_breakdown_empty_when_no_pages(): void {
+	public function test_breakdown_empty_when_no_content(): void {
 		$GLOBALS['nc_test']['query_posts'] = array();
 		$GLOBALS['nc_test']['meta']       = array();
 
 		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( 'No pages found', $rendered );
+		self::assertStringContainsString( 'No published content found', $rendered );
 	}
 
 	/* ----------------------------------------------------------------
@@ -239,7 +252,7 @@ final class AdminPageTest extends TestCase {
 		$GLOBALS['nc_test']['meta']        = array();
 
 		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( 'Pages by editor mode', $rendered );
+		self::assertStringContainsString( 'Content by editor mode', $rendered );
 	}
 
 	public function test_dashboard_contains_blocks_overview_card(): void {
@@ -258,7 +271,7 @@ final class AdminPageTest extends TestCase {
 		$GLOBALS['nc_test']['meta']       = array();
 
 		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( 'Recent pages', $rendered );
+		self::assertStringContainsString( 'Recent content', $rendered );
 	}
 
 	public function test_dashboard_contains_quick_links_card(): void {
@@ -267,6 +280,35 @@ final class AdminPageTest extends TestCase {
 
 		$rendered = $this->render_dashboard();
 		self::assertStringContainsString( 'Quick links', $rendered );
+	}
+
+	public function test_dashboard_project_contract_card_shows_empty_state_without_contract(): void {
+		$GLOBALS['nc_test']['query_posts'] = array();
+		$GLOBALS['nc_test']['meta']       = array();
+		unset( $GLOBALS['nc_test']['options']['nexuscontent_settings'] );
+
+		$rendered = $this->render_dashboard();
+		self::assertStringContainsString( 'Project contract', $rendered );
+		self::assertStringContainsString( 'No project contract received yet', $rendered );
+	}
+
+	public function test_dashboard_project_contract_card_shows_drift_and_disabled_types(): void {
+		$GLOBALS['nc_test']['query_posts'] = array();
+		$GLOBALS['nc_test']['meta']       = array();
+		$GLOBALS['nc_test']['options']['nexuscontent_settings'] = array(
+			'enabled_sections' => array( 'hero', 'cta' ),
+			'project_components' => array(
+				'components'   => array( 'hero', 'custom_thing' ),
+				'sectionTypes' => array( 'hero', 'image_text', 'copyright' ),
+			),
+		);
+
+		$rendered = $this->render_dashboard();
+		self::assertStringContainsString( 'Project contract', $rendered );
+		self::assertStringContainsString( 'Missing from install', $rendered );
+		self::assertStringContainsString( 'copyright', $rendered );
+		self::assertStringContainsString( 'Disabled in settings', $rendered );
+		self::assertStringContainsString( 'Image and Text', $rendered );
 	}
 
 	public function test_dashboard_does_not_contain_settings_form(): void {

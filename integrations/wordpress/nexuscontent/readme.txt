@@ -2,19 +2,19 @@
 Contributors: nexuscontent
 Tags: headless, content, rest-api, gutenberg, acf
 Requires at least: 6.6
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 8.1
 Stable tag: 0.1.0
 License: MIT
 License URI: https://opensource.org/license/mit
 
-Contract-versioned, normalized WordPress page content for future NexusContent consumers.
+Contract-versioned, normalized WordPress page and post content for future NexusContent consumers.
 
 == Description ==
 
 = Purpose =
 
-NexusContent Companion exposes normalized page sections, schema, capabilities, media, and diagnostics through read-only WordPress REST routes. Plugin 0.1.0 uses companion contract 1.
+NexusContent Companion exposes normalized page and post sections, schema, capabilities, media, and diagnostics through WordPress REST routes. Content is read-only; the only write route is the admin-only project-contract push. Plugin 0.1.0 uses companion contract 1.
 
 = Requirements =
 
@@ -22,7 +22,7 @@ WordPress 6.6+ and PHP 8.1+ are required. Gutenberg is supplied by WordPress. AC
 
 = Modes, Gutenberg, and ACF =
 
-Each page selects Gutenberg, ACF fixed fields, or ACF flexible sections. Gutenberg supports core content plus NexusContent blocks. Block inspectors expose eyebrow, section ID, variant, and theme as additional fields; generated section IDs remain editable. Each block includes a packaged static inserter and inspector preview. ACF Free provides flat, prefixed Hero, Introduction, and Call to Action fields. Pro-only modes appear only when the required APIs exist. The plugin never downloads or distributes licensed ACF Pro; developers must legally provide and mount their own copy.
+Each page or post selects Gutenberg, ACF fixed fields, or ACF flexible sections. Gutenberg supports core content plus NexusContent blocks. Block inspectors expose eyebrow, section ID, variant, and theme as additional fields; generated section IDs remain editable. Each block includes a packaged static inserter and inspector preview. ACF Free provides flat, prefixed Hero, Introduction, and Call to Action fields. Pro-only modes appear only when the required APIs exist. The plugin never downloads or distributes licensed ACF Pro; developers must legally provide and mount their own copy.
 
 = Blocks and switching =
 
@@ -31,6 +31,8 @@ Supported blocks are Hero, Introduction, Rich Text, Image and Text, Features, St
 = Routes and authentication =
 
 GET routes under /wp-json/nexuscontent/v1 are /pages, /pages/{id}, /pages/slug/{slug}, /schema, and /capabilities. /pages supports pagination, search, slug, status, order, and orderby. Published passwordless pages, schema, and capabilities are public. Draft collection access requires edit_posts; non-public individual pages require edit_post. Use standard WordPress REST cookies/nonces or Application Passwords over HTTPS.
+
+POST /project-contract stores the consumer's expected components and section types for the admin dashboard. It requires manage_options; WordPress core enforces the REST nonce for cookie-authenticated requests, while non-cookie authentication (such as an Application Password over HTTPS) works without one. It accepts only sanitized string arrays and stores nothing but those arrays inside the plugin settings option.
 
 = Contract, capabilities, and schema =
 
@@ -69,14 +71,14 @@ Run composer install, composer validate, composer lint, composer phpcs, composer
 
 = Limitations and Phase 3 status =
 
-0.1.0 is read-only and page-focused: no mutations, preview transport, webhooks, synchronization, retries, caching, SEO/localisation plugin mapping, endpoint discovery, content conversion, or bundled ACF Pro. HTML remains untrusted. The plugin is Phase 2 and still awaits WordPress integration verification in CI. Phase 3 provider discovery and transport are planned; the NexusContent WordPress provider does not call this plugin yet, and NexusContent v0.2.1 is not finalized.
+0.1.0 content retrieval is read-only and page/post-focused: no mutations of site content, preview transport, webhooks, synchronization, retries, caching of site content, SEO/localisation plugin mapping, endpoint discovery, content conversion, or bundled ACF Pro. HTML remains untrusted. The companion integration (Phase 3) is implemented: the NexusContent WordPress provider discovers these routes, negotiates contract version 1, caches capabilities, and falls back to standard REST retrieval when the plugin is unavailable. WordPress integration is verified in CI. The sole write route is the manage_options-only project-contract push, which stores consumer expectation metadata.
 
 == Installation ==
 
 1. Upload the release ZIP or extract it to wp-content/plugins/nexuscontent.
 2. Activate NexusContent Companion in Plugins or with wp plugin activate nexuscontent.
 3. Optionally install ACF Free 6.2+ or a legally obtained ACF Pro 6.2+.
-4. Choose a NexusContent editor mode on each page. Activation does not migrate or alter content.
+4. Choose a NexusContent editor mode on each page or post. Activation does not migrate or alter content.
 
 == Frequently Asked Questions ==
 
@@ -90,7 +92,7 @@ No. ACF Pro is licensed software and must be legally supplied by the developer.
 
 = Does the NexusContent provider use these routes today? =
 
-No. Provider integration and the v0.2.1 contract are not finalized.
+Yes, when the provider runs with the companion strategy or auto-discovery. It discovers these routes, negotiates contract version 1, caches capabilities, and falls back to unmodified standard REST retrieval when the plugin is not reachable. Release status of the wrapping NexusContent milestone remains under repo control.
 
 == Changelog ==
 

@@ -19,11 +19,28 @@ final class EditorModeCapabilitiesTest extends TestCase {
 		self::assertSame( 'gutenberg', $mode->sanitize( array( 'acf_fixed' ) ) );
 	}
 
-	public function test_get_defaults_invalid_or_missing_metadata_to_gutenberg(): void {
+	public function test_register_meta_defaults_invalid_or_missing_metadata_to_gutenberg(): void {
 		$mode = new Editor_Mode( new Capabilities() );
 		self::assertSame( 'gutenberg', $mode->get( 42 ) );
 		$GLOBALS['nc_test']['meta'][42][ Editor_Mode::META_KEY ] = 'invalid';
 		self::assertSame( 'gutenberg', $mode->get( 42 ) );
+	}
+
+	public function test_register_hooks_editor_modes_for_pages_and_posts(): void {
+		( new Editor_Mode( new Capabilities() ) )->register();
+		foreach ( array( 'add_meta_boxes_page', 'add_meta_boxes_post', 'save_post_page', 'save_post_post' ) as $hook ) {
+			self::assertNotEmpty( $GLOBALS['nc_test']['actions'][ $hook ] ?? array(), $hook . ' was not registered' );
+		}
+	}
+
+	public function test_register_meta_registers_meta_for_pages_and_posts(): void {
+		( new Editor_Mode( new Capabilities() ) )->register_meta();
+		$meta = $GLOBALS['nc_test']['registered_meta'] ?? array();
+		foreach ( array( 'page', 'post' ) as $post_type ) {
+			self::assertArrayHasKey( Editor_Mode::META_KEY, $meta[ $post_type ] ?? array(), $post_type . ' meta was not registered' );
+			self::assertSame( 'gutenberg', $meta[ $post_type ][ Editor_Mode::META_KEY ]['default'] );
+			self::assertSame( array( 'gutenberg', 'acf_flexible', 'acf_fixed' ), $meta[ $post_type ][ Editor_Mode::META_KEY ]['show_in_rest']['schema']['enum'] );
+		}
 	}
 
 	public function test_without_acf_only_the_available_block_editor_is_reported(): void {

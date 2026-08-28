@@ -34,8 +34,9 @@ final class Block_Loader {
 		add_filter( 'block_categories_all', array( $this, 'register_category' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_blocks' ), 20 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_document_settings' ) );
-		add_action( 'add_meta_boxes_page', array( $this, 'remove_block_editor_fallback_meta_box' ), 100 );
-		add_filter( 'nexuscontent_editor_settings_panel_available', array( $this, 'panel_available' ), 10, 2 );
+		foreach ( array( 'page', 'post' ) as $post_type ) {
+			add_action( 'add_meta_boxes_' . $post_type, array( $this, 'remove_block_editor_fallback_meta_box' ), 100 );
+		}
 	}
 
 	/**
@@ -92,10 +93,10 @@ final class Block_Loader {
 		}
 	}
 
-	/** Enqueue the page-only document settings panel. */
+	/** Enqueue the page and post document settings panel. */
 	public function enqueue_document_settings() {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || 'page' !== $screen->post_type || ! $screen->is_block_editor() ) {
+		if ( ! $screen || ! in_array( $screen->post_type, array( 'page', 'post' ), true ) || ! $screen->is_block_editor() ) {
 			return;
 		}
 
@@ -115,8 +116,8 @@ final class Block_Loader {
 				'contentByMode'   => $this->content_by_mode(),
 				'labels'          => array(
 					'panel'       => __( 'NexusContent editor', 'nexuscontent' ),
-					'description' => __( 'Choose how this page is structured. Changing mode never deletes existing content.', 'nexuscontent' ),
-					'warning'     => __( 'This page contains content for the current editor mode. Switching modes will leave that content stored but inactive. Continue?', 'nexuscontent' ),
+					'description' => __( 'Choose how this content is structured. Changing mode never deletes existing content.', 'nexuscontent' ),
+					'warning'     => __( 'This content is already authored in the current editor mode. Switching modes will leave that content stored but inactive. Continue?', 'nexuscontent' ),
 				),
 			)
 		);
@@ -125,28 +126,23 @@ final class Block_Loader {
 	/** Remove only known classic fallback boxes when the block-editor panel is available. */
 	public function remove_block_editor_fallback_meta_box() {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || ! $screen->is_block_editor() ) {
+		if ( ! $screen || ! $screen->is_block_editor() || ! in_array( $screen->post_type, array( 'page', 'post' ), true ) ) {
 			return;
 		}
 
-		remove_meta_box( 'nexuscontent_editor_mode', 'page', 'side' );
-		remove_meta_box( 'nexuscontent-editor-mode', 'page', 'side' );
+		remove_meta_box( 'nexuscontent_editor_mode', $screen->post_type, 'side' );
+		remove_meta_box( 'nexuscontent-editor-mode', $screen->post_type, 'side' );
 	}
 
 	/**
-	 * @param bool   $available Current availability.
-	 * @param string $post_type Post type.
-	 * @return bool
-	 */
-	public function panel_available( $available, $post_type = '' ) {
-		return 'page' === $post_type ? true : $available;
-	}
-
-	/**
+	 * Hyphenated block directory names for the canonical sections.
+	 *
 	 * @return array<int, string>
 	 */
 	public static function block_types() {
-		return array( 'hero', 'intro', 'rich-text', 'image-text', 'features', 'statistics', 'testimonials', 'gallery', 'cta', 'faq', 'logo-grid', 'form-embed' );
+		$types = array_keys( ( new Section_Registry() )->definitions() );
+
+		return array_map( static fn( string $type ): string => str_replace( '_', '-', $type ), $types );
 	}
 
 	/** Register shared handles once; block.json references the handles by name. */
@@ -211,7 +207,7 @@ final class Block_Loader {
 				'value'     => 'gutenberg',
 				'label'     => __( 'Gutenberg', 'nexuscontent' ),
 				'available' => $this->capabilities->supports_mode( Editor_Mode::GUTENBERG ),
-				'reason'    => $this->capabilities->supports_mode( Editor_Mode::GUTENBERG ) ? '' : __( 'The page post type does not support the block editor.', 'nexuscontent' ),
+				'reason'    => $this->capabilities->supports_mode( Editor_Mode::GUTENBERG ) ? '' : __( 'This post type does not support the block editor.', 'nexuscontent' ),
 			),
 			'acf_flexible' => array(
 				'value'     => 'acf_flexible',
@@ -261,16 +257,7 @@ final class Block_Loader {
 
 	/** @return array<int, string> */
 	private function fixed_field_keys() {
-		$keys = array();
-		foreach ( array( 'hero', 'intro', 'cta' ) as $type ) {
-			$keys[] = $type . '_enabled';
-			foreach ( $this->registry->definitions()[ $type ]['fields'] as $field ) {
-				if ( is_array( $field ) && is_string( $field['name'] ?? null ) ) {
-					$keys[] = $type . '_' . $field['name'];
-				}
-			}
-		}
-		return $keys;
+		return $this->registry->fixed_field_keys();
 	}
 
 	/**

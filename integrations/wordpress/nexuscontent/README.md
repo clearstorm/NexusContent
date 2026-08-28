@@ -2,7 +2,7 @@
 
 ## Purpose
 
-NexusContent Companion exposes WordPress pages as normalized, contract-versioned JSON for future NexusContent consumers. WordPress remains the content system; the plugin supplies editor modes, section normalization, diagnostics, schema metadata, and REST transport.
+NexusContent Companion exposes WordPress pages and standard posts as normalized, contract-versioned JSON for future NexusContent consumers. WordPress remains the content system; the plugin supplies editor modes, section normalization, diagnostics, schema metadata, and REST transport.
 
 ## Installation
 
@@ -10,7 +10,7 @@ Install the release ZIP through **Plugins > Add New > Upload Plugin**, or extrac
 
 ## Activation
 
-Activate **NexusContent Companion** in WordPress Admin or run `wp plugin activate nexuscontent`. Activation does not install ACF, migrate content, or change existing page content.
+Activate **NexusContent Companion** in WordPress Admin or run `wp plugin activate nexuscontent`. Activation does not install ACF, migrate content, or change existing content.
 
 ## Requirements
 
@@ -22,11 +22,11 @@ Activate **NexusContent Companion** in WordPress Admin or run `wp plugin activat
 
 ## Editor Modes
 
-Each page stores one `nexus_editor_mode`: `gutenberg`, `acf_fixed`, or `acf_flexible`. Only the selected source is normalized; inactive source data remains stored and is never merged into the response.
+Each page and post stores one `nexus_editor_mode`: `gutenberg`, `acf_fixed`, or `acf_flexible`. The section field groups and editor-mode selector are available on both pages and standard posts. Only the selected source is normalized; inactive source data remains stored and is never merged into the response.
 
 ## Gutenberg
 
-Gutenberg is available when the page post type supports the block editor. Core rich-text, image, gallery, cover, and container blocks are normalized, alongside registered NexusContent blocks. Unsupported visible blocks are retained as flagged rich-text data with diagnostics where possible.
+Gutenberg is available when the page or post type supports the block editor. Core rich-text, image, gallery, cover, and container blocks are normalized, alongside registered NexusContent blocks. Unsupported visible blocks are retained as flagged rich-text data with diagnostics where possible.
 
 NexusContent blocks edit headings and primary content in place. The inspector's Additional fields panel exposes eyebrow, section ID, variant, and theme. Section IDs follow the heading until an editor enters a custom value. Every block includes a packaged static illustration in the inserter preview and Block preview panel.
 
@@ -53,11 +53,13 @@ The plugin defines Hero, Introduction, Rich Text, Image and Text, Features, Stat
 
 ## Switching Modes
 
-Use the NexusContent document settings panel or page meta box. Switching modes preserves all content but exports only the active source. The editor warns when inactive content exists and reports unavailable modes instead of deleting or converting content.
+Use the NexusContent document settings panel or editor meta box. Switching modes preserves all content but exports only the active source. The editor warns when inactive content exists and reports unavailable modes instead of deleting or converting content.
 
 ## REST Routes
 
-All routes are read-only `GET` routes under `/wp-json/nexuscontent/v1`:
+The `GET` routes below are public or capability-gated as documented. The single write route is described separately because it sits outside the content wire contract.
+
+### `GET`
 
 | Route | Purpose |
 |---|---|
@@ -68,6 +70,25 @@ All routes are read-only `GET` routes under `/wp-json/nexuscontent/v1`:
 | `/capabilities` | Runtime WordPress, Gutenberg, and ACF capability report. |
 
 Collection responses also expose `X-WP-Total` and `X-WP-TotalPages`.
+
+### `POST /project-contract` (admin only)
+
+`POST /wp-json/nexuscontent/v1/project-contract` stores the consumer project's expected component contract:
+
+```json
+{ "components": ["hero", "servicesList"], "sectionTypes": ["hero", "features"] }
+```
+
+Only `manage_options` callers may write. WordPress core enforces the REST nonce for cookie-authenticated requests itself, so non-cookie authentication (such as an Application Password over HTTPS) works without a nonce header. Payloads are sanitized string arrays, deduplicated and sorted, and stored as `project_components` inside the existing `nexuscontent_settings` option. The route is a read-only comparison aid for the admin dashboard — it never reconfigures editor settings automatically. It lives outside the content wire contract, so no `contractVersion` negotiation applies. No credentials are accepted or stored.
+
+The NexusContent consumer derives the payload from its schema via the public `projectComponentContract()` API, then POSTs it. An equivalent manual push:
+
+```sh
+curl -X POST https://example.com/wp-json/nexuscontent/v1/project-contract \
+  -u "admin:xxxx xxxx xxxx xxxx xxxx xxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"components":["hero","servicesList"],"sectionTypes":["hero","features"]}'
+```
 
 ## Authentication
 
@@ -107,7 +128,6 @@ Filters must return the documented value type; malformed values may be discarded
 | `nexuscontent_acf_layout_definitions` | `$layouts`, `$field_types` | ACF layout array | Before the Pro Flexible Content group is registered. |
 | `nexuscontent_editor_mode_capabilities` | `$modes` | Mode descriptor array | Before settings are localized to the block editor. |
 | `nexuscontent_editor_mode_content_presence` | `$presence`, `$post_id` | Mode-to-boolean map | Before mode-switch warning data is localized. |
-| `nexuscontent_editor_settings_panel_available` | `$available`, `$post_type` | Boolean | When integrations query whether the document panel is available. |
 | `nexuscontent_embed_allowed_html` | `$allowed_html` | KSES allowlist | Whenever Form Embed is normalized or rendered. |
 
 `nexuscontent_companion_loaded` fires with the `Section_Registry` after core services and optional integrations register. `nexuscontent_acf_limitations` fires with the limitation string array after ACF capability inspection.
@@ -147,8 +167,8 @@ The default wp-env has no ACF. Run `npm run env:acf-free` for the development si
 
 ## Limitations
 
-Version 0.1.0 is read-only and page-focused. It does not provide mutations, preview transport, webhooks, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
+Version 0.1.0 is read-only and page/post-focused, scoped to pages and standard posts. It does not provide mutations, preview transport, webhooks, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
 
 ## Phase 3 Status
 
-The companion plugin is Phase 2. Its local quality gates pass, but WordPress integration verification remains pending in CI. Phase 3 will update the NexusContent WordPress provider to discover and call these routes, negotiate contract versions, cache capabilities, and preserve standard REST fallback. The provider does not call this plugin yet, and NexusContent `v0.2.1` is not finalized.
+The companion integration is implemented. With the default `auto` API strategy, the NexusContent WordPress provider discovers these routes through the companion client, negotiates contract version 1, caches capabilities and content, and preserves unmodified standard REST retrieval as its fallback. The base provider's standard REST path is unchanged and remains available when the plugin has not been installed. WordPress integration is verified in CI.

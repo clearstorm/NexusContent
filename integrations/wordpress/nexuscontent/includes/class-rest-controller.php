@@ -19,6 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class REST_Controller extends WP_REST_Controller {
+	private const SETTINGS_OPTION      = 'nexuscontent_settings';
+	private const PROJECT_CONTRACT_KEY = 'project_components';
+
 	private Contract $contract;
 	private Normalizer $normalizer;
 	private Section_Registry $registry;
@@ -93,6 +96,25 @@ final class REST_Controller extends WP_REST_Controller {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_capabilities' ),
 				'permission_callback' => array( $this, 'public_permissions_check' ),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/project-contract',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'set_project_contract' ),
+				'permission_callback' => array( $this, 'project_contract_permissions_check' ),
+				'args'                => array(
+					'components'   => array(
+						'type'     => 'array',
+						'required' => true,
+					),
+					'sectionTypes' => array(
+						'type'     => 'array',
+						'required' => true,
+					),
+				),
 			)
 		);
 	}
@@ -214,6 +236,80 @@ final class REST_Controller extends WP_REST_Controller {
 	/** @return WP_REST_Response|WP_Error */
 	public function get_capabilities() {
 		return $this->respond( $this->capabilities->get(), new Diagnostics(), 'capabilities' );
+	}
+
+	/**
+	 * Store the consumer's project component contract.
+	 *
+	 * This route lives outside the content wire contract: there is no
+	 * contractVersion negotiation and the payload is not part of the public
+	 * schema. Credentials are never accepted or stored here.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function set_project_contract( WP_REST_Request $request ) {
+		$permission = $this->project_contract_permissions_check( $request );
+		if ( true !== $permission ) {
+			return $permission;
+		}
+
+		$components    = $this->sanitize_contract_array( $request->get_param( 'components' ) );
+		$section_types = $this->sanitize_contract_array( $request->get_param( 'sectionTypes' ) );
+		if ( null === $components || null === $section_types ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				__( 'Project contract components and sectionTypes must be arrays of sanitizable strings.', 'nexuscontent' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$settings                               = get_option( self::SETTINGS_OPTION, array() );
+		$settings                               = is_array( $settings ) ? $settings : array();
+		$contract                               = array(
+			'components'   => $components,
+			'sectionTypes' => $section_types,
+		);
+		$settings[ self::PROJECT_CONTRACT_KEY ] = $contract;
+		update_option( self::SETTINGS_OPTION, $settings );
+
+		return rest_ensure_response( $contract );
+	}
+
+	/**
+	 * Only administrators may push a project contract; the route is never callable anonymously.
+	 *
+	 * WordPress core already rejects cookie-authenticated requests lacking a
+	 * valid REST nonce (rest_cookie_check_errors) before this callback runs,
+	 * so no nonce is verified here. Non-cookie auth such as Application
+	 * Passwords carries no session nonce and is guarded solely by the
+	 * manage_options capability below.
+	 *
+	 * @return true|WP_Error
+	 */
+	public function project_contract_permissions_check( WP_REST_Request $request ) {
+		return current_user_can( 'manage_options' ) ? true : $this->forbidden();
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return array<int, string>|null
+	 */
+	private function sanitize_contract_array( $value ) {
+		if ( ! is_array( $value ) ) {
+			return null;
+		}
+
+		$result = array();
+		foreach ( $value as $item ) {
+			if ( ! is_string( $item ) || '' === $item ) {
+				return null;
+			}
+			$result[] = sanitize_key( $item );
+		}
+
+		$result = array_values( array_unique( $result ) );
+		sort( $result );
+		return $result;
 	}
 
 	/** @return WP_REST_Response|WP_Error */

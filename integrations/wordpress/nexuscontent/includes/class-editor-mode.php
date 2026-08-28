@@ -1,6 +1,6 @@
 <?php
 /**
- * Per-page editor mode metadata and classic editor fallback UI.
+ * Per-content-editor-mode metadata and classic editor fallback UI.
  *
  * @package NexusContentCompanion
  */
@@ -28,32 +28,34 @@ final class Editor_Mode {
 
 	public function register(): void {
 		add_action( 'init', array( $this, 'register_meta' ) );
-		add_action( 'add_meta_boxes_page', array( $this, 'add_meta_box' ) );
-		add_action( 'save_post_page', array( $this, 'save' ), 10, 2 );
+		foreach ( array( 'page', 'post' ) as $post_type ) {
+			add_action( 'add_meta_boxes_' . $post_type, array( $this, 'add_meta_box' ) );
+			add_action( 'save_post_' . $post_type, array( $this, 'save' ), 10, 2 );
+		}
 		add_action( 'admin_notices', array( $this, 'conflict_notice' ) );
 	}
 
 	public function register_meta(): void {
-		register_post_meta(
-			'page',
-			self::META_KEY,
-			array(
-				'type'              => 'string',
-				'single'            => true,
-				'default'           => self::GUTENBERG,
-				'show_in_rest'      => array(
-					'schema' => array(
-						'type'    => 'string',
-						'enum'    => self::VALID_MODES,
-						'default' => self::GUTENBERG,
-					),
+		$args = array(
+			'type'              => 'string',
+			'single'            => true,
+			'default'           => self::GUTENBERG,
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'    => 'string',
+					'enum'    => self::VALID_MODES,
+					'default' => self::GUTENBERG,
 				),
-				'sanitize_callback' => array( $this, 'sanitize' ),
-				'auth_callback'     => static function ( bool $allowed, string $meta_key, int $post_id ): bool {
-					return current_user_can( 'edit_post', $post_id );
-				},
-			)
+			),
+			'sanitize_callback' => array( $this, 'sanitize' ),
+			'auth_callback'     => static function ( bool $allowed, string $meta_key, int $post_id ): bool {
+				return current_user_can( 'edit_post', $post_id );
+			},
 		);
+
+		foreach ( array( 'page', 'post' ) as $post_type ) {
+			register_post_meta( $post_type, self::META_KEY, $args );
+		}
 	}
 
 	/** @param mixed $value */
@@ -68,11 +70,13 @@ final class Editor_Mode {
 	}
 
 	public function add_meta_box(): void {
+		$screen    = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$post_type = $screen && in_array( $screen->post_type, array( 'page', 'post' ), true ) ? $screen->post_type : 'post';
 		add_meta_box(
 			'nexuscontent-editor-mode',
 			esc_html__( 'NexusContent editor mode', 'nexuscontent' ),
 			array( $this, 'render_meta_box' ),
-			'page',
+			$post_type,
 			'side',
 			'default'
 		);
@@ -121,7 +125,7 @@ final class Editor_Mode {
 
 	public function conflict_notice(): void {
 		$screen = get_current_screen();
-		if ( ! $screen || 'page' !== $screen->post_type || 'post' !== $screen->base ) {
+		if ( ! $screen || ! in_array( $screen->post_type, array( 'page', 'post' ), true ) || 'post' !== $screen->base ) {
 			return;
 		}
 
@@ -174,19 +178,7 @@ final class Editor_Mode {
 
 	/** @return array<int, string> */
 	private function fixed_field_keys(): array {
-		$fields = array(
-			'hero'  => array( 'section_id', 'variant', 'eyebrow', 'heading', 'body', 'image', 'primary_action_label', 'primary_action_url', 'secondary_action_label', 'secondary_action_url', 'theme' ),
-			'intro' => array( 'section_id', 'variant', 'eyebrow', 'heading', 'body', 'image', 'image_position', 'theme' ),
-			'cta'   => array( 'section_id', 'variant', 'heading', 'body', 'primary_action_label', 'primary_action_url', 'secondary_action_label', 'secondary_action_url', 'background_image', 'theme' ),
-		);
-		$keys   = array();
-		foreach ( $fields as $type => $names ) {
-			$keys[] = $type . '_enabled';
-			foreach ( $names as $name ) {
-				$keys[] = $type . '_' . $name;
-			}
-		}
-		return $keys;
+		return ( new Section_Registry() )->fixed_field_keys();
 	}
 
 	private function label( string $mode ): string {
@@ -201,7 +193,7 @@ final class Editor_Mode {
 		return match ( $mode ) {
 			self::ACF_FLEXIBLE => __( 'Requires ACF 6.2 or newer with Flexible Content.', 'nexuscontent' ),
 			self::ACF_FIXED    => __( 'Requires ACF 6.2 or newer.', 'nexuscontent' ),
-			default            => __( 'The page post type does not support the block editor.', 'nexuscontent' ),
+			default            => __( 'This post type does not support the block editor.', 'nexuscontent' ),
 		};
 	}
 }

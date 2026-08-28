@@ -14,6 +14,22 @@ use NexusContent\Companion\Section_Registry;
  */
 final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
 	/**
+	 * @param array<int, array<int, array<string, string>>> $location
+	 * @return array<int, string>
+	 */
+	private function location_post_types( array $location ): array {
+		$values = array();
+		foreach ( $location as $rules ) {
+			foreach ( $rules as $rule ) {
+				if ( ( $rule['param'] ?? '' ) === 'post_type' ) {
+					$values[] = $rule['value'];
+				}
+			}
+		}
+		return $values;
+	}
+
+	/**
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
@@ -30,6 +46,7 @@ final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
 		foreach ( array( 'hero_enabled', 'hero_heading', 'intro_enabled', 'intro_heading', 'cta_enabled', 'cta_heading' ) as $name ) {
 			self::assertContains( $name, $names );
 		}
+		self::assertSame( array( 'page', 'post' ), $this->location_post_types( $GLOBALS['nc_acf_groups'][0]['location'] ) );
 	}
 
 	/**
@@ -46,5 +63,8 @@ final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
 		$flexible = array_values( array_filter( $GLOBALS['nc_acf_groups'], static fn( array $group ): bool => 'group_nc_flexible_sections' === $group['key'] ) );
 		self::assertCount( 1, $flexible );
 		self::assertCount( 12, $flexible[0]['fields'][0]['layouts'] );
+		self::assertSame( array( 'page', 'post' ), $this->location_post_types( $flexible[0]['location'] ) );
+		$fixed = array_values( array_filter( $GLOBALS['nc_acf_groups'], static fn( array $group ): bool => 'group_nc_fixed_page_sections' === $group['key'] ) );
+		self::assertSame( array( 'page', 'post' ), $this->location_post_types( $fixed[0]['location'] ) );
 	}
 }

@@ -19,6 +19,7 @@ trap 'rm -rf "$stage"' EXIT
 
 required_files=(
   "nexuscontent.php"
+  "sections.json"
   "README.md"
   "readme.txt"
   "LICENSE"
@@ -60,7 +61,7 @@ done
 
 package_root="$stage/$plugin_slug"
 mkdir -p "$package_root/assets/build" "$package_root/assets/previews" "$package_root/blocks"
-cp "$plugin_root/nexuscontent.php" "$plugin_root/README.md" "$plugin_root/readme.txt" "$plugin_root/LICENSE" "$package_root/"
+cp "$plugin_root/nexuscontent.php" "$plugin_root/sections.json" "$plugin_root/README.md" "$plugin_root/readme.txt" "$plugin_root/LICENSE" "$package_root/"
 cp -R "$plugin_root/includes" "$package_root/includes"
 find "$package_root/includes" -name '.DS_Store' -delete
 cp "$plugin_root/assets/build/editor.js" "$plugin_root/assets/build/editor.css" "$plugin_root/assets/build/admin.css" "$plugin_root/assets/build/editor-rtl.css" "$plugin_root/assets/build/editor.asset.php" "$package_root/assets/build/"

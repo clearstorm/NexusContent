@@ -19,9 +19,11 @@ final class RegistrationIntegrationTest extends IntegrationTestCase {
 	}
 
 	public function test_editor_meta_native_blocks_and_rest_routes_are_registered(): void {
-		$registered = get_registered_meta_keys( 'post', 'page' );
-		self::assertArrayHasKey( Editor_Mode::META_KEY, $registered );
-		self::assertSame( array( 'gutenberg', 'acf_flexible', 'acf_fixed' ), $registered[ Editor_Mode::META_KEY ]['show_in_rest']['schema']['enum'] );
+		foreach ( array( 'page', 'post' ) as $post_type ) {
+			$registered = get_registered_meta_keys( 'post', $post_type );
+			self::assertArrayHasKey( Editor_Mode::META_KEY, $registered, $post_type . ' editor meta was not registered' );
+			self::assertSame( array( 'gutenberg', 'acf_flexible', 'acf_fixed' ), $registered[ Editor_Mode::META_KEY ]['show_in_rest']['schema']['enum'] );
+		}
 
 		$block_registry = \WP_Block_Type_Registry::get_instance();
 		foreach ( array( 'hero', 'intro', 'rich-text', 'image-text', 'features', 'statistics', 'testimonials', 'gallery', 'cta', 'faq', 'logo-grid', 'form-embed' ) as $type ) {
@@ -32,9 +34,33 @@ final class RegistrationIntegrationTest extends IntegrationTestCase {
 		}
 
 		$routes = rest_get_server()->get_routes();
-		foreach ( array( '/nexuscontent/v1/pages', '/nexuscontent/v1/pages/(?P<id>\d+)', '/nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', '/nexuscontent/v1/schema', '/nexuscontent/v1/capabilities' ) as $route ) {
+		foreach ( array( '/nexuscontent/v1/pages', '/nexuscontent/v1/pages/(?P<id>\d+)', '/nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', '/nexuscontent/v1/schema', '/nexuscontent/v1/capabilities', '/nexuscontent/v1/project-contract' ) as $route ) {
 			self::assertArrayHasKey( $route, $routes );
 		}
+	}
+
+	public function test_project_contract_route_is_secured_and_stores_only_sanitized_arrays(): void {
+		$request = new \WP_REST_Request( 'POST', '/nexuscontent/v1/project-contract' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'components' => array( 'Héroe', 'cta', 'cta' ), 'sectionTypes' => array( 'cta', 'hero' ) ) ) );
+		$response = rest_get_server()->dispatch( $request );
+		self::assertSame( 401, $response->get_status() );
+$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+		// Non-cookie authenticated admin (Application Password parity): no
+		// X-WP-Nonce is required by the route or WordPress core.
+
+		$request->set_body( wp_json_encode( array( 'components' => 'hero' ) ) );
+		$response = rest_get_server()->dispatch( $request );
+		self::assertSame( 400, $response->get_status() );
+
+		$request->set_body( wp_json_encode( array( 'components' => array( 'Héroe', 'cta', 'cta' ), 'sectionTypes' => array( 'cta', 'hero' ) ) ) );
+		$response = rest_get_server()->dispatch( $request );
+		self::assertSame( 200, $response->get_status() );
+
+		$stored = get_option( 'nexuscontent_settings', array() );
+		self::assertSame( array( 'cta', 'hero' ), $stored['project_components']['sectionTypes'] );
+		self::assertSame( array( 'cta', 'hroe' ), $stored['project_components']['components'] ); // 'Héroe' is sanitized with its accent stripped.
 	}
 
 	public function test_public_schema_and_capabilities_match_the_contract(): void {

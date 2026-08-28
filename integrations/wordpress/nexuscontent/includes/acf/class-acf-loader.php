@@ -62,7 +62,7 @@ final class ACF_Loader {
 		do_action( 'nexuscontent_acf_limitations', $this->limitations );
 	}
 
-	/** Register the ACF Free-compatible fixed page fields. */
+	/** Register the ACF Free-compatible fixed section fields. */
 	private function register_fixed_fields() {
 		$field_types = array(
 			'repeater'         => false,
@@ -70,7 +70,7 @@ final class ACF_Loader {
 			'flexible_content' => false,
 		);
 		$definitions = array();
-		foreach ( array( 'hero', 'intro', 'cta' ) as $type ) {
+		foreach ( $this->registry->fixed_types() as $type ) {
 			$fields        = ACF_Field_Factory::fields_for( $type, $field_types, $this->limitations, 'fixed' );
 			$definitions[] = array(
 				'key'           => 'field_nc_fixed_' . $type . '_enabled',
@@ -106,7 +106,7 @@ final class ACF_Loader {
 				'key'                   => 'group_nc_fixed_page_sections',
 				'title'                 => __( 'NexusContent fixed sections', 'nexuscontent' ),
 				'fields'                => is_array( $definitions ) ? $definitions : array(),
-				'location'              => $this->page_mode_location( 'acf_fixed' ),
+				'location'              => $this->section_mode_location( 'acf_fixed' ),
 				'instruction_placement' => 'label',
 				'description'           => __( 'Fixed fields provide a predictable Hero, Introduction, and Call to Action structure. Existing block or flexible content is not removed when modes change.', 'nexuscontent' ),
 				'show_in_rest'          => 1,
@@ -135,14 +135,14 @@ final class ACF_Loader {
 					array(
 						'key'          => 'field_nc_nexus_sections',
 						'name'         => 'nexus_sections',
-						'label'        => __( 'Page sections', 'nexuscontent' ),
+						'label'        => __( 'Sections', 'nexuscontent' ),
 						'instructions' => __( 'Add and arrange supported NexusContent sections. Layouts requiring unavailable ACF field types are omitted.', 'nexuscontent' ),
 						'type'         => 'flexible_content',
 						'layouts'      => is_array( $layouts ) ? $layouts : array(),
 						'button_label' => __( 'Add section', 'nexuscontent' ),
 					),
 				),
-				'location'     => $this->page_mode_location( 'acf_flexible' ),
+				'location'     => $this->section_mode_location( 'acf_flexible' ),
 				'show_in_rest' => 1,
 			)
 		);
@@ -218,16 +218,30 @@ final class ACF_Loader {
 	}
 
 	/**
+	 * Location rules matching pages and posts whose editor mode is $mode.
+	 *
 	 * @param string $mode Editor mode.
 	 * @return array<int, array<int, array<string, string>>>
 	 */
-	private function page_mode_location( $mode ) {
+	private function section_mode_location( $mode ) {
 		return array(
 			array(
 				array(
 					'param'    => 'post_type',
 					'operator' => '==',
 					'value'    => 'page',
+				),
+				array(
+					'param'    => 'nexus_editor_mode',
+					'operator' => '==',
+					'value'    => $mode,
+				),
+			),
+			array(
+				array(
+					'param'    => 'post_type',
+					'operator' => '==',
+					'value'    => 'post',
 				),
 				array(
 					'param'    => 'nexus_editor_mode',
@@ -273,14 +287,14 @@ final class ACF_Loader {
 		return isset( $rule['operator'] ) && '!=' === $rule['operator'] ? ! $equal : $equal;
 	}
 
-	/** Display capability limitations only to users configuring page content. */
+	/** Display capability limitations only to users configuring page or post content. */
 	public function render_limitations_notice() {
-		if ( empty( $this->limitations ) || ! current_user_can( 'edit_pages' ) ) {
+		if ( empty( $this->limitations ) || ! ( current_user_can( 'edit_pages' ) || current_user_can( 'edit_posts' ) ) ) {
 			return;
 		}
 
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || 'page' !== $screen->post_type ) {
+		if ( ! $screen || ! in_array( $screen->post_type, array( 'page', 'post' ), true ) ) {
 			return;
 		}
 

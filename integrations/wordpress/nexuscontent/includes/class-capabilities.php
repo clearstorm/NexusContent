@@ -81,6 +81,39 @@ final class Capabilities {
 		return in_array( $mode, $this->editor_modes(), true );
 	}
 
+	/**
+	 * Project contract stored by the consumer's push, or null when none exists.
+	 *
+	 * Admin-only projection: it reads directly from plugin settings and is
+	 * never included in the public capabilities report.
+	 *
+	 * @return array<string, array<int, string>>|null
+	 */
+	public function project_contract() {
+		$stored = get_option( 'nexuscontent_settings', array() );
+		$stored = is_array( $stored ) ? $stored : array();
+		$value  = $stored['project_components'] ?? null;
+
+		if ( ! is_array( $value ) ) {
+			return null;
+		}
+
+		$components    = $value['components'] ?? null;
+		$section_types = $value['sectionTypes'] ?? null;
+		if ( ! is_array( $components ) || ! is_array( $section_types ) ) {
+			return null;
+		}
+
+		$map           = static fn( $item ): bool => is_string( $item ) && '' !== $item;
+		$components    = array_values( array_unique( array_map( 'sanitize_key', array_filter( $components, $map ) ) ) );
+		$section_types = array_values( array_unique( array_map( 'sanitize_key', array_filter( $section_types, $map ) ) ) );
+
+		return array(
+			'components'   => $components,
+			'sectionTypes' => $section_types,
+		);
+	}
+
 	private function has_acf(): bool {
 		return function_exists( 'get_field' ) && ( class_exists( 'ACF' ) || defined( 'ACF_VERSION' ) );
 	}

@@ -44,384 +44,8 @@ final class Section_Registry {
 	/** @var array<string, array<string, mixed>>|null */
 	private ?array $definitions = null;
 
-	private const FIELDS = array(
-		'hero'         => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'body',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'image',
-				'type' => 'media',
-			),
-			array(
-				'name' => 'primary_action_label',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'primary_action_url',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'secondary_action_label',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'secondary_action_url',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'intro'        => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'body',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'image',
-				'type' => 'media',
-			),
-			array(
-				'name' => 'image_position',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'rich_text'    => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'body',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'image_text'   => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'body',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'image',
-				'type' => 'media',
-			),
-			array(
-				'name' => 'image_position',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'action_label',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'action_url',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'features'     => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'body',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'items',
-				'type' => 'json',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'statistics'   => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'items',
-				'type' => 'json',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'testimonials' => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'items',
-				'type' => 'json',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'gallery'      => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'images',
-				'type' => 'json',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'cta'          => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'body',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'primary_action_label',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'primary_action_url',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'secondary_action_label',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'secondary_action_url',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'background_image',
-				'type' => 'media',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'faq'          => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'items',
-				'type' => 'json',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'logo_grid'    => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'eyebrow',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'items',
-				'type' => 'json',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-		'form_embed'   => array(
-			array(
-				'name' => 'section_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'variant',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'heading',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'provider',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'form_id',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'embed_code',
-				'type' => 'string',
-			),
-			array(
-				'name' => 'theme',
-				'type' => 'string',
-			),
-		),
-	);
+	/** @var array<string, array<string, mixed>>|null */
+	private static ?array $json_cache = null;
 
 	/** @return array<string, array<string, mixed>> */
 	public function definitions(): array {
@@ -429,30 +53,84 @@ final class Section_Registry {
 			return $this->definitions;
 		}
 
-		$definitions = array();
-		foreach ( self::TYPES as $type ) {
-			$source_name          = self::SOURCE_NAMES[ $type ];
-			$definitions[ $type ] = array(
-				'type'       => $type,
-				'sourceType' => 'nexuscontent/' . $source_name,
-				'sourceKey'  => 'acf/' . $source_name,
-				'aliases'    => array( 'nexuscontent/' . $source_name, 'acf/' . $source_name, $source_name, $type ),
-				'fields'     => self::FIELDS[ $type ],
-			);
-		}
+		$base = $this->json_definitions();
 
 		/**
 		 * Filters canonical section definitions used by normalizers and schema output.
 		 *
 		 * Definitions may contain internal callbacks, but callbacks are never included
-		 * in REST metadata.
+		 * in REST metadata. The built-in sections arrive from sections.json at the
+		 * plugin root; this filter adds or replaces definitions for a specific site.
 		 *
 		 * @param array<string, array<string, mixed>> $definitions Definitions keyed by canonical type.
 		 */
-		$filtered          = apply_filters( 'nexuscontent_section_definitions', $definitions );
-		$this->definitions = $this->normalize_definitions( is_array( $filtered ) ? $filtered : $definitions );
+		$filtered          = apply_filters( 'nexuscontent_section_definitions', $base );
+		$this->definitions = $this->normalize_definitions( is_array( $filtered ) ? $filtered : $base );
 
 		return $this->definitions;
+	}
+
+	/** @return array<string, array<string, mixed>> */
+	private function json_definitions(): array {
+		if ( null !== self::$json_cache ) {
+			return self::$json_cache;
+		}
+
+		$result = array();
+		$path   = dirname( __DIR__ ) . '/sections.json';
+		if ( ! file_exists( $path ) ) {
+			self::$json_cache = $result;
+			return $result;
+		}
+
+		$contents = file_get_contents( $path );
+		$data     = json_decode( $contents ? $contents : '', true );
+		if ( ! is_array( $data ) || ! isset( $data['sections'] ) || ! is_array( $data['sections'] ) ) {
+			self::$json_cache = $result;
+			return $result;
+		}
+
+		foreach ( $data['sections'] as $section ) {
+			if ( ! is_array( $section ) || ! is_string( $section['type'] ?? null ) ) {
+				continue;
+			}
+			$type = sanitize_key( $section['type'] );
+			if ( '' === $type ) {
+				continue;
+			}
+
+			$definition = array();
+			if ( ! empty( $section['fixed'] ) ) {
+				$definition['fixed'] = true;
+			}
+			if ( is_string( $section['label'] ?? null ) && '' !== trim( $section['label'] ) ) {
+				$definition['label'] = $section['label'];
+			}
+			$fields = array();
+			if ( isset( $section['fields'] ) && is_array( $section['fields'] ) ) {
+				foreach ( $section['fields'] as $field ) {
+					if ( ! is_array( $field ) || ! is_string( $field['name'] ?? null ) || ! is_string( $field['type'] ?? null ) ) {
+						continue;
+					}
+					$item = array(
+						'name' => sanitize_key( $field['name'] ),
+						'type' => sanitize_key( $field['type'] ),
+					);
+					if ( isset( $field['required'] ) ) {
+						$item['required'] = (bool) $field['required'];
+					}
+					if ( array_key_exists( 'default', $field ) && ( is_scalar( $field['default'] ) || null === $field['default'] ) ) {
+						$item['default'] = $field['default'];
+					}
+					$fields[] = $item;
+				}
+			}
+			$definition['fields'] = $fields;
+			$result[ $type ]      = $definition;
+		}
+
+		self::$json_cache = $result;
+		return $result;
 	}
 
 	public function resolve( string $source ): ?string {
@@ -466,6 +144,66 @@ final class Section_Registry {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Canonical human-readable label for a section type.
+	 *
+	 * The canonical English label lives in sections.json; translation is
+	 * applied through WordPress text functions so existing translations
+	 * keep working.
+	 *
+	 * @param string $type Section type.
+	 */
+	public function label( string $type ): string {
+		$type       = str_replace( '-', '_', $type );
+		$definition = $this->definitions()[ $type ] ?? null;
+		if ( is_array( $definition ) && is_string( $definition['label'] ?? null ) && '' !== trim( $definition['label'] ) ) {
+			// The canonical label lives in sections.json; translate() keeps the
+			// standard text domain pipe open for customised labels too.
+			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+			return __( $definition['label'], 'nexuscontent' );
+		}
+
+		// The generated fallback label never ships in the JSON; it only covers
+		// custom sections filtered in without a label.
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+		return __( ucwords( str_replace( '_', ' ', $type ) ), 'nexuscontent' );
+	}
+
+	/** @return array<int, string> Canonical types flagged as fixed sections in sections.json. */
+	public function fixed_types(): array {
+		$types = array();
+		foreach ( $this->definitions() as $type => $definition ) {
+			if ( ! empty( $definition['fixed'] ) ) {
+				$types[] = $type;
+			}
+		}
+
+		return $types;
+	}
+
+	/**
+	 * Meta keys for the fixed editor-mode fields, derived from the canonical
+	 * section field lists. Single source for normalizer and block-modal checks.
+	 *
+	 * @return array<int, string>
+	 */
+	public function fixed_field_keys(): array {
+		$keys = array();
+		foreach ( $this->definitions() as $type => $definition ) {
+			if ( empty( $definition['fixed'] ) ) {
+				continue;
+			}
+			$keys[] = $type . '_enabled';
+			foreach ( $definition['fields'] as $field ) {
+				if ( is_array( $field ) && is_string( $field['name'] ?? null ) ) {
+					$keys[] = $type . '_' . $field['name'];
+				}
+			}
+		}
+
+		return $keys;
 	}
 
 	/** @return array<int, array<string, mixed>> */
@@ -514,7 +252,7 @@ final class Section_Registry {
 					'sourceType' => 'nexuscontent/' . $source_name,
 					'sourceKey'  => isset( $value['sourceKey'] ) && is_string( $value['sourceKey'] ) ? $value['sourceKey'] : 'acf/' . $source_name,
 					'aliases'    => $aliases,
-					'fields'     => isset( $value['fields'] ) && is_array( $value['fields'] ) ? $value['fields'] : ( self::FIELDS[ $type ] ?? array() ),
+					'fields'     => isset( $value['fields'] ) && is_array( $value['fields'] ) ? $value['fields'] : array(),
 				)
 			);
 		}

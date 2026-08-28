@@ -71,4 +71,35 @@ final class NormalizationEquivalenceTest extends TestCase {
 		self::assertStringNotContainsString( 'Inactive', json_encode( $page['sections'], JSON_THROW_ON_ERROR ) );
 		self::assertContains( Contract::ERROR_CONFLICTING_SECTION_SOURCES, array_column( $diagnostics->all(), 'code' ) );
 	}
+
+	public function test_posts_normalize_sections_like_pages_in_every_editor_mode(): void {
+		$GLOBALS['nc_test']['caps']['unfiltered_html'] = true;
+		$expected = $this->fixture( 'hero' );
+		$source_type = 'hero';
+
+		$post = $this->post( array( 'post_type' => 'post', 'post_name' => 'fixture-post', 'post_title' => 'Fixture post' ) );
+		$GLOBALS['nc_test']['blocks'] = array( array( 'blockName' => 'nexuscontent/' . $source_type, 'attrs' => array_merge( $expected['data'], $expected['settings'] ?? array() ), 'innerHTML' => '', 'innerBlocks' => array() ) );
+		self::assertSame( $expected, $this->canonical( $this->normalizedPage( $post )['sections'][0] ), 'Gutenberg post sections mismatch' );
+
+		\nc_test_reset();
+		$GLOBALS['nc_test']['caps']['unfiltered_html'] = true;
+		$post = $this->post( array( 'post_type' => 'post', 'post_name' => 'fixture-post', 'post_title' => 'Fixture post' ) );
+		$GLOBALS['nc_test']['meta'][42][ Editor_Mode::META_KEY ] = Editor_Mode::ACF_FLEXIBLE;
+		$GLOBALS['nc_test']['fields'][42]['nexus_sections'] = array( array_merge( array( 'acf_fc_layout' => $source_type ), $expected['data'], $expected['settings'] ?? array() ) );
+		self::assertSame( $expected, $this->canonical( $this->normalizedPage( $post )['sections'][0] ), 'Flexible post sections mismatch' );
+
+		\nc_test_reset();
+		$GLOBALS['nc_test']['caps']['unfiltered_html'] = true;
+		$post = $this->post( array( 'post_type' => 'post', 'post_name' => 'fixture-post', 'post_title' => 'Fixture post' ) );
+		$GLOBALS['nc_test']['meta'][42][ Editor_Mode::META_KEY ] = Editor_Mode::ACF_FIXED;
+		$GLOBALS['nc_test']['fields'][42]['hero_enabled'] = true;
+		foreach ( $expected['data'] as $field => $value ) {
+			if ( ! in_array( $field, array( 'variant', 'theme' ), true ) ) {
+				$GLOBALS['nc_test']['fields'][42][ 'hero_' . $field ] = $value;
+			}
+		}
+		$sections = $this->normalizedPage( $post )['sections'];
+		self::assertCount( 1, $sections, 'Fixed post sections were not extracted' );
+		self::assertSame( array_diff_key( $expected['data'], array( 'variant' => true, 'theme' => true ) ), $this->canonical( $sections[0] )['data'] );
+	}
 }

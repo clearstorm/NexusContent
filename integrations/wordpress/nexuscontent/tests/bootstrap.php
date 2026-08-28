@@ -64,9 +64,13 @@ if ( ! class_exists( 'WP_REST_Controller' ) ) {
 if ( ! class_exists( 'WP_REST_Request' ) ) {
 	class WP_REST_Request implements ArrayAccess {
 		private array $params = array();
+		private array $headers = array();
 		public function __construct( string $method = 'GET', string $route = '' ) {}
 		public function set_param( string $key, $value ): void { $this->params[ $key ] = $value; }
 		public function get_param( string $key ) { return $this->params[ $key ] ?? null; }
+		public function set_header( string $key, $value ): void { $this->headers[ $key ] = $value; }
+		public function get_header( string $key ) { return $this->headers[ $key ] ?? ''; }
+		public function get_headers(): array { return $this->headers; }
 		public function offsetExists( $offset ): bool { return isset( $this->params[ $offset ] ); }
 		public function offsetGet( $offset ) { return $this->params[ $offset ] ?? null; }
 		public function offsetSet( $offset, $value ): void { $this->params[ $offset ] = $value; }
@@ -89,6 +93,7 @@ if ( ! class_exists( 'WP_Query' ) ) {
 		public int $found_posts = 0;
 		public int $max_num_pages = 0;
 		public function __construct( array $args = array() ) {
+			$GLOBALS['nc_test']['query_args'][] = $args;
 			$raw = $GLOBALS['nc_test']['query_posts'] ?? array();
 			$fields = $args['fields'] ?? '';
 			if ( 'ids' === $fields ) {
@@ -113,9 +118,10 @@ if ( ! class_exists( 'WP_Query' ) ) {
 if ( ! function_exists( 'nc_test_reset' ) ) {
 	function nc_test_reset(): void {
 		$GLOBALS['nc_test'] = array(
-			'actions' => array(), 'filters' => array(), 'meta' => array(), 'fields' => array(),
+			'' => array(), 'actions' => array(), 'filters' => array(), 'meta' => array(), 'fields' => array(),
 			'posts' => array(), 'blocks' => array(), 'caps' => array(), 'attachment_calls' => array(),
 			'styles' => array(), 'options' => array(), 'menus' => array(), 'query_posts' => array(),
+			'query_args' => array(), 'registered_meta' => array(),
 		);
 		$GLOBALS['wp_version'] = '6.6-test';
 	}
@@ -167,9 +173,12 @@ if ( ! function_exists( 'wp_get_attachment_metadata' ) ) { function wp_get_attac
 if ( ! function_exists( 'wp_get_attachment_image_src' ) ) { function wp_get_attachment_image_src( $id, $size ) { return $GLOBALS['nc_test']['attachment_sizes'][ $id ][ $size ] ?? false; } }
 if ( ! function_exists( 'get_post_mime_type' ) ) { function get_post_mime_type( $id ) { return $GLOBALS['nc_test']['mime'][ $id ] ?? ''; } }
 if ( ! function_exists( 'rest_authorization_required_code' ) ) { function rest_authorization_required_code() { return 401; } }
-if ( ! function_exists( 'register_post_meta' ) ) { function register_post_meta( $type, $key, $args ) { $GLOBALS['nc_test']['registered_meta'][ $key ] = $args; return true; } }
+if ( ! function_exists( 'register_post_meta' ) ) { function register_post_meta( $type, $key, $args ) { $GLOBALS['nc_test']['registered_meta'][ $type ][ $key ] = $args; return true; } }
 if ( ! function_exists( 'register_rest_route' ) ) { function register_rest_route( $namespace, $route, $args ) { $GLOBALS['nc_test']['routes'][ $namespace . $route ] = $args; return true; } }
 if ( ! function_exists( 'get_option' ) ) { function get_option( $option, $default = false ) { return $GLOBALS['nc_test']['options'][ $option ] ?? $default; } }
+if ( ! function_exists( 'update_option' ) ) { function update_option( $option, $value, $autoload = null ) { $GLOBALS['nc_test']['options'][ $option ] = $value; return true; } }
+if ( ! function_exists( 'wp_verify_nonce' ) ) { function wp_verify_nonce( $nonce, $action = -1 ) { return ( $GLOBALS['nc_test']['nonces'][ $action ] ?? null ) === $nonce ? 1 : false; } }
+if ( ! function_exists( 'rest_ensure_response' ) ) { function rest_ensure_response( $response ) { return $response instanceof WP_REST_Response ? $response : new WP_REST_Response( $response ); } }
 if ( ! function_exists( 'add_menu_page' ) ) { function add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function = '', $icon_url = '', $position = null ) { $GLOBALS['nc_test']['menus'][ $menu_slug ] = compact( 'page_title', 'menu_title', 'capability', 'function' ); return $menu_slug; } }
 if ( ! function_exists( 'add_submenu_page' ) ) { function add_submenu_page( $parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function = '' ) { $GLOBALS['nc_test']['menus'][ $menu_slug ] = compact( 'page_title', 'menu_title', 'capability', 'function', 'parent_slug' ); return $menu_slug; } }
 if ( ! function_exists( 'register_setting' ) ) { function register_setting( $option_group, $option_name, $args = array() ) { $GLOBALS['nc_test']['settings'][ $option_name ] = $args; return true; } }

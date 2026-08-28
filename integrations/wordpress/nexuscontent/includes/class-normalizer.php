@@ -249,7 +249,7 @@ final class Normalizer {
 		}
 
 		$sections = array();
-		foreach ( array( 'hero', 'intro', 'cta' ) as $type ) {
+		foreach ( $this->registry->fixed_types() as $type ) {
 			if ( ! get_field( $type . '_enabled', $post->ID, false ) ) {
 				continue;
 			}
@@ -427,7 +427,7 @@ final class Normalizer {
 
 	/** @param mixed $value @return mixed */
 	private function json_value( $value, Diagnostics $diagnostics, string $path, int $depth = 0 ) {
-		if ( $depth > 20 ) {
+		if ( $depth > self::MAX_BLOCK_DEPTH ) {
 			$diagnostics->add( 'warning', Contract::ERROR_INVALID_SECTION, __( 'Section data exceeded the normalization depth limit.', 'nexuscontent' ), $path );
 			return null;
 		}
@@ -526,41 +526,7 @@ final class Normalizer {
 		if ( $flexible ) {
 			++$count;
 		}
-		$fixed_keys = array(
-			'hero_enabled',
-			'hero_section_id',
-			'hero_variant',
-			'hero_eyebrow',
-			'hero_heading',
-			'hero_body',
-			'hero_image',
-			'hero_primary_action_label',
-			'hero_primary_action_url',
-			'hero_secondary_action_label',
-			'hero_secondary_action_url',
-			'hero_theme',
-			'intro_enabled',
-			'intro_section_id',
-			'intro_variant',
-			'intro_eyebrow',
-			'intro_heading',
-			'intro_body',
-			'intro_image',
-			'intro_image_position',
-			'intro_theme',
-			'cta_enabled',
-			'cta_section_id',
-			'cta_variant',
-			'cta_heading',
-			'cta_body',
-			'cta_primary_action_label',
-			'cta_primary_action_url',
-			'cta_secondary_action_label',
-			'cta_secondary_action_url',
-			'cta_background_image',
-			'cta_theme',
-		);
-		foreach ( $fixed_keys as $key ) {
+		foreach ( $this->registry->fixed_field_keys() as $key ) {
 			$value = metadata_exists( 'post', $post->ID, $key ) ? get_post_meta( $post->ID, $key, true ) : null;
 			if ( ! $value && function_exists( 'get_field' ) ) {
 				$value = get_field( $key, $post->ID, false );
