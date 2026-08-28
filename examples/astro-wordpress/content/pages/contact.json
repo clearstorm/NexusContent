@@ -1,0 +1,38 @@
+{
+  "key": "contact",
+  "slug": "contact",
+  "title": "Contact - NexusContent",
+  "seo": {
+    "title": "Contact | NexusContent",
+    "description": "Reach the NexusContent team, or just test the embedded form section.",
+    "robots": { "index": true, "follow": true }
+  },
+  "image_text": {
+    "eyebrow": "Contact",
+    "heading": "Talk to us",
+    "body": "<p>Questions about the architecture, the providers, or the roadmap? Write to the team or use the form below. We are happiest explaining why the content layer should stay boring.</p>",
+    "image": {
+      "src": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=1000&q=80&auto=format&fit=crop",
+      "alt": "Office space"
+    },
+    "image_position": "right",
+    "action_label": "Email the team",
+    "action_url": "mailto:hello@nexuscontent.dev"
+  },
+  "logo_grid": {
+    "eyebrow": "Partners",
+    "heading": "Trusted by teams at",
+    "items": [
+      { "name": "Northwind", "image": { "src": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=200&q=80&auto=format&fit=crop", "alt": "Northwind logo" } },
+      { "name": "Acme Cloud", "image": { "src": "https://images.unsplash.com/photo-1496200186974-034380f55fa4?w=200&q=80&auto=format&fit=crop", "alt": "Acme Cloud logo" } },
+      { "name": "Bexell", "image": { "src": "https://images.unsplash.com/photo-1516321165247-4aa89a48be28?w=200&q=80&auto=format&fit=crop", "alt": "Bexell logo" } },
+      { "name": "Lantern", "image": { "src": "https://images.unsplash.com/photo-1541410965313-d53b3c16ff17?w=200&q=80&auto=format&fit=crop", "alt": "Lantern logo" } }
+    ]
+  },
+  "form_embed": {
+    "heading": "Send us a message",
+    "provider": "demo",
+    "form_id": "contact-demo",
+    "embed_code": "<form><label>Your email <input type=\"email\" name=\"email\" placeholder=\"you@example.com\" /></label><label>Message <textarea name=\"message\" rows=\"4\"></textarea></label><button type=\"submit\">Send message</button></form>"
+  }
+}

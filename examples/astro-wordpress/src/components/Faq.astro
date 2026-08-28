@@ -1,0 +1,62 @@
+---
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface Props {
+  eyebrow?: string;
+  heading: string;
+  body?: string;
+  items?: FaqItem[];
+}
+
+const { eyebrow, heading, body, items } = Astro.props;
+---
+
+<section class="section faq">
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <h2>{heading}</h2>
+  {body && <p class="lede">{body}</p>}
+  {items && items.length > 0 && (
+    <div class="list">
+      {items.map((item) => (
+        <details class="card">
+          <summary>{item.question}</summary>
+          <p>{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  )}
+  <style>
+    .lede {
+      color: var(--muted);
+      max-width: 40rem;
+    }
+
+    .list {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 1.25rem;
+    }
+
+    summary {
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .card p {
+      color: var(--muted);
+      margin: 0.75rem 0 0.25rem;
+    }
+  </style>
+</section>

@@ -1,0 +1,128 @@
+{
+  "key": "home",
+  "slug": "home",
+  "title": "Home - NexusContent",
+  "seo": {
+    "title": "NexusContent | Content abstraction for the modern web",
+    "description": "One interface between your frontend and your content sources - Git, WordPress, Strapi and more.",
+    "robots": { "index": true, "follow": true }
+  },
+  "hero": {
+    "eyebrow": "Welcome",
+    "heading": "Content abstraction, done right.",
+    "body": "NexusContent gives your frontend one interface for every content source. Git-managed JSON, WordPress, Strapi - the application never cares where content lives.",
+    "image": {
+      "src": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&q=80&auto=format&fit=crop",
+      "alt": "Laptop showing code"
+    },
+    "primary_action_label": "Explore services",
+    "primary_action_url": "/services",
+    "secondary_action_label": "Contact us",
+    "secondary_action_url": "/contact"
+  },
+  "intro": {
+    "eyebrow": "The idea",
+    "heading": "One interface, every content source.",
+    "body": "Content sources come and go. Editors change tools, clients move from WordPress to Strapi, and repositories get reorganised. Your pages should ride through all of it unchanged.",
+    "image": {
+      "src": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1000&q=80&auto=format&fit=crop",
+      "alt": "Notebook and documents on a desk"
+    },
+    "image_position": "right"
+  },
+  "features": {
+    "eyebrow": "Capabilities",
+    "heading": "Core capabilities",
+    "body": "The small set of primitives NexusContent is built on - nothing more.",
+    "items": [
+      {
+        "title": "Normalized content",
+        "description": "Every provider resolves to the same page, collection, and media objects.",
+        "points": ["Provider-neutral shapes", "Media as first-class content", "Content provenance on every object"],
+        "thumbnail": {
+          "src": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&q=80&auto=format&fit=crop",
+          "alt": "Code on a monitor"
+        }
+      },
+      {
+        "title": "Schema validation",
+        "description": "Declarative field schemas validate content at retrieval time.",
+        "points": ["Required fields fail loudly", "Typed components and media"],
+        "thumbnail": {
+          "src": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80&auto=format&fit=crop",
+          "alt": "Team planning at a whiteboard"
+        }
+      },
+      {
+        "title": "Template switches",
+        "description": "Swap the content source behind any model without touching website code.",
+        "points": ["Git JSON, WordPress, or Strapi", "Same pages, same components"],
+        "thumbnail": {
+          "src": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&q=80&auto=format&fit=crop",
+          "alt": "Writing at a laptop"
+        }
+      },
+      {
+        "title": "Framework neutral",
+        "description": "The same core works in Astro builds and plain Node scripts.",
+        "points": ["No framework imports", "Static-build friendly"],
+        "thumbnail": {
+          "src": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&q=80&auto=format&fit=crop",
+          "alt": "Person studying at a desk"
+        }
+      }
+    ]
+  },
+  "gallery": {
+    "eyebrow": "Gallery",
+    "heading": "Glimpses of the platform",
+    "images": [
+      {
+        "src": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80&auto=format&fit=crop",
+        "alt": "Code editor"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80&auto=format&fit=crop",
+        "alt": "Team collaborating"
+      },
+      {
+        "src": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80&auto=format&fit=crop",
+        "alt": "Students working together"
+      }
+    ]
+  },
+  "testimonials": {
+    "eyebrow": "Testimonials",
+    "heading": "What teams say",
+    "items": [
+      {
+        "quote": "We moved from our legacy CMS to NexusContent and the migration strategy was simply swapping a config line.",
+        "author": "Aisha Patel, Head of Engineering",
+        "avatar": {
+          "src": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80&auto=format&fit=crop",
+          "alt": "Portrait of Aisha Patel"
+        }
+      },
+      {
+        "quote": "One content model, three providers. Our editorial team never noticed the switch.",
+        "author": "Tom Okafor, Digital Director",
+        "avatar": {
+          "src": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80&auto=format&fit=crop",
+          "alt": "Portrait of Tom Okafor"
+        }
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Ready to build?",
+    "body": "See how NexusContent turns content sources into a single interface for your frontend.",
+    "primary_action_label": "Get in touch",
+    "primary_action_url": "/contact",
+    "secondary_action_label": "Read the blog",
+    "secondary_action_url": "/blog",
+    "background_image": {
+      "src": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1600&q=80&auto=format&fit=crop",
+      "alt": ""
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "key": "migrating-content-sources",
+  "slug": "migrating-content-sources",
+  "title": "Migrating a Content Source Without Rebuilding the Site",
+  "excerpt": "Change the source, keep the pages. How a per-model provider switch makes content migrations boring.",
+  "publishedAt": "2026-08-12",
+  "url": "https://nexuscontent.dev/blog/migrating-content-sources/",
+  "featuredImage": {
+    "src": "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=900&q=80&auto=format&fit=crop",
+    "alt": "Migration arrows on a whiteboard"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "data": {
+        "eyebrow": "Engineering",
+        "heading": "Migrating a Content Source Without Rebuilding the Site",
+        "body": "When the content source changes, the frontend should not notice. Here is how NexusContent makes that a configuration change.",
+        "image": {
+          "src": "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=1200&q=80&auto=format&fit=crop",
+          "alt": "Migration arrows on a whiteboard"
+        },
+        "primary_action_label": "Read the docs",
+        "primary_action_url": "/services"
+      }
+    },
+    {
+      "type": "rich_text",
+      "data": {
+        "heading": "The old way",
+        "body": "<p>Most migrations rewrite templates, move URLs, and re-map fields. The page component that consumed <strong>WordPress objects</strong> needs a different version for <strong>Strapi objects</strong> and a third for repository files.</p><p>That compounding work is what NexusContent removes. Providers normalize everything into the same shapes, so components never change.</p>"
+      }
+    },
+    {
+      "type": "statistics",
+      "data": {
+        "eyebrow": "The switch",
+        "heading": "A migration in three numbers",
+        "items": [
+          { "value": "1", "label": "Config line changed" },
+          { "value": "0", "label": "Components rewritten" },
+          { "value": "1", "label": "Build that proved it" }
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "data": {
+        "heading": "See the pattern live",
+        "body": "Every model in this example declares its provider source. Flip one and rebuild to watch the swap.",
+        "primary_action_label": "Explore the example",
+        "primary_action_url": "/",
+        "secondary_action_label": "Contact us",
+        "secondary_action_url": "/contact"
+      }
+    }
+  ]
+}

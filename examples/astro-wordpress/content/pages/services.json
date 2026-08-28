@@ -1,0 +1,100 @@
+{
+  "key": "services",
+  "slug": "services",
+  "title": "Services - NexusContent",
+  "seo": {
+    "title": "Services | NexusContent",
+    "description": "Schema-driven content, provider freedom, validation, and plain Node compatibility.",
+    "robots": { "index": true, "follow": true }
+  },
+  "hero": {
+    "eyebrow": "Services",
+    "heading": "What we deliver",
+    "body": "Four capabilities, one goal: keep your content source replaceable without reworking your frontend.",
+    "image": {
+      "src": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&q=80&auto=format&fit=crop",
+      "alt": "Documents on a desk"
+    },
+    "primary_action_label": "Get a quote",
+    "primary_action_url": "/contact",
+    "secondary_action_label": "What clients say",
+    "secondary_action_url": "/#testimonials"
+  },
+  "features": {
+    "eyebrow": "Offering",
+    "heading": "Services & packages",
+    "items": [
+      {
+        "title": "Schema-first integration",
+        "description": "Define your content contract once as models and let every source conform to it.",
+        "points": ["Declarative field schemas", "Retrieval-time validation"],
+        "thumbnail": {
+          "src": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80&auto=format&fit=crop",
+          "alt": "Planning a project"
+        }
+      },
+      {
+        "title": "Provider migration",
+        "description": "Move from WordPress to Git, or Git to Strapi, without touching a page.",
+        "points": ["Provider-neutral media", "Per-model source override"],
+        "thumbnail": {
+          "src": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&q=80&auto=format&fit=crop",
+          "alt": "Code approach"
+        }
+      },
+      {
+        "title": "Content governance",
+        "description": "Provenance, structured errors, and strict mode keep content honest.",
+        "points": ["Where every object came from", "Actionable failure messages"],
+        "thumbnail": {
+          "src": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=400&q=80&auto=format&fit=crop",
+          "alt": "Charts on a screen"
+        }
+      },
+      {
+        "title": "Static-first delivery",
+        "description": "Everything runs at build time; nothing presumes a persistent server.",
+        "points": ["Plain Node compatible", "Astro reference consumers"],
+        "thumbnail": {
+          "src": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80&auto=format&fit=crop",
+          "alt": "Terminal window"
+        }
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "heading": "Frequently asked questions",
+    "body": "Straight answers about what NexusContent is and is not.",
+    "items": [
+      {
+        "question": "Do I have to use Git for content?",
+        "answer": "No. Git is one provider. This example wires pages and posts to Git JSON, but every model declares its own source - the same site can read WordPress or Strapi instead."
+      },
+      {
+        "question": "Does NexusContent edit or render my content?",
+        "answer": "No. Editors stay in the CMS, and rendering stays in your application. NexusContent only retrieves, normalizes, and validates."
+      },
+      {
+        "question": "Is this tied to Astro?",
+        "answer": "No. Astro is the reference consumer, but the core runs in plain Node too."
+      },
+      {
+        "question": "Can I mix providers on one site?",
+        "answer": "Yes. Each model picks its source, so the homepage can come from Git while blog posts come from WordPress."
+      }
+    ]
+  },
+  "cta": {
+    "heading": "Want the same setup?",
+    "body": "From a two-provider reference consumer to a full content strategy, the shape is the same.",
+    "primary_action_label": "Book a call",
+    "primary_action_url": "/contact",
+    "secondary_action_label": "Browse posts",
+    "secondary_action_url": "/blog",
+    "background_image": {
+      "src": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&q=80&auto=format&fit=crop",
+      "alt": ""
+    }
+  }
+}

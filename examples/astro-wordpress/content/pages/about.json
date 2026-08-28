@@ -1,0 +1,49 @@
+{
+  "key": "about",
+  "slug": "about",
+  "title": "About - NexusContent",
+  "seo": {
+    "title": "About | NexusContent",
+    "description": "Why NexusContent exists: a clean boundary between content sources and the applications that consume them.",
+    "robots": { "index": true, "follow": true }
+  },
+  "hero": {
+    "eyebrow": "About",
+    "heading": "We make content replaceable.",
+    "body": "NexusContent is an open source content abstraction and integration layer. It normalizes content from any source into one predictable interface, so migrations stop being rewrites.",
+    "image": {
+      "src": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80&auto=format&fit=crop",
+      "alt": "Team collaborating around a laptop"
+    },
+    "primary_action_label": "Our services",
+    "primary_action_url": "/services",
+    "secondary_action_label": "Contact us",
+    "secondary_action_url": "/contact"
+  },
+  "rich_text": {
+    "heading": "Our story",
+    "body": "<p>Every modern website copies the same data out of a CMS or a repository and hand-maps it into components. When the source changes, the mapping has to change too.</p><p>NexusContent draws a line: <strong>content sources provide normalized content</strong>, and applications consume that normalized content. Providers handle the differences. Consumers stay boring.</p><p>This repository proves the architecture with a Git JSON content source and a WordPress REST source behind the <em>same</em> pages, components, and schema.</p>"
+  },
+  "image_text": {
+    "eyebrow": "The method",
+    "heading": "Content first, page later",
+    "body": "<p>Providers normalize pages, collections, media, navigation, and settings. Schema validation checks the content before it reaches a component. Only then does the frontend decide how to present it.</p>",
+    "image": {
+      "src": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=1000&q=80&auto=format&fit=crop",
+      "alt": "Person typing on a laptop"
+    },
+    "image_position": "left",
+    "action_label": "See how it works",
+    "action_url": "/services"
+  },
+  "statistics": {
+    "eyebrow": "Track record",
+    "heading": "By the numbers",
+    "items": [
+      { "value": "3", "label": "Content sources" },
+      { "value": "12", "label": "Canonical sections" },
+      { "value": "100%", "label": "Static build friendly" },
+      { "value": "0", "label": "Framework dependencies" }
+    ]
+  }
+}

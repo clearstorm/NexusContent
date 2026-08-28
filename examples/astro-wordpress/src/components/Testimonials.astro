@@ -1,29 +1,42 @@
 ---
+interface Image {
+  src: string;
+  alt?: string;
+}
+
 interface Testimonial {
   quote: string;
   author: string;
+  avatar?: Image;
 }
 
-interface Props {
+export interface Props {
+  eyebrow?: string;
   heading: string;
-  items: Testimonial[];
+  items?: Testimonial[];
 }
 
-const { heading, items } = Astro.props;
+const { eyebrow, heading, items } = Astro.props;
 ---
 
 <section class="section testimonials">
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
   <h2>{heading}</h2>
-  <div class="grid">
-    {
-      items.map((item) => (
-        <blockquote class="card">
-          <p class="quote">"{item.quote}"</p>
-          <footer>— {item.author}</footer>
-        </blockquote>
-      ))
-    }
-  </div>
+  {items && items.length > 0 && (
+    <div class="grid">
+      {
+        items.map((item) => (
+          <blockquote class="card">
+            {item.avatar?.src && (
+              <img class="avatar" src={item.avatar.src} alt={item.avatar.alt ?? ""} />
+            )}
+            <p class="quote">"{item.quote}"</p>
+            <footer>— {item.author}</footer>
+          </blockquote>
+        ))
+      }
+    </div>
+  )}
   <style>
     .grid {
       display: grid;
@@ -40,6 +53,14 @@ const { heading, items } = Astro.props;
       padding: 1.5rem;
       background: var(--surface);
       box-shadow: var(--shadow-sm);
+    }
+
+    .avatar {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 0.75rem;
     }
 
     .quote {

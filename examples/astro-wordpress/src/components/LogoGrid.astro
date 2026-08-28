@@ -1,0 +1,64 @@
+---
+interface Image {
+  src: string;
+  alt?: string;
+}
+
+interface LogoItem {
+  name: string;
+  image?: Image;
+}
+
+export interface Props {
+  eyebrow?: string;
+  heading: string;
+  items?: LogoItem[];
+}
+
+const { eyebrow, heading, items } = Astro.props;
+---
+
+<section class="section logo-grid">
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <h2>{heading}</h2>
+  {items && items.length > 0 && (
+    <div class="grid">
+      {items.map((item) => (
+        <div class="logo" title={item.name}>
+          {item.image?.src ? (
+            <img src={item.image.src} alt={item.name} loading="lazy" />
+          ) : (
+            <span>{item.name}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+      padding: 0.5rem;
+    }
+
+    .logo img {
+      max-width: 80%;
+      max-height: 3rem;
+      object-fit: contain;
+    }
+  </style>
+</section>

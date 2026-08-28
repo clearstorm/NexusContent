@@ -1,35 +1,50 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/Hero.astro";
-import Services from "../components/Services.astro";
-import Testimonials from "../components/Testimonials.astro";
 import CTA from "../components/CTA.astro";
+import Features from "../components/Features.astro";
+import Gallery from "../components/Gallery.astro";
+import Hero from "../components/Hero.astro";
+import Intro from "../components/Intro.astro";
+import Testimonials from "../components/Testimonials.astro";
+import type { Props as CtaProps } from "../components/CTA.astro";
+import type { Props as FeaturesProps } from "../components/Features.astro";
+import type { Props as GalleryProps } from "../components/Gallery.astro";
+import type { Props as HeroProps } from "../components/Hero.astro";
+import type { Props as IntroProps } from "../components/Intro.astro";
+import type { Props as TestimonialsProps } from "../components/Testimonials.astro";
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { resolveMediaFields } from "../app/media";
+
+export interface HomeData {
+  hero?: HeroProps;
+  intro?: IntroProps;
+  features?: FeaturesProps;
+  gallery?: GalleryProps;
+  testimonials?: TestimonialsProps;
+  cta?: CtaProps;
+}
 
 const page = await nexus.getPage("home");
 
 if (!page) {
-  throw new Error(`Required WordPress page "home" was not found.`);
+  throw new Error(`Required content "home" was not found.`);
 }
 
-const { hero, services, testimonials, cta, contentBlocks } = page.data;
+const home = (await resolveMediaFields(nexus, page.data)) as HomeData;
 
 const seo = resolveSeo({
-  title: page.title ?? "NexusContent WordPress Example",
+  title: page.title ?? "Home",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/") }
 }, siteSeoDefaults);
 ---
 
 <BaseLayout seo={seo}>
-  {hero && <Hero {...hero} />}
-  {services && <Services heading={services.heading} intro={services.intro} items={services.items} />}
-  {testimonials && <Testimonials heading={testimonials.heading} items={testimonials.items} />}
-  {cta && <CTA {...cta} />}
- <!-- 
- {page.data.content && !(hero || mission || story) && (
-    <article class="prose" set:html={page.data.content} />
-  )}
-  -->
+  {home.hero && <Hero {...home.hero} />}
+  {home.intro && <Intro {...home.intro} />}
+  {home.features && <Features {...home.features} />}
+  {home.gallery && <Gallery {...home.gallery} />}
+  {home.testimonials && <Testimonials {...home.testimonials} />}
+  {home.cta && <CTA {...home.cta} />}
 </BaseLayout>

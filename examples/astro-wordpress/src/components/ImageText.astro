@@ -1,0 +1,71 @@
+---
+interface Image {
+  src: string;
+  alt?: string;
+}
+
+export interface Props {
+  eyebrow?: string;
+  heading: string;
+  body?: string;
+  image?: Image;
+  image_position?: string;
+  action_label?: string;
+  action_url?: string;
+}
+
+const { eyebrow, heading, body, image, image_position, action_label, action_url } = Astro.props;
+const flip = image_position === "left" && Boolean(image?.src);
+---
+
+<section class="section image-text" class:list={{ flip }}>
+  {image?.src && (
+    <img class="media" src={image.src} alt={image.alt ?? ""} />
+  )}
+  <div class="copy">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h2>{heading}</h2>
+    {body && <div class="body" set:html={body} />}
+    {action_label && action_url && (
+      <a class="btn btn-primary" href={action_url}>{action_label}</a>
+    )}
+  </div>
+  <style>
+    .image-text {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .image-text.flip .copy {
+      order: -1;
+    }
+
+    .image-text h2 {
+      margin-top: 0.5rem;
+    }
+
+    .body {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .media {
+      width: 100%;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      object-fit: cover;
+    }
+
+    @media (max-width: 48rem) {
+      .image-text {
+        grid-template-columns: 1fr;
+      }
+
+      .image-text.flip .copy {
+        order: initial;
+      }
+    }
+  </style>
+</section>

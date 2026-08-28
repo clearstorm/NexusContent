@@ -2,7 +2,19 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import NexusSeo from "../components/NexusSeo.astro";
+import { nexus } from "../nexus";
 import type { SeoData } from "@nexuscontent/core";
+
+interface FooterData {
+  description?: string;
+  credit?: string;
+}
+
+interface SiteData {
+  siteName?: string;
+  tagline?: string;
+  footer?: FooterData;
+}
 
 interface Props {
   seo: SeoData;
@@ -11,23 +23,29 @@ interface Props {
 const { seo } = Astro.props;
 const lang = "en";
 
-// The WordPress provider only serves pages and posts, so navigation and site
-// data are app-owned constants declared here in the layout.
-const navItems = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Services", href: "/services" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" }
-];
+// Navigation and settings are declared as NexusContent models wired to the Git
+// provider (the WordPress provider serves pages and posts only, and returns
+// null for navigation/settings). A constant fallback keeps the site usable if
+// those optional sources are missing.
+const nav = await nexus.getNavigation("primary");
+const navItems = (nav?.items ??
+  [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Services", href: "/services" },
+    { label: "Blog", href: "/blog" },
+    { label: "Contact", href: "/contact" }
+  ]) as { label: string; href: string }[];
 
-const siteData = {
-  siteName: "NexusContent WordPress",
+const sites = await nexus.getSettings("site");
+const siteData: SiteData = {
+  siteName: "NexusContent",
   tagline: "Content abstraction for the modern web",
   footer: {
     description: "A reference consumer proving Astro and NexusContent share a clean boundary.",
-    credit: "Powered by NexusContent with a WordPress content source."
-  }
+    credit: "Powered by NexusContent with Git and WordPress content sources."
+  },
+  ...(sites?.data as SiteData | undefined)
 };
 ---
 

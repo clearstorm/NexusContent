@@ -1,0 +1,53 @@
+---
+interface Image {
+  src: string;
+  alt?: string;
+}
+
+export interface Props {
+  eyebrow?: string;
+  heading: string;
+  images?: Image[];
+}
+
+const { eyebrow, heading, images } = Astro.props;
+---
+
+<section class="section gallery">
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <h2>{heading}</h2>
+  {images && images.length > 0 && (
+    <div class="grid">
+      {images.map((image) => (
+        <figure>
+          <img src={image.src} alt={image.alt ?? ""} loading="lazy" />
+        </figure>
+      ))}
+    </div>
+  )}
+  <style>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    img {
+      width: 100%;
+      height: 12rem;
+      object-fit: cover;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease;
+    }
+
+    img:hover {
+      transform: scale(1.02);
+    }
+  </style>
+</section>

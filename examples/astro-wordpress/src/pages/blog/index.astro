@@ -4,10 +4,18 @@ import PostCard from "../../components/PostCard.astro";
 import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { resolveImage } from "../../app/media";
 
 const posts = await nexus.getCollection("blog");
 
-const intro = "Posts from the WordPress content source.";
+const cards = await Promise.all(
+  posts.map(async (post) => {
+    const image = await resolveImage(nexus, post.data.featuredImage as never);
+    return { ...post, image };
+  })
+);
+
+const intro = "Posts from the Git content repository.";
 const seo = resolveSeo({
   title: "Blog - NexusContent WordPress Example",
   seo: { description: intro, canonicalUrl: canonicalUrl("/blog/") }
@@ -22,12 +30,13 @@ const seo = resolveSeo({
 
   <div class="posts">
     {
-      posts.map((post) => (
+      cards.map((post) => (
         <PostCard
           title={post.title}
           slug={post.slug ?? post.key}
           date={post.data.publishedAt}
           excerpt={post.data.excerpt}
+          image={post.image}
         />
       ))
     }

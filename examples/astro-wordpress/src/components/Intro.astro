@@ -1,0 +1,66 @@
+---
+interface Image {
+  src: string;
+  alt?: string;
+}
+
+export interface Props {
+  eyebrow?: string;
+  heading: string;
+  body?: string;
+  image?: Image;
+  image_position?: string;
+}
+
+const { eyebrow, heading, body, image, image_position } = Astro.props;
+const flip = image_position === "left" && Boolean(image?.src);
+---
+
+<section class="section intro" class:list={{ flip }}>
+  <div class="copy">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h2>{heading}</h2>
+    {body && <p class="body">{body}</p>}
+  </div>
+  {image?.src && (
+    <img class="media" src={image.src} alt={image.alt ?? ""} />
+  )}
+  <style>
+    .intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .intro.flip .media {
+      order: -1;
+    }
+
+    .intro h2 {
+      margin-top: 0.5rem;
+    }
+
+    .body {
+      color: var(--muted);
+      max-width: 40rem;
+    }
+
+    .media {
+      width: 100%;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      object-fit: cover;
+    }
+
+    @media (max-width: 48rem) {
+      .intro {
+        grid-template-columns: 1fr;
+      }
+
+      .intro.flip .media {
+        order: initial;
+      }
+    }
+  </style>
+</section>

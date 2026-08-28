@@ -1,0 +1,17 @@
+{
+  "key": "site",
+  "siteName": "NexusContent",
+  "tagline": "Content abstraction for the modern web",
+  "footer": {
+    "description": "A reference consumer proving Astro and NexusContent share a clean boundary across Git and WordPress content sources.",
+    "credit": "Powered by NexusContent with Git and WordPress content sources."
+  },
+  "contactDetails": {
+    "heading": "Contact",
+    "items": [
+      { "label": "Email", "value": "hello@nexuscontent.dev", "href": "mailto:hello@nexuscontent.dev" },
+      { "label": "Docs", "value": "nexuscontent.dev", "href": "https://nexuscontent.dev" },
+      { "label": "GitHub", "value": "github.com/nexuscontent", "href": "https://github.com/nexuscontent" }
+    ]
+  }
+}

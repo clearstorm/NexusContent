@@ -1,28 +1,47 @@
 ---
-interface Props {
-  heading: string;
-  intro: string;
-  label: string;
-  href: string;
+interface Image {
+  src: string;
+  alt?: string;
 }
 
-const { heading, intro, label, href } = Astro.props;
+export interface Props {
+  heading: string;
+  body?: string;
+  primary_action_label?: string;
+  primary_action_url?: string;
+  secondary_action_label?: string;
+  secondary_action_url?: string;
+  background_image?: Image;
+}
+
+const { heading, body, primary_action_label, primary_action_url, secondary_action_label, secondary_action_url, background_image } = Astro.props;
 ---
 
 <section class="cta">
   <h2>{heading}</h2>
-  <p>{intro}</p>
-  <a class="btn btn-primary" href={href}>
-    {label}
-  </a>
+  {body && <p>{body}</p>}
+  {(primary_action_label || secondary_action_label) && (
+    <div class="actions">
+      {primary_action_label && primary_action_url && (
+        <a class="btn btn-primary" href={primary_action_url}>{primary_action_label}</a>
+      )}
+      {secondary_action_label && secondary_action_url && (
+        <a class="btn btn-light" href={secondary_action_url}>{secondary_action_label}</a>
+      )}
+    </div>
+  )}
   <style>
     .cta {
       margin-top: 3.5rem;
-      padding: 2.75rem 2.5rem;
+      padding: 3rem 2.5rem;
       text-align: center;
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, var(--accent-soft), #faf5ff);
+      background:
+        {background_image?.src
+          ? `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url("${background_image.src}") center / cover no-repeat`
+          : "linear-gradient(135deg, var(--accent-soft), #faf5ff)"};
+      color: {background_image?.src ? "#ffffff" : "inherit"};
     }
 
     .cta h2 {
@@ -33,6 +52,18 @@ const { heading, intro, label, href } = Astro.props;
       color: var(--muted);
       max-width: 36rem;
       margin: 0 auto 1.5rem;
+    }
+
+    .cta .actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta .btn-light {
+      background: #ffffff;
+      color: var(--accent);
     }
   </style>
 </section>

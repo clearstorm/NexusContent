@@ -1,22 +1,32 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
-import CTA from "../components/CTA.astro";
+import ImageText from "../components/ImageText.astro";
+import RichText from "../components/RichText.astro";
+import Statistics from "../components/Statistics.astro";
+import type { Props as HeroProps } from "../components/Hero.astro";
+import type { Props as ImageTextProps } from "../components/ImageText.astro";
+import type { Props as RichTextProps } from "../components/RichText.astro";
+import type { Props as StatisticsProps } from "../components/Statistics.astro";
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { resolveMediaFields } from "../app/media";
+
+export interface AboutData {
+  hero?: HeroProps;
+  rich_text?: RichTextProps;
+  image_text?: ImageTextProps;
+  statistics?: StatisticsProps;
+}
 
 const page = await nexus.getPage("about");
 
 if (!page) {
-  throw new Error(`Required WordPress page "about" was not found.`);
+  throw new Error(`Required content "about" was not found.`);
 }
 
-const { hero } = page.data;
-const { mission } = page.data;
-const { story } = page.data;
-const { values } = page.data;
-const { cta } = page.data;
+const about = (await resolveMediaFields(nexus, page.data)) as AboutData;
 
 const seo = resolveSeo({
   title: page.title ?? "About",
@@ -25,61 +35,8 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  {hero && <Hero {...hero} />}
-
-  {mission && (
-    <section class="section mission">
-      <h2>{mission.heading}</h2>
-      <p>{mission.content}</p>
-    </section>
-  )}
-
-  {story && (
-    <section class="section story">
-      <h2>{story.heading}</h2>
-      <p>{story.content}</p>
-    </section>
-  )}
-
-  {values && (
-    <section class="section values">
-      <h2>{values.heading}</h2>
-      <ul>
-        {values.items.map((item) => (
-          <li>{item}</li>
-        ))}
-      </ul>
-    </section>
-  )}
- <!-- 
- {page.data.content && !(hero || mission || story) && (
-    <article class="prose" set:html={page.data.content} />
-  )}
-  -->
-  {cta && <CTA {...cta} />}
-
-  <style>
-    .mission p,
-    .story p {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 44rem;
-    }
-
-    .values ul {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-      gap: 1rem;
-      list-style: none;
-      padding: 0;
-    }
-
-    .values li {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem 1.25rem;
-      background: var(--surface);
-      box-shadow: var(--shadow-sm);
-    }
-  </style>
+  {about.hero && <Hero {...about.hero} />}
+  {about.rich_text && <RichText {...about.rich_text} />}
+  {about.image_text && <ImageText {...about.image_text} />}
+  {about.statistics && <Statistics {...about.statistics} />}
 </BaseLayout>

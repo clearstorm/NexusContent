@@ -1,17 +1,28 @@
 ---
+interface Image {
+  src: string;
+  alt?: string;
+}
+
 interface Props {
   title?: string;
   slug?: string;
   date?: string;
   excerpt?: string;
+  image?: Image;
 }
 
-const { title, slug, date, excerpt } = Astro.props;
+const { title, slug, date, excerpt, image } = Astro.props;
 const href = `/blog/${slug ?? ""}`;
 const more = "Read more";
 ---
 
 <article class="card">
+  {image?.src && (
+    <a class="media" href={href}>
+      <img src={image.src} alt={image.alt ?? ""} loading="lazy" />
+    </a>
+  )}
   <a class="title" href={href}>
     <h2>{title ?? "Untitled"}</h2>
   </a>
@@ -33,6 +44,14 @@ const more = "Read more";
     .card:hover {
       transform: translateY(-3px);
       box-shadow: var(--shadow-md);
+    }
+
+    .media img {
+      width: 100%;
+      height: 10rem;
+      object-fit: cover;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
     }
 
     .title {

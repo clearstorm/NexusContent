@@ -1,45 +1,53 @@
 ---
-interface Props {
-  eyebrow?: string;
-  heading: string;
-  intro: string;
-  cta?: {
-    label: string;
-    href: string;
-  };
+interface Image {
+  src: string;
+  alt?: string;
 }
 
-const { eyebrow, heading, intro, cta } = Astro.props;
+export interface Props {
+  eyebrow?: string;
+  heading: string;
+  body?: string;
+  image?: Image;
+  primary_action_label?: string;
+  primary_action_url?: string;
+  secondary_action_label?: string;
+  secondary_action_url?: string;
+}
+
+const { eyebrow, heading, body, image, primary_action_label, primary_action_url, secondary_action_label, secondary_action_url } = Astro.props;
 ---
 
 <section class="hero">
-  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-  <h1>{heading}</h1>
-  <p class="intro">{intro}</p>
-  {cta && (
-    <a class="btn btn-light" href={cta.href}>
-      {cta.label}
-    </a>
+  <div class="copy">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1>{heading}</h1>
+    {body && <p class="body">{body}</p>}
+    {(primary_action_label || secondary_action_label) && (
+      <div class="actions">
+        {primary_action_label && primary_action_url && (
+          <a class="btn btn-primary" href={primary_action_url}>{primary_action_label}</a>
+        )}
+        {secondary_action_label && secondary_action_url && (
+          <a class="btn btn-light" href={secondary_action_url}>{secondary_action_label}</a>
+        )}
+      </div>
+    )}
+  </div>
+  {image && image.src && (
+    <img class="media" src={image.src} alt={image.alt ?? ""} />
   )}
   <style>
     .hero {
-      position: relative;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+      align-items: center;
       overflow: hidden;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       border-radius: var(--radius-lg);
       padding: 3.5rem 2.5rem;
       color: #ffffff;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      right: -6rem;
-      top: -6rem;
-      width: 18rem;
-      height: 18rem;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
     }
 
     .hero .eyebrow {
@@ -48,21 +56,40 @@ const { eyebrow, heading, intro, cta } = Astro.props;
 
     .hero h1 {
       margin: 0.5rem 0 1rem;
-      font-size: clamp(2.25rem, 6vw, 4rem);
-      max-width: 32rem;
-      position: relative;
+      font-size: clamp(2.25rem, 6vw, 3.5rem);
+      max-width: 34rem;
     }
 
-    .hero .intro {
+    .hero .body {
       margin: 0 0 1.75rem;
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       color: #e0e7ff;
-      max-width: 40rem;
-      position: relative;
+      max-width: 36rem;
     }
 
-    .hero .btn {
-      position: relative;
+    .hero .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .hero .media {
+      width: 100%;
+      height: 100%;
+      max-height: 22rem;
+      object-fit: cover;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+    }
+
+    @media (max-width: 48rem) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero .media {
+        max-height: 16rem;
+      }
     }
   </style>
 </section>

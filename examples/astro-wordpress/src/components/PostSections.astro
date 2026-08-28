@@ -1,0 +1,81 @@
+---
+import CTA from "./CTA.astro";
+import Faq from "./Faq.astro";
+import Features from "./Features.astro";
+import FormEmbed from "./FormEmbed.astro";
+import Gallery from "./Gallery.astro";
+import Hero from "./Hero.astro";
+import ImageText from "./ImageText.astro";
+import Intro from "./Intro.astro";
+import LogoGrid from "./LogoGrid.astro";
+import RichText from "./RichText.astro";
+import Statistics from "./Statistics.astro";
+import Testimonials from "./Testimonials.astro";
+import type { Props as CtaProps } from "./CTA.astro";
+import type { Props as FaqProps } from "./Faq.astro";
+import type { Props as FeaturesProps } from "./Features.astro";
+import type { Props as FormEmbedProps } from "./FormEmbed.astro";
+import type { Props as GalleryProps } from "./Gallery.astro";
+import type { Props as HeroProps } from "./Hero.astro";
+import type { Props as ImageTextProps } from "./ImageText.astro";
+import type { Props as IntroProps } from "./Intro.astro";
+import type { Props as LogoGridProps } from "./LogoGrid.astro";
+import type { Props as RichTextProps } from "./RichText.astro";
+import type { Props as StatisticsProps } from "./Statistics.astro";
+import type { Props as TestimonialsProps } from "./Testimonials.astro";
+
+// Sections arrive in the canonical wire shape `{ type, data }` from both the
+// Git content files and WordPress flexible/Gutenberg posts. `_type` is
+// tolerated for schemas that use the core `blocks` field type.
+// Unsupported section types are skipped with a build-time warning rather than
+// failing the whole page. Each case casts the data to its component's Props;
+// schema validation has already guaranteed the declared fields.
+export interface Section {
+  type?: string;
+  _type?: string;
+  data?: Record<string, unknown>;
+}
+
+interface Props {
+  sections?: Section[];
+}
+
+const { sections } = Astro.props;
+const entries = sections ?? [];
+---
+
+{
+  entries.map((section) => {
+    const type = section.type ?? section._type;
+    const data = section.data ?? {};
+    switch (type) {
+      case "hero":
+        return <Hero {...(data as unknown as HeroProps)} />;
+      case "intro":
+        return <Intro {...(data as unknown as IntroProps)} />;
+      case "rich_text":
+        return <RichText {...(data as unknown as RichTextProps)} />;
+      case "image_text":
+        return <ImageText {...(data as unknown as ImageTextProps)} />;
+      case "features":
+        return <Features {...(data as unknown as FeaturesProps)} />;
+      case "statistics":
+        return <Statistics {...(data as unknown as StatisticsProps)} />;
+      case "testimonials":
+        return <Testimonials {...(data as unknown as TestimonialsProps)} />;
+      case "gallery":
+        return <Gallery {...(data as unknown as GalleryProps)} />;
+      case "cta":
+        return <CTA {...(data as unknown as CtaProps)} />;
+      case "faq":
+        return <Faq {...(data as unknown as FaqProps)} />;
+      case "logo_grid":
+        return <LogoGrid {...(data as unknown as LogoGridProps)} />;
+      case "form_embed":
+        return <FormEmbed {...(data as unknown as FormEmbedProps)} />;
+      default:
+        console.warn(`PostSections: skipping unsupported section type "${type}".`);
+        return null;
+    }
+  })
+}

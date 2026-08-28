@@ -19,23 +19,57 @@ if (username && appPassword) {
   authHeaders.Authorization = `Basic ${credentials}`;
 }
 
+// Provider setup is application-owned and may combine committed defaults with
+// environment-specific values. Secrets must remain in environment variables.
+export const gitProviderOptions = {
+  contentPath:
+    (import.meta.env.NEXUS_GIT_CONTENT_PATH as string | undefined) ?? "content"
+};
+
 export const wordpressProviderOptions = {
   baseUrl: wordpressApiUrl,
   headers: authHeaders,
 
-  // "core" uses standard WordPress REST published-page and post retrieval
-  // only. It never calls the companion plugin, so no editor mode, section,
-  // or companion options are configured in this plugin-neutral consumer.
-  apiStrategy: "core"
+  // Standard WordPress REST retrieval (no companion plugin calls).
+  //
+  // `editorMode` decides what a WordPress response becomes under the
+  // "wordpress" source:
+  //   "gutenberg"    — Gutenberg posts become the canonical `data.sections`
+  //     array (`{ type, data }`), matching the `sections` field the Git blog
+  //     posts author. Gallery blocks become `gallery` sections, so WordPress
+  //     and Git galleries render identically through the same grid component.
+  //   "acf_flexible" — ACF flexible layouts become `data.sections` instead;
+  //     Gutenberg galleries without ACF then fall back to raw HTML.
+  //   "acf_fixed"    — plugin fixed groups (hero, intro, cta) flatten into
+  //     named page fields instead.
+  //
+  // One instance is enough for this example because the shipped site reads
+  // from Git. Projects that need both at once can register two WordPress
+  // instances (acf_fixed for pages, acf_flexible or gutenberg for posts) and
+  // point each model's `source.provider` at the matching one.
+  apiStrategy: "core",
+  editorMode: "gutenberg"
+
 } satisfies WordPressProviderOptions;
 
-// NexusContent configuration declares provider instances and a model schema.
-// The schema in ./schema/schema declares the WordPress ACF blocks each page
-// expects, provider-kind, and post source keys. Navigation and settings are
-// app-owned constants in the layout, so no models are declared for them.
+// NexusContent configuration declares provider instances, a media provider,
+// and a model schema. Each model maps a logical content name to a provider
+// source (Git by default; flip `schema.source.provider` to "wordpress" to
+// serve the same model from WordPress) and its field schema.
+//
+// `media.default` is "remote": absolute http(s) URLs are validated and passed
+// through. Both the Git content files and normalized WordPress media use
+// absolute URLs, so one media provider serves every image on the site.
 export const nexusConfig = defineNexusConfig({
   providers: {
+    git: { type: "git", options: gitProviderOptions },
     wordpress: { type: "wordpress", options: wordpressProviderOptions }
+  },
+  media: {
+    default: "remote",
+    providers: {
+      remote: { type: "remote" }
+    }
   },
   schema
 });

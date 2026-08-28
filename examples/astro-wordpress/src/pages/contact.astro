@@ -1,20 +1,29 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/Hero.astro";
-import CTA from "../components/CTA.astro";
+import FormEmbed from "../components/FormEmbed.astro";
+import ImageText from "../components/ImageText.astro";
+import LogoGrid from "../components/LogoGrid.astro";
+import type { Props as FormEmbedProps } from "../components/FormEmbed.astro";
+import type { Props as ImageTextProps } from "../components/ImageText.astro";
+import type { Props as LogoGridProps } from "../components/LogoGrid.astro";
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { resolveMediaFields } from "../app/media";
+
+export interface ContactData {
+  image_text?: ImageTextProps;
+  logo_grid?: LogoGridProps;
+  form_embed?: FormEmbedProps;
+}
 
 const page = await nexus.getPage("contact");
 
 if (!page) {
-  throw new Error(`Required WordPress page "contact" was not found.`);
+  throw new Error(`Required content "contact" was not found.`);
 }
 
-const { hero } = page.data;
-const { contact } = page.data;
-const { cta } = page.data;
+const contact = (await resolveMediaFields(nexus, page.data)) as ContactData;
 
 const seo = resolveSeo({
   title: page.title ?? "Contact",
@@ -23,64 +32,7 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  {hero && <Hero {...hero} />}
-
-  {contact && (
-    <section class="section details">
-      <h2>{contact.heading}</h2>
-      <div class="grid">
-        {
-          contact.items.map((detail) => (
-            <article class="card">
-              <h3>{detail.label}</h3>
-              {detail.href ? (
-                <a href={detail.href}>{detail.value}</a>
-              ) : (
-                <p>{detail.value}</p>
-              )}
-            </article>
-          ))
-        }
-      </div>
-    </section>
-  )}
-
- <!-- 
- {page.data.content && !(hero || mission || story) && (
-    <article class="prose" set:html={page.data.content} />
-  )}
-  -->
-
-  {cta && <CTA {...cta} />}
-
-  <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-
-    .card {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      background: var(--surface);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .card h3 {
-      margin-top: 0;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-    }
-
-    .card a {
-      font-weight: 600;
-      word-break: break-word;
-    }
-  </style>
+  {contact.image_text && <ImageText {...contact.image_text} />}
+  {contact.logo_grid && <LogoGrid {...contact.logo_grid} />}
+  {contact.form_embed && <FormEmbed {...contact.form_embed} />}
 </BaseLayout>

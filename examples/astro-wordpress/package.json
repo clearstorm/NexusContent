@@ -8,7 +8,8 @@
     "build": "astro build",
     "check": "astro check",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "push:project-contract": "node --env-file-if-exists=.env scripts/push-project-contract.mjs"
   },
   "dependencies": {
     "@nexuscontent/core": "file:../.."

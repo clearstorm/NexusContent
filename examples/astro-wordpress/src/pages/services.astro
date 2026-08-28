@@ -1,20 +1,32 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/Hero.astro";
 import CTA from "../components/CTA.astro";
+import Faq from "../components/Faq.astro";
+import Features from "../components/Features.astro";
+import Hero from "../components/Hero.astro";
+import type { Props as CtaProps } from "../components/CTA.astro";
+import type { Props as FaqProps } from "../components/Faq.astro";
+import type { Props as FeaturesProps } from "../components/Features.astro";
+import type { Props as HeroProps } from "../components/Hero.astro";
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { resolveMediaFields } from "../app/media";
+
+export interface ServicesData {
+  hero?: HeroProps;
+  features?: FeaturesProps;
+  faq?: FaqProps;
+  cta?: CtaProps;
+}
 
 const page = await nexus.getPage("services");
 
 if (!page) {
-  throw new Error(`Required WordPress page "services" was not found.`);
+  throw new Error(`Required content "services" was not found.`);
 }
 
-const { hero } = page.data;
-const { services } = page.data;
-const { cta } = page.data;
+const services = (await resolveMediaFields(nexus, page.data)) as ServicesData;
 
 const seo = resolveSeo({
   title: page.title ?? "Services",
@@ -23,88 +35,8 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
-  {hero && <Hero {...hero} />}
-
-  {services && (
-    <section class="section services">
-      <h2>{services.heading}</h2>
-      {services.intro && <p class="lede">{services.intro}</p>}
-      <div class="grid">
-        {
-          services.items.map((service, index) => (
-            <article class="card">
-              <span class="num">{index + 1}</span>
-              <h3>{service.title}</h3>
-              <p>{service.description}</p>
-              {service.points && (
-                <ul>
-                  {service.points.map((point) => (
-                    <li>{point}</li>
-                  ))}
-                </ul>
-              )}
-            </article>
-          ))
-        }
-      </div>
-    </section>
-  )}
-
- <!-- 
- {page.data.content && !(hero || mission || story) && (
-    <article class="prose" set:html={page.data.content} />
-  )}
-  -->
-
-  {cta && <CTA {...cta} />}
-
-  <style>
-    .lede {
-      color: var(--muted);
-      max-width: 44rem;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-    }
-
-    .card {
-      position: relative;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      background: var(--surface);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .card h3 {
-      margin-top: 0.75rem;
-    }
-
-    .card ul {
-      margin: 0.75rem 0 0;
-      padding-left: 1.1rem;
-      color: var(--muted);
-    }
-
-    .card li + li {
-      margin-top: 0.25rem;
-    }
-
-    .num {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 0.5rem;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-  </style>
+  {services.hero && <Hero {...services.hero} />}
+  {services.features && <Features {...services.features} />}
+  {services.faq && <Faq {...services.faq} />}
+  {services.cta && <CTA {...services.cta} />}
 </BaseLayout>

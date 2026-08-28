@@ -1,0 +1,67 @@
+{
+  "key": "schema-driven-content",
+  "slug": "schema-driven-content",
+  "title": "Schema-Driven Content for Astro",
+  "excerpt": "Declare the field schema once, validate every retrieval, and let components trust their input.",
+  "publishedAt": "2026-07-28",
+  "url": "https://nexuscontent.dev/blog/schema-driven-content/",
+  "featuredImage": {
+    "src": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=900&q=80&auto=format&fit=crop",
+    "alt": "Code on a dark screen"
+  },
+  "sections": [
+    {
+      "type": "hero",
+      "data": {
+        "eyebrow": "Featured",
+        "heading": "Schema-Driven Content for Astro",
+        "body": "Astro pages stay explicit while content shapes stay validated.",
+        "image": {
+          "src": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&q=80&auto=format&fit=crop",
+          "alt": "Code on a dark screen"
+        },
+        "secondary_action_label": "About NexusContent",
+        "secondary_action_url": "/about"
+      }
+    },
+    {
+      "type": "rich_text",
+      "data": {
+        "heading": "Why schema validation matters",
+        "body": "<p>External content is untrusted input. A Git file can be malformed, a CMS field can be empty, and a URL can point nowhere. NexusContent validates declared fields at retrieval time, so a missing required heading fails <strong>during the build</strong> instead of rendering a broken page.</p><p>Undeclared fields pass through, which lets a provider stay loose while the parts the site depends on stay strict.</p>"
+      }
+    },
+    {
+      "type": "features",
+      "data": {
+        "eyebrow": "Primitives",
+        "heading": "The field toolkit",
+        "items": [
+          {
+            "title": "Scalars and dates",
+            "description": "String, number, boolean, and datetime fields with required and list flags."
+          },
+          {
+            "title": "Objects and references",
+            "description": "Nested object fields, collection references, and media overrides."
+          },
+          {
+            "title": "Components and blocks",
+            "description": "Declared components and discriminated block lists for CMS-ordered content."
+          }
+        ]
+      }
+    },
+    {
+      "type": "cta",
+      "data": {
+        "heading": "Trust your components again",
+        "body": "Validate at the boundary, keep the markup boring.",
+        "primary_action_label": "Get started",
+        "primary_action_url": "/",
+        "secondary_action_label": "Read more posts",
+        "secondary_action_url": "/blog"
+      }
+    }
+  ]
+}

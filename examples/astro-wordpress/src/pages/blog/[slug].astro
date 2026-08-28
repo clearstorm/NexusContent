@@ -1,8 +1,10 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostSections from "../../components/PostSections.astro";
 import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { resolveMediaFields } from "../../app/media";
 
 export async function getStaticPaths() {
   const posts = await nexus.getCollection("blog");
@@ -18,12 +20,21 @@ const { key } = Astro.props as { key?: string };
 const post = await nexus.getItem("blog", key ?? "");
 
 if (!post) {
-  throw new Error(`Required WordPress post "${key ?? slug}" was not found.`);
+  throw new Error(`Required post "${key ?? slug}" was not found.`);
 }
+
+interface PostData {
+  excerpt?: string;
+  content?: string;
+  publishedAt?: string;
+  sections?: { type?: string; _type?: string; data?: Record<string, unknown> }[];
+}
+
+const data = (await resolveMediaFields(nexus, post.data)) as PostData;
 
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
-const excerpt = post.data.excerpt;
+const excerpt = data.excerpt;
 const seo = resolveSeo({
   title: `${postTitle} - NexusContent WordPress Example`,
   seo: {
@@ -36,7 +47,7 @@ const seo = resolveSeo({
         "@type": "BlogPosting",
         headline: postTitle,
         url: postUrl,
-        ...(post.data.publishedAt ? { datePublished: post.data.publishedAt } : {})
+        ...(data.publishedAt ? { datePublished: data.publishedAt } : {})
       }
     ]
   }
@@ -48,15 +59,29 @@ const seo = resolveSeo({
     <p class="back">
       <a href="/blog">← Blog</a>
     </p>
-    <h1>{post.title}</h1>
-    {post.data.publishedAt && <time>{post.data.publishedAt}</time>}
-    {excerpt && <p class="excerpt">{excerpt}</p>}
-    <div class="body wordpress-content" set:html={post.data.content} />
+    <header>
+      <h1>{post.title}</h1>
+      {data.publishedAt && <time>{data.publishedAt}</time>}
+      
+    </header>
+
+    <!-- WordPress posts outside the known `core/*` block set produce no
+    sections. Their rendered content is external HTML owned by the consumer,
+    so it is inserted directly and styled below. -->
+    {data.sections && data.sections.length > 0 ? (
+      <div class="sections">
+        <PostSections sections={data.sections} />
+      </div>
+    ) : data.content ? (
+      <div class="body wordpress-content" set:html={data.content} />
+    ) : (
+      <p class="empty">This post has no body content yet.</p>
+    )}
   </article>
 
   <style>
     .post {
-      max-width: 46rem;
+      max-width: 52rem;
     }
 
     .back a {
@@ -83,11 +108,30 @@ const seo = resolveSeo({
       line-height: 1.6;
     }
 
-    .body {
+    .body,
+    .empty {
       margin-top: 2rem;
       font-size: 1.15rem;
       color: var(--muted);
       line-height: 1.8;
+    }
+
+    .wordpress-content :global(.nexuscontent-section__gallery) {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .wordpress-content :global(.nexuscontent-section__image) {
+      width: 100%;
+      height: 12rem;
+      object-fit: cover;
+      border-radius: var(--radius);
+    }
+
+    .sections {
+      margin-top: 2.5rem;
     }
   </style>
 </BaseLayout>

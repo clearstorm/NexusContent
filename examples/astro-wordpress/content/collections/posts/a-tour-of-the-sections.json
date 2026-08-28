@@ -1,0 +1,56 @@
+{
+  "key": "a-tour-of-the-sections",
+  "slug": "a-tour-of-the-sections",
+  "title": "A Tour of the Twelve Canonical Sections",
+  "excerpt": "Hero, intro, features, gallery and friends - the reusable vocabulary this consumer and the WordPress plugin share.",
+  "publishedAt": "2026-06-19",
+  "url": "https://nexuscontent.dev/blog/a-tour-of-the-sections/",
+  "featuredImage": {
+    "src": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=900&q=80&auto=format&fit=crop",
+    "alt": "Bright office space"
+  },
+  "sections": [
+    {
+      "type": "rich_text",
+      "data": {
+        "heading": "One vocabulary, both sides of the boundary",
+        "body": "<p>Hero, intro, rich_text, image_text, features, statistics, testimonials, gallery, cta, faq, logo_grid, and form_embed are the twelve canonical section types. Git content authors them by hand; the WordPress companion plugin produces the same names from ACF layouts.</p>"
+      }
+    },
+    {
+      "type": "intro",
+      "data": {
+        "eyebrow": "Section",
+        "heading": "Intro leads a story",
+        "body": "A short eyebrow, a heading, and a paragraph - often with an image beside it. It sets the scene without stealing the headline.",
+        "image": {
+          "src": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=900&q=80&auto=format&fit=crop",
+          "alt": "Workspace with screens"
+        }
+      }
+    },
+    {
+      "type": "gallery",
+      "data": {
+        "eyebrow": "Sections",
+        "heading": "Gallery & media sections",
+        "images": [
+          { "src": "https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=800&q=80&auto=format&fit=crop", "alt": "Drizzly street" },
+          { "src": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&q=80&auto=format&fit=crop", "alt": "Office with plants" },
+          { "src": "https://images.unsplash.com/photo-1497366412874-3415097a27e7?w=800&q=80&auto=format&fit=crop", "alt": "Open plan office" }
+        ]
+      }
+    },
+    {
+      "type": "faq",
+      "data": {
+        "eyebrow": "Sections",
+        "heading": "Do sections fall back to HTML?",
+        "items": [
+          { "question": "What if a post has no sections?", "answer": "The post page falls back to the raw HTML stored in the content field, which is exactly what a plain WordPress post provides." },
+          { "question": "What if a section type is unknown?", "answer": "PostSections logs a build warning and skips it instead of failing the whole page." }
+        ]
+      }
+    }
+  ]
+}

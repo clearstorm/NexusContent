@@ -1,0 +1,29 @@
+---
+export interface Props {
+  heading?: string;
+  body: string;
+}
+
+const { heading, body } = Astro.props;
+---
+
+<section class="section rich-text">
+  {heading && <h2>{heading}</h2>}
+  <div class="body" set:html={body} />
+  <style>
+    .body {
+      max-width: 46rem;
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+
+    .body :global(p:first-child) {
+      margin-top: 0;
+    }
+
+    .body :global(strong) {
+      color: var(--fg);
+    }
+  </style>
+</section>

@@ -1,0 +1,97 @@
+---
+interface Image {
+  src: string;
+  alt?: string;
+}
+
+interface FeatureItem {
+  title: string;
+  description?: string;
+  points?: string[];
+  thumbnail?: Image;
+}
+
+export interface Props {
+  eyebrow?: string;
+  heading: string;
+  body?: string;
+  items?: FeatureItem[];
+}
+
+const { eyebrow, heading, body, items } = Astro.props;
+---
+
+<section class="section features">
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <h2>{heading}</h2>
+  {body && <p class="lede">{body}</p>}
+  {items && items.length > 0 && (
+    <div class="grid">
+      {
+        items.map((item) => (
+          <article class="card">
+            {item.thumbnail?.src && (
+              <img class="thumb" src={item.thumbnail.src} alt={item.thumbnail.alt ?? ""} />
+            )}
+            <h3>{item.title}</h3>
+            {item.description && <p>{item.description}</p>}
+            {item.points && item.points.length > 0 && (
+              <ul>
+                {item.points.map((point) => <li>{point}</li>)}
+              </ul>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  )}
+  <style>
+    .lede {
+      color: var(--muted);
+      max-width: 44rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .thumb {
+      width: 3rem;
+      height: 3rem;
+      object-fit: cover;
+      border-radius: var(--radius);
+      margin-bottom: 0.75rem;
+    }
+
+    .card h3 {
+      margin-top: 0;
+    }
+
+    .card p,
+    .card ul {
+      color: var(--muted);
+    }
+
+    .card ul {
+      padding-left: 1.1rem;
+      margin-bottom: 0;
+    }
+  </style>
+</section>
