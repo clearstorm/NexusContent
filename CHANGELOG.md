@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.2] - 2026-08-29
+
+Core content contract and media release.
 
 ### Added
 
@@ -35,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WordPress page retrieval routes through `getPage` when the model declares `source.mode: "page"`; `getSingleton` throws a `ProviderError` for page-routed models.
 - Standard REST WordPress ACF fields are flattened onto `data`; reserved normalized keys cannot be replaced by colliding ACF fields. The WordPress Astro example uses the plugin-neutral `core` API strategy and explicit page composition.
 - WordPress standard REST excerpts are normalized to plain text: the `excerpt.rendered` `<p>` wrapper and inline tags are stripped and whitespace collapsed, so cards and SEO descriptions no longer render literal markup. The companion plugin already returned plain-text excerpts.
+
+## [0.2.1] - 2026-08-29
+
+WordPress companion release: Phase 1 repaired contracts, Phase 2 plugin, and Phase 3 provider integration.
+
+### Added
 
 - `ContentSection<TData>` and `SectionSettings` types for structured page sections in Core.
 - `PageStatus` type (`"draft" | "published" | "archived"`) and optional `status`, `excerpt`, `featuredImage`, `modifiedAt`, and `sections` fields on `PageContent`.
@@ -76,11 +84,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Admin page "Pages by editor mode" now counts all published pages, including those without an explicit `nexus_editor_mode` meta row. Pages without the meta value default to the Block editor count, matching the `Editor_Mode::get()` fallback behaviour.
 - Block previews now render in the editor. Removed the `wp.blocks.getBlockType()` bail-out check that prevented client-side `registerBlockType()` from merging the `edit` function with SVG preview support.
-
-### In Progress
-
-- `core.schema.models` (the consolidated `schema.models` contract and media architecture) targets `0.2.2`.
-- All `0.2.1` phases are implemented and pass CI, but version `0.2.1` and the companion plugin are unreleased; the root package is now `0.2.2`.
 
 ## [0.2.0] - 2026-08-18
 

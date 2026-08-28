@@ -1414,15 +1414,15 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.2.2-core-contract
+**CURRENT MILESTONE:** 0.2.3-wordpress-companion-consumer
 
-The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The unreleased `0.2.1` companion work (repaired Phase 1 contracts, Phase 2 plugin, Phase 3 integration) is implemented and passes CI. The current unreleased `0.2.2` milestone is the core content contract: a unified `schema.models` configuration (model kinds, provider sources, declarative field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, `nexus.media` resolution).
+The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The `0.2.1` WordPress companion milestone (repaired Phase 1 contracts, Phase 2 plugin, Phase 3 integration) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference consumer) were released together on 2026-08-29 (`v0.2.1` and `v0.2.2` tags at the same commit; root package version `0.2.2`). The current unreleased `0.2.3` milestone proves the Phase 3 companion path through the reference consumer: normalized companion sections on collection items (`data.sections`), the `astro-wordpress` example's `apiStrategy: "companion"` flip, and Git-vs-WordPress section parity.
 
-The recommended next focus after `0.2.2` is the directional `0.3.0` Strapi provider.
+The recommended next focus after `0.2.3` is the directional `0.3.0` Strapi provider.
 
 ---
 
-# 33. Required Scope for 0.2.0 and 0.2.1
+# 33. Required Scope for 0.2.0, 0.2.1, and 0.2.2
 
 ## 0.2.0 WordPress Provider (Released)
 
@@ -1446,7 +1446,7 @@ The released milestone includes:
 - `examples/astro-wordpress/` for pages and posts.
 - Deterministic provider tests and local REST fixture builds.
 
-## 0.2.1 WordPress Phase 1 Contracts (Implemented, Unreleased)
+## 0.2.1 WordPress Phase 1 Contracts (Released)
 
 ### Core Section Types
 
@@ -1498,15 +1498,15 @@ The released milestone includes:
 - Provider config validation tests for invalid enum values.
 - Public export verification for all new types, schemas, and predicates.
 
-## 0.2.1 WordPress Phase 2 Companion Plugin (Implemented, Unreleased)
+## 0.2.1 WordPress Phase 2 Companion Plugin (Implemented, Released)
 
 - Plugin `0.1.0` source is isolated under `integrations/wordpress/nexuscontent/` and requires WordPress 6.6+ and PHP 8.1+.
 - Native Gutenberg, optional ACF Free 6.2+ fixed fields, optional ACF Pro 6.2+ flexible layouts for all 12 sections, and opt-in ACF Blocks are implemented.
 - Page mode UI, server-side source normalization, expanded media metadata, exact capability reporting, diagnostics, secured REST routes, tests, tooling, documentation, and ZIP packaging exist.
 - Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and packaging pass; `dist/nexuscontent-0.1.0.zip` is the current artifact.
-- WordPress integration passes in CI (tests and the escaping gate satisfied). `0.2.1` itself remains unreleased; the feature is `implemented` and the milestone awaits release alongside `0.2.2`.
+- WordPress integration passes in CI (tests and the escaping gate satisfied). The plugin ships in the release as `dist/nexuscontent-0.1.0.zip`.
 
-## 0.2.1 WordPress Phase 3 Companion Integration (Implemented, Unreleased)
+## 0.2.1 WordPress Phase 3 Companion Integration (Implemented, Released)
 
 - Provider discovery, companion calls, contract-version negotiation, caching, and fallback are implemented with tests.
 - Phase 3 must consume only the repaired contract after plugin integration verification; the `ts-integration` CI job runs the live integration gate against a fresh Docker wp-env companion install and passes.
@@ -1585,7 +1585,7 @@ The established foundation includes:
 - License
 - Basic contribution documentation
 
-## 0.2.2 Core Content Contract and Media (In Progress, Unreleased)
+## 0.2.2 Core Content Contract and Media (Released)
 
 - Root `content`, `navigation`, and `settings` configuration sections are replaced by a unified `schema.models` contract. Each model declares a `kind` (`singleton`, `collection`, `navigation`, `settings`) and a provider `source` (`provider`, `key`, and `mode: "page"` or `"singleton"` for singletons).
 - `defineNexusConfig()` validates the model shape and provider/source/media relationships and returns a `NexusConfig`. `validateNexusConfig` and `resolveBuiltinMediaProviders` back it. Relational checks also run for direct `NexusContent` construction.

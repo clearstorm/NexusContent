@@ -6,11 +6,11 @@
 |---|---|
 | Project name | NexusContent |
 | Current version | `0.2.2` |
-| Current milestone | `0.2.2-core-contract` |
+| Current milestone | `0.2.3-wordpress-companion-consumer` |
 | Project status | Active, early development; internal private package |
-| Current focus | `core.schema.models` — model schema and field contracts (`in_progress`) |
+| Current focus | Released `0.2.1` + `0.2.2`; `0.2.3` companion consumption in the reference example is next |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion work (Phases 1-3) is implemented and passes CI. The current unreleased `0.2.2` work is the core content contract: a unified `schema.models` configuration (model kinds, field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, and a `nexus.media` resolution entry point). Also implemented in `0.2.2`: WordPress section synchronisation (`sections.json` single source with generated TS and `npm run check:sections`, live `/schema` registry reconciliation, `validateWordPressComponents`, and a secured admin-only project-contract push whose Dashboard card shows expected-vs-installed drift), plus companion plugin hygiene (registry-derived labels/fixed keys, repo URL single-sourcing, corrected Phase 3 status docs).
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.2` release closes the `core.schema.models` contract: a unified `schema.models` configuration (model kinds, provider sources, field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, and a `nexus.media` resolution entry point), plus WordPress section synchronisation (`sections.json` single source with generated TS and `npm run check:sections`, live `/schema` registry reconciliation, `validateWordPressComponents`, and a secured admin-only project-contract push whose Dashboard card shows expected-vs-installed drift) and companion plugin hygiene and post support.
 
 ## Current Architecture
 
@@ -78,18 +78,15 @@ See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 ## Current Work
 
-The `0.2.2` core content contract is in progress:
+The `0.2.1` WordPress companion and `0.2.2` core content contract milestones are released. The next milestone is `0.2.3-wordpress-companion-consumer`:
 
-- `schema.models` unifies logical content mapping: every model declares a `kind` (`singleton`, `collection`, `navigation`, `settings`) and a provider `source` (with `mode: "page"` vs `"singleton"`), replacing the root `content` / `navigation` / `settings` configuration.
-- Declarative field schemas (`string`, `number`, `boolean`, `datetime`, `object`, `reference`, `media`, `richText`) validate model data at retrieval time with `SchemaError`, while undeclared fields pass through.
-- `MediaAsset` now uses `src` (with `provider` and `sourceId`) instead of the legacy `url`; `MediaSize`/`sizes` keep `url`. The companion wire contract and plugin keep `featuredImage.url`; the TypeScript boundary converts it to `src`.
-- Media providers are provider-neutral: `defineLocalMediaProvider` (root-relative `src` to `publicPath`, traversal-safe), `defineRemoteMediaProvider` (absolute http(s) validation, no fetching), and `WordPressMediaProvider` (id lookup via the WordPress media endpoint). Local and remote providers are declared in `media.providers` and auto-built by Core; WordPress media registers via `nexus.registerMedia`.
-- **Recommended next focus:** finish `core.schema.models`, then the directional `0.3.0` Strapi provider.
+- Make the reference consumer prove the Phase 3 companion path: surface normalized companion sections onto collection items (`data.sections`), flip the astro-wordpress example to `apiStrategy: "companion"`, and verify Git-vs-WordPress section parity (including gallery posts) through the shared `PostSections` components.
+- The directional `0.3.0` Strapi provider remains the long-term next provider after `0.2.3`.
 
 ## Next
 
-1. Finish the in-progress `core.schema.models` contract (field schema edge cases and example coverage).
-2. Confirm the Strapi provider's minimum REST API scope and contract test strategy for `0.3.0`.
+1. Release `0.2.1` + `0.2.2` is cut; the `0.2.3` milestone consumes the companion from the reference example (companion item sections, example `apiStrategy` flip, Git-vs-WordPress section parity).
+2. Confirm the Strapi provider's minimum REST API scope and contract test strategy for the directional `0.3.0`.
 3. Consider the directional localisation continuation once provider breadth is proven.
 
 ## Not Implementing Yet
@@ -144,7 +141,7 @@ The `0.2.2` core content contract is in progress:
 - No synchronization, webhook, or preview workflow is implemented.
 - Canonical URLs are supplied by content or consumers because Core does not know deployment URLs.
 - The package remains private while the pre-1.0 architecture is proven.
-- The companion plugin is implemented and passes CI. It remains unreleased until `0.2.1` is finalized.
+- The companion plugin is implemented, passes CI, and ships in the `0.2.1` release (`dist/nexuscontent-0.1.0.zip`).
 - Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the `ts-integration` CI job passes a live integration test against a fresh Docker wp-env companion install.
 - The `0.2.2` field schema validates data at retrieval time; models without declared fields skip validation so provider-owned shapes (WordPress, arbitrary fixtures) remain unconstrained.
 

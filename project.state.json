@@ -5,13 +5,13 @@
     "version": "0.2.2",
     "status": "active",
     "stage": "early-development",
-    "milestone": "0.2.2-core-contract",
+    "milestone": "0.2.3-wordpress-companion-consumer",
     "packagePrivate": true
   },
   "currentFocus": {
-    "id": "core.schema.models",
-    "label": "Model schema and field contracts",
-    "status": "in_progress"
+    "id": null,
+    "label": null,
+    "status": "unassigned"
   },
   "recommendedNextFocus": {
     "id": "provider.strapi",
@@ -69,6 +69,7 @@
       "core.collection",
       "core.item",
       "core.schema.fields",
+      "core.schema.models",
       "content.media",
       "media.provider.local",
       "media.provider.remote",
@@ -97,9 +98,7 @@
       "docs.contributing",
       "docs.roadmap"
     ],
-    "inProgress": [
-      "core.schema.models"
-    ],
+    "inProgress": [],
     "planned": [
       "provider.strapi",
       "content.sync",
@@ -172,7 +171,6 @@
     "Built-in local and remote media providers are declared, validated, and auto-built by Core; providers never reach the network from Core."
   ],
   "next": [
-    "core.schema.models",
     "provider.strapi",
     "content.sync",
     "content.webhooks",

@@ -30,7 +30,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `core.errors` Structured errors | implemented | 0.1.0 | - | Contextual configuration, registry, provider, validation, and missing-content errors. |
 | `core.provenance` Content provenance | implemented | 0.1.0 | - | Normalized source, source identifier, and optional update timestamp. |
 | `core.public-api` Public exports | implemented | 0.1.0 | - | Small package entry point for supported consumer APIs. |
-| `core.schema.models` Model schema contract | in_progress | 0.2.2 | 0.2.2 | `schema.models` maps logical models to `kind`, provider `source`, and optional field schemas; retrieval routes through the declared kind and `source.mode`. Replaces root `content` / `navigation` / `settings` configuration. |
+| `core.schema.models` Model schema contract | implemented | 0.2.2 | - | `schema.models` maps logical models to `kind`, provider `source`, and optional field schemas; retrieval routes through the declared kind and `source.mode`. Replaces root `content` / `navigation` / `settings` configuration. |
 | `core.schema.fields` Declarative field schemas | implemented | 0.2.2 | - | String, number, boolean, datetime, object, reference, media, richText, component, and blocks fields with `required`, `list`, `options`, nested `object.fields`, `reference.collection`, `media` overrides, `component` references into `schema.components`, and `blocks` validation of a discriminated `_type` list against `allowedComponents`; validated at retrieval time with a `SchemaError`. |
 
 ## Providers

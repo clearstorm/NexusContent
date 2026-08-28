@@ -126,13 +126,13 @@ The exit criteria are satisfied by `0.2.0`.
 
 ## 0.2.1 - WordPress Companion
 
-**State:** Implemented but unreleased. Phases 1-3 are complete and pass CI. The root package is now `0.2.2` for the core content contract milestone.
+**State:** Released on 2026-08-29 alongside `0.2.2`. Phases 1-3 are complete, pass CI, and ship with the companion plugin `0.1.0` artifact.
 
 **Goal:** Establish a versioned companion boundary that gives WordPress editors Gutenberg and optional ACF authoring modes while preserving the released plugin-neutral standard REST provider.
 
 ### Phase 1 - Repaired Contracts
 
-**State:** Implemented but unreleased.
+**State:** Implemented; released with `0.2.1`.
 
 - Core structured-page types, WordPress configuration validation, section registry, diagnostics, capabilities, and typed errors are implemented.
 - Contract v1 uses `{ contractVersion: 1, data, diagnostics? }` envelopes.
@@ -146,7 +146,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ### Phase 2 - Companion Plugin
 
-**State:** Implemented and passes CI.
+**State:** Implemented, passes CI, and ships with `0.2.1` (plugin artifact `dist/nexuscontent-0.1.0.zip`).
 
 - Plugin `0.1.0` is isolated under `integrations/wordpress/nexuscontent/` and requires WordPress 6.6+ and PHP 8.1+.
 - Native Gutenberg, ACF Free 6.2+ fixed Hero/Introduction/Call to Action fields, ACF Pro 6.2+ flexible layouts for all 12 sections, opt-in ACF Blocks, and page mode UI are implemented.
@@ -155,7 +155,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ### Phase 3 - Companion Provider Integration
 
-**State:** Implemented and passes CI.
+**State:** Implemented, passes CI, and ships with `0.2.1`.
 
 - Provider discovery, companion calls, explicit contract-version negotiation, caching, and fallback are implemented.
 - A live integration test runs the provider (auto and core strategies) against a fresh Docker wp-env companion install in the `ts-integration` CI job; it exercises page, collection, and item retrieval plus core fallback against the real plugin.
@@ -165,11 +165,11 @@ This was a pre-release contract repair because the earlier committed definitions
 **0.2.1 exclusions:**
 
 - No preview, webhooks, mutations, synchronization, retries, plugin SEO, WordPress localisation-plugin integration, WooCommerce, or multisite verification.
-- No release or root package version change until the milestone exit criteria are met.
+- Milestone exit criteria were met and `0.2.1` was released with `0.2.2` on 2026-08-29 (`v0.2.1` and `v0.2.2` tags at the same commit).
 
 ## 0.2.2 - Core Content Contract and Media
 
-**State:** In progress (unreleased; root package `0.2.2`).
+**State:** Released on 2026-08-29 (root package `0.2.2`).
 
 **Goal:** Consolidate logical content mapping into a unified `schema.models` contract and establish provider-neutral media, without changing provider semantics or leaked framework dependencies.
 
@@ -182,6 +182,12 @@ This was a pre-release contract repair because the earlier committed definitions
 - Built-in local (root-relative to `publicPath`, traversal-safe) and remote (absolute http(s), no fetching) media providers; a `WordPressMediaProvider` for id lookup through the WordPress media endpoint.
 - Companion wire contract and plugin keep `featuredImage.url`; the TypeScript boundary converts it to `src`.
 
+**Also shipped in the released milestone:**
+
+- Section single-source synchronization: canonical `sections.json` feeds the PHP `Section_Registry` and generated TypeScript, enforced by `npm run check:sections`.
+- Live `/schema` registry reconciliation, `validateWordPressComponents` component/block validation, the admin-only project-contract push with expected-vs-installed drift card, and plain-text excerpts.
+- The dual-provider `astro-wordpress` reference consumer using canonical section components and `schema.models` + `nexus.media`.
+
 **Explicit exclusions:**
 
 - Content reference resolution (remains value-neutral; the consumer calls `nexus.media.resolve`). Cloudinary and additional CDN providers.
@@ -193,6 +199,29 @@ This was a pre-release contract repair because the earlier committed definitions
 - Core, media, contract, and example tests pass; plain Node and Astro examples build against `defineNexusConfig` + `schema.models`.
 - `npm run validate:project-state` and all required CI gates pass.
 - Public behavior, README, and project state documentation are updated.
+
+## 0.2.3 - WordPress Companion Consumer
+
+**State:** Current milestone (unreleased).
+
+**Goal:** Prove the Phase 3 companion path through the reference consumer and verify Git-vs-WordPress section parity.
+
+**Required capabilities:**
+
+- Surface normalized companion sections onto collection items (`data.sections`) so Git-sourced and companion-backed WordPress content reach pages through the same `blocks` shape.
+- Flip the `astro-wordpress` example to `apiStrategy: "companion"` with fallback to the standard REST path when the plugin is absent.
+- Verify section parity (hero, rich_text, faq, cta, gallery, and others) between Git content and companion WordPress content through the shared `PostSections` components, keeping the raw-HTML fallback.
+
+**Explicit exclusions:**
+
+- No new provider capabilities, wire-contract changes, plugin changes, or editor modes.
+- No preview, webhooks, or synchronization.
+
+**Exit criteria:**
+
+- Companion item retrieval returns normalized sections with tests.
+- The example builds and renders both sources with parity.
+- Project state and documentation are updated; release gates stay green.
 
 ## 0.2.x - Localisation Continuation
 
@@ -224,7 +253,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ## 0.3.0 - Strapi Provider
 
-**State:** Directional; planned after `0.2.2` core content contract.
+**State:** Directional; planned after `0.2.3`.
 
 **Goal:** Add structured Strapi REST content while preserving the Core contract proven by Git and WordPress.
 
