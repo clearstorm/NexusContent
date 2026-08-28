@@ -30,24 +30,28 @@ export const wordpressProviderOptions = {
   baseUrl: wordpressApiUrl,
   headers: authHeaders,
 
-  // Standard WordPress REST retrieval (no companion plugin calls).
+  // Phase 3 companion-first retrieval: pages and posts are served through the
+  // companion plugin's `nexuscontent/v1` routes, which carry normalized
+  // sections, and the provider surfaces them as `data.sections` on items — the
+  // same canonical shape the Git blog posts author. The strict "companion"
+  // strategy fails loudly when the plugin is absent; use "auto" to fall back
+  // to standard REST silently, or "core" to skip companion calls entirely
+  // (the released 0.2.0 REST path).
   //
-  // `editorMode` decides what a WordPress response becomes under the
-  // "wordpress" source:
+  // `editorMode` decides what shapes sections on the install:
   //   "gutenberg"    — Gutenberg posts become the canonical `data.sections`
   //     array (`{ type, data }`), matching the `sections` field the Git blog
   //     posts author. Gallery blocks become `gallery` sections, so WordPress
   //     and Git galleries render identically through the same grid component.
-  //   "acf_flexible" — ACF flexible layouts become `data.sections` instead;
-  //     Gutenberg galleries without ACF then fall back to raw HTML.
-  //   "acf_fixed"    — plugin fixed groups (hero, intro, cta) flatten into
-  //     named page fields instead.
+  //   "acf_flexible" — ACF flexible layouts become `data.sections` instead.
+  //   "acf_fixed"    — ACF fixed groups (hero, intro, cta) flatten into named
+  //     page fields.
   //
-  // One instance is enough for this example because the shipped site reads
-  // from Git. Projects that need both at once can register two WordPress
+  // One instance is enough for this example because the shipped site reads its
+  // pages from Git. Projects that need both at once can register two WordPress
   // instances (acf_fixed for pages, acf_flexible or gutenberg for posts) and
   // point each model's `source.provider` at the matching one.
-  apiStrategy: "core",
+  apiStrategy: "companion",
   editorMode: "gutenberg"
 
 } satisfies WordPressProviderOptions;

@@ -73,7 +73,11 @@ export function normalizeCompanionPageItem(
     key: page.key,
     slug: page.slug,
     title: page.title,
-    data: page.rawFields,
+    // Normalized sections surface as `data.sections` — the same canonical
+    // shape Git blog posts author — so companion-backed items render through
+    // the identical consumer components as Git content. An empty array keeps
+    // the consumer's raw-HTML fallback path intact.
+    data: { ...page.rawFields, sections: page.sections.map(normalizeSection) },
     meta: { source: "wordpress", sourceId: page.id }
   };
 }

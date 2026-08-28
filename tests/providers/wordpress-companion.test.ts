@@ -354,8 +354,11 @@ test("normalizeCompanionPageItem maps companion data to CollectionItem", () => {
     key: "services",
     slug: "services",
     title: "Services",
-    sections: [] as Array<{ id: string; type: string; data: Record<string, unknown> }>,
-    rawFields: {}
+    sections: [
+      { id: "intro-1", type: "intro", data: { heading: "What we do" } },
+      { id: "cta-1", type: "cta", settings: { align: "center" }, data: { heading: "Get started" } }
+    ],
+    rawFields: { custom: "value" }
   };
 
   const result = normalizeCompanionPageItem(input);
@@ -363,7 +366,34 @@ test("normalizeCompanionPageItem maps companion data to CollectionItem", () => {
   assert.equal(result.key, "services");
   assert.equal(result.slug, "services");
   assert.equal(result.title, "Services");
+  const sections = result.data.sections as Array<{
+    type: string;
+    data: Record<string, unknown>;
+    settings?: Record<string, unknown>;
+  }>;
+  assert.equal(sections.length, 2);
+  assert.equal(sections[0]?.type, "intro");
+  assert.equal(sections[0]?.data.heading, "What we do");
+  assert.equal(sections[1]?.type, "cta");
+  assert.deepEqual(sections[1]?.settings, { align: "center" });
+  assert.equal(result.data.custom, "value");
   assert.deepEqual(result.meta, { source: "wordpress", sourceId: "5" });
+});
+
+test("normalizeCompanionPageItem keeps an empty sections array for raw-HTML fallback", () => {
+  const result = normalizeCompanionPageItem({
+    id: "9",
+    key: "legacy",
+    slug: "legacy",
+    title: "Legacy",
+    sections: [],
+    rawFields: { content: "<p>Plain HTML post.</p>" }
+  });
+
+  assert.deepEqual(result.data, {
+    content: "<p>Plain HTML post.</p>",
+    sections: []
+  });
 });
 
 // ─── URL derivation ────────────────────────────────────────────────

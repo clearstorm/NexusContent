@@ -24,12 +24,14 @@ from WordPress, change only `source.provider` to `"wordpress"` — pages,
 components, and data shapes stay identical.
 
 The WordPress instance lives in `src/nexus.config.ts` and uses provider options
-`apiStrategy: "core"` (standard REST, no companion plugin calls) and
-`editorMode: "acf_flexible"`. Under that mode WordPress flexible layouts and
-Gutenberg content arrive as the canonical `data.sections` array; ACF fixed
-groups (`hero`, `intro`, `cta`) flatten into named page fields instead. A site
-that needs both at once can register two WordPress instances (one per editor
-mode, see "Multiple provider instances" in the root `AGENTS.md`).
+`apiStrategy: "companion"` (the secured companion plugin routes via the managed
+WordPress instance running the plugin; set `auto` to fall back to standard REST
+silently when the plugin is absent, or `core` for the released 0.2.0 REST path
+without any companion calls) and `editorMode: "gutenberg"`. Under that mode
+companion sections arrive as the canonical `data.sections` array on every item,
+matching the `sections` field the Git blog posts author. A site that needs both
+at once can register two WordPress instances (one per editor mode, see
+"Multiple provider instances" in the root `AGENTS.md`).
 
 Navigation and settings are NexusContent models on the Git provider (the
 WordPress provider returns `null` for those operations). `BaseLayout` loads
