@@ -4,6 +4,11 @@ import type {
   WordPressFixedSectionConfig
 } from "./config.ts";
 import { BUILTIN_SECTION_TYPES, FIXED_SECTION_TYPES } from "./config.ts";
+import {
+  BUILTIN_SECTION_FIELDS,
+  WORDPRESS_SECTION_NAMES,
+  type GeneratedSectionFieldDefinition
+} from "./sections.generated.ts";
 
 export interface SectionDataSchema {
   readonly fields: ReadonlyArray<SectionFieldDefinition>;
@@ -36,140 +41,17 @@ export interface SectionRegistryOptions {
   readonly fixedSections?: Partial<Record<FixedSectionType, WordPressFixedSectionConfig>>;
 }
 
+type BuiltinFieldSchema = ReadonlyArray<GeneratedSectionFieldDefinition>;
+
+// The generated file only permits JSON-compatible defaults, so its field
+// definitions are structurally compatible with SectionFieldDefinition.
 const FIELD_SCHEMAS: Record<
   (typeof BUILTIN_SECTION_TYPES)[number],
   ReadonlyArray<SectionFieldDefinition>
-> = {
-  hero: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "body", type: "string" },
-    { name: "image", type: "media" },
-    { name: "primary_action_label", type: "string" },
-    { name: "primary_action_url", type: "string" },
-    { name: "secondary_action_label", type: "string" },
-    { name: "secondary_action_url", type: "string" },
-    { name: "theme", type: "string" }
-  ],
-  intro: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "body", type: "string" },
-    { name: "image", type: "media" },
-    { name: "image_position", type: "string" },
-    { name: "theme", type: "string" }
-  ],
-  rich_text: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "body", type: "string" },
-    { name: "theme", type: "string" }
-  ],
-  image_text: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "body", type: "string" },
-    { name: "image", type: "media" },
-    { name: "image_position", type: "string" },
-    { name: "action_label", type: "string" },
-    { name: "action_url", type: "string" },
-    { name: "theme", type: "string" }
-  ],
-  features: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "body", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
-  ],
-  statistics: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
-  ],
-  testimonials: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
-  ],
-  gallery: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "images", type: "json" },
-    { name: "theme", type: "string" }
-  ],
-  cta: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "body", type: "string" },
-    { name: "primary_action_label", type: "string" },
-    { name: "primary_action_url", type: "string" },
-    { name: "secondary_action_label", type: "string" },
-    { name: "secondary_action_url", type: "string" },
-    { name: "background_image", type: "media" },
-    { name: "theme", type: "string" }
-  ],
-  faq: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
-  ],
-  logo_grid: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "eyebrow", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
-  ],
-  form_embed: [
-    { name: "section_id", type: "string" },
-    { name: "variant", type: "string" },
-    { name: "heading", type: "string" },
-    { name: "provider", type: "string" },
-    { name: "form_id", type: "string" },
-    { name: "embed_code", type: "string" },
-    { name: "theme", type: "string" }
-  ]
-};
-
-const WORDPRESS_SECTION_NAMES: Readonly<
-  Record<(typeof BUILTIN_SECTION_TYPES)[number], string>
-> = {
-  hero: "hero",
-  intro: "intro",
-  rich_text: "rich-text",
-  image_text: "image-text",
-  features: "features",
-  statistics: "statistics",
-  testimonials: "testimonials",
-  gallery: "gallery",
-  cta: "cta",
-  faq: "faq",
-  logo_grid: "logo-grid",
-  form_embed: "form-embed"
-};
+> = BUILTIN_SECTION_FIELDS as Record<
+  (typeof BUILTIN_SECTION_TYPES)[number],
+  BuiltinFieldSchema
+>;
 
 export const BUILTIN_SECTIONS: readonly SectionDefinition[] =
   BUILTIN_SECTION_TYPES.map((type) => ({

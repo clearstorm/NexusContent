@@ -1,20 +1,422 @@
 {
   "contractVersion": 1,
   "data": {
-    "editorModes": ["gutenberg", "acf_flexible", "acf_fixed"],
+    "editorModes": [
+      "gutenberg",
+      "acf_flexible",
+      "acf_fixed"
+    ],
     "sectionDefinitions": [
       {
         "type": "hero",
         "fields": [
-          { "name": "heading", "type": "string", "required": true },
-          { "name": "background_image", "type": "media" }
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "image",
+            "type": "media"
+          },
+          {
+            "name": "primary_action_label",
+            "type": "string"
+          },
+          {
+            "name": "primary_action_url",
+            "type": "string"
+          },
+          {
+            "name": "secondary_action_label",
+            "type": "string"
+          },
+          {
+            "name": "secondary_action_url",
+            "type": "string"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "intro",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "image",
+            "type": "media"
+          },
+          {
+            "name": "image_position",
+            "type": "string"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "rich_text",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
         ]
       },
       {
         "type": "image_text",
         "fields": [
-          { "name": "image_position", "type": "string" },
-          { "name": "image", "type": "media", "required": true }
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "image",
+            "type": "media"
+          },
+          {
+            "name": "image_position",
+            "type": "string"
+          },
+          {
+            "name": "action_label",
+            "type": "string"
+          },
+          {
+            "name": "action_url",
+            "type": "string"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "features",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "items",
+            "type": "json"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "statistics",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "items",
+            "type": "json"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "testimonials",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "items",
+            "type": "json"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "gallery",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "images",
+            "type": "json"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "cta",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "type": "string"
+          },
+          {
+            "name": "primary_action_label",
+            "type": "string"
+          },
+          {
+            "name": "primary_action_url",
+            "type": "string"
+          },
+          {
+            "name": "secondary_action_label",
+            "type": "string"
+          },
+          {
+            "name": "secondary_action_url",
+            "type": "string"
+          },
+          {
+            "name": "background_image",
+            "type": "media"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "faq",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "items",
+            "type": "json"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "logo_grid",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "eyebrow",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "items",
+            "type": "json"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "type": "form_embed",
+        "fields": [
+          {
+            "name": "section_id",
+            "type": "string"
+          },
+          {
+            "name": "variant",
+            "type": "string"
+          },
+          {
+            "name": "heading",
+            "type": "string"
+          },
+          {
+            "name": "provider",
+            "type": "string"
+          },
+          {
+            "name": "form_id",
+            "type": "string"
+          },
+          {
+            "name": "embed_code",
+            "type": "string"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          }
         ]
       }
     ],
@@ -22,9 +424,43 @@
       "nexuscontent/hero": "hero",
       "acf/hero": "hero",
       "hero": "hero",
-      "nexuscontent/image_text": "image_text",
-      "acf/image_text": "image_text",
-      "image_text": "image_text"
+      "nexuscontent/intro": "intro",
+      "acf/intro": "intro",
+      "intro": "intro",
+      "nexuscontent/rich-text": "rich_text",
+      "acf/rich-text": "rich_text",
+      "rich-text": "rich_text",
+      "rich_text": "rich_text",
+      "nexuscontent/image-text": "image_text",
+      "acf/image-text": "image_text",
+      "image-text": "image_text",
+      "image_text": "image_text",
+      "nexuscontent/features": "features",
+      "acf/features": "features",
+      "features": "features",
+      "nexuscontent/statistics": "statistics",
+      "acf/statistics": "statistics",
+      "statistics": "statistics",
+      "nexuscontent/testimonials": "testimonials",
+      "acf/testimonials": "testimonials",
+      "testimonials": "testimonials",
+      "nexuscontent/gallery": "gallery",
+      "acf/gallery": "gallery",
+      "gallery": "gallery",
+      "nexuscontent/cta": "cta",
+      "acf/cta": "cta",
+      "cta": "cta",
+      "nexuscontent/faq": "faq",
+      "acf/faq": "faq",
+      "faq": "faq",
+      "nexuscontent/logo-grid": "logo_grid",
+      "acf/logo-grid": "logo_grid",
+      "logo-grid": "logo_grid",
+      "logo_grid": "logo_grid",
+      "nexuscontent/form-embed": "form_embed",
+      "acf/form-embed": "form_embed",
+      "form-embed": "form_embed",
+      "form_embed": "form_embed"
     }
   },
   "diagnostics": []

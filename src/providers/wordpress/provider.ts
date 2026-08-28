@@ -4,9 +4,12 @@ import type {
   ProviderRetrievalOptions
 } from "../../core/provider.ts";
 import type {
+  ComponentSchema,
   CollectionItem,
+  FieldMap,
   NavigationContent,
   PageContent,
+  SchemaConfig,
   SettingsContent,
   SingletonContent
 } from "../../core/types.ts";
@@ -38,10 +41,25 @@ import {
   isValidUnknownContentPolicy
 } from "./config.ts";
 import type { WordPressAcfConfig } from "./config.ts";
-import type { SectionDefinition } from "./sections.ts";
-import type { SectionRegistry } from "./sections.ts";
-import type { WordPressProviderFacingCapabilities } from "./responses.ts";
-import type { WordPressSchemaData } from "./responses.ts";
+import {
+  buildSectionRegistry,
+  type SectionDefinition,
+  type SectionRegistry
+} from "./sections.ts";
+import type {
+  WordPressProjectComponentContract,
+  WordPressProviderFacingCapabilities,
+  WordPressSchemaData,
+  WordPressSectionSyncResult
+} from "./responses.ts";
+import {
+  applyInstallOnlyDefinitions,
+  reconcileSectionRegistry
+} from "./schema-sync.ts";
+import {
+  validateWordPressComponents,
+  type WordPressComponentValidationResult
+} from "./schema-validation.ts";
 
 export interface WordPressCollectionConfig {
   endpoint: string;
@@ -69,6 +87,9 @@ export interface WordPressProviderOptions {
   includeCoreBlocks?: boolean;
   coreApiNamespace?: string;
   companionApiNamespace?: string;
+  strictSectionSync?: boolean;
+  componentTypeMap?: Record<string, string>;
+  strictFields?: boolean;
 }
 
 const DEFAULT_PER_PAGE = 100;
@@ -92,6 +113,12 @@ export class WordPressProvider implements ContentProvider {
   readonly sectionRegistry: SectionRegistry | undefined;
   readonly sectionBlockNamespaces: ReadonlyArray<string>;
   readonly includeCoreBlocks: boolean;
+  readonly strictSectionSync: boolean;
+  readonly componentTypeMap: Record<string, string> | undefined;
+  readonly strictFields: boolean;
+  private readonly customSections: ReadonlyArray<SectionDefinition>;
+  private sectionSync: WordPressSectionSyncResult | undefined;
+  private sectionSyncPromise: Promise<WordPressSectionSyncResult | undefined> | undefined;
 
   constructor(options: WordPressProviderOptions) {
     this.name = options?.name ?? "wordpress";
@@ -141,8 +168,12 @@ export class WordPressProvider implements ContentProvider {
     this.acfEnabled =
       options?.acf?.enabled ?? DEFAULT_WORDPRESS_ACF_ENABLED;
     this.sectionRegistry = options?.sectionRegistry;
+    this.customSections = options?.customSections ?? [];
     this.sectionBlockNamespaces = options?.sectionBlockNamespaces ?? [];
     this.includeCoreBlocks = options?.includeCoreBlocks ?? false;
+    this.strictSectionSync = options?.strictSectionSync ?? false;
+    this.componentTypeMap = options?.componentTypeMap;
+    this.strictFields = options?.strictFields ?? false;
 
     this.collections = new Map([["posts", "posts"]]);
     for (const [collection, config] of Object.entries(options?.collections ?? {})) {
@@ -177,6 +208,7 @@ export class WordPressProvider implements ContentProvider {
   }
 
   capabilities(): WordPressProviderFacingCapabilities {
+    const synced = this.sectionSync !== undefined;
     return {
       editorMode: this.editorMode,
       gutenberg: this.editorMode === "gutenberg",
@@ -186,9 +218,148 @@ export class WordPressProvider implements ContentProvider {
       mediaLibrary: this.mediaResolution !== "none",
       customPostTypes: this.collections.size > 1,
       sections: this.sectionRegistry !== undefined,
+      sectionSync: !synced
+        ? "none"
+        : this.sectionSync!.conflicts.length === 0 &&
+            this.sectionSync!.registryOnly.length === 0
+          ? "synced"
+          : "unsynced",
       localeAware: false,
       previewSupport: false,
       webhookSupport: false
+    };
+  }
+
+  /**
+   * Current section-registry reconciliation result, or undefined when the
+   * registry has not been reconciled (core strategy, no companion, or no
+   * companion retrieval has happened yet).
+   */
+  schemaStatus(): WordPressSectionSyncResult | undefined {
+    return this.sectionSync;
+  }
+
+  /**
+   * Reconciles the declared section registry against the live companion
+   * `/schema` once, caching the result. Safe to call from every companion
+   * retrieval path; strict mode throws on conflicts or registry-only types.
+   */
+  async reconcileSections(
+    context: WordPressNormalizeContext
+  ): Promise<WordPressSectionSyncResult | undefined> {
+    if (this.sectionSyncPromise) return this.sectionSyncPromise;
+    if (this.apiStrategy === "core" || !this.companion) {
+      this.sectionSyncPromise = Promise.resolve(undefined);
+      return this.sectionSyncPromise;
+    }
+
+    this.sectionSyncPromise = (async () => {
+      const available = await this.companion!.isAvailable();
+      if (!available) return undefined;
+      let schema: WordPressSchemaData;
+      try {
+        schema = await this.companion!.getSchema(context);
+      } catch {
+        // The companion schema is advisory; an unreachable /schema must not
+        // break content retrieval. Drift stays unreported ("none") until the
+        // schema is reachable again.
+        return undefined;
+      }
+      const registry = this.buildBaseRegistry();
+      const result = reconcileSectionRegistry(registry, schema);
+      this.sectionSync = result;
+      if (
+        this.strictSectionSync &&
+        (result.conflicts.length > 0 || result.registryOnly.length > 0)
+      ) {
+        const reasons = [
+          ...result.registryOnly.map(
+            (type) => `"${type}" is declared but the install does not report it`
+          ),
+          ...result.conflicts.map(
+            (conflict) =>
+              `"${conflict.type}" source "${conflict.source}" resolves to "${conflict.installed}" on the install`
+          )
+        ];
+        throw this.error(
+          "WordPress section registry is out of sync with the companion install.",
+          {
+            ...context,
+            operation: "reconcileSections"
+          },
+          `Reason: ${reasons.join("; ")}.`
+        );
+      }
+      return result;
+    })();
+
+    return this.sectionSyncPromise;
+  }
+
+  /**
+   * Validate declared consumer components against the canonical section
+   * registry and any reconciled install schema. Unknown component names throw
+   * `wordpress/unknown-component`; canonical-field deltas throw when the
+   * `strictFields` option is enabled.
+   */
+  validateComponents(
+    components: Readonly<Record<string, ComponentSchema>>
+  ): WordPressComponentValidationResult {
+    const registry = this.effectiveRegistry();
+    const result = validateWordPressComponents(components, {
+      registry,
+      syncResult: this.sectionSync,
+      componentTypeMap: this.componentTypeMap
+    });
+    if (result.unknownComponents.length > 0) {
+      throw this.error(
+        "WordPress components cannot be produced by the install.",
+        { provider: this.name, operation: "validateComponents", content: "schema" },
+        `Unresolvable component names: ${result.unknownComponents.join(", ")}. ` +
+          "Declare matching customSections or map them with componentTypeMap."
+      );
+    }
+    if (this.strictFields && result.fieldDeltas.length > 0) {
+      const deltas = result.fieldDeltas.map(
+        (delta) =>
+          `"${delta.component}" differs from "${delta.sectionType}": ` +
+          `missing [${delta.missingFields.join(", ")}], extra [${delta.extraFields.join(", ")}]`
+      );
+      throw this.error(
+        "WordPress component fields do not match the canonical section schema.",
+        { provider: this.name, operation: "validateComponents", content: "schema" },
+        deltas.join("; ")
+      );
+    }
+    return result;
+  }
+
+  /**
+   * Derive the serializable project component contract from a consumer schema
+   * config: declared component names plus the canonical section types they
+   * resolve to. This is what a consumer pushes to the companion plugin.
+   */
+  projectComponentContract(schema: SchemaConfig): WordPressProjectComponentContract {
+    const used = new Set<string>();
+    for (const model of Object.values(schema.models)) {
+      if (model.fields) collectUsedComponents(model.fields, used);
+    }
+    for (const name of Object.keys(schema.components ?? {})) {
+      used.add(name);
+    }
+
+    const registry = this.effectiveRegistry();
+    const components = [...used].sort();
+    const sectionTypes = new Set<string>();
+    for (const component of components) {
+      const mapped = this.componentTypeMap?.[component] ?? component;
+      const entry = registry.get(mapped);
+      if (entry !== undefined) sectionTypes.add(entry.definition.type);
+    }
+
+    return {
+      components,
+      sectionTypes: [...sectionTypes].sort()
     };
   }
 
@@ -254,6 +425,7 @@ export class WordPressProvider implements ContentProvider {
     if (this.apiStrategy === "companion" || this.apiStrategy === "auto") {
       const available = await this.companion?.isAvailable() ?? false;
       if (available) {
+        await this.reconcileSections(context);
         return this.companion!.getPage(key, context) as Promise<PageContent<TData> | null>;
       }
       if (this.apiStrategy === "companion") {
@@ -299,6 +471,7 @@ export class WordPressProvider implements ContentProvider {
     if (this.apiStrategy === "companion" || this.apiStrategy === "auto") {
       const available = await this.companion?.isAvailable() ?? false;
       if (available) {
+        await this.reconcileSections(context);
         return this.companion!.getPages(collection, this.perPage, context) as Promise<CollectionItem<TData>[]>;
       }
       if (this.apiStrategy === "companion") {
@@ -324,6 +497,7 @@ export class WordPressProvider implements ContentProvider {
     if (this.apiStrategy === "companion" || this.apiStrategy === "auto") {
       const available = await this.companion?.isAvailable() ?? false;
       if (available) {
+        await this.reconcileSections(context);
         return this.companion!.getItem(collection, key, context) as Promise<CollectionItem<TData> | null>;
       }
       if (this.apiStrategy === "companion") {
@@ -345,7 +519,10 @@ export class WordPressProvider implements ContentProvider {
       return null;
     }
 
-    return normalizeWordPressItem(raw, context) as unknown as CollectionItem<TData>;
+    return normalizeWordPressItem(
+      raw,
+      this.normalizeContext(raw, context)
+    ) as unknown as CollectionItem<TData>;
   }
 
   private async loadCollectionPage(
@@ -388,7 +565,7 @@ export class WordPressProvider implements ContentProvider {
       return null;
     }
 
-    return normalizeWordPressPage(raw, key, context) as unknown as PageContent;
+    return normalizeWordPressPage(raw, key, this.normalizeContext(raw, context));
   }
 
   private async coreGetCollection(
@@ -440,7 +617,11 @@ export class WordPressProvider implements ContentProvider {
     }
 
     return rawItems.map(
-      (raw) => normalizeWordPressItem(raw, context) as unknown as CollectionItem
+      (raw) =>
+        normalizeWordPressItem(
+          raw,
+          this.normalizeContext(raw, context)
+        ) as unknown as CollectionItem
     );
   }
 
@@ -533,6 +714,34 @@ export class WordPressProvider implements ContentProvider {
 
   private context(operation: string, content: string): WordPressNormalizeContext {
     return { provider: this.name, operation, content };
+  }
+
+  /**
+   * Wrap a retrieval context with the entry's resolved editor mode and the
+   * provider options the section extractors need, so core-strategy retrieval
+   * emits canonical `data.sections` for pages and collection items.
+   */
+  private normalizeContext(
+    raw: unknown,
+    context: WordPressNormalizeContext
+  ): WordPressNormalizeContext {
+    return {
+      ...context,
+      editorMode: isRecord(raw) ? this.resolveEditorMode(raw) : this.editorMode,
+      includeCoreBlocks: this.includeCoreBlocks,
+      unknownContentPolicy: this.unknownContentPolicy
+    };
+  }
+
+  private buildBaseRegistry(): SectionRegistry {
+    return this.sectionRegistry ?? buildSectionRegistry({ customSections: this.customSections });
+  }
+
+  private effectiveRegistry(): SectionRegistry {
+    const base = this.buildBaseRegistry();
+    return this.sectionSync
+      ? applyInstallOnlyDefinitions(base, this.sectionSync)
+      : base;
   }
 
   private error(
@@ -630,6 +839,24 @@ function readPaginationHeader(headers: Headers, name: string): number | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function collectUsedComponents(fields: FieldMap, out: Set<string>): void {
+  for (const field of Object.values(fields)) {
+    switch (field.type) {
+      case "component":
+        out.add(field.component);
+        break;
+      case "blocks":
+        for (const component of field.allowedComponents ?? []) {
+          out.add(component);
+        }
+        break;
+      case "object":
+        if (field.fields) collectUsedComponents(field.fields, out);
+        break;
+    }
+  }
 }
 
 function validateEnumOption<T extends string>(

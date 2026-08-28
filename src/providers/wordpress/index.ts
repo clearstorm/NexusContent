@@ -67,16 +67,32 @@ export type {
   WordPressPagesData,
   WordPressPagesResponse,
   WordPressPagination,
+  WordPressProjectComponentContract,
   WordPressProviderFacingCapabilities,
   WordPressSchemaData,
   WordPressSchemaResponse,
   WordPressSectionSchema,
-  WordPressSectionSchemaField
+  WordPressSectionSchemaField,
+  WordPressSectionSyncConflict,
+  WordPressSectionSyncResult,
+  WordPressSectionSyncStatus
 } from "./responses.ts";
 export {
   buildCompanionContractVersion,
   isValidCompanionContractVersion
 } from "./responses.ts";
+
+export {
+  applyInstallOnlyDefinitions,
+  reconcileSectionRegistry
+} from "./schema-sync.ts";
+
+export {
+  validateWordPressComponents,
+  type WordPressComponentFieldDelta,
+  type WordPressComponentValidationOptions,
+  type WordPressComponentValidationResult
+} from "./schema-validation.ts";
 
 export { WORDPRESS_ERROR_CODES, isWordPressErrorCode } from "./errors.ts";
 export type { WordPressErrorCode } from "./errors.ts";

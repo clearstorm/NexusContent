@@ -49,6 +49,10 @@ import {
   companionSchemaResponseSchema,
   paginationSchema
 } from "../../src/index.ts";
+import {
+  BUILTIN_SECTION_FIELDS,
+  WORDPRESS_SECTION_NAMES
+} from "../../src/providers/wordpress/sections.generated.ts";
 import type {
   WordPressErrorCode,
   WordPressFixedSectionConfig,
@@ -336,6 +340,40 @@ test("isFixedSectionType recognizes all built-in types", () => {
   assert.ok(!isFixedSectionType(""));
 });
 
+test("sections.json matches the generated TypeScript field schemas", () => {
+  const raw = fs.readFileSync(
+    path.join(import.meta.dirname, "..", "..", "integrations", "wordpress", "nexuscontent", "sections.json"),
+    "utf8"
+  );
+  const parsed = JSON.parse(raw) as {
+    sections: Array<{
+      type: string;
+      fixed?: boolean;
+      fields: Array<{ name: string; type: string }>;
+    }>;
+  };
+  const jsonTypes = parsed.sections.map((s) => s.type);
+  assert.deepEqual(jsonTypes, [...BUILTIN_SECTION_TYPES]);
+  const fixedFromJson = parsed.sections.filter((s) => s.fixed === true).map((s) => s.type);
+  assert.deepEqual(fixedFromJson, [...FIXED_SECTION_TYPES]);
+
+  for (const section of parsed.sections) {
+    assert.deepEqual(
+      BUILTIN_SECTION_FIELDS[section.type as keyof typeof BUILTIN_SECTION_FIELDS].map((f) => ({
+        name: f.name,
+        type: f.type
+      })),
+      section.fields,
+      `section ${section.type} fields differ between sections.json and generated output`
+    );
+    assert.equal(
+      WORDPRESS_SECTION_NAMES[section.type as keyof typeof WORDPRESS_SECTION_NAMES],
+      section.type.replaceAll("_", "-"),
+      `section ${section.type} source name mismatch`
+    );
+  }
+});
+
 // ─── Section Registry ────────────────────────────────────────────
 
 test("buildSectionRegistry creates registry with all built-in sections", () => {
@@ -481,10 +519,22 @@ test("companion schema response JSON has correct structure", () => {
     "acf_flexible",
     "acf_fixed"
   ]);
-  assert.ok(Array.isArray(fixture.data.sectionDefinitions));
-  assert.equal(fixture.data.sourceMappings["nexuscontent/hero"], "hero");
-  assert.equal(fixture.data.sourceMappings["acf/hero"], "hero");
-  assert.equal(fixture.data.sourceMappings.hero, "hero");
+  assert.equal(fixture.data.sectionDefinitions.length, 12);
+  assert.deepEqual(
+    fixture.data.sectionDefinitions.map((d) => d.type),
+    [...BUILTIN_SECTION_TYPES]
+  );
+  assert.equal(
+    fixture.data.sectionDefinitions[0]!.fields.length,
+    BUILTIN_SECTION_FIELDS.hero.length,
+    "schema fixture hero fields must match the canonical JSON"
+  );
+  for (const sectionType of BUILTIN_SECTION_TYPES) {
+    assert.equal(fixture.data.sourceMappings[`nexuscontent/${WORDPRESS_SECTION_NAMES[sectionType]}`], sectionType);
+    assert.equal(fixture.data.sourceMappings[`acf/${WORDPRESS_SECTION_NAMES[sectionType]}`], sectionType);
+    assert.equal(fixture.data.sourceMappings[WORDPRESS_SECTION_NAMES[sectionType]], sectionType);
+    assert.equal(fixture.data.sourceMappings[sectionType], sectionType);
+  }
 });
 
 test("companion capabilities response JSON has exact capability data", () => {

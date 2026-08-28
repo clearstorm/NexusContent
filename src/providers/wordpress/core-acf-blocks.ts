@@ -1,6 +1,7 @@
 import type { ContentSection, JsonValue } from "../../core/types.ts";
 import type { BuiltinSectionType, WordPressFixedSectionConfig } from "./config.ts";
-import { BUILTIN_SECTION_TYPES, FIXED_SECTION_TYPES } from "./config.ts";
+import { FIXED_SECTION_TYPES } from "./config.ts";
+import { normalizeAcfImageToMediaAsset } from "./core-media.ts";
 
 /**
  * Extract ACF fields from a WordPress REST response's `acf` property.
@@ -144,7 +145,7 @@ function extractAcfLayoutData(
       data.heading = layout.heading ?? layout.title ?? layout.hero_heading;
       data.body = layout.body ?? layout.description ?? layout.hero_description;
       data.eyebrow = layout.eyebrow;
-      data.image = normalizeAcfImage(layout.image ?? layout.hero_image);
+      data.image = normalizeAcfImageToMediaAsset(layout.image ?? layout.hero_image);
       data.primary_action_label = layout.primary_action_label ?? layout.button_label;
       data.primary_action_url = layout.primary_action_url ?? layout.button_url;
       data.secondary_action_label = layout.secondary_action_label;
@@ -156,7 +157,7 @@ function extractAcfLayoutData(
       data.heading = layout.heading ?? layout.title;
       data.body = layout.body ?? layout.description;
       data.eyebrow = layout.eyebrow;
-      data.image = normalizeAcfImage(layout.image);
+      data.image = normalizeAcfImageToMediaAsset(layout.image);
       data.image_position = layout.image_position;
       data.theme = layout.theme;
       break;
@@ -171,7 +172,7 @@ function extractAcfLayoutData(
       data.heading = layout.heading ?? layout.title;
       data.body = layout.body ?? layout.description;
       data.eyebrow = layout.eyebrow;
-      data.image = normalizeAcfImage(layout.image);
+      data.image = normalizeAcfImageToMediaAsset(layout.image);
       data.image_position = layout.image_position;
       data.action_label = layout.action_label ?? layout.button_label;
       data.action_url = layout.action_url ?? layout.button_url;
@@ -214,7 +215,7 @@ function extractAcfLayoutData(
       data.primary_action_url = layout.primary_action_url ?? layout.button_url;
       data.secondary_action_label = layout.secondary_action_label;
       data.secondary_action_url = layout.secondary_action_url;
-      data.background_image = normalizeAcfImage(layout.background_image);
+      data.background_image = normalizeAcfImageToMediaAsset(layout.background_image);
       data.theme = layout.theme;
       break;
 
@@ -248,45 +249,49 @@ function extractAcfLayoutData(
     }
   }
 
-  return data;
+  return normalizeSectionMediaFields(data);
 }
 
 /**
- * Normalize an ACF image field to a MediaAsset-like object.
+ * Recursively normalize media values inside section data. ACF image objects
+ * (`url` plus `id`/`ID`/`sizes`/`width`/`height`) become MediaAsset entries so
+ * gallery arrays, repeatable item lists, and nested groups never leak the raw
+ * `url`-shaped WordPress image structure past the provider boundary.
  */
-function normalizeAcfImage(
-  value: unknown
-): { url: string; alt?: string; width?: number; height?: number; id?: string } | undefined {
-  if (!value || typeof value !== "object") return undefined;
-  const obj = value as Record<string, unknown>;
-
-  const url = typeof obj.url === "string"
-    ? obj.url
-    : typeof obj.sizes === "object" && obj.sizes !== null
-      ? findLargestSize(obj.sizes as Record<string, { url: string }>)
-      : undefined;
-
-  if (!url) return undefined;
-
-  return {
-    url,
-    alt: typeof obj.alt === "string" ? obj.alt : undefined,
-    width: typeof obj.width === "number" ? obj.width : undefined,
-    height: typeof obj.height === "number" ? obj.height : undefined,
-    id: typeof obj.id === "number" ? String(obj.id) : typeof obj.ID === "number" ? String(obj.ID) : undefined
-  };
-}
-
-/**
- * Find the largest size URL from an ACF image sizes object.
- */
-function findLargestSize(sizes: Record<string, { url: string }>): string | undefined {
-  const sizeOrder = ["full", "large", "medium_large", "medium", "thumbnail"];
-  for (const size of sizeOrder) {
-    if (sizes[size]?.url) return sizes[size].url;
+function normalizeSectionMediaFields(data: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    out[key] = normalizeMediaValue(value);
   }
-  const firstKey = Object.keys(sizes)[0];
-  return firstKey ? sizes[firstKey]?.url : undefined;
+  return out;
+}
+
+function normalizeMediaValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeMediaValue(item));
+  }
+  if (!isPlainObjectValue(value)) {
+    return value;
+  }
+
+  const asset = normalizeAcfImageToMediaAsset(value);
+  if (asset !== undefined) {
+    return asset;
+  }
+
+  const out: Record<string, unknown> = {};
+  for (const [key, nested] of Object.entries(value)) {
+    out[key] = normalizeMediaValue(nested);
+  }
+  return out;
+}
+
+function isPlainObjectValue(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
 }
 
 /**
@@ -319,7 +324,7 @@ function extractAcfGroup(
     sections.push({
       id: `acf-group-${groupName}`,
       type: sectionType,
-      data: group
+      data: normalizeSectionMediaFields(group)
     });
     return sections;
   }

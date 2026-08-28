@@ -1,9 +1,14 @@
 import { ProviderError } from "../../core/errors.ts";
 import type {
   CollectionItem,
+  ContentSection,
   MediaAsset,
   PageContent
 } from "../../core/types.ts";
+import { extractAcfFields } from "./core-acf-blocks.ts";
+import { parseGutenbergToSections } from "./core-gutenberg.ts";
+import { normalizeAcfImageToMediaAsset } from "./core-media.ts";
+import type { WordPressEditorMode, WordPressUnknownContentPolicy } from "./config.ts";
 
 export interface WordPressContentData {
   content: string;
@@ -27,6 +32,15 @@ export interface WordPressNormalizeContext {
   provider: string;
   operation: string;
   content: string;
+  /**
+   * Resolved editor mode for the entry being normalized. When present, the
+   * canonical section extractor for that mode runs and the result is attached
+   * as `data.sections`. Fixed-field mode is skipped: those ACF groups are
+   * already flattened as named fields on `data`.
+   */
+  editorMode?: WordPressEditorMode;
+  includeCoreBlocks?: boolean;
+  unknownContentPolicy?: WordPressUnknownContentPolicy;
 }
 
 interface WordPressEntry {
@@ -58,7 +72,7 @@ export function normalizeWordPressPage(
     key,
     slug: entry.slug,
     title: entry.title,
-    data: buildData(entry),
+    data: buildData(entry, context),
     meta: {
       source: "wordpress",
       sourceId: String(entry.id),
@@ -78,7 +92,7 @@ export function normalizeWordPressItem(
     key: entry.slug,
     slug: entry.slug,
     title: entry.title,
-    data: buildData(entry),
+    data: buildData(entry, context),
     meta: {
       source: "wordpress",
       sourceId: String(entry.id),
@@ -106,7 +120,7 @@ function parseEntry(
 
   const title = requireRenderedString(object.title, "title", context);
   const content = requireRenderedString(object.content, "content", context);
-  const excerpt = optionalRenderedString(object.excerpt, "excerpt", context);
+  const excerpt = optionalPlainRenderedString(object.excerpt, "excerpt", context);
   const publishedAt = readDate(object.date_gmt, object.date);
   const modifiedAt = readDate(object.modified_gmt, object.modified);
 
@@ -153,11 +167,16 @@ function normalizeWpData(val: unknown): unknown {
   return val;
 }
 
-function buildData(entry: WordPressEntry): WordPressContentData {
+function buildData(
+  entry: WordPressEntry,
+  context: WordPressNormalizeContext
+): WordPressContentData {
   // ACF fields are flattened so project schemas can declare them directly.
   // Reserved normalized values are assigned last so they always win over a
   // field name collision with an ACF key.
-  const normalizedFields = (normalizeWpData(entry.fields ?? {}) as Record<string, unknown>);
+  const normalizedFields = normalizeMediaFields(
+    normalizeWpData(entry.fields ?? {})
+  ) as Record<string, unknown>;
   const data: WordPressContentData = {
     ...normalizedFields,
     content: entry.content
@@ -187,7 +206,60 @@ function buildData(entry: WordPressEntry): WordPressContentData {
     data.featuredImage = entry.featuredImage;
   }
 
+  const sections = extractSections(entry, context);
+  if (sections.length > 0) {
+    data.sections = sections;
+  }
+
   return data;
+}
+
+function extractSections(
+  entry: WordPressEntry,
+  context: WordPressNormalizeContext
+): ContentSection[] {
+  switch (context.editorMode) {
+    case "gutenberg":
+      return parseGutenbergToSections(entry.content, {
+        includeCoreBlocks: context.includeCoreBlocks ?? false,
+        onUnknown:
+          context.unknownContentPolicy === "error"
+            ? () => "throw"
+            : context.unknownContentPolicy === "html"
+              ? () => "raw"
+              : undefined
+      });
+    case "acf_flexible":
+      return extractAcfFields(entry.fields ?? {});
+    default:
+      return [];
+  }
+}
+
+/**
+ * Recursively normalize ACF image objects (`url` plus `id`/`ID`/`sizes`/
+ * `width`/`height`) inside flattened ACF fields so named-field content (fixed
+ * section groups, nested groups, repeatable entries) carries MediaAsset values
+ * instead of the raw `url`-shaped WordPress structure.
+ */
+function normalizeMediaFields(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeMediaFields(item));
+  }
+  if (!isPlainObject(value)) {
+    return value;
+  }
+
+  const asset = normalizeAcfImageToMediaAsset(value);
+  if (asset !== undefined) {
+    return asset;
+  }
+
+  const out: Record<string, unknown> = {};
+  for (const [key, nested] of Object.entries(value)) {
+    out[key] = normalizeMediaFields(nested);
+  }
+  return out;
 }
 
 function requireRenderedString(
@@ -219,6 +291,22 @@ function optionalRenderedString(
     throw invalidEntry(`Expected ${field}.rendered to be a string.`, context);
   }
   return object.rendered;
+}
+
+function optionalPlainRenderedString(
+  value: unknown,
+  field: string,
+  context: WordPressNormalizeContext
+): string | undefined {
+  const rendered = optionalRenderedString(value, field, context);
+  if (rendered === undefined) {
+    return undefined;
+  }
+  // WordPress wraps excerpt.rendered in <p> via wpautop and may include inline
+  // markup. Consumers render excerpts as plain text (cards, meta descriptions),
+  // so strip tags and collapse whitespace. Entities are left untouched to match
+  // the companion plugin's wp_kses_post output.
+  return rendered.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
 
 function requireObject(

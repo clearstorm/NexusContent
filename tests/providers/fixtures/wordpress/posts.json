@@ -5,7 +5,7 @@
     "status": "publish",
     "title": { "rendered": "First post" },
     "content": { "rendered": "<p>First body.</p>" },
-    "excerpt": { "rendered": "<p>First excerpt.</p>" },
+    "excerpt": { "rendered": "<p>First <em>excerpt</em>.</p>" },
     "date_gmt": "2026-08-03T08:00:00",
     "modified_gmt": "2026-08-03T09:00:00"
   },

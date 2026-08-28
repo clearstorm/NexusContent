@@ -47,7 +47,10 @@ export const WORDPRESS_ERROR_CODES = {
   COMPANION_FORBIDDEN: "wordpress/companion/forbidden",
   COMPANION_MISSING: "wordpress/companion/missing",
   COMPANION_UNAVAILABLE: "wordpress/companion/unavailable",
-  COMPANION_VERSION_MISMATCH: "wordpress/companion/version-mismatch"
+  COMPANION_VERSION_MISMATCH: "wordpress/companion/version-mismatch",
+  SECTION_SYNC_CONFLICT: "wordpress/section/sync-conflict",
+  SECTION_SYNC_MISSING: "wordpress/section/sync-missing",
+  COMPONENT_UNKNOWN: "wordpress/unknown-component"
 } as const;
 
 export type WordPressErrorCode =

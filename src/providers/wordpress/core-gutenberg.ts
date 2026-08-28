@@ -1,4 +1,4 @@
-import type { ContentSection, JsonValue } from "../../core/types.ts";
+import type { ContentSection, MediaAsset } from "../../core/types.ts";
 import type { BuiltinSectionType } from "./config.ts";
 import { BUILTIN_SECTION_TYPES } from "./config.ts";
 
@@ -145,41 +145,50 @@ function extractListItems(block: GutenbergBlock): string[] {
 }
 
 /**
- * Extract image data from an image block.
+ * Extract image data from an image block as a MediaAsset.
  */
-function extractImageData(
-  block: GutenbergBlock
-): { url: string; alt?: string; caption?: string; width?: number; height?: number } | null {
+function extractImageData(block: GutenbergBlock): MediaAsset | null {
   const attrs = block.attributes;
-  const url = typeof attrs.url === "string" ? attrs.url : null;
-  if (!url) return null;
+  const src = typeof attrs.url === "string" ? attrs.url : null;
+  if (!src) return null;
 
-  return {
-    url,
-    alt: typeof attrs.alt === "string" ? attrs.alt : undefined,
-    caption: typeof attrs.caption === "string" ? attrs.caption : undefined,
-    width: typeof attrs.width === "number" ? attrs.width : undefined,
-    height: typeof attrs.height === "number" ? attrs.height : undefined
-  };
+  const asset: MediaAsset = { src };
+  if (typeof attrs.id === "number" || typeof attrs.id === "string") {
+    asset.id = String(attrs.id);
+  }
+  if (typeof attrs.alt === "string") {
+    asset.alt = attrs.alt;
+  }
+  if (typeof attrs.caption === "string") {
+    asset.caption = attrs.caption;
+  }
+  if (typeof attrs.width === "number") {
+    asset.width = attrs.width;
+  }
+  if (typeof attrs.height === "number") {
+    asset.height = attrs.height;
+  }
+  return asset;
 }
 
 /**
- * Extract gallery images from a gallery block.
+ * Extract gallery images from a gallery block as MediaAsset entries.
  */
-function extractGalleryImages(
-  block: GutenbergBlock
-): Array<{ url: string; alt?: string; caption?: string }> {
-  const images: Array<{ url: string; alt?: string; caption?: string }> = [];
-  const imgPattern = /<img[^>]+src="([^"]+)"[^>]*(?:alt="([^"]*)")?[^>]*>/g;
+function extractGalleryImages(block: GutenbergBlock): MediaAsset[] {
+  const images: MediaAsset[] = [];
+  const imgPattern = /<img[^>]+src="([^"]+)"[^>]*>/g;
   let match: RegExpExecArray | null;
   while ((match = imgPattern.exec(block.innerHTML)) !== null) {
     const src = match[1];
-    if (src !== undefined) {
-      images.push({
-        url: src,
-        alt: match[2] || undefined
-      });
-    }
+    if (src === undefined) continue;
+
+    const tag = match[0];
+    const asset: MediaAsset = { src };
+    const alt = /alt="([^"]*)"/.exec(tag)?.[1];
+    if (alt) asset.alt = alt;
+    const id = /wp-image-(\d+)/.exec(tag)?.[1];
+    if (id) asset.id = id;
+    images.push(asset);
   }
   return images;
 }

@@ -9,7 +9,7 @@
     "rendered": "<p>Rendered <strong>page</strong> content.</p>"
   },
   "excerpt": {
-    "rendered": "<p>Rendered excerpt.</p>"
+    "rendered": "<p>Rendered <strong>excerpt</strong>.\nDone.</p>"
   },
   "date_gmt": "2026-08-01T09:30:00",
   "modified": "2026-08-02T10:45:00+02:00",

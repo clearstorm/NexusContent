@@ -93,6 +93,27 @@ export interface WordPressCapabilities {
 export type WordPressCapabilitiesData = WordPressCapabilities;
 export type WordPressCapabilitiesResponse = WordPressCompanionEnvelope<WordPressCapabilitiesData>;
 
+export type WordPressSectionSyncStatus = "synced" | "unsynced" | "none";
+
+export interface WordPressSectionSyncConflict {
+  readonly type: string;
+  readonly source: string;
+  readonly expected: string;
+  readonly installed: string;
+}
+
+/**
+ * Result of reconciling a consumer-declared section registry against the
+ * live companion `/schema` response. Used to surface drift loudly.
+ */
+export interface WordPressSectionSyncResult {
+  readonly knownTypes: ReadonlyArray<string>;
+  readonly registryOnly: ReadonlyArray<string>;
+  readonly installOnly: ReadonlyArray<string>;
+  readonly conflicts: ReadonlyArray<WordPressSectionSyncConflict>;
+  readonly installDefinitions: ReadonlyArray<WordPressSectionSchema>;
+}
+
 export interface WordPressProviderFacingCapabilities {
   readonly editorMode: WordPressEditorMode;
   readonly gutenberg: boolean;
@@ -102,9 +123,20 @@ export interface WordPressProviderFacingCapabilities {
   readonly mediaLibrary: boolean;
   readonly customPostTypes: boolean;
   readonly sections: boolean;
+  readonly sectionSync: WordPressSectionSyncStatus;
   readonly localeAware: boolean;
   readonly previewSupport: boolean;
   readonly webhookSupport: boolean;
+}
+
+/**
+ * Serializable project component contract pushed to the companion plugin.
+ * `components` are the consumer's declared component names; `sectionTypes`
+ * are the canonical WordPress section types they resolve to.
+ */
+export interface WordPressProjectComponentContract {
+  readonly components: ReadonlyArray<string>;
+  readonly sectionTypes: ReadonlyArray<string>;
 }
 
 export function buildCompanionContractVersion(): typeof COMPANION_CONTRACT_VERSION {

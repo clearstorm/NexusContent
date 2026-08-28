@@ -182,7 +182,7 @@ test("looks up and fully normalizes a page while preserving rendered values", as
     assert.equal(page.slug, "about-us");
     assert.equal(page.title, "Fish &amp; Chips &#8212; News");
     assert.equal(page.data.content, "<p>Rendered <strong>page</strong> content.</p>");
-    assert.equal(page.data.excerpt, "<p>Rendered excerpt.</p>");
+    assert.equal(page.data.excerpt, "Rendered excerpt. Done.");
     assert.equal(page.data.publishedAt, "2026-08-01T09:30:00Z");
     assert.equal(page.data.modifiedAt, "2026-08-02T10:45:00+02:00");
     assert.equal(page.data.url, "https://wordpress.example/about-us/");
@@ -291,7 +291,7 @@ test("retrieves posts as a single-page collection and by item slug", async () =>
     const wordpress = provider(baseUrl, { perPage: 2 });
     const collection = await wordpress.getCollection<WordPressContentData>("posts");
     assert.deepEqual(collection.map((item) => item.key), ["first-post", "second-post"]);
-    assert.equal(collection[0]?.data.excerpt, "<p>First excerpt.</p>");
+    assert.equal(collection[0]?.data.excerpt, "First excerpt.");
     const item = await wordpress.getItem<WordPressContentData>("posts", "second-post");
     assert.ok(item);
     assert.equal(item.id, "102");

@@ -18,6 +18,10 @@ import {
   resolveSectionIds,
   ensureUniqueSectionIds
 } from "../../src/providers/wordpress/core-section-ids.ts";
+import {
+  normalizeWordPressItem,
+  normalizeWordPressPage
+} from "../../src/providers/wordpress/normalize.ts";
 
 // ─── Gutenberg block parsing ───────────────────────────────────────
 
@@ -316,6 +320,181 @@ test("extractAcfBlocks extracts ACF data from page", () => {
   const sections = extractAcfBlocks(acfData);
   assert.ok(sections.length > 0);
   assert.equal(sections[0]!.type, "hero");
+});
+
+// ─── Media normalization ───────────────────────────────────────────
+
+test("normalizeWordPressPage emits data.sections from Gutenberg content", () => {
+  const raw = {
+    id: 7,
+    slug: "hello-world",
+    status: "publish",
+    title: { rendered: "Hello" },
+    content: {
+      rendered: `<!-- wp:core/image {"id":123,"url":"https://example.com/block.jpg"} -->
+<figure class="wp-block-image"><img src="https://example.com/block.jpg" alt="Block" class="wp-image-123"/></figure>
+<!-- /wp:core/image -->`
+    },
+    date_gmt: "2026-08-01T00:00:00",
+    modified_gmt: "2026-08-02T00:00:00"
+  };
+
+  const page = normalizeWordPressPage(raw, "hello", {
+    provider: "wp",
+    operation: "getPage",
+    content: "hello",
+    editorMode: "gutenberg"
+  });
+
+  assert.equal(page.id, "7");
+  assert.equal(page.data.content, raw.content.rendered);
+  const sections = page.data.sections as Array<{ type: string; data: Record<string, unknown> }>;
+  assert.ok(Array.isArray(sections));
+  const section = sections[0]!;
+  assert.equal(section.type, "image_text");
+  const image = section.data.image as Record<string, unknown>;
+  assert.equal(image.src, "https://example.com/block.jpg");
+  assert.equal(image.id, "123");
+  assert.equal((image as Record<string, unknown>).url, undefined);
+});
+
+test("normalizeWordPressPage keeps no sections when editor mode is unset", () => {
+  const raw = {
+    id: 7,
+    slug: "hello-world",
+    status: "publish",
+    title: { rendered: "Hello" },
+    content: {
+      rendered: `<!-- wp:core/paragraph -->
+<p>Plain</p>
+<!-- /wp:core/paragraph -->`
+    },
+    date_gmt: "2026-08-01T00:00:00",
+    modified_gmt: "2026-08-02T00:00:00"
+  };
+
+  const page = normalizeWordPressPage(raw, "hello", {
+    provider: "wp",
+    operation: "getPage",
+    content: "hello"
+  });
+
+  assert.equal(page.data.sections, undefined);
+});
+
+test("normalizeWordPressItem emits canonical sections for ACF flexible content with normalized media", () => {
+  const raw = {
+    id: 9,
+    slug: "post-one",
+    status: "publish",
+    title: { rendered: "Post One" },
+    content: { rendered: "" },
+    date_gmt: "2026-08-01T00:00:00",
+    modified_gmt: "2026-08-02T00:00:00",
+    link: "https://example.com/post-one",
+    acf: {
+      sections: [
+        {
+          acf_fc_layout: "hero",
+          heading: "Hero Title",
+          image: {
+            id: 1,
+            url: "https://example.com/h.jpg",
+            alt: "Hero",
+            width: 800,
+            height: 600
+          }
+        },
+        {
+          acf_fc_layout: "gallery",
+          heading: "Gallery",
+          images: [
+            { id: 2, url: "https://example.com/g1.jpg", alt: "One" },
+            { id: 3, url: "https://example.com/g2.jpg" }
+          ]
+        },
+        {
+          acf_fc_layout: "features",
+          heading: "Features",
+          items: [
+            { title: "Feature", image: { id: 4, url: "https://example.com/f.jpg", alt: "F" } }
+          ]
+        },
+        {
+          acf_fc_layout: "logo_grid",
+          heading: "Logos",
+          items: [{ name: "Acme", image: { ID: 5, url: "https://example.com/l.jpg" } }]
+        }
+      ]
+    }
+  };
+
+  const item = normalizeWordPressItem(raw, {
+    provider: "wp",
+    operation: "getItem",
+    content: "posts/post-one",
+    editorMode: "acf_flexible"
+  });
+
+  assert.equal(item.key, "post-one");
+  const sections = item.data.sections as Array<{ type: string; data: Record<string, unknown> }>;
+  assert.equal(sections.length, 4);
+  assert.equal(sections[0]!.type, "hero");
+  const heroImage = sections[0]!.data.image as Record<string, unknown>;
+  assert.equal(heroImage.src, "https://example.com/h.jpg");
+  assert.equal(heroImage.id, "1");
+
+  const gallery = sections[1]!;
+  assert.equal(gallery.type, "gallery");
+  const images = gallery.data.images as Array<Record<string, unknown>>;
+  assert.equal(images.length, 2);
+  assert.equal(images[0]!.src, "https://example.com/g1.jpg");
+  assert.equal(images[0]!.alt, "One");
+  assert.equal(images[1]!.src, "https://example.com/g2.jpg");
+  assert.equal(images[1]!.url, undefined);
+
+  const features = sections[2]!;
+  const featureItems = features.data.items as Array<Record<string, unknown>>;
+  assert.equal((featureItems[0]!.image as Record<string, unknown>).src, "https://example.com/f.jpg");
+
+  const logos = sections[3]!;
+  const logoItems = logos.data.items as Array<Record<string, unknown>>;
+  const logoImage = logoItems[0]!.image as Record<string, unknown>;
+  assert.equal(logoImage.src, "https://example.com/l.jpg");
+  assert.equal(logoImage.id, "5");
+});
+
+test("normalizeWordPressPage flattens fixed ACF group media to MediaAsset on named fields", () => {
+  const raw = {
+    id: 12,
+    slug: "about",
+    status: "publish",
+    title: { rendered: "About" },
+    content: { rendered: "" },
+    date_gmt: "2026-08-01T00:00:00",
+    modified_gmt: "2026-08-02T00:00:00",
+    acf: {
+      hero: {
+        heading: "Welcome",
+        body: "Body",
+        image: { url: "https://example.com/h2.jpg", id: 8, alt: "A2", width: 100, height: 50 }
+      }
+    }
+  };
+
+  const page = normalizeWordPressPage(raw, "about", {
+    provider: "wp",
+    operation: "getPage",
+    content: "about",
+    editorMode: "acf_fixed"
+  });
+
+  assert.equal((page.data.hero as Record<string, unknown>).heading, "Welcome");
+  const image = (page.data.hero as Record<string, unknown>).image as Record<string, unknown>;
+  assert.equal(image.src, "https://example.com/h2.jpg");
+  assert.equal(image.id, "8");
+  assert.equal(image.url, undefined);
+  assert.equal(page.data.sections, undefined);
 });
 
 // ─── Media normalization ───────────────────────────────────────────

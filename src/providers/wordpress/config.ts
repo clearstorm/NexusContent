@@ -23,11 +23,9 @@ export const DEFAULT_WORDPRESS_UNKNOWN_CONTENT_POLICY: WordPressUnknownContentPo
 export const DEFAULT_WORDPRESS_MEDIA_RESOLUTION: WordPressMediaResolution = "full";
 export const DEFAULT_WORDPRESS_ACF_ENABLED = true;
 
-export const FIXED_SECTION_TYPES = [
-  "hero",
-  "intro",
-  "cta"
-] as const;
+import { FIXED_SECTION_TYPES } from "./sections.generated.ts";
+
+export { FIXED_SECTION_TYPES };
 
 export type FixedSectionType = (typeof FIXED_SECTION_TYPES)[number];
 
