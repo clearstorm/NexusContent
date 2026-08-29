@@ -29,6 +29,7 @@
     "examples/node-basic"
   ],
   "scripts": {
+    "prepublishOnly": "npm run build",
     "build": "npm run generate:sections && tsc -p tsconfig.build.json",
     "generate:sections": "node scripts/generate-sections.mjs",
     "check:sections": "node scripts/generate-sections.mjs --check",
