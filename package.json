@@ -33,6 +33,7 @@
     "build": "npm run generate:sections && tsc -p tsconfig.build.json",
     "generate:sections": "node scripts/generate-sections.mjs",
     "check:sections": "node scripts/generate-sections.mjs --check",
+    "sections:contract": "node scripts/sections-contract.mjs",
     "typecheck": "tsc --noEmit",
     "validate:project-state": "node scripts/validate-project-state.mjs",
     "test": "node --test \"tests/**/*.test.ts\"",

@@ -51,6 +51,8 @@ Never commit the ZIP, credentials, or license data. Remove `.local/` when finish
 
 The plugin defines Hero, Introduction, Rich Text, Image and Text, Features, Statistics, Testimonials, Gallery, Call to Action, FAQ, Logo Grid, and Form Embed blocks. Native blocks are the default implementation. Logo Grid items accept a label, a logo image, or both. `nexuscontent_block_implementations` can select `native`, `acf`, `both`, or a per-type selection when ACF block APIs are available.
 
+Custom section types registered through `nexuscontent_section_definitions` automatically get an ACF flexible layout and are normalized generically. The repository's `npm run sections:contract` script generates a consumer-owned must-use plugin that registers a project contract's custom sections; see `docs/wordpress-companion.md`.
+
 ## Switching Modes
 
 Use the NexusContent document settings panel or editor meta box. Switching modes preserves all content but exports only the active source. The editor warns when inactive content exists and reports unavailable modes instead of deleting or converting content.

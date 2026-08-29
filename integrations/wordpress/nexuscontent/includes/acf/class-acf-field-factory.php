@@ -20,7 +20,14 @@ final class ACF_Field_Factory {
 		$type   = str_replace( '-', '_', (string) $type );
 		$fields = array();
 
-		foreach ( self::definition( $type ) as $name => $definition ) {
+		$definitions = self::definition( $type );
+		if ( empty( $definitions ) ) {
+			// Custom section types registered through nexuscontent_section_definitions
+			// have no built-in field map; derive ACF fields from the registry definition.
+			$definitions = self::generic_fields( $type, $limitations );
+		}
+
+		foreach ( $definitions as $name => $definition ) {
 			$field = self::field( $type, $name, $definition, $field_types, $limitations, $context );
 			if ( null === $field ) {
 				return null;
@@ -368,6 +375,59 @@ final class ACF_Field_Factory {
 		);
 
 		return isset( $map[ $type ] ) ? $map[ $type ] : array();
+	}
+
+	/**
+	 * ACF field definitions for a custom section type registered through the
+	 * nexuscontent_section_definitions filter. Fields whose type cannot be
+	 * represented with ACF core field types are skipped with a limitation so
+	 * normalized output never invents keys. Consumers needing richer layouts
+	 * can register them through nexuscontent_acf_layout_definitions instead.
+	 *
+	 * @param string             $type        Section type.
+	 * @param array<int, string> &$limitations Discovered limitations.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function generic_fields( $type, &$limitations ) {
+		$registry   = new Section_Registry();
+		$definition = $registry->definitions()[ $type ] ?? array();
+		$result     = array();
+		$acf_types  = array(
+			'string'   => 'text',
+			'number'   => 'number',
+			'boolean'  => 'true_false',
+			'datetime' => 'date_time_picker',
+			'media'    => 'image',
+			'richText' => 'wysiwyg',
+		);
+
+		foreach ( (array) ( $definition['fields'] ?? array() ) as $field ) {
+			$name  = is_string( $field['name'] ?? null ) ? $field['name'] : '';
+			$ftype = is_string( $field['type'] ?? null ) ? $field['type'] : '';
+			if ( '' === $name || '' === $ftype ) {
+				continue;
+			}
+			$acf_type = $acf_types[ $ftype ] ?? null;
+			if ( null === $acf_type ) {
+				/* translators: 1: section label, 2: unsupported field type. */
+				$limitations[] = sprintf( __( '%1$s field "%2$s" was skipped because ACF cannot represent the %3$s field type; consumers may register a layout through nexuscontent_acf_layout_definitions.', 'nexuscontent' ), self::label( $type ), $name, $ftype );
+				continue;
+			}
+
+			$item = array(
+				'type'  => $acf_type,
+				'label' => ucwords( str_replace( '_', ' ', $name ) ),
+			);
+			if ( ! empty( $field['required'] ) ) {
+				$item['required'] = true;
+			}
+			if ( array_key_exists( 'default', $field ) && ( is_scalar( $field['default'] ) || null === $field['default'] ) ) {
+				$item['default_value'] = $field['default'];
+			}
+			$result[ $name ] = $item;
+		}
+
+		return $result;
 	}
 
 	/**

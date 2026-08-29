@@ -72,6 +72,35 @@ Core Gutenberg blocks (rich-text, image, gallery, cover, container) and native
 NexusContent blocks are converted. Unsupported visible blocks degrade to
 flagged rich-text data with diagnostics rather than being dropped silently.
 
+### Auto-Creating ACF Layouts for Custom Sections
+
+Custom section types flow through the same registry and automatically get the
+same ACF surface as the built-in twelve:
+
+- The ACF loader registers a flexible-content layout for every registry
+  section. A section added through the `nexuscontent_section_definitions`
+  filter therefore appears in the `acf_flexible` editor immediately, and is
+  normalized generically by the flexible-sections path.
+- ACF fields are derived from the section's `fields` definitions:
+  `string` → text, `number` → number, `boolean` → true/false, `datetime` →
+  date/time picker, `media` → image, `richText` → wysiwyg. Field types ACF
+  cannot represent faithfully (such as `json` item arrays, whose keys are
+  consumer-owned and must not be invented) are skipped with a diagnostic;
+  consumers needing richer layouts register them explicitly through the
+  `nexuscontent_acf_layout_definitions` filter.
+- The project `npm run sections:contract` script (see
+  `scripts/sections-contract.mjs`) generates a consumer-owned must-use plugin
+  drop-in that registers the custom sections referenced by a project contract
+  (`components` + `sectionTypes`, with an optional `componentTypeMap`). It
+  classifies each expected type as installed (built-in), declared (emitted),
+  or missing (fails the run), warns about declared-but-unused sections, and
+  opts those types into the `acf`/`both` block implementation so the ACF block
+  appears too. The `project-contract` route stays a read-only drift comparison;
+  the script is the action that turns the contract into registered sections.
+- The generated drop-in is WordPress code owned by the consumer and must not
+  be committed to this repository. The built-in vocabulary in `sections.json`
+  and its generated TypeScript counterpart are never edited by the script.
+
 ### Media Metadata
 
 The plugin expands media metadata (id, url, mime type, width, height, alt).
