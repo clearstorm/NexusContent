@@ -255,6 +255,27 @@ The route requires `manage_options`, stores only sanitized string arrays in
 It lives outside the content wire contract, so no `contractVersion` negotiation
 applies.
 
+The `nexus-contract` npm bin (shipped with `@nexuscontent/core`) drives both
+flows from a consumer project using an Application Password:
+
+```bash
+# Scaffold a consumer-owned mu-plugin registering custom sections as ACF layouts:
+npx @nexuscontent/core nexus-contract generate --schema src/schema/schema.ts --custom sections.custom.json --write wp-content/mu-plugins/nexuscontent-sections.php
+
+# Post the consumer contract to the admin-only project-contract route:
+npx @nexuscontent/core nexus-contract push --schema src/schema/schema.ts --api-root "$WORDPRESS_API_URL" --username admin-user --app-password "xxxx xxxx xxxx xxxx xxxx xxxx"
+```
+
+`generate` derives the `{ components, sectionTypes }` contract from your own
+field schema through `projectComponentContract`, classifies each section type as
+installed, custom (emitted), or missing (fails), warns on unused custom
+declarations, and emits deterministic PHP registering the custom sections via
+`nexuscontent_section_definitions` so the companion plugin auto-creates their ACF
+flexible layouts and optional ACF blocks. Classification uses the site's live
+`/schema` when `--api-root` is given and otherwise falls back to the bundled
+offline vocabulary (`scripts/sections.json`). Generated mu-plugin code is owned
+by the consumer and must not be committed to this repository.
+
 See `docs/wordpress-companion.md` for the project-facing definition of the companion plugin.
 
 ### Editor Modes

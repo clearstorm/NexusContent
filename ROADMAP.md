@@ -222,6 +222,29 @@ This was a pre-release contract repair because the earlier committed definitions
 - Provider, plugin, contract, and example tests pass; the live wp-env gate verifies the posts route serves the seeded post and rejects page slugs.
 - `npm run validate:project-state` and required CI gates pass; project state, README, and documentation are updated.
 
+## 0.2.5 - NexusContent CLI (scoped exception)
+
+**State:** Released on 2026-08-29 (root package `0.2.5`).
+
+**Goal:** Ship the first NexusContent CLI capability as `nexus-contract` inside `@nexuscontent/core`, turning the consumer's project contract into WordPress-side custom sections. This is a deliberate, user-approved scope exception to the directional `0.7.0` CLI milestone (AGENTS §68) because the WordPress companion contract is the first capability that genuinely needs a CLI.
+
+**Required capabilities:**
+
+- `nexus-contract generate` derives a `{ components, sectionTypes }` contract from the consumer's own field schema (`--schema`, runtime-imported through `projectComponentContract`) or reads `--contract`, classifies it against the installed section vocabulary (live companion `/schema` or the bundled `scripts/sections.json` offline copy), and scaffolds a consumer-owned ACF-layout mu-plugin registering custom sections.
+- `nexus-contract push` posts the contract to the admin-only project-contract route with an Application Password; the route and its Dashboard drift card behavior are unchanged.
+- The astro-wordpress example drives `generate` and `push` through the shipped bin; the example-owned push script is removed.
+- The plugin auto-registers ACF flexible layouts (and optional ACF block/fixed fields) for every custom section from the `nexuscontent_section_definitions` filter, exactly as for the built-in twelve, proven by `AcfFeatureDoubleIntegrationTest`.
+
+**Explicit exclusions:**
+
+- No expansion of the CLI beyond the `generate`/`push` pair; the general-purpose CLI stays directional at `0.7.0`.
+- No changes to contract v1, provider retrieval, editor modes, or the project-contract route's read-only drift semantics.
+
+**Exit criteria:**
+
+- CLI unit and packaging tests pass; a generated mu-plugin lints under `php -l`; `npm run typecheck`, `npm test`, `npm run check:sections`, `npm run test:astro`, and `npm run validate:project-state` all pass.
+- State files, CHANGELOG, README, and companion docs reflect the CLI and its `0.7.0` scoped exception.
+
 ## 0.2.3 - WordPress Companion Consumer
 
 **State:** Released on 2026-08-29 (root package `0.2.3`).
@@ -372,6 +395,8 @@ This was a pre-release contract repair because the earlier committed definitions
 ## 0.7.0 - CLI and Developer Tooling
 
 **Goal:** Wrap stable programmatic APIs with focused developer commands.
+
+> The scoped `nexus-contract` bin (`generate`/`push`) shipped in `0.2.5` as a user-approved exception to this milestone; see the `0.2.5` section. This entry remains the home for the general-purpose CLI and further tooling.
 
 **Required capabilities:**
 

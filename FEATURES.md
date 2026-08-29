@@ -151,7 +151,8 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `tooling.build` Package build | implemented | 0.1.0 | - | Emits the package distribution with TypeScript. |
 | `tooling.project-state` Coordinated project tracking | implemented | 0.1.2 | - | Human and machine-readable state files with synchronized stable feature IDs. |
 | `tooling.project-state-validation` Project state validation | implemented | 0.1.2 | - | Dependency-free structural, version, feature-ID, and status consistency check. |
-| `tooling.cli` NexusContent CLI | planned | - | 0.7.0 | Directional target after programmatic APIs stabilize. |
+| `tooling.nexus-contract-cli` Nexus contract CLI | implemented | 0.2.5 | - | The `nexus-contract` bin ships with `@nexuscontent/core`: `generate` derives a `{ components, sectionTypes }` contract from the consumer's field schema (`--schema`) and scaffolds an ACF-layout mu-plugin for consumer custom sections, classifying against the live companion `/schema` or the bundled `scripts/sections.json` offline vocabulary; `push` posts the contract to the admin-only project-contract route with an Application Password. This is a user-approved scope exception to `tooling.cli` (still planned for `0.7.0`) because the WordPress companion contract is the first capability that genuinely needs one; the general-purpose CLI remains directional. |
+| `tooling.cli` NexusContent CLI | planned | - | 0.7.0 | Directional full CLI after programmatic APIs stabilize; the scoped `nexus-contract` bin (`tooling.nexus-contract-cli`) ships from 0.2.5. |
 | `tooling.package-extraction` Multi-package extraction | deferred | - | TBD | Requires proven boundaries and a concrete versioning or dependency-isolation need. |
 
 ## Testing and CI

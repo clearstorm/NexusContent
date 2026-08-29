@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-08-29
+
+NexusContent CLI and consumer custom-section scaffolding release.
+
+### Added
+
+- The `nexus-contract` npm bin ships with `@nexuscontent/core` (`scripts/nexus-contract.mjs`, declared under `bin`): `generate` and `push` subcommands derive a `{ components, sectionTypes }` contract from the consumer's own field schema (`--schema`, imported at runtime and passed through `projectComponentContract`) or read it directly (`--contract`).
+  - `generate` classifies the contract against the installed section vocabulary, flags missing and unused declared types, and scaffolds a WordPress mu-plugin of ACF layouts for consumer custom sections (deterministic PHP, both the `nexuscontent_section_definitions` and `nexuscontent_block_implementations` filters). With `--api-root` it fetches the live companion `/schema` route (contract v1 envelope); otherwise it falls back to the bundled vocabulary.
+  - `push` posts the consumer contract to the admin-only `nexuscontent/v1/project-contract` route using an Application Password (`--api-root`, `--username`, `--app-password`, or `WORDPRESS_API_URL`, `WORDPRESS_USERNAME`, `WORDPRESS_APP_PASSWORD`).
+- Bundled offline vocabulary: `scripts/generate-sections.mjs` now also writes `scripts/sections.json`, an exact copy of the canonical `integrations/wordpress/nexuscontent/sections.json`, so classification runs without network access; `npm run check:sections` verifies the copy matches.
+- The astro-wordpress example now drives both flows through the shipped CLI: `sections:contract` scaffolds layouts and `push:project-contract` posts its schema (`sections.custom.json` declares no custom sections out of the box). The example-owned `push-project-contract.mjs` was removed; installed consumers use `npx @nexuscontent/core nexus-contract …`.
+- `AcfFeatureDoubleIntegrationTest` proves the ACF field factory registers the canonical section field groups (fixed Hero/Intro/CTA and flexible layouts for the other sections).
+
+The CLI is a deliberate, user-approved scope exception to the planned `0.7.0` CLI milestone because the WordPress companion contract is the first capability to genuinely need one; the general-purpose CLI remains planned.
+
 ## [0.2.4] - 2026-08-29
 
 ### Fixed

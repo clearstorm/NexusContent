@@ -88,18 +88,11 @@ same ACF surface as the built-in twelve:
   consumer-owned and must not be invented) are skipped with a diagnostic;
   consumers needing richer layouts register them explicitly through the
   `nexuscontent_acf_layout_definitions` filter.
-- The project `npm run sections:contract` script (see
-  `scripts/sections-contract.mjs`) generates a consumer-owned must-use plugin
-  drop-in that registers the custom sections referenced by a project contract
-  (`components` + `sectionTypes`, with an optional `componentTypeMap`). It
-  classifies each expected type as installed (built-in), declared (emitted),
-  or missing (fails the run), warns about declared-but-unused sections, and
-  opts those types into the `acf`/`both` block implementation so the ACF block
-  appears too. The `project-contract` route stays a read-only drift comparison;
-  the script is the action that turns the contract into registered sections.
-- The generated drop-in is WordPress code owned by the consumer and must not
-  be committed to this repository. The built-in vocabulary in `sections.json`
-  and its generated TypeScript counterpart are never edited by the script.
+- The shipped `nexus-contract` CLI (see `scripts/nexus-contract.mjs`) generates a consumer-owned must-use plugin drop-in that registers the custom sections referenced by a project contract (`components` + `sectionTypes`, with an optional `componentTypeMap`). It classifies each expected type as installed (built-in), declared (emitted), or missing (fails the run), warns about declared-but-unused sections, and opts those types into the `acf`/`both` block implementation so the ACF block appears too. The `project-contract` route stays a read-only drift comparison; the CLI's `generate` subcommand is the action that turns the contract into registered sections.
+  - `generate --schema <file> --custom <file>` derives the contract from the consumer's own field schema (runtime-imported through `projectComponentContract`); `generate --contract <file> --custom <file>` reads a serialized contract. Optional `--write <path>` writes the mu-plugin to a file instead of stdout.
+  - Classification uses the live companion `/schema` response when `--api-root` is given; otherwise it falls back to the bundled offline vocabulary in `scripts/sections.json` (a copy of the canonical `sections.json`).
+  - `push --schema|--contract --api-root --username --app-password` posts the contract to the admin-only `nexuscontent/v1/project-contract` route (`WORDPRESS_API_URL`/`WORDPRESS_USERNAME`/`WORDPRESS_APP_PASSWORD` env fallbacks).
+- The generated drop-in is WordPress code owned by the consumer and must not be committed to this repository. The built-in vocabulary in `sections.json` and its generated TypeScript counterpart are never edited by the CLI.
 
 ### Media Metadata
 

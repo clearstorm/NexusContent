@@ -27,17 +27,34 @@ export interface ClassificationResult {
   emitted: CustomSection[];
 }
 
+export interface CommandOptions {
+  command?: string;
+  help?: boolean;
+  customPath?: string;
+  writePath?: string;
+  schemaPath?: string;
+  contractPath?: string;
+  apiRoot?: string;
+  username?: string;
+  appPassword?: string;
+}
+
 export declare const root: string;
-export declare const SECTIONS_PATH: string;
+export declare const BUNDLED_SECTIONS_PATH: string;
 export declare const ALLOWED_FIELD_TYPES: Set<string>;
 export declare const RESERVED_PREFIXES: string[];
 export declare const FIELD_PATTERN: RegExp;
+export declare const USAGE: string;
 
 export declare function phpString(value: unknown): string;
-export declare function loadBaseSections(): Map<string, Record<string, unknown>>;
+export declare function schemaRouteUrl(input: string): string;
+export declare function projectContractRouteUrl(input: string): string;
+export declare function installedSet(definitions: unknown): Set<string>;
+export declare function loadBundledSections(): Set<string>;
+export declare function fetchInstalledSections(apiRoot: string): Promise<Set<string>>;
 export declare function normalizeCustomSections(
   raw: unknown,
-  base: Map<string, Record<string, unknown>>
+  installed: Set<string>
 ): Map<string, CustomSection>;
 export declare function loadContract(raw: unknown): ProjectContract | null;
 export declare function expectedTypes(
@@ -45,13 +62,16 @@ export declare function expectedTypes(
   custom: Map<string, CustomSection>
 ): string[];
 export declare function classify(input: {
-  base: Map<string, Record<string, unknown>>;
+  installed: Set<string>;
   custom: Map<string, CustomSection>;
   contract: ProjectContract | null;
 }): ClassificationResult;
+export declare function deriveContractFromSchema(
+  schemaPath: string,
+  apiRoot: string | undefined
+): Promise<ProjectContract>;
 export declare function renderPhp(emitted: CustomSection[]): string;
-export declare function run(input: {
-  customPath: string | undefined;
-  contractPath: string | undefined;
-  writePath: string | undefined;
-}): void;
+export declare function generateCommand(options: CommandOptions): Promise<void>;
+export declare function pushCommand(options: CommandOptions): Promise<void>;
+export declare function parseArgs(argv: string[]): CommandOptions;
+export declare function main(argv?: string[]): Promise<void>;

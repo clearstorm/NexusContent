@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | Project name | NexusContent |
-| Current version | `0.2.4` |
+| Current version | `0.2.5` |
 | Current milestone | `0.3.0-strapi` |
 | Project status | Active, early development; internal private package |
-| Current focus | Released `0.2.4`; directional `0.3.0` Strapi provider is next |
+| Current focus | Released `0.2.5`; directional `0.3.0` Strapi provider is next |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.2` release closes the `core.schema.models` contract: a unified `schema.models` configuration (model kinds, provider sources, field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, and a `nexus.media` resolution entry point), plus WordPress section synchronisation (`sections.json` single source with generated TS and `npm run check:sections`, live `/schema` registry reconciliation, `validateWordPressComponents`, and a secured admin-only project-contract push whose Dashboard card shows expected-vs-installed drift) and companion plugin hygiene and post support.
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.3` companion consumer milestone shipped V1 companion section parity, and `0.2.4` fixed the companion posts routing (dedicated posts routes, `companionRoute`, recursive media normalization). The `0.2.5` release adds the `nexus-contract` CLI: `generate` derives a consumer contract from the developer's own field schema and scaffolds ACF layouts for consumer custom sections (offline via the bundled `scripts/sections.json` vocabulary or against the live companion `/schema`), while `push` stores the contract through the admin-only project-contract route with an Application Password. The example's section/push scripts now drive the shipped CLI instead of example-owned scripts.
 
 ## Current Architecture
 
@@ -85,11 +85,13 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 - The built-in `posts` collection now routes to dedicated companion `posts` routes (plugin `0.1.1`, `companionRoute: "pages" | "posts"`), so the reference consumer's blog shows the actual posts instead of navigation pages; custom collections without a companion route fall back (`auto`) or throw (`companion`). The live wp-env gate verifies the posts route serves the seeded post and rejects page slugs.
 - Companion section media is normalized recursively at the TypeScript boundary (`wire image.url` → `MediaAsset src`), and item `data` surfaces the companion `excerpt` and `featuredImage`.
 - The astro-wordpress reference example consumes WordPress through `apiStrategy: "companion"` and builds in CI against a local companion API (capabilities, schema, posts, and `posts/slug/{slug}` routes), rendering Git- and companion-sourced sections with parity through the shared `PostSections` components.
+- The `nexus-contract` bin (shipped in `@nexuscontent/core` 0.2.5) derives the consumer `{ components, sectionTypes }` contract from the developer's own field schema (`--schema`) and scaffolds a deterministic ACF-layout mu-plugin for consumer custom sections, classifying against the live companion `/schema` or the bundled offline vocabulary. Its `push` subcommand posts the contract to the admin-only project-contract route with an Application Password. This is a user-approved scope exception to the planned `0.7.0` CLI.
+- The example's `sections:contract` and `push:project-contract` scripts drive the shipped CLI (`--schema src/schema/schema.ts`, env via `.env`); the example-owned push script was removed.
 - The directional `0.3.0` Strapi provider is the recommended next focus.
 
 ## Next
 
-1. `0.2.3` is released (`v0.2.3`); begin the directional `0.3.0` Strapi milestone.
+1. `0.2.5` is released with the `nexus-contract` CLI; begin the directional `0.3.0` Strapi milestone.
 2. Confirm the Strapi provider's minimum REST API scope and contract test strategy for `0.3.0`.
 3. Consider the directional localisation continuation once provider breadth is proven.
 
@@ -99,7 +101,7 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 - Content synchronization and change detection.
 - Webhooks and automated rebuild workflows.
 - Draft preview.
-- CLI and expanded developer tooling.
+- General-purpose CLI and expanded developer tooling beyond the scoped `nexus-contract` bin (`tooling.nexus-contract-cli` ships from 0.2.5; `tooling.cli` remains planned for 0.7.0).
 - Markdown, MDX, YAML, TOML, and CSV Git content formats.
 - Framework-specific adapter packages.
 - Deployment integrations.
@@ -148,6 +150,8 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 - The companion plugin is implemented, passes CI, and ships in the `0.2.1` release (`dist/nexuscontent-0.1.1.zip`).
 - Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the `ts-integration` CI job passes a live integration test against a fresh Docker wp-env companion install.
 - The `0.2.2` field schema validates data at retrieval time; models without declared fields skip validation so provider-owned shapes (WordPress, arbitrary fixtures) remain unconstrained.
+- The `0.2.5` `nexus-contract` CLI executes `--schema` derivation against a placeholder WordPress root when run offline (no `effectiveRegistry()` network call at `core` strategy); the live `/schema` fetch and `push` require network and credentials.
+- Example-owned contracts are not committed: `sections.custom.json` declares no custom sections, `generate` warns about unused custom declarations, and pushed contracts are stored only on the plugin side as `project_components`.
 
 ## Project State Authority
 

@@ -4,10 +4,14 @@
  * plugin sections.json. Both the WordPress plugin and the TypeScript provider
  * derive their section vocabulary from that single file.
  *
+ * Also copies the canonical JSON to scripts/sections.json, the bundled
+ * vocabulary the `nexus-contract generate` CLI falls back to for offline
+ * classification in an installed @nexuscontent/core package.
+ *
  * Written to be runnable from any consumer checkout; the generated output is
  * committed so `tsc --noEmit` never depends on this script running.
  *
- * Run with --check to fail (exit 1) when the committed generated file is
+ * Run with --check to fail (exit 1) when the committed generated files are
  * stale, used by `npm run check:sections`.
  */
 import { readFileSync, writeFileSync } from "node:fs";
@@ -23,6 +27,7 @@ const generatedPath = path.join(
   root,
   "src/providers/wordpress/sections.generated.ts"
 );
+const bundledPath = path.join(root, "scripts", "sections.json");
 
 const ALLOWED_FIELD_TYPES = new Set([
   "string",
@@ -151,6 +156,16 @@ try {
   process.exit(1);
 }
 
+// The bundled vocabulary is an exact copy of the canonical JSON so the
+// offline CLI base can never drift from the single source.
+let bundled;
+try {
+  bundled = readFileSync(sectionsPath, "utf8");
+} catch (cause) {
+  console.error(cause instanceof Error ? cause.message : cause);
+  process.exit(1);
+}
+
 if (process.argv.includes("--check")) {
   let committed = null;
   try {
@@ -162,8 +177,20 @@ if (process.argv.includes("--check")) {
     console.error("sections.generated.ts is stale. Run `npm run generate:sections`.");
     process.exit(1);
   }
-  console.log("sections.generated.ts is up to date.");
+  let committedBundled = null;
+  try {
+    committedBundled = readFileSync(bundledPath, "utf8");
+  } catch {
+    // Falls through to the stale check below.
+  }
+  if (committedBundled !== bundled) {
+    console.error("scripts/sections.json is stale. Run `npm run generate:sections`.");
+    process.exit(1);
+  }
+  console.log("sections.generated.ts and scripts/sections.json are up to date.");
 } else {
   writeFileSync(generatedPath, output);
   console.log(`Wrote ${path.relative(root, generatedPath)}`);
+  writeFileSync(bundledPath, bundled);
+  console.log(`Wrote ${path.relative(root, bundledPath)}`);
 }

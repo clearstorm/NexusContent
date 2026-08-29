@@ -9,7 +9,8 @@
     "check": "astro check",
     "preview": "astro preview",
     "astro": "astro",
-    "push:project-contract": "node --env-file-if-exists=.env scripts/push-project-contract.mjs"
+    "push:project-contract": "node --env-file-if-exists=.env ../../scripts/nexus-contract.mjs push --schema src/schema/schema.ts",
+    "sections:contract": "node --env-file-if-exists=.env ../../scripts/nexus-contract.mjs generate --schema src/schema/schema.ts --custom sections.custom.json"
   },
   "dependencies": {
     "@nexuscontent/core": "file:../.."

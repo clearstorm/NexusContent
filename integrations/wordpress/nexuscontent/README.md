@@ -51,7 +51,7 @@ Never commit the ZIP, credentials, or license data. Remove `.local/` when finish
 
 The plugin defines Hero, Introduction, Rich Text, Image and Text, Features, Statistics, Testimonials, Gallery, Call to Action, FAQ, Logo Grid, and Form Embed blocks. Native blocks are the default implementation. Logo Grid items accept a label, a logo image, or both. `nexuscontent_block_implementations` can select `native`, `acf`, `both`, or a per-type selection when ACF block APIs are available.
 
-Custom section types registered through `nexuscontent_section_definitions` automatically get an ACF flexible layout and are normalized generically. The repository's `npm run sections:contract` script generates a consumer-owned must-use plugin that registers a project contract's custom sections; see `docs/wordpress-companion.md`.
+Custom section types registered through `nexuscontent_section_definitions` automatically get an ACF flexible layout and are normalized generically. The shipped `nexus-contract` CLI (`npx @nexuscontent/core nexus-contract generate …`) generates a consumer-owned must-use plugin that registers a project contract's custom sections, and `nexus-contract push …` stores the contract through the admin-only project-contract route; see `docs/wordpress-companion.md`. The astro-wordpress example drives both through its `sections:contract` and `push:project-contract` npm scripts.
 
 ## Switching Modes
 

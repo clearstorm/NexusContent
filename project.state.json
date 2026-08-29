@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": {
     "name": "NexusContent",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "status": "active",
     "stage": "early-development",
     "milestone": "0.3.0-strapi",
@@ -89,6 +89,7 @@
       "tooling.build",
       "tooling.project-state",
       "tooling.project-state-validation",
+      "tooling.nexus-contract-cli",
       "testing.core",
       "testing.git",
       "testing.validation",
@@ -150,7 +151,8 @@
     "Named media providers are required at configuration time; a missing default or unknown media provider is rejected early.",
     "Model field validation produces SchemaError with model, issues, provider, content, locale, and operation context; relational checks also run for direct NexusContent construction.",
     "The companion wire contract and plugin keep featuredImage.url; the TypeScript boundary converts it to MediaAsset.src.",
-    "The WordPress project-contract push is a secured admin-only write route (manage_options only; WordPress core enforces the REST nonce for cookie-authenticated requests while Application Passwords work without one) that stores only sanitized components/sectionTypes inside nexuscontent_settings; it lives outside the content wire contract and never reconfigures editor settings automatically."
+    "The WordPress project-contract push is a secured admin-only write route (manage_options only; WordPress core enforces the REST nonce for cookie-authenticated requests while Application Passwords work without one) that stores only sanitized components/sectionTypes inside nexuscontent_settings; it lives outside the content wire contract and never reconfigures editor settings automatically.",
+    "The nexus-contract CLI is a user-approved scope exception to the planned 0.7.0 CLI: a single bin with generate (scaffold ACF layouts for consumer custom sections) and push (post the consumer contract to the project-contract route with an Application Password) subcommands. The bundled scripts/sections.json offline vocabulary is generated from the canonical sections.json and keeps classification working without network access."
   ],
   "architecturalDecisions": [
     "Core is framework neutral.",
@@ -189,6 +191,7 @@
     "tooling.cli"
   ],
   "roadmapTargets": {
+    "tooling.nexus-contract-cli": "0.2.5",
     "provider.wordpress.companion-plugin": "0.2.1",
     "provider.wordpress.companion-admin-page": "0.2.1",
     "provider.wordpress.companion-block-previews": "0.2.1",

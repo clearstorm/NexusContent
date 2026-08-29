@@ -1420,6 +1420,8 @@ The WordPress provider `0.2.0` release was completed internally on 2026-08-18. T
 
 The `0.2.4` companion posts-routing fix was released on 2026-08-29 as `v0.2.4` (root package version `0.2.4`): the companion plugin `0.1.1` registers dedicated `posts`, `posts/{id}`, and `posts/slug/{slug}` routes (`dist/nexuscontent-0.1.1.zip`), the provider routes the built-in `posts` collection to them via `WordPressCollectionConfig.companionRoute`, and companion section media converts `wire image.url` to `MediaAsset src` — so the reference consumer's blog shows real posts instead of navigation pages, verified live against the wp-env gate.
 
+The `0.2.5` NexusContent CLI release was released on 2026-08-29 as `v0.2.5` (root package version `0.2.5`): the `nexus-contract` bin ships with `@nexuscontent/core` (`generate` scaffolds ACF layouts for consumer custom sections from `--schema`/`--contract`, classifying against the live companion `/schema` or the bundled `scripts/sections.json` offline vocabulary; `push` posts the contract to the admin-only project-contract route with an Application Password). This is a deliberate, user-approved scope exception to the planned `0.7.0` `tooling.cli` milestone. The astro-wordpress example drives both flows through the shipped CLI; the example-owned push script was removed.
+
 The recommended next focus is the directional `0.3.0` Strapi provider.
 
 ---
@@ -1604,6 +1606,14 @@ The established foundation includes:
 - The `astro-wordpress` example consumes WordPress through `apiStrategy: "companion"` and builds in CI against a local companion API (`capabilities`, `schema`, `posts`, and `posts/slug/{slug}` routes); Git- and companion-sourced sections render with parity through the shared `PostSections` components, so the built blog index shows the actual posts rather than navigation pages.
 - `auto` and `core` strategies remain available so consumers without the plugin keep standard REST or automatic-fallback retrieval.
 - No provider capabilities, wire-contract changes, or editor modes were added beyond the `companionRoute` collection routing and plugin posts routes; preview, webhooks, and synchronization remain excluded.
+
+## 0.2.5 NexusContent CLI (Released)
+
+- The `nexus-contract` bin ships with `@nexuscontent/core` (`bin: { "nexus-contract": "scripts/nexus-contract.mjs" }`). `generate` accepts `--schema <file>` (the consumer's own field schema, runtime-imported and passed through `projectComponentContract`) or `--contract <file>` (a serialized `{ components, sectionTypes }` contract), plus required `--custom <file>` and optional `--write <path>`/`--api-root <url>`. `push` accepts `--schema|--contract` plus `--api-root`/`--username`/`--app-password` (or the `WORDPRESS_API_URL`/`WORDPRESS_USERNAME`/`WORDPRESS_APP_PASSWORD` env) and posts the contract to the admin-only project-contract route.
+- `generate` classifies the contract against the installed section vocabulary (live companion `/schema` contract-v1 envelope when `--api-root` is given, bundled `scripts/sections.json` otherwise, with a WARNING on fetch failure), warns on missing and unused declared types, and emits a deterministic PHP mu-plugin with both the `nexuscontent_section_definitions` and `nexuscontent_block_implementations` filters.
+- `scripts/generate-sections.mjs` now also writes `scripts/sections.json` (exact copy of canonical `sections.json`); `npm run check:sections` guards it. Never hand-edit the copy.
+- The astro-wordpress example drives both flows through the shipped CLI (`sections:contract` and `push:project-contract`, `--schema src/schema/schema.ts`, `--env-file-if-exists=.env`), with `sections.custom.json` declaring no custom sections; the example-owned `push-project-contract.mjs` was removed. Installed consumers use `npx @nexuscontent/core nexus-contract …`.
+- This CLI is a deliberate, user-approved scope exception to the planned `0.7.0` `tooling.cli`; the general-purpose CLI remains directional and must not be expanded speculatively.
 
 ---
 
