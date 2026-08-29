@@ -55,6 +55,9 @@ export const COMPANION_WIRE_ENDPOINTS = [
   "pages",
   "pages/{id}",
   "pages/slug/{slug}",
+  "posts",
+  "posts/{id}",
+  "posts/slug/{slug}",
   "schema",
   "capabilities"
 ] as const;

@@ -1,0 +1,54 @@
+{
+  "contractVersion": 1,
+  "data": {
+    "items": [
+      {
+        "id": "11",
+        "key": "hello-world",
+        "slug": "hello-world",
+        "title": "Hello World",
+        "status": "published",
+        "excerpt": "The first post.",
+        "sections": [
+          {
+            "id": "hero-1",
+            "type": "hero",
+            "data": {
+              "heading": "Hello",
+              "image": {
+                "url": "https://example.test/hello.jpg",
+                "id": "9",
+                "mimeType": "image/jpeg",
+                "width": 1200,
+                "height": 800
+              }
+            }
+          }
+        ],
+        "rawFields": {
+          "publishedAt": "2026-08-01T10:00:00Z",
+          "content": "<p>Hello world raw HTML.</p>"
+        }
+      },
+      {
+        "id": "12",
+        "key": "second-post",
+        "slug": "second-post",
+        "title": "Second Post",
+        "status": "published",
+        "excerpt": "A post without sections.",
+        "sections": [],
+        "rawFields": {
+          "publishedAt": "2026-08-02T10:00:00Z",
+          "content": "<p>Second post raw HTML.</p>"
+        }
+      }
+    ],
+    "pagination": {
+      "total": 2,
+      "totalPages": 1,
+      "page": 1,
+      "perPage": 100
+    }
+  }
+}

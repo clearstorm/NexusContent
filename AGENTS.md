@@ -1250,7 +1250,7 @@ Preserve these rules:
 
 - Released `0.2.0` standard REST retrieval remains plugin-neutral and must not require or call the companion plugin.
 - Plugin PHP, JavaScript, WordPress tooling, and packaging stay under the integration directory; do not move them into `src/core/`, `src/providers/`, or consumer examples.
-- Contract v1 responses use `{ contractVersion: 1, data, diagnostics? }` under `nexuscontent/v1` routes for pages, page by ID, page by slug, schema, and capabilities.
+- Contract v1 responses use `{ contractVersion: 1, data, diagnostics? }` under `nexuscontent/v1` routes for pages, page by ID, page by slug, posts, post by ID, post by slug, schema, and capabilities.
 - Canonical editor modes are exactly `gutenberg`, `acf_flexible`, and `acf_fixed`.
 - Canonical section names are exactly `hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`, `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, and `form_embed`. Do not restore `content/*` names or a thirteenth section.
 - ACF is optional. ACF Free supports fixed Hero, Introduction, and Call to Action fields; legally supplied ACF Pro may enable flexible layouts and opt-in ACF Blocks. Never download or distribute ACF Pro.
@@ -1418,6 +1418,8 @@ The project may integrate with existing systems that provide these capabilities.
 
 The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The `0.2.1` WordPress companion milestone (repaired Phase 1 contracts, Phase 2 plugin, Phase 3 integration) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference consumer) were released together on 2026-08-29 (`v0.2.1` and `v0.2.2` tags at the same commit; root package version `0.2.2`). The `0.2.3` WordPress companion consumer milestone was released on 2026-08-29 as `v0.2.3` (root package version `0.2.3`); it proved the Phase 3 companion path through the reference consumer: normalized companion sections on collection items (`data.sections`), the `astro-wordpress` example's `apiStrategy: "companion"` flip (built in CI against a local companion API), and Git-vs-WordPress section parity through the shared `PostSections` components.
 
+The `0.2.4` companion posts-routing fix was released on 2026-08-29 as `v0.2.4` (root package version `0.2.4`): the companion plugin `0.1.1` registers dedicated `posts`, `posts/{id}`, and `posts/slug/{slug}` routes (`dist/nexuscontent-0.1.1.zip`), the provider routes the built-in `posts` collection to them via `WordPressCollectionConfig.companionRoute`, and companion section media converts `wire image.url` to `MediaAsset src` — so the reference consumer's blog shows real posts instead of navigation pages, verified live against the wp-env gate.
+
 The recommended next focus is the directional `0.3.0` Strapi provider.
 
 ---
@@ -1473,7 +1475,7 @@ The released milestone includes:
 ### Companion Wire Contracts
 
 - Contract v1 envelopes shaped as `{ contractVersion: 1, data, diagnostics? }`.
-- TypeScript interfaces and Zod schemas for pages, page by ID, page by slug, schema, and capabilities responses.
+- TypeScript interfaces and Zod schemas for pages, page by ID, page by slug, posts, post by ID, post by slug, schema, and capabilities responses.
 - `COMPANION_CONTRACT_VERSION`, `COMPANION_WIRE_NAMESPACE`, `COMPANION_WIRE_ENDPOINTS` constants.
 - `buildCompanionContractVersion()` and `isValidCompanionContractVersion()` helpers.
 - Reserved `nc-` and `nexus-` companion prefixes.
@@ -1500,11 +1502,11 @@ The released milestone includes:
 
 ## 0.2.1 WordPress Phase 2 Companion Plugin (Implemented, Released)
 
-- Plugin `0.1.0` source is isolated under `integrations/wordpress/nexuscontent/` and requires WordPress 6.6+ and PHP 8.1+.
+- Plugin `0.1.1` source is isolated under `integrations/wordpress/nexuscontent/` and requires WordPress 6.6+ and PHP 8.1+. Version `0.1.1` adds dedicated `posts`, `posts/{id}`, and `posts/slug/{slug}` content routes (the `0.1.0` artifact served posts through the `pages` routes); the package artifact is `dist/nexuscontent-0.1.1.zip`.
 - Native Gutenberg, optional ACF Free 6.2+ fixed fields, optional ACF Pro 6.2+ flexible layouts for all 12 sections, and opt-in ACF Blocks are implemented.
 - Page mode UI, server-side source normalization, expanded media metadata, exact capability reporting, diagnostics, secured REST routes, tests, tooling, documentation, and ZIP packaging exist.
-- Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and packaging pass; `dist/nexuscontent-0.1.0.zip` is the current artifact.
-- WordPress integration passes in CI (tests and the escaping gate satisfied). The plugin ships in the release as `dist/nexuscontent-0.1.0.zip`.
+- Unit tests, PHP lint, PHPCS, PHPStan, contract tests, JavaScript build/lint/format, and packaging pass; `dist/nexuscontent-0.1.1.zip` is the current artifact.
+- WordPress integration passes in CI (tests and the escaping gate satisfied). The plugin ships in the release as `dist/nexuscontent-0.1.1.zip`.
 
 ## 0.2.1 WordPress Phase 3 Companion Integration (Implemented, Released)
 
@@ -1598,9 +1600,10 @@ The established foundation includes:
 ## 0.2.3 WordPress Companion Consumer (Released)
 
 - Companion collection items surface normalized sections as `data.sections` (`{ type, data }`), the same canonical shape Git blog posts author; `normalizeCompanionPageItem` merges raw fields with the normalized section list, and posts with no sections keep the raw-HTML fallback.
-- The `astro-wordpress` example consumes WordPress through `apiStrategy: "companion"` and builds in CI against a local companion API (`capabilities`, `schema`, `pages`, and `pages/slug/{slug}` routes); Git- and companion-sourced sections render with parity through the shared `PostSections` components.
+- The built-in `posts` collection routes to the companion `posts` routes via `WordPressCollectionConfig.companionRoute` (`"pages" | "posts"`, default `"posts"`); custom collections without a `companionRoute` fall back to standard REST under `auto` or throw an actionable error under strict `companion`. Companion section media is normalized recursively at the TypeScript boundary (`wire image.url` → `MediaAsset src`), and item `data` surfaces the companion `excerpt` and `featuredImage`.
+- The `astro-wordpress` example consumes WordPress through `apiStrategy: "companion"` and builds in CI against a local companion API (`capabilities`, `schema`, `posts`, and `posts/slug/{slug}` routes); Git- and companion-sourced sections render with parity through the shared `PostSections` components, so the built blog index shows the actual posts rather than navigation pages.
 - `auto` and `core` strategies remain available so consumers without the plugin keep standard REST or automatic-fallback retrieval.
-- No provider capabilities, wire-contract changes, plugin changes, or editor modes were added; preview, webhooks, and synchronization remain excluded.
+- No provider capabilities, wire-contract changes, or editor modes were added beyond the `companionRoute` collection routing and plugin posts routes; preview, webhooks, and synchronization remain excluded.
 
 ---
 

@@ -14,7 +14,7 @@ Activate **NexusContent Companion** in WordPress Admin or run `wp plugin activat
 
 ## Requirements
 
-- Plugin version `0.1.0`; companion contract `1` (`contract1`).
+- Plugin version `0.1.1`; companion contract `1` (`contract1`).
 - WordPress 6.6 or newer and PHP 8.1 or newer.
 - Gutenberg uses WordPress core. ACF is optional.
 - ACF Free 6.2 or newer supports fixed fields. A legally supplied ACF Pro 6.2 or newer enables Pro-only capabilities where available.
@@ -66,6 +66,9 @@ The `GET` routes below are public or capability-gated as documented. The single 
 | `/pages` | Paginated pages; accepts `page`, `per_page`, `search`, `slug`, `status`, `order`, and `orderby`. |
 | `/pages/{id}` | One page by positive numeric ID. |
 | `/pages/slug/{slug}` | One page by slug. |
+| `/posts` | Paginated standard posts; accepts `page`, `per_page`, `search`, `slug`, `status`, `order`, and `orderby`. |
+| `/posts/{id}` | One standard post by positive numeric ID. |
+| `/posts/slug/{slug}` | One standard post by slug. |
 | `/schema` | Supported editor modes, section definitions, and source mappings. |
 | `/capabilities` | Runtime WordPress, Gutenberg, and ACF capability report. |
 
@@ -92,7 +95,7 @@ curl -X POST https://example.com/wp-json/nexuscontent/v1/project-contract \
 
 ## Authentication
 
-Published, passwordless pages, schema, and capabilities are public. Non-published collection queries require `edit_posts`; a non-public individual page requires `edit_post` for that page. Use normal WordPress REST authentication, such as an authenticated admin cookie plus nonce or an Application Password over HTTPS. The plugin adds no credentials and never accepts secrets in URLs.
+Published, passwordless pages and posts, schema, and capabilities are public. Non-published collection queries require `edit_posts`; a non-public individual entry requires `edit_post` for that entry. Use normal WordPress REST authentication, such as an authenticated admin cookie plus nonce or an Application Password over HTTPS. The plugin adds no credentials and never accepts secrets in URLs.
 
 ## Contract
 
@@ -144,7 +147,7 @@ npm run format:check
 npm run package
 ```
 
-`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.0.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
+`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.1.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
 
 ## Tests
 
@@ -167,7 +170,7 @@ The default wp-env has no ACF. Run `npm run env:acf-free` for the development si
 
 ## Limitations
 
-Version 0.1.0 is read-only and page/post-focused, scoped to pages and standard posts. It does not provide mutations, preview transport, webhooks, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
+Version 0.1.1 is read-only and page/post-focused, scoped to pages and standard posts. It does not provide mutations, preview transport, webhooks, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
 
 ## Phase 3 Status
 

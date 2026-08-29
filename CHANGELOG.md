@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-08-29
+
+### Fixed
+
+- The companion plugin now registers dedicated `posts`, `posts/{id}`, and `posts/slug/{slug}` routes under `nexuscontent/v1`, fixing the reversed routing that served navigation pages as blog posts: `get_pages`/`get_page`/`get_page_by_slug` are post-type-aware, individual lookups reject the wrong post type, and permission checks use `read_private_posts`/`edit_posts` for posts. The plugin artifact is now `dist/nexuscontent-0.1.1.zip`.
+- The WordPress provider now maps the built-in `posts` collection to the companion `posts` routes (`WordPressCollectionConfig.companionRoute: "pages" | "posts"`, default `"posts"` for the built-in collection). Custom collections without a `companionRoute` fall back to standard REST under `auto` or throw an actionable error under strict `companion`.
+- Companion section media is normalized recursively: wire media (`image.url` with size/metadata fields) becomes `MediaAsset src` inside section `data`, fixing image parity so companion-backed sections render through the same components as Git galleries. Item `data` now also surfaces the companion `excerpt` and `featuredImage`.
+- The astro-wordpress reference example (and its CI mock) now serves blog posts from the `posts` routes, so the built blog index shows the actual posts instead of navigation pages.
+
 ## [0.2.3] - 2026-08-29
 
 WordPress companion consumer release.

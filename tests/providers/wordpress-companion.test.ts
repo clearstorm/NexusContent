@@ -300,22 +300,106 @@ test("strategy companion returns null for a missing page", async () => {
 
 // ─── Strategy: companion collection ────────────────────────────────
 
-test("strategy companion returns pages collection", async () => {
+test("strategy companion returns posts collection from the posts route", async () => {
+  const capabilities = await readFixture("companion-capabilities.json");
+  const posts = await readFixture("companion-posts.json");
+
+  await withServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://local.test");
+    if (url.pathname.includes("capabilities")) {
+      sendJson(response, capabilities);
+    } else if (url.pathname.includes("nexuscontent/v1/posts")) {
+      sendJson(response, posts);
+    }
+  }, async (baseUrl) => {
+    const result = await provider(baseUrl, { apiStrategy: "companion" }).getCollection("posts");
+    assert.equal(result.length, 2);
+    assert.equal(result[0]?.key, "hello-world");
+    assert.equal(result[1]?.key, "second-post");
+    // Companion posts normalize section wire media (`image.url`) to MediaAsset `src`.
+    const hero = (result[0]?.data as { sections?: Array<{ data: { image: { src: string; id: string } } }> }).sections?.[0];
+    assert.equal(hero?.data.image.src, "https://example.test/hello.jpg");
+    assert.equal(hero?.data.image.id, "9");
+    assert.equal(result[0]?.data.excerpt, "The first post.");
+  });
+});
+
+test("strategy companion maps an explicit pages companionRoute to the pages route", async () => {
   const capabilities = await readFixture("companion-capabilities.json");
   const pages = await readFixture("companion-pages.json");
+  const paths: string[] = [];
+
+  await withServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://local.test");
+    paths.push(url.pathname);
+    if (url.pathname.includes("capabilities")) {
+      sendJson(response, capabilities);
+    } else if (url.pathname.includes("nexuscontent/v1/pages")) {
+      sendJson(response, pages);
+    }
+  }, async (baseUrl) => {
+    const result = await provider(baseUrl, {
+      apiStrategy: "companion",
+      collections: { info: { endpoint: "pages", companionRoute: "pages" } }
+    }).getCollection("info");
+    assert.equal(result.length, 2);
+    assert.equal(result[0]?.key, "home");
+    assert.ok(paths.some((p) => p.includes("nexuscontent/v1/pages")));
+  });
+});
+
+test("strategy companion throws for a custom collection without a companion route", async () => {
+  const capabilities = await readFixture("companion-capabilities.json");
 
   await withServer((request, response) => {
     const url = new URL(request.url ?? "/", "http://local.test");
     if (url.pathname.includes("capabilities")) {
       sendJson(response, capabilities);
     } else {
-      sendJson(response, pages);
+      sendJson(response, { code: "not_found" }, { status: 404 });
     }
   }, async (baseUrl) => {
-    const result = await provider(baseUrl, { apiStrategy: "companion" }).getCollection("posts");
-    assert.equal(result.length, 2);
-    assert.equal(result[0]?.key, "home");
-    assert.equal(result[1]?.key, "about");
+    await assert.rejects(
+      () => provider(baseUrl, {
+        apiStrategy: "companion",
+        collections: { projects: { endpoint: "projects" } }
+      }).getCollection("projects"),
+      (error: unknown) => {
+        assert.ok(error instanceof ProviderError);
+        assert.match(error.reason ?? "", /companionRoute/);
+        return true;
+      }
+    );
+  });
+});
+
+test("strategy auto falls back to core REST for a custom collection without a companion route", async () => {
+  const capabilities = await readFixture("companion-capabilities.json");
+  const paths: string[] = [];
+
+  await withServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://local.test");
+    paths.push(url.pathname);
+    if (url.pathname.includes("capabilities")) {
+      sendJson(response, capabilities);
+    } else if (url.pathname.includes("wp/v2/projects")) {
+      sendJson(response, [
+        { id: 7, slug: "project-one", status: "publish", title: { rendered: "Project One" }, content: { rendered: "" }, modified_gmt: "2026-08-01T00:00:00", _embedded: { "wp:featuredmedia": [] } }
+      ], { headers: { "X-WP-Total": "1", "X-WP-TotalPages": "1" } });
+    } else {
+      sendJson(response, { code: "not_found" }, { status: 404 });
+    }
+  }, async (baseUrl) => {
+    const wp = provider(baseUrl, {
+      apiStrategy: "auto",
+      collections: { projects: { endpoint: "projects" } }
+    });
+    const result = await wp.getCollection("projects");
+    assert.equal(result.length, 1);
+    assert.equal(result[0]?.key, "project-one");
+    assert.ok(paths.some((p) => p.includes("wp/v2/projects")));
+    assert.ok(!paths.some((p) => p.includes("nexuscontent/v1/posts")));
+    assert.ok(!paths.some((p) => p.includes("nexuscontent/v1/pages")));
   });
 });
 
@@ -396,6 +480,45 @@ test("normalizeCompanionPageItem keeps an empty sections array for raw-HTML fall
   });
 });
 
+test("normalizeCompanionPageItem surfaces featuredImage and excerpt and converts nested section media", () => {
+  const result = normalizeCompanionPageItem({
+    id: "5",
+    key: "post-one",
+    slug: "post-one",
+    title: "Post One",
+    excerpt: "The excerpt",
+    featuredImage: { id: "7", url: "https://example.test/featured.jpg", alt: "Featured", width: 640, height: 480 },
+    sections: [
+      {
+        id: "hero-1",
+        type: "hero",
+        data: {
+          heading: "Hi",
+          image: { url: "https://example.test/hero.jpg", id: "8", mimeType: "image/jpeg", width: 1200, height: 800 },
+          gallery: [{ url: "https://example.test/one.jpg", id: "9" }],
+          link: { url: "https://example.test/not-media", label: "CTA" }
+        }
+      }
+    ],
+    rawFields: { publishedAt: "2026-08-01T10:00:00Z" }
+  });
+
+  const data = result.data as Record<string, unknown>;
+  const featured = data.featuredImage as { src: string; id?: string; alt?: string };
+  assert.equal(featured.src, "https://example.test/featured.jpg");
+  assert.equal(featured.id, "7");
+  assert.equal(featured.alt, "Featured");
+  assert.equal(data.excerpt, "The excerpt");
+  assert.deepEqual(data.publishedAt, "2026-08-01T10:00:00Z");
+
+  const hero = (data as { sections: Array<{ data: Record<string, unknown> }> }).sections[0]?.data;
+  assert.ok(hero);
+  assert.deepEqual(hero.image, { id: "8", src: "https://example.test/hero.jpg", mimeType: "image/jpeg", width: 1200, height: 800 });
+  assert.deepEqual(hero.gallery, [{ id: "9", src: "https://example.test/one.jpg" }]);
+  // A plain object carrying only a `url` (a link, not media) is untouched.
+  assert.deepEqual(hero.link, { url: "https://example.test/not-media", label: "CTA" });
+});
+
 // ─── URL derivation ────────────────────────────────────────────────
 
 test("deriveRestRoot extracts WordPress REST root from baseUrl", () => {
@@ -447,6 +570,19 @@ test("rejects old media resolution values", () => {
   assert.throws(
     () => provider("https://example.com/wp-json/wp/v2", { mediaResolution: "embed" as any }),
     /Invalid WordPress provider configuration/
+  );
+});
+
+test("rejects an invalid companionRoute value", () => {
+  assert.throws(
+    () => provider("https://example.com/wp-json/wp/v2", {
+      collections: { info: { endpoint: "pages", companionRoute: "files" as any } }
+    }),
+    (error: unknown) => {
+      assert.ok(error instanceof ProviderError);
+      assert.match(error.reason ?? "", /companionRoute/);
+      return true;
+    }
   );
 });
 

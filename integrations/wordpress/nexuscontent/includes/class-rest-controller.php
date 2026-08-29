@@ -37,49 +37,54 @@ final class REST_Controller extends WP_REST_Controller {
 	}
 
 	public function register_routes(): void {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_pages' ),
-				'permission_callback' => array( $this, 'pages_permissions_check' ),
-				'args'                => $this->collection_args(),
-			)
-		);
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>\d+)',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_page' ),
-				'permission_callback' => array( $this, 'page_permissions_check' ),
-				'args'                => array(
-					'id' => array(
-						'type'              => 'integer',
-						'required'          => true,
-						'sanitize_callback' => 'absint',
-						'validate_callback' => static fn( $value ): bool => is_numeric( $value ) && (int) $value > 0,
+		// Content routes are registered for pages and posts alike; handle type
+		// selection derives the post type from the matched route so one
+		// implementation serves both editor modes.
+		foreach ( array( 'pages', 'posts' ) as $rest_base ) {
+			register_rest_route(
+				$this->namespace,
+				'/' . $rest_base,
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_pages' ),
+					'permission_callback' => array( $this, 'pages_permissions_check' ),
+					'args'                => $this->collection_args(),
+				)
+			);
+			register_rest_route(
+				$this->namespace,
+				'/' . $rest_base . '/(?P<id>\d+)',
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_page' ),
+					'permission_callback' => array( $this, 'page_permissions_check' ),
+					'args'                => array(
+						'id' => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => static fn( $value ): bool => is_numeric( $value ) && (int) $value > 0,
+						),
 					),
-				),
-			)
-		);
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/slug/(?P<slug>[^/]+)',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_page_by_slug' ),
-				'permission_callback' => array( $this, 'slug_permissions_check' ),
-				'args'                => array(
-					'slug' => array(
-						'type'              => 'string',
-						'required'          => true,
-						'sanitize_callback' => 'sanitize_title',
+				)
+			);
+			register_rest_route(
+				$this->namespace,
+				'/' . $rest_base . '/slug/(?P<slug>[^/]+)',
+				array(
+					'methods'             => 'GET',
+					'callback'            => array( $this, 'get_page_by_slug' ),
+					'permission_callback' => array( $this, 'slug_permissions_check' ),
+					'args'                => array(
+						'slug' => array(
+							'type'              => 'string',
+							'required'          => true,
+							'sanitize_callback' => 'sanitize_title',
+						),
 					),
-				),
-			)
-		);
+				)
+			);
+		}
 		register_rest_route(
 			$this->namespace,
 			'/schema',
@@ -125,27 +130,28 @@ final class REST_Controller extends WP_REST_Controller {
 
 	/** @return true|WP_Error */
 	public function pages_permissions_check( WP_REST_Request $request ) {
-		$status = $request->get_param( 'status' );
+		$post_type = $this->post_type( $request );
+		$status    = $request->get_param( 'status' );
 		if ( null === $status || '' === $status || 'publish' === $status ) {
 			return true;
 		}
 
 		if ( 'private' === $status ) {
-			return current_user_can( 'read_private_pages' ) ? true : $this->forbidden();
+			return current_user_can( "read_private_{$post_type}s" ) ? true : $this->forbidden();
 		}
 
-		return current_user_can( 'edit_pages' ) ? true : $this->forbidden();
+		return current_user_can( "edit_{$post_type}s" ) ? true : $this->forbidden();
 	}
 
 	/** @return true|WP_Error */
 	public function page_permissions_check( WP_REST_Request $request ) {
-		return $this->can_read_page( get_post( absint( $request['id'] ) ) );
+		return $this->can_read_page( get_post( absint( $request['id'] ) ), $this->post_type( $request ) );
 	}
 
 	/** @return true|WP_Error */
 	public function slug_permissions_check( WP_REST_Request $request ) {
-		$post = get_page_by_path( sanitize_title( (string) $request['slug'] ), OBJECT, 'page' );
-		return $this->can_read_page( $post );
+		$post = get_page_by_path( sanitize_title( (string) $request['slug'] ), OBJECT, $this->post_type( $request ) );
+		return $this->can_read_page( $post, $this->post_type( $request ) );
 	}
 
 	/** @return WP_REST_Response|WP_Error */
@@ -161,7 +167,7 @@ final class REST_Controller extends WP_REST_Controller {
 			default => $orderby,
 		};
 		$args  = array(
-			'post_type'           => 'page',
+			'post_type'           => $this->post_type( $request ),
 			'post_status'         => $status,
 			'paged'               => max( 1, (int) $request->get_param( 'page' ) ),
 			'posts_per_page'      => min( 100, max( 1, (int) $request->get_param( 'per_page' ) ) ),
@@ -206,13 +212,13 @@ final class REST_Controller extends WP_REST_Controller {
 
 	/** @return WP_REST_Response|WP_Error */
 	public function get_page( WP_REST_Request $request ) {
-		return $this->respond_with_post( get_post( absint( $request['id'] ) ) );
+		return $this->respond_with_post( get_post( absint( $request['id'] ) ), $this->post_type( $request ) );
 	}
 
 	/** @return WP_REST_Response|WP_Error */
 	public function get_page_by_slug( WP_REST_Request $request ) {
-		$post = get_page_by_path( sanitize_title( (string) $request['slug'] ), OBJECT, 'page' );
-		return $this->respond_with_post( $post );
+		$post = get_page_by_path( sanitize_title( (string) $request['slug'] ), OBJECT, $this->post_type( $request ) );
+		return $this->respond_with_post( $post, $this->post_type( $request ) );
 	}
 
 	/** @return WP_REST_Response|WP_Error */
@@ -313,11 +319,11 @@ final class REST_Controller extends WP_REST_Controller {
 	}
 
 	/** @return WP_REST_Response|WP_Error */
-	private function respond_with_post( $post ) {
-		if ( ! $post instanceof WP_Post || 'page' !== $post->post_type ) {
+	private function respond_with_post( $post, string $post_type ) {
+		if ( ! $post instanceof WP_Post || $post->post_type !== $post_type ) {
 			return $this->not_found();
 		}
-		$permission = $this->can_read_page( $post );
+		$permission = $this->can_read_page( $post, $post_type );
 		if ( true !== $permission ) {
 			return $permission;
 		}
@@ -351,8 +357,8 @@ final class REST_Controller extends WP_REST_Controller {
 	}
 
 	/** @return true|WP_Error */
-	private function can_read_page( $post ) {
-		if ( ! $post instanceof WP_Post || 'page' !== $post->post_type ) {
+	private function can_read_page( $post, string $post_type ) {
+		if ( ! $post instanceof WP_Post || $post->post_type !== $post_type ) {
 			return true;
 		}
 		if ( 'publish' === $post->post_status && '' === $post->post_password ) {
@@ -364,6 +370,17 @@ final class REST_Controller extends WP_REST_Controller {
 
 	private function is_page_visible( WP_Post $post ): bool {
 		return 'publish' === $post->post_status && '' === $post->post_password || current_user_can( 'edit_post', $post->ID );
+	}
+
+	/**
+	 * Resolve the post type served by a content route.
+	 *
+	 * The same handlers back both the `pages` and `posts` route bases; the
+	 * matched route names the post type so posts normalization stays in the
+	 * shared Normalizer instead of duplicating it here.
+	 */
+	private function post_type( WP_REST_Request $request ): string {
+		return false !== strpos( $request->get_route(), '/posts' ) ? 'post' : 'page';
 	}
 
 	private function not_found(): WP_Error {

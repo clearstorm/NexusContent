@@ -79,11 +79,12 @@ export class WordPressCompanionClient {
 
   async getPages(
     collection: string,
+    route: "pages" | "posts",
     perPage: number,
     context: WordPressNormalizeContext
   ): Promise<CollectionItem[]> {
     const response = await this.client.request(
-      "pages",
+      route,
       { per_page: perPage },
       context,
       { skipStatus: true }
@@ -101,13 +102,14 @@ export class WordPressCompanionClient {
 
   async getItem(
     collection: string,
+    route: "pages" | "posts",
     key: string,
     context: WordPressNormalizeContext
   ): Promise<CollectionItem | null> {
     let response;
     try {
       response = await this.client.request(
-        `pages/slug/${encodeURIComponent(key)}`,
+        `${route}/slug/${encodeURIComponent(key)}`,
         {},
         context,
         { skipStatus: true }

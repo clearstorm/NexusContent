@@ -48,28 +48,37 @@ test("getPage returns null for nonexistent slug", async (t) => {
 
 // ─── Collection retrieval ──────────────────────────────────────────
 
-test("getCollection returns pages with expected shape", async (t) => {
+test("getCollection returns posts with expected shape", async (t) => {
   if (!(await requireLiveWp(t))) return;
-  const pages = await provider().getCollection("posts");
-  assert.ok(Array.isArray(pages), "expected array");
-  assert.ok(pages.length > 0, "expected at least one entry");
-  const first = pages[0]!;
+  const posts = await provider().getCollection("posts");
+  assert.ok(Array.isArray(posts), "expected array");
+  assert.ok(posts.length > 0, "expected at least one entry");
+  const first = posts[0]!;
   assert.equal(typeof first.id, "string");
   assert.equal(typeof first.key, "string");
   assert.equal(first.meta.source, "wordpress");
+  // The default install ships one published post; the posts routes must not
+  // serve the seeded page ("sample-page").
+  assert.equal(first.key, "hello-world");
 });
 
 // ─── Item retrieval ────────────────────────────────────────────────
 
-test("getItem returns single entry by slug", async (t) => {
+test("getItem returns a post by slug from the posts route", async (t) => {
   if (!(await requireLiveWp(t))) return;
-  const item = await provider().getItem("posts", "sample-page");
-  assert.ok(item !== null, "expected non-null item for sample-page");
-  assert.equal(item.key, "sample-page");
+  const item = await provider().getItem("posts", "hello-world");
+  assert.ok(item !== null, "expected non-null item for hello-world");
+  assert.equal(item.key, "hello-world");
   assert.equal(item.meta.source, "wordpress");
 });
 
-test("getItem returns null for nonexistent entry", async (t) => {
+test("getItem returns null for a page slug on the posts route", async (t) => {
+  if (!(await requireLiveWp(t))) return;
+  const item = await provider().getItem("posts", "sample-page");
+  assert.equal(item, null);
+});
+
+test("getItem returns null for nonexistent item", async (t) => {
   if (!(await requireLiveWp(t))) return;
   const item = await provider().getItem("posts", "nonexistent-page-xyz-999");
   assert.equal(item, null);

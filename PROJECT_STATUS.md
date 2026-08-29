@@ -5,10 +5,10 @@
 | Field | Value |
 |---|---|
 | Project name | NexusContent |
-| Current version | `0.2.3` |
+| Current version | `0.2.4` |
 | Current milestone | `0.3.0-strapi` |
 | Project status | Active, early development; internal private package |
-| Current focus | Released `0.2.3`; directional `0.3.0` Strapi provider is next |
+| Current focus | Released `0.2.4`; directional `0.3.0` Strapi provider is next |
 
 The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.2` release closes the `core.schema.models` contract: a unified `schema.models` configuration (model kinds, provider sources, field schemas) and a provider-neutral media architecture (`MediaAsset.src`, local/remote/WordPress media providers, and a `nexus.media` resolution entry point), plus WordPress section synchronisation (`sections.json` single source with generated TS and `npm run check:sections`, live `/schema` registry reconciliation, `validateWordPressComponents`, and a secured admin-only project-contract push whose Dashboard card shows expected-vs-installed drift) and companion plugin hygiene and post support.
 
@@ -54,7 +54,7 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - WordPress Phase 1 configuration: editor mode, API strategy, unknown content policy, media resolution, ACF toggle, and fixed section configuration.
 - WordPress Phase 1 section registry with exactly 12 canonical short names: `hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`, `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, and `form_embed`.
 - WordPress Phase 1 `capabilities()` method returning provider-facing capability report.
-- Repaired pre-release companion contract v1 envelopes shaped as `{ contractVersion: 1, data, diagnostics? }` for `nexuscontent/v1` pages, page-by-ID, page-by-slug, schema, and capabilities routes.
+- Repaired pre-release companion contract v1 envelopes shaped as `{ contractVersion: 1, data, diagnostics? }` for `nexuscontent/v1` pages, page-by-ID, page-by-slug, posts, post-by-ID, post-by-slug, schema, and capabilities routes.
 - WordPress Phase 1 structured diagnostics with severity, code, message, and optional path.
 - Expanded WordPress typed error codes covering provider, companion, editor, block, ACF, section, and media failures.
 - Missing-content behavior, malformed JSON errors, path traversal protection, and symlink escape protection.
@@ -73,16 +73,18 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Declarative field schemas with required/list/options/nested-object/reference/media/richText/component/blocks support, `schema.components` references, and retrieval-time `SchemaError` validation.
 - Provider-neutral media: `MediaAsset.src`, `MediaReference`, `MediaProviderRegistry`, `ResolveMediaService`, declared-and-auto-built local/remote providers, and a `WordPressMediaProvider` for id lookup.
 - Migrated astro-basic, astro-basic-localised, astro-wordpress, and node-basic consumers to `defineNexusConfig` with `schema.models`.
-- Companion collection items surface normalized sections as `data.sections`, so Git- and companion-sourced content render through the same consumer components; the astro-wordpress example builds against a local companion API with `apiStrategy: "companion"` and shows Git-vs-WordPress section parity.
+- Companion collection items surface normalized sections as `data.sections`, so Git- and companion-sourced content render through the same consumer components; the astro-wordpress example builds against a local companion API with `apiStrategy: "companion"` and shows Git-vs-WordPress section parity. The built-in `posts` collection routes to the companion `posts` routes (`companionRoute`), section media normalizes `image.url` → `src`, and item `data` surfaces `excerpt`/`featuredImage`.
 
 See the authoritative feature-level status in [FEATURES.md](FEATURES.md).
 
 ## Current Work
 
-The `0.2.1` WordPress companion and `0.2.2` core content contract milestones were released together, and the `0.2.3` WordPress companion consumer milestone is now released:
+The `0.2.1` WordPress companion and `0.2.2` core content contract milestones were released together, and the `0.2.3` WordPress companion consumer milestone plus the `0.2.4` posts-routing fix are now released:
 
 - Companion collection items carry normalized sections as `data.sections` (the same `{ type, data }` shape Git blog posts author), verified against a live WordPress companion install; section-less posts keep the raw-HTML fallback.
-- The astro-wordpress reference example consumes WordPress through `apiStrategy: "companion"` and builds in CI against a local companion API (capabilities, schema, pages, and page-by-slug routes), rendering Git- and companion-sourced sections with parity through the shared `PostSections` components.
+- The built-in `posts` collection now routes to dedicated companion `posts` routes (plugin `0.1.1`, `companionRoute: "pages" | "posts"`), so the reference consumer's blog shows the actual posts instead of navigation pages; custom collections without a companion route fall back (`auto`) or throw (`companion`). The live wp-env gate verifies the posts route serves the seeded post and rejects page slugs.
+- Companion section media is normalized recursively at the TypeScript boundary (`wire image.url` → `MediaAsset src`), and item `data` surfaces the companion `excerpt` and `featuredImage`.
+- The astro-wordpress reference example consumes WordPress through `apiStrategy: "companion"` and builds in CI against a local companion API (capabilities, schema, posts, and `posts/slug/{slug}` routes), rendering Git- and companion-sourced sections with parity through the shared `PostSections` components.
 - The directional `0.3.0` Strapi provider is the recommended next focus.
 
 ## Next
@@ -143,7 +145,7 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 - No synchronization, webhook, or preview workflow is implemented.
 - Canonical URLs are supplied by content or consumers because Core does not know deployment URLs.
 - The package remains private while the pre-1.0 architecture is proven.
-- The companion plugin is implemented, passes CI, and ships in the `0.2.1` release (`dist/nexuscontent-0.1.0.zip`).
+- The companion plugin is implemented, passes CI, and ships in the `0.2.1` release (`dist/nexuscontent-0.1.1.zip`).
 - Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the `ts-integration` CI job passes a live integration test against a fresh Docker wp-env companion install.
 - The `0.2.2` field schema validates data at retrieval time; models without declared fields skip validation so provider-owned shapes (WordPress, arbitrary fixtures) remain unconstrained.
 

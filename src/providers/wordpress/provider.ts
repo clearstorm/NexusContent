@@ -63,6 +63,13 @@ import {
 
 export interface WordPressCollectionConfig {
   endpoint: string;
+  /**
+   * Optional companion wire route for this collection. `"posts"` maps to the
+   * plugin `posts` routes, `"pages"` to the `pages` routes. Custom post types
+   * need an explicit mapping; without one the collection resolves through the
+   * standard REST endpoint only.
+   */
+  companionRoute?: "pages" | "posts";
 }
 
 export interface WordPressProviderOptions {
@@ -101,6 +108,7 @@ export class WordPressProvider implements ContentProvider {
   private readonly client: WordPressClient;
   private readonly companion: WordPressCompanionClient | undefined;
   private readonly collections: Map<string, string>;
+  private readonly companionRoutes: Map<string, "pages" | "posts">;
   private readonly maxPages: number;
   private readonly perPage: number;
   readonly editorMode: WordPressEditorMode;
@@ -176,6 +184,7 @@ export class WordPressProvider implements ContentProvider {
     this.strictFields = options?.strictFields ?? false;
 
     this.collections = new Map([["posts", "posts"]]);
+    this.companionRoutes = new Map([["posts", "posts"]]);
     for (const [collection, config] of Object.entries(options?.collections ?? {})) {
       if (!isRecord(config)) {
         throw configurationError(
@@ -187,6 +196,15 @@ export class WordPressProvider implements ContentProvider {
         collection,
         validateEndpoint(config.endpoint, this.name, collection)
       );
+      if (config.companionRoute !== undefined) {
+        if (config.companionRoute !== "pages" && config.companionRoute !== "posts") {
+          throw configurationError(
+            this.name,
+            `Collection "${collection}" has an invalid companionRoute "${String(config.companionRoute)}"; use "pages" or "posts".`
+          );
+        }
+        this.companionRoutes.set(collection, config.companionRoute);
+      }
     }
 
     this.client = new WordPressClient({
@@ -467,14 +485,22 @@ export class WordPressProvider implements ContentProvider {
   ): Promise<CollectionItem<TData>[]> {
     const endpoint = this.resolveCollection(collection, "getCollection");
     const context = this.context("getCollection", collection);
+    const companionRoute = this.companionRoutes.get(collection);
 
     if (this.apiStrategy === "companion" || this.apiStrategy === "auto") {
       const available = await this.companion?.isAvailable() ?? false;
-      if (available) {
+      if (available && companionRoute) {
         await this.reconcileSections(context);
-        return this.companion!.getPages(collection, this.perPage, context) as Promise<CollectionItem<TData>[]>;
+        return this.companion!.getPages(collection, companionRoute, this.perPage, context) as Promise<CollectionItem<TData>[]>;
       }
       if (this.apiStrategy === "companion") {
+        if (!companionRoute) {
+          throw this.error(
+            "Companion has no route for this collection.",
+            context,
+            `Collection "${collection}" resolves to REST endpoint "${endpoint}"; map it explicitly via "companionRoute".`
+          );
+        }
         throw this.error(
           "Companion plugin is not available.",
           context,
@@ -493,14 +519,22 @@ export class WordPressProvider implements ContentProvider {
   ): Promise<CollectionItem<TData> | null> {
     const endpoint = this.resolveCollection(collection, "getItem");
     const context = this.context("getItem", `${collection}/${key}`);
+    const companionRoute = this.companionRoutes.get(collection);
 
     if (this.apiStrategy === "companion" || this.apiStrategy === "auto") {
       const available = await this.companion?.isAvailable() ?? false;
-      if (available) {
+      if (available && companionRoute) {
         await this.reconcileSections(context);
-        return this.companion!.getItem(collection, key, context) as Promise<CollectionItem<TData> | null>;
+        return this.companion!.getItem(collection, companionRoute, key, context) as Promise<CollectionItem<TData> | null>;
       }
       if (this.apiStrategy === "companion") {
+        if (!companionRoute) {
+          throw this.error(
+            "Companion has no route for this collection.",
+            context,
+            `Collection "${collection}" resolves to REST endpoint "${endpoint}"; map it explicitly via "companionRoute".`
+          );
+        }
         throw this.error(
           "Companion plugin is not available.",
           context,

@@ -27,7 +27,7 @@ final class RestControllerTest extends TestCase {
 	public function test_routes_register_expected_public_and_content_endpoints(): void {
 		$this->controller()->register_routes();
 		self::assertSame(
-			array( 'nexuscontent/v1/pages', 'nexuscontent/v1/pages/(?P<id>\d+)', 'nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/schema', 'nexuscontent/v1/capabilities', 'nexuscontent/v1/project-contract' ),
+			array( 'nexuscontent/v1/pages', 'nexuscontent/v1/pages/(?P<id>\d+)', 'nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/posts', 'nexuscontent/v1/posts/(?P<id>\d+)', 'nexuscontent/v1/posts/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/schema', 'nexuscontent/v1/capabilities', 'nexuscontent/v1/project-contract' ),
 			array_keys( $GLOBALS['nc_test']['routes'] )
 		);
 	}
@@ -117,6 +117,50 @@ final class RestControllerTest extends TestCase {
 		$result = $this->controller()->pages_permissions_check( $request );
 		self::assertInstanceOf( WP_Error::class, $result );
 		$GLOBALS['nc_test']['caps']['edit_pages'] = true;
+		self::assertTrue( $this->controller()->pages_permissions_check( $request ) );
+	}
+
+	public function test_posts_route_collection_targets_post_type(): void {
+		$controller = $this->controller();
+		$request = new WP_REST_Request( 'GET', '/nexuscontent/v1/posts' );
+		$GLOBALS['nc_test']['query_posts'] = array( $this->post( array( 'ID' => 10, 'post_type' => 'post', 'post_name' => 'hello', 'post_title' => 'Hello' ) ) );
+
+		$response = $controller->get_pages( $request );
+
+		self::assertInstanceOf( WP_REST_Response::class, $response );
+		self::assertSame( 'post', $GLOBALS['nc_test']['query_args'][0]['post_type'] );
+		self::assertCount( 1, $response->get_data()['data']['items'] );
+		self::assertSame( 'hello', $response->get_data()['data']['items'][0]['key'] );
+	}
+
+	public function test_posts_route_slug_returns_only_posts(): void {
+		$controller = $this->controller();
+		$GLOBALS['nc_test']['posts'] = array( 20 => $this->post( array( 'ID' => 20, 'post_type' => 'post', 'post_name' => 'welcome', 'post_title' => 'Welcome' ) ) );
+		$request = new WP_REST_Request( 'GET', '/nexuscontent/v1/posts/slug/welcome' );
+		$request['slug'] = 'welcome';
+
+		$response = $controller->get_page_by_slug( $request );
+
+		self::assertInstanceOf( WP_REST_Response::class, $response );
+		self::assertSame( 'Welcome', $response->get_data()['data']['title'] );
+	}
+
+	public function test_posts_route_rejects_page_ids(): void {
+		$controller = $this->controller();
+		$GLOBALS['nc_test']['posts'] = array( 30 => $this->post( array( 'ID' => 30, 'post_type' => 'page', 'post_name' => 'about', 'post_status' => 'publish' ) ) );
+		$request = new WP_REST_Request( 'GET', '/nexuscontent/v1/posts/(?P<id>\d+)' );
+		$request['id'] = 30;
+
+		$result = $controller->get_page( $request );
+
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( Contract::ERROR_NOT_FOUND, $result->get_error_code() );
+	}
+
+	public function test_posts_collection_private_status_uses_posts_capability(): void {
+		$request = new WP_REST_Request( 'GET', '/nexuscontent/v1/posts' );
+		$request->set_param( 'status', 'private' );
+		$GLOBALS['nc_test']['caps']['read_private_posts'] = true;
 		self::assertTrue( $this->controller()->pages_permissions_check( $request ) );
 	}
 }

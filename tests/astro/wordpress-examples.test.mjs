@@ -45,9 +45,11 @@ const companionPosts = {
         type: "gallery",
         data: {
           heading: "Gallery parity",
+          // Wire media shape (`url` + metadata) is normalized to `src` by the
+          // provider, so the built page renders through the shared gallery grid.
           images: [
-            { src: "https://example.test/gallery-one.jpg", alt: "One" },
-            { src: "https://example.test/gallery-two.jpg", alt: "Two" }
+            { url: "https://example.test/gallery-one.jpg", id: "1", mimeType: "image/jpeg", width: 1200, height: 800, alt: "One" },
+            { url: "https://example.test/gallery-two.jpg", id: "2", mimeType: "image/jpeg", width: 640, height: 480, alt: "Two" }
           ]
         }
       }
@@ -102,11 +104,11 @@ test("WordPress Astro examples build against a local companion API", async (t) =
       response.end(JSON.stringify(schema));
       return;
     }
-    if (path === "/wp-json/nexuscontent/v1/pages") {
+    if (path === "/wp-json/nexuscontent/v1/posts") {
       response.end(JSON.stringify(pageEnvelope({ items: collectionItems(), pagination: { total: 2, totalPages: 1, page: 1, perPage: 20 } })));
       return;
     }
-    const slugMatch = path.match(/^\/wp-json\/nexuscontent\/v1\/pages\/slug\/(.+)$/);
+    const slugMatch = path.match(/^\/wp-json\/nexuscontent\/v1\/posts\/slug\/(.+)$/);
     if (slugMatch) {
       const post = companionPosts[decodeURIComponent(slugMatch[1])];
       if (post) {
@@ -172,6 +174,10 @@ test("WordPress Astro examples build against a local companion API", async (t) =
   assert.match(singlePost, /Companion sections, same shape/);
   assert.match(singlePost, /Gallery parity/);
   assert.doesNotMatch(singlePost, /Raw HTML fallback/);
+
+  // Companion wire media (`image.url`) renders as `src` after provider
+  // normalization, proving section parity through the full static build.
+  assert.match(singlePost, /src="https:\/\/example\.test\/gallery-one\.jpg"/);
 
   // A post with no sections keeps the raw-HTML fallback path.
   assert.match(secondPost, /Second post body from WordPress/);

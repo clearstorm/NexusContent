@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/wordpress-stub/' );
 }
 if ( ! defined( 'NEXUSCONTENT_COMPANION_VERSION' ) ) {
-	define( 'NEXUSCONTENT_COMPANION_VERSION', '0.1.0-test' );
+	define( 'NEXUSCONTENT_COMPANION_VERSION', '0.1.1-test' );
 }
 if ( ! defined( 'NEXUSCONTENT_COMPANION_CONTRACT_VERSION' ) ) {
 	define( 'NEXUSCONTENT_COMPANION_CONTRACT_VERSION', 1 );
@@ -65,7 +65,9 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 	class WP_REST_Request implements ArrayAccess {
 		private array $params = array();
 		private array $headers = array();
-		public function __construct( string $method = 'GET', string $route = '' ) {}
+		private string $route = '';
+		public function __construct( string $method = 'GET', string $route = '' ) { $this->route = $route; }
+		public function get_route(): string { return $this->route; }
 		public function set_param( string $key, $value ): void { $this->params[ $key ] = $value; }
 		public function get_param( string $key ) { return $this->params[ $key ] ?? null; }
 		public function set_header( string $key, $value ): void { $this->headers[ $key ] = $value; }

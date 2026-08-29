@@ -540,7 +540,7 @@ test("companion schema response JSON has correct structure", () => {
 test("companion capabilities response JSON has exact capability data", () => {
   const fixture = readJsonFixture("companion-capabilities.json") as WordPressCapabilitiesResponse;
   assert.equal(fixture.contractVersion, COMPANION_CONTRACT_VERSION);
-  assert.equal(fixture.data.pluginVersion, "0.1.0");
+  assert.equal(fixture.data.pluginVersion, "0.1.1");
   assert.equal(fixture.data.wordpressVersion, "6.8.2");
   assert.equal(fixture.data.gutenberg, true);
   assert.equal(fixture.data.acfPro, true);
@@ -565,10 +565,13 @@ test("companion wire endpoints are reserved paths", () => {
     "pages",
     "pages/{id}",
     "pages/slug/{slug}",
+    "posts",
+    "posts/{id}",
+    "posts/slug/{slug}",
     "schema",
     "capabilities"
   ]);
-  assert.equal(COMPANION_WIRE_ENDPOINTS.length, 5);
+  assert.equal(COMPANION_WIRE_ENDPOINTS.length, 8);
 });
 
 test("companion wire namespace is defined", () => {
