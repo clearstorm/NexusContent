@@ -255,6 +255,8 @@ The route requires `manage_options`, stores only sanitized string arrays in
 It lives outside the content wire contract, so no `contractVersion` negotiation
 applies.
 
+See `docs/wordpress-companion.md` for the project-facing definition of the companion plugin.
+
 ### Editor Modes
 
 Pages can use one of three editor modes. The companion plugin stores the mode per-page in WordPress, so different pages on the same site can use different modes:
