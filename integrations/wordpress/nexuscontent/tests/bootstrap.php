@@ -123,7 +123,7 @@ if ( ! function_exists( 'nc_test_reset' ) ) {
 			'' => array(), 'actions' => array(), 'filters' => array(), 'meta' => array(), 'fields' => array(),
 			'posts' => array(), 'blocks' => array(), 'caps' => array(), 'attachment_calls' => array(),
 			'styles' => array(), 'options' => array(), 'menus' => array(), 'query_posts' => array(),
-			'query_args' => array(), 'registered_meta' => array(),
+			'query_args' => array(), 'registered_meta' => array(), 'transients' => array(),
 		);
 		$GLOBALS['wp_version'] = '6.6-test';
 	}
@@ -144,6 +144,7 @@ if ( ! function_exists( 'sanitize_title' ) ) { function sanitize_title( $value )
 if ( ! function_exists( 'sanitize_text_field' ) ) { function sanitize_text_field( $value ) { return trim( strip_tags( (string) $value ) ); } }
 if ( ! function_exists( 'absint' ) ) { function absint( $value ) { return abs( (int) $value ); } }
 if ( ! function_exists( 'esc_url_raw' ) ) { function esc_url_raw( $value ) { return filter_var( (string) $value, FILTER_VALIDATE_URL ) ? (string) $value : ''; } }
+if ( ! function_exists( 'trailingslashit' ) ) { function trailingslashit( $value ) { return rtrim( (string) $value, '/' ) . '/'; } }
 if ( ! function_exists( 'wp_kses_post' ) ) { function wp_kses_post( $value ) { return (string) $value; } }
 if ( ! function_exists( 'wp_kses' ) ) { function wp_kses( $value, $allowed ) { $tags = '<' . implode( '><', array_keys( $allowed ) ) . '>'; $clean = strip_tags( (string) $value, $tags ); $clean = preg_replace( '/\son[a-z]+=("[^"]*"|\'[^\']*\')/i', '', $clean ); return preg_replace( '/\s(href|src)=("|\')javascript:[^"\']*("|\')/i', ' $1=$2$2', (string) $clean ); } }
 if ( ! function_exists( 'wp_strip_all_tags' ) ) { function wp_strip_all_tags( $value ) { return strip_tags( (string) $value ); } }
@@ -198,12 +199,18 @@ if ( ! function_exists( 'get_edit_post_link' ) ) { function get_edit_post_link( 
 if ( ! function_exists( 'admin_url' ) ) { function admin_url( $path = '' ) { return 'https://example.com/wp-admin/' . ltrim( $path, '/' ); } }
 if ( ! function_exists( 'esc_url' ) ) { function esc_url( $url ) { return (string) $url; } }
 if ( ! function_exists( 'has_blocks' ) ) { function has_blocks( $content ) { return false; } }
+if ( ! function_exists( 'get_current_user_id' ) ) { function get_current_user_id() { return (int) ( $GLOBALS['nc_test']['current_user'] ?? 0 ); } }
+if ( ! function_exists( 'set_transient' ) ) { function set_transient( $key, $value, $expiration = 0 ) { $GLOBALS['nc_test']['transients'][ $key ] = array( 'value' => $value, 'expires' => time() + (int) $expiration ); return true; } }
+if ( ! function_exists( 'get_transient' ) ) { function get_transient( $key ) { $entry = $GLOBALS['nc_test']['transients'][ $key ] ?? null; if ( null === $entry ) { return false; } if ( $entry['expires'] < time() ) { unset( $GLOBALS['nc_test']['transients'][ $key ] ); return false; } return $entry['value']; } }
+if ( ! function_exists( 'delete_transient' ) ) { function delete_transient( $key ) { unset( $GLOBALS['nc_test']['transients'][ $key ] ); return true; } }
+if ( ! function_exists( 'wp_http_validate_url' ) ) { function wp_http_validate_url( $url ) { $parsed = wp_parse_url( $url ); return isset( $parsed['scheme'], $parsed['host'] ) && in_array( strtolower( $parsed['scheme'] ), array( 'http', 'https' ), true ) ? (string) $url : false; } }
+if ( ! function_exists( 'wp_parse_url' ) ) { function wp_parse_url( $url ) { return parse_url( (string) $url ); } }
 
 $root = dirname( __DIR__ );
 foreach ( array(
 	'includes/class-contract.php', 'includes/class-diagnostics.php', 'includes/class-capabilities.php',
 	'includes/class-editor-mode.php', 'includes/class-section-registry.php', 'includes/class-media-normalizer.php',
-	'includes/class-normalizer.php', 'includes/class-rest-controller.php', 'includes/class-admin-page.php',
+	'includes/class-normalizer.php', 'includes/class-preview-token.php', 'includes/class-rest-controller.php', 'includes/class-admin-page.php',
 	'includes/blocks/class-block-normalizer.php', 'includes/blocks/class-block-loader.php',
 	'includes/acf/class-acf-field-factory.php', 'includes/acf/class-acf-loader.php',
 ) as $file ) {

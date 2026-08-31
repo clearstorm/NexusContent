@@ -1422,7 +1422,9 @@ The `0.2.4` companion posts-routing fix was released on 2026-08-29 as `v0.2.4` (
 
 The `0.2.5` NexusContent CLI release was released on 2026-08-29 as `v0.2.5` (root package version `0.2.5`): the `nexus-contract` bin ships with `@nexuscontent/core` (`generate` scaffolds ACF layouts for consumer custom sections from `--schema`/`--contract`, classifying against the live companion `/schema` or the bundled `scripts/sections.json` offline vocabulary; `push` posts the contract to the admin-only project-contract route with an Application Password). This is a deliberate, user-approved scope exception to the planned `0.7.0` `tooling.cli` milestone. The astro-wordpress example drives both flows through the shipped CLI; the example-owned push script was removed.
 
-The recommended next focus is the directional `0.3.0` Strapi provider.
+The `0.2.6` WordPress companion preview release is the current in-progress release (root package version `0.2.6`): the companion plugin mints short-lived, post-scoped preview tokens (`POST /nexuscontent/v1/preview-token`, requires `edit_posts`, transient-backed with a filterable TTL) and serves draft/scheduled content through the public `GET /nexuscontent/v1/preview/{token}/{id}` route, where the token is the auth — invalid, expired, or mismatched tokens return 401 and are revoked on use. A Gutenberg "Open frontend preview" button (`assets/src/preview.js`), gated by the new `preview_frontend_url` admin setting, opens the consumer route with `?token=...&id=...`. The astro-wordpress reference consumer adds a static `preview.astro` route that fetches the tokenized companion route and renders through the shared section components.
+
+The recommended next focus is the directional `0.3.0` Strapi provider, followed by the `0.2.7` WordPress companion webhooks release (outbound HMAC-signed change dispatcher) within the same 0.2.x consolidation.
 
 ---
 

@@ -1,0 +1,192 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostSections from "../components/PostSections.astro";
+import { resolveSeo } from "@nexuscontent/core";
+import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { gutenbergStyleSheets } from "../app/gutenberg";
+import { resolveMediaFields } from "../app/media";
+import { nexus } from "../nexus";
+
+// Draft/scheduled preview route. The WordPress companion plugin mints a
+// short-lived token bound to a single post ID; the Gutenberg "Open frontend
+// preview" button opens this route with `?token=...&id=...`. The token is the
+// auth — no session is required — and it expires within minutes, so it never
+// leaks into production builds or indexes.
+const token = Astro.url.searchParams.get("token") ?? "";
+const id = Astro.url.searchParams.get("id") ?? "";
+
+if (!token || !id) {
+  Astro.response.status = 400;
+}
+
+// Resolve the companion namespace (`nexuscontent/v1`) from the configured
+// WordPress REST API root, which includes `.../wp-json/wp/v2`.
+const apiRoot = import.meta.env.WORDPRESS_API_URL as string | undefined;
+const wpJsonIndex = apiRoot?.indexOf("/wp-json/wp/v2");
+
+let preview:
+  | {
+      title?: string;
+      status?: string;
+      sections?: unknown[];
+      content?: string;
+      excerpt?: string;
+      modifiedAt?: string;
+    }
+  | undefined = undefined;
+let error: string | undefined = undefined;
+
+if (apiRoot && wpJsonIndex !== undefined && wpJsonIndex >= 0 && token && id) {
+  const base = apiRoot.slice(0, wpJsonIndex);
+  const url = `${base}/nexuscontent/v1/preview/${encodeURIComponent(token)}/${encodeURIComponent(id)}`;
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      const envelope = (await res.json()) as {
+        data?: {
+          title?: string;
+          status?: string;
+          sections?: unknown[];
+          rawFields?: { content?: string };
+          excerpt?: string;
+          modifiedAt?: string;
+        };
+      };
+      preview = {
+        title: envelope.data?.title,
+        status: envelope.data?.status,
+        sections: envelope.data?.sections,
+        content: envelope.data?.rawFields?.content,
+        excerpt: envelope.data?.excerpt,
+        modifiedAt: envelope.data?.modifiedAt
+      };
+    } else if (res.status === 401) {
+      error = "This preview link has expired or is invalid.";
+    } else {
+      error = "The preview could not be loaded.";
+    }
+  } catch {
+    error = "The preview service could not be reached.";
+  }
+} else if (token && id && !apiRoot) {
+  error = "WORDPRESS_API_URL is required to load a preview.";
+}
+
+const data = (await resolveMediaFields(nexus, preview ?? {})) as {
+  sections?: { type?: string; _type?: string; data?: Record<string, unknown> }[];
+  content?: string;
+  excerpt?: string;
+};
+
+const previewTitle = preview?.title ?? "Preview";
+const seo = resolveSeo(
+  {
+    title: `${previewTitle} - Preview`,
+    seo: { robots: { index: false, follow: false } }
+  },
+  siteSeoDefaults
+);
+---
+
+<BaseLayout seo={seo} styles={gutenbergStyleSheets}>
+  <article class="preview">
+    <p class="back">
+      <a href="/">← Home</a>
+    </p>
+    {error ? (
+      <div class="notice">{error}</div>
+    ) : preview ? (
+      <>
+        <header>
+          <h1>{previewTitle}</h1>
+          {preview.status && preview.status !== "published" && (
+            <span class="status">{preview.status}</span>
+          )}
+          {data.excerpt && <p class="excerpt">{data.excerpt}</p>}
+        </header>
+
+        {data.sections && data.sections.length > 0 ? (
+          <div class="sections">
+            <PostSections sections={data.sections} />
+          </div>
+        ) : data.content ? (
+          <div class="body wordpress-content" set:html={data.content} />
+        ) : (
+          <p class="empty">This content has no body yet.</p>
+        )}
+      </>
+    ) : (
+      <div class="notice">Missing preview token or content id.</div>
+    )}
+  </article>
+
+  <style>
+    .preview {
+      max-width: 52rem;
+    }
+
+    .back a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back a:hover {
+      color: var(--accent);
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .excerpt {
+      margin-top: 0.75rem;
+      color: var(--muted);
+    }
+
+    .body,
+    .empty,
+    .notice {
+      margin-top: 2rem;
+      font-size: 1.15rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .notice {
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    /* Same consumer-owned prose layer as the blog post raw-HTML fallback. */
+    .wordpress-content :global(img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+    }
+
+    .wordpress-content :global(p) {
+      margin: 0 0 1rem;
+    }
+
+    .wordpress-content :global(h2),
+    .wordpress-content :global(h3) {
+      margin: 2rem 0 0.5rem;
+      line-height: 1.2;
+      color: var(--fg);
+    }
+
+    .sections {
+      margin-top: 2.5rem;
+    }
+  </style>
+</BaseLayout>

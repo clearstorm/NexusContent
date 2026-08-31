@@ -28,6 +28,8 @@ required_files=(
   "assets/build/admin.css"
   "assets/build/editor-rtl.css"
   "assets/build/editor.asset.php"
+  "assets/build/preview.js"
+  "assets/build/preview.asset.php"
   "includes/class-contract.php"
   "includes/class-diagnostics.php"
   "includes/class-capabilities.php"
@@ -37,6 +39,7 @@ required_files=(
   "includes/class-normalizer.php"
   "includes/class-rest-controller.php"
   "includes/class-admin-page.php"
+  "includes/class-preview-token.php"
   "includes/class-plugin.php"
   "includes/acf/class-registration.php"
   "includes/acf/class-acf-loader.php"
@@ -64,7 +67,7 @@ mkdir -p "$package_root/assets/build" "$package_root/assets/previews" "$package_
 cp "$plugin_root/nexuscontent.php" "$plugin_root/sections.json" "$plugin_root/README.md" "$plugin_root/readme.txt" "$plugin_root/LICENSE" "$package_root/"
 cp -R "$plugin_root/includes" "$package_root/includes"
 find "$package_root/includes" -name '.DS_Store' -delete
-cp "$plugin_root/assets/build/editor.js" "$plugin_root/assets/build/editor.css" "$plugin_root/assets/build/admin.css" "$plugin_root/assets/build/editor-rtl.css" "$plugin_root/assets/build/editor.asset.php" "$package_root/assets/build/"
+cp "$plugin_root/assets/build/editor.js" "$plugin_root/assets/build/editor.css" "$plugin_root/assets/build/admin.css" "$plugin_root/assets/build/editor-rtl.css" "$plugin_root/assets/build/editor.asset.php" "$plugin_root/assets/build/preview.js" "$plugin_root/assets/build/preview.asset.php" "$package_root/assets/build/"
 cp "$plugin_root"/assets/previews/*.svg "$package_root/assets/previews/"
 
 for block_dir in "$plugin_root"/blocks/*; do

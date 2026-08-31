@@ -10,8 +10,9 @@ namespace NexusContent\Companion;
 defined( 'ABSPATH' ) || exit;
 
 final class Block_Loader {
-	const SCRIPT_HANDLE = 'nexuscontent-editor';
-	const STYLE_HANDLE  = 'nexuscontent-editor';
+	const SCRIPT_HANDLE  = 'nexuscontent-editor';
+	const STYLE_HANDLE   = 'nexuscontent-editor';
+	const PREVIEW_HANDLE = 'nexuscontent-preview';
 
 	/** @var string */
 	private $root;
@@ -103,6 +104,7 @@ final class Block_Loader {
 		$this->register_assets();
 		wp_enqueue_script( self::SCRIPT_HANDLE );
 		wp_enqueue_style( self::STYLE_HANDLE );
+		$this->enqueue_preview_button();
 
 		wp_localize_script(
 			self::SCRIPT_HANDLE,
@@ -181,7 +183,47 @@ final class Block_Loader {
 			wp_register_style( self::STYLE_HANDLE, $base_url . 'assets/build/editor.css', array( 'wp-edit-blocks' ), $version );
 		}
 
+		if ( ! wp_script_is( self::PREVIEW_HANDLE, 'registered' ) ) {
+			wp_register_script(
+				self::PREVIEW_HANDLE,
+				$base_url . 'assets/build/preview.js',
+				array( 'wp-api-fetch', 'wp-blocks', 'wp-element', 'wp-components', 'wp-data', 'wp-plugins', 'wp-edit-post' ),
+				$version,
+				true
+			);
+		}
+
 		$this->assets_registered = true;
+	}
+
+	/** Enqueue the preview button with its localized settings. */
+	private function enqueue_preview_button(): void {
+		wp_enqueue_script( self::PREVIEW_HANDLE );
+
+		wp_localize_script(
+			self::PREVIEW_HANDLE,
+			'NexusContentPreviewSettings',
+			array(
+				'restRoot'           => trailingslashit( rest_url( NEXUSCONTENT_COMPANION_REST_NAMESPACE ) ),
+				'previewFrontendUrl' => $this->settings_preview_frontend_url(),
+				'labels'             => array(
+					'panel'        => __( 'Frontend preview', 'nexuscontent' ),
+					'description'  => __( 'Open this content rendered by the consuming frontend.', 'nexuscontent' ),
+					'button'       => __( 'Open frontend preview', 'nexuscontent' ),
+					'fetchError'   => __( 'Could not create a preview token.', 'nexuscontent' ),
+					'noPreviewUrl' => __( 'The frontend returned no preview URL.', 'nexuscontent' ),
+					'noConfig'     => __( 'Set the Frontend preview URL in NexusContent settings to enable preview.', 'nexuscontent' ),
+					'opened'       => __( 'Preview opened in a new tab.', 'nexuscontent' ),
+				),
+			)
+		);
+	}
+
+	/** @return string */
+	private function settings_preview_frontend_url(): string {
+		$stored = get_option( 'nexuscontent_settings', array() );
+		$stored = is_array( $stored ) ? $stored : array();
+		return isset( $stored['preview_frontend_url'] ) ? esc_url_raw( (string) $stored['preview_frontend_url'] ) : '';
 	}
 
 	/**

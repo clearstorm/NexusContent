@@ -245,6 +245,30 @@ This was a pre-release contract repair because the earlier committed definitions
 - CLI unit and packaging tests pass; a generated mu-plugin lints under `php -l`; `npm run typecheck`, `npm test`, `npm run check:sections`, `npm run test:astro`, and `npm run validate:project-state` all pass.
 - State files, CHANGELOG, README, and companion docs reflect the CLI and its `0.7.0` scoped exception.
 
+## 0.2.6 - WordPress Companion Preview (in progress)
+
+**State:** In progress (root package `0.2.6`).
+
+**Goal:** Bring WordPress draft/scheduled preview forward into the `0.2.x` consolidation (preview was previously a `0.6.0` directional target). The companion plugin mints short-lived, post-scoped preview tokens and serves draft content through a public tokenized route, with a Gutenberg button and a static consumer preview route.
+
+**Required capabilities:**
+
+- `POST /nexuscontent/v1/preview-token` (requires `edit_posts`) returns a 64-character hex token bound to a single post id, stored in a WordPress transient with a filterable TTL (default 15 minutes).
+- `GET /nexuscontent/v1/preview/{token}/{id}` is public — the token is the auth — and returns the normalized page/post envelope for a valid, matching, unexpired token. Invalid, expired, or mismatched tokens return 401 and are revoked on use.
+- A Gutenberg "Open frontend preview" button (`PluginDocumentSettingPanel` in `assets/src/preview.js`) mints a token and opens the configured `preview_frontend_url` with `?token=...&id=...`. A new `preview_frontend_url` admin setting gates it.
+- The astro-wordpress reference consumer adds a static `preview.astro` route that resolves the companion namespace from `WORDPRESS_API_URL`, fetches `preview/{token}/{id}`, and renders through the shared `PostSections` components (or the raw-HTML fallback). It is build-time static, emits `noindex`, and shows a clear message for expired/invalid tokens.
+
+**Explicit exclusions:**
+
+- No persistent sessions or consumer-side auth state; the token is short-lived and single-purpose.
+- No changes to contract v1, released standard REST retrieval, or editor modes.
+- Webhooks remain out of scope for `0.2.6`; they are scheduled in `0.2.7`.
+
+**Exit criteria:**
+
+- Companion PHP unit tests (Preview_Token mint/validate/expiry/revoke, preview-token permissions, `preview/{token}/{id}` normalized/draft, invalid/mismatched tokens) pass; astro-wordpress consumer test covers the static preview page; `npm run typecheck`, `npm test`, `npm run test:astro`, plugin unit/phpcs/phpstan, and `npm run validate:project-state` all pass; WordPress integration passes in CI.
+- State files, CHANGELOG, README, and companion docs reflect preview and its `0.2.7` webhooks follow-up.
+
 ## 0.2.3 - WordPress Companion Consumer
 
 **State:** Released on 2026-08-29 (root package `0.2.3`).

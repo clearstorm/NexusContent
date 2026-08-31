@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | Project name | NexusContent |
-| Current version | `0.2.5` |
+| Current version | `0.2.6` |
 | Current milestone | `0.3.0-strapi` |
 | Project status | Active, early development; internal private package |
-| Current focus | Released `0.2.5`; directional `0.3.0` Strapi provider is next |
+| Current focus | `0.2.6` WordPress companion preview in progress; directional `0.3.0` Strapi provider next |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.3` companion consumer milestone shipped V1 companion section parity, and `0.2.4` fixed the companion posts routing (dedicated posts routes, `companionRoute`, recursive media normalization). The `0.2.5` release adds the `nexus-contract` CLI: `generate` derives a consumer contract from the developer's own field schema and scaffolds ACF layouts for consumer custom sections (offline via the bundled `scripts/sections.json` vocabulary or against the live companion `/schema`), while `push` stores the contract through the admin-only project-contract route with an Application Password. The example's section/push scripts now drive the shipped CLI instead of example-owned scripts.
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.3` companion consumer milestone shipped V1 companion section parity, and `0.2.4` fixed the companion posts routing (dedicated posts routes, `companionRoute`, recursive media normalization). The `0.2.5` release adds the `nexus-contract` CLI: `generate` derives a consumer contract from the developer's own field schema and scaffolds ACF layouts for consumer custom sections (offline via the bundled `scripts/sections.json` vocabulary or against the live companion `/schema`), while `push` stores the contract through the admin-only project-contract route with an Application Password. The example's section/push scripts now drive the shipped CLI instead of example-owned scripts. The `0.2.6` release adds WordPress companion preview: the plugin mints short-lived post-scoped preview tokens, serves draft/scheduled content through the public `preview/{token}/{id}` route (the token is the auth), a Gutenberg "Open frontend preview" button opens the configured `preview_frontend_url`, and the astro-wordpress reference consumer fetches the tokenized route from a static `preview.astro` page.
 
 ## Current Architecture
 
@@ -87,20 +87,20 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 - The astro-wordpress reference example consumes WordPress through `apiStrategy: "companion"` and builds in CI against a local companion API (capabilities, schema, posts, and `posts/slug/{slug}` routes), rendering Git- and companion-sourced sections with parity through the shared `PostSections` components.
 - The `nexus-contract` bin (shipped in `@nexuscontent/core` 0.2.5) derives the consumer `{ components, sectionTypes }` contract from the developer's own field schema (`--schema`) and scaffolds a deterministic ACF-layout mu-plugin for consumer custom sections, classifying against the live companion `/schema` or the bundled offline vocabulary. Its `push` subcommand posts the contract to the admin-only project-contract route with an Application Password. This is a user-approved scope exception to the planned `0.7.0` CLI.
 - The example's `sections:contract` and `push:project-contract` scripts drive the shipped CLI (`--schema src/schema/schema.ts`, env via `.env`); the example-owned push script was removed.
-- The directional `0.3.0` Strapi provider is the recommended next focus.
+- The `0.2.6` release adds WordPress companion preview: `POST /nexuscontent/v1/preview-token` (requires `edit_posts`) mints a short-lived, post-scoped token stored in a transient with a filterable TTL; the public `GET /nexuscontent/v1/preview/{token}/{id}` route serves the draft/scheduled normalized content where the token is the auth (invalid/expired/mismatched tokens return 401 and are revoked on use). A Gutenberg "Open frontend preview" button (`assets/src/preview.js`) mints a token and opens the configured `preview_frontend_url` with `?token=...&id=...`. The astro-wordpress reference consumer adds a static `preview.astro` route that resolves the companion namespace from `WORDPRESS_API_URL`, fetches the tokenized route, and renders through the shared `PostSections` components (or the raw-HTML fallback).
+- The directional `0.3.0` Strapi provider is the recommended next focus, followed by the `0.2.7` WordPress companion webhooks release within the same 0.2.x consolidation.
 
 ## Next
 
-1. `0.2.5` is released with the `nexus-contract` CLI; begin the directional `0.3.0` Strapi milestone.
-2. Confirm the Strapi provider's minimum REST API scope and contract test strategy for `0.3.0`.
-3. Consider the directional localisation continuation once provider breadth is proven.
+1. Finish the `0.2.6` WordPress companion preview release (integration tests pending against wp-env; then release).
+2. Follow with the `0.2.7` WordPress companion webhooks release (outbound HMAC-signed change dispatcher).
+3. Begin the directional `0.3.0` Strapi provider; confirm its minimum REST API scope and contract test strategy.
 
 ## Not Implementing Yet
 
-- Strapi and other remote CMS providers beyond WordPress.
+- Strapi and other remote CMS providers beyond WordPress (directional `0.3.0`).
 - Content synchronization and change detection.
-- Webhooks and automated rebuild workflows.
-- Draft preview.
+- Webhooks (WordPress companion webhooks are scheduled in `0.2.7`; generic workflows remain directional).
 - General-purpose CLI and expanded developer tooling beyond the scoped `nexus-contract` bin (`tooling.nexus-contract-cli` ships from 0.2.5; `tooling.cli` remains planned for 0.7.0).
 - Markdown, MDX, YAML, TOML, and CSV Git content formats.
 - Framework-specific adapter packages.

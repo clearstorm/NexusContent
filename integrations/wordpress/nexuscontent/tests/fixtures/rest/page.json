@@ -1,1 +1,14 @@
-{"contractVersion":1,"data":{"id":"42","key":"fixture-page","slug":"fixture-page","title":"Fixture page","status":"published","excerpt":"","modifiedAt":"2026-01-02T03:04:05+00:00","sections":[],"rawFields": {"editorMode":"gutenberg","content":""}}}
+{
+	"contractVersion": 1,
+	"data": {
+		"id": "42",
+		"key": "fixture-page",
+		"slug": "fixture-page",
+		"title": "Fixture page",
+		"status": "published",
+		"excerpt": "",
+		"modifiedAt": "2026-01-02T03:04:05+00:00",
+		"sections": [],
+		"rawFields": { "editorMode": "gutenberg", "content": "" }
+	}
+}

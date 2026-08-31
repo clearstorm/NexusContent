@@ -1,1 +1,15 @@
-{"type":"features","data":{"heading":"Features","body":"Core benefits.","items":[{"heading":"Portable","body":"Works across consumers.","icon":"layers"}]},"settings":{"variant":"cards","theme":"light"}}
+{
+	"type": "features",
+	"data": {
+		"heading": "Features",
+		"body": "Core benefits.",
+		"items": [
+			{
+				"heading": "Portable",
+				"body": "Works across consumers.",
+				"icon": "layers"
+			}
+		]
+	},
+	"settings": { "variant": "cards", "theme": "light" }
+}

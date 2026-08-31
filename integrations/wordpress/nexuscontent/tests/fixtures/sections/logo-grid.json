@@ -1,1 +1,24 @@
-{"type":"logo_grid","data":{"heading":"Trusted by","items":[{"name":"Example Co","logo":{"url":"https://example.test/logo.png","alt":"Example Co"},"url":"https://example.test"},{"label":"Acme","image":{"url":"https://example.test/acme.png","alt":"Acme logo"}}]},"settings":{"variant":"default","theme":"light"}}
+{
+	"type": "logo_grid",
+	"data": {
+		"heading": "Trusted by",
+		"items": [
+			{
+				"name": "Example Co",
+				"logo": {
+					"url": "https://example.test/logo.png",
+					"alt": "Example Co"
+				},
+				"url": "https://example.test"
+			},
+			{
+				"label": "Acme",
+				"image": {
+					"url": "https://example.test/acme.png",
+					"alt": "Acme logo"
+				}
+			}
+		]
+	},
+	"settings": { "variant": "default", "theme": "light" }
+}

@@ -122,6 +122,45 @@ final class REST_Controller extends WP_REST_Controller {
 				),
 			)
 		);
+		register_rest_route(
+			$this->namespace,
+			'/preview-token',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'create_preview_token' ),
+				'permission_callback' => array( $this, 'preview_token_permissions_check' ),
+				'args'                => array(
+					'postId' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => static fn( $value ): bool => is_numeric( $value ) && (int) $value > 0,
+					),
+				),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/preview/(?P<token>[0-9a-f]+)/(?P<id>\d+)',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_preview' ),
+				'permission_callback' => array( $this, 'preview_permissions_check' ),
+				'args'                => array(
+					'token' => array(
+						'type'              => 'string',
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'id'    => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => static fn( $value ): bool => is_numeric( $value ) && (int) $value > 0,
+					),
+				),
+			)
+		);
 	}
 
 	public function public_permissions_check(): bool {
@@ -279,6 +318,112 @@ final class REST_Controller extends WP_REST_Controller {
 		update_option( self::SETTINGS_OPTION, $settings );
 
 		return rest_ensure_response( $contract );
+	}
+
+	/**
+	 * Mint a short-lived preview token for a post.
+	 *
+	 * Requires edit_posts capability. The token allows unauthenticated access
+	 * to a single post's normalized content via the preview/{token}/{id} route.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function create_preview_token( WP_REST_Request $request ) {
+		$post_id = absint( $request->get_param( 'postId' ) );
+		$post    = get_post( $post_id );
+		if ( ! $post instanceof WP_Post || ! in_array( $post->post_type, array( 'page', 'post' ), true ) ) {
+			return new WP_Error(
+				Contract::ERROR_NOT_FOUND,
+				__( 'Post not found.', 'nexuscontent' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return $this->forbidden();
+		}
+
+		$token_data  = Preview_Token::mint( $post_id );
+		$settings    = get_option( self::SETTINGS_OPTION, array() );
+		$settings    = is_array( $settings ) ? $settings : array();
+		$frontend    = isset( $settings['preview_frontend_url'] ) ? esc_url_raw( (string) $settings['preview_frontend_url'] ) : '';
+		$preview_url = '';
+		if ( '' !== $frontend ) {
+			$separator   = false !== strpos( $frontend, '?' ) ? '&' : '?';
+			$preview_url = trailingslashit( $frontend ) . 'preview' . $separator . 'token=' . $token_data['token'] . '&id=' . (string) $post_id;
+		}
+
+		$data = array(
+			'token'      => $token_data['token'],
+			'expiresAt'  => $token_data['expires_at'],
+			'previewUrl' => $preview_url,
+		);
+
+		$diagnostics = new Diagnostics();
+		$envelope    = array(
+			'contractVersion' => Contract::VERSION,
+			'data'            => $data,
+		);
+		if ( ! $this->contract->validate( $envelope, 'preview_token' ) ) {
+			return new WP_Error(
+				Contract::ERROR_INVALID_RESPONSE,
+				__( 'NexusContent could not produce a valid response.', 'nexuscontent' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return new WP_REST_Response( $envelope, 200 );
+	}
+
+	/**
+	 * Fetch a post's normalized content using a preview token.
+	 *
+	 * The token is the authentication mechanism. No user session is required.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_preview( WP_REST_Request $request ) {
+		$token   = (string) $request->get_param( 'token' );
+		$post_id = absint( $request->get_param( 'id' ) );
+		$payload = Preview_Token::validate( $token );
+		if ( null === $payload ) {
+			return new WP_Error(
+				Contract::ERROR_INVALID_PREVIEW_TOKEN,
+				__( 'The preview token is invalid or has expired.', 'nexuscontent' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		if ( $payload['post_id'] !== $post_id ) {
+			Preview_Token::revoke( $token );
+			return new WP_Error(
+				Contract::ERROR_INVALID_PREVIEW_TOKEN,
+				__( 'The preview token does not match the requested post.', 'nexuscontent' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post instanceof WP_Post || ! in_array( $post->post_type, array( 'page', 'post' ), true ) ) {
+			return new WP_Error(
+				Contract::ERROR_NOT_FOUND,
+				__( 'Post not found.', 'nexuscontent' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$diagnostics = new Diagnostics();
+		return $this->respond( $this->normalizer->page( $post, $diagnostics ), $diagnostics, 'page' );
+	}
+
+	/** @return true|WP_Error */
+	public function preview_token_permissions_check() {
+		return current_user_can( 'edit_posts' ) ? true : $this->forbidden();
+	}
+
+	/** Preview content access is public; the token is the auth. */
+	public function preview_permissions_check(): bool {
+		return true;
 	}
 
 	/**

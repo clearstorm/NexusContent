@@ -127,11 +127,25 @@ Content routes:
 - `GET /nexuscontent/v1/posts`
 - `GET /nexuscontent/v1/posts/{id}`
 - `GET /nexuscontent/v1/posts/slug/{slug}`
+- `POST /nexuscontent/v1/preview-token`
+- `GET /nexuscontent/v1/preview/{token}/{id}`
 
 The dedicated `posts` routes (added in plugin `0.1.1`) are post-type-aware:
 they serve only posts and reject page ids/slugs with `404`. The built-in
 `posts` collection routes to them through `WordPressCollectionConfig.
 companionRoute` (`"pages" | "posts"`, default `"posts"`).
+
+### Preview
+
+`POST /nexuscontent/v1/preview-token` (requires `edit_posts`) mints a
+64-character hex token bound to a single post id, stored in a WordPress
+transient with a filterable TTL (default 15 minutes). The public
+`GET /nexuscontent/v1/preview/{token}/{id}` route returns the normalized
+page/post envelope for a valid, matching, unexpired token — the token itself is
+the auth, so no session is required. Invalid, expired, or mismatched tokens
+return `401` and are revoked on use. A Gutenberg "Open frontend preview"
+button, gated by the `preview_frontend_url` admin setting, mints a token and
+opens a consumer preview route with `?token=...&id=...`.
 
 Permissions preserve WordPress REST boundaries. The admin-only
 `POST /nexuscontent/v1/project-contract` route requires `manage_options`,
@@ -163,7 +177,7 @@ converts companion section media recursively (`wire image.url` →
   call the companion plugin.
 - ACF is optional. ACF Free supports the fixed fields; ACF Pro (only with a
   legally supplied license) enables flexible layouts and opt-in ACF Blocks.
-- No preview, webhooks, mutations, or synchronization.
+- No webhooks, mutations, or synchronization.
 - No plugin SEO mapping, localisation-plugin contracts, or multi-site logic.
 - WordPress stays the content system; consumers own routes and rendering.
 - Plugin code stays under `integrations/wordpress/nexuscontent/`. It is never

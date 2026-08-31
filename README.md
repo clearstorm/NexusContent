@@ -278,6 +278,28 @@ by the consumer and must not be committed to this repository.
 
 See `docs/wordpress-companion.md` for the project-facing definition of the companion plugin.
 
+### Preview
+
+The companion plugin serves draft/scheduled content for single-use preview. An
+editor with `edit_posts` mints a short-lived, post-scoped token:
+
+```bash
+curl -X POST "https://wordpress.example.com/wp-json/nexuscontent/v1/preview-token" \
+  -H "X-WP-Nonce: <rest-nonce>" \
+  -d '{"postId":42}'
+# => { "token": "<64-hex>", "expiresAt": "..." }
+```
+
+The public `GET /nexuscontent/v1/preview/{token}/{id}` route returns the
+normalized content envelope for a valid, matching, unexpired token — the token
+is the auth, so no session is required. Invalid, expired, or mismatched tokens
+return `401` and are revoked on use. The Gutenberg "Open frontend preview"
+button (gated by the plugin's `preview_frontend_url` setting) mints a token and
+opens a consumer preview route with `?token=...&id=...`. The astro-wordpress
+example's `preview.astro` route is a static, consumer-owned preview that fetches
+the tokenized route and renders through the shared section components, emitting
+`noindex` so previews never leak into production.
+
 ### Editor Modes
 
 Pages can use one of three editor modes. The companion plugin stores the mode per-page in WordPress, so different pages on the same site can use different modes:

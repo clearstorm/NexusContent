@@ -1,38 +1,38 @@
 {
-  "name": "nexuscontent/wordpress-companion",
-  "description": "WordPress companion plugin for NexusContent.",
-  "type": "wordpress-plugin",
-  "license": "MIT",
-  "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "^1.1",
-    "php-stubs/wordpress-stubs": "^6.6.2",
-    "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^9.6",
-    "squizlabs/php_codesniffer": "^3.13.5",
-    "szepeviktor/phpstan-wordpress": "^2.0",
-    "wp-coding-standards/wpcs": "^3.4",
-    "yoast/phpunit-polyfills": "^2.0"
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "NexusContent\\Companion\\Tests\\": "tests/"
-    }
-  },
-  "config": {
-    "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
-    },
-    "platform": {
-      "php": "8.1.0"
-    },
-    "sort-packages": true
-  },
-  "scripts": {
-    "validate-config": "@composer validate --strict --no-check-lock",
-    "lint": "bash scripts/lint-php.sh",
-    "phpcs": "phpcs --standard=phpcs.xml.dist",
-    "phpstan": "phpstan analyse --configuration=phpstan.neon.dist --no-progress --memory-limit=1G",
-    "test-unit": "bash scripts/run-test-suite.sh unit",
-    "test-integration": "bash scripts/run-test-suite.sh integration"
-  }
+	"name": "nexuscontent/wordpress-companion",
+	"description": "WordPress companion plugin for NexusContent.",
+	"type": "wordpress-plugin",
+	"license": "MIT",
+	"require-dev": {
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.1",
+		"php-stubs/wordpress-stubs": "^6.6.2",
+		"phpstan/phpstan": "^2.1",
+		"phpunit/phpunit": "^9.6",
+		"squizlabs/php_codesniffer": "^3.13.5",
+		"szepeviktor/phpstan-wordpress": "^2.0",
+		"wp-coding-standards/wpcs": "^3.4",
+		"yoast/phpunit-polyfills": "^2.0"
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"NexusContent\\Companion\\Tests\\": "tests/"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"platform": {
+			"php": "8.1.0"
+		},
+		"sort-packages": true
+	},
+	"scripts": {
+		"validate-config": "@composer validate --strict --no-check-lock",
+		"lint": "bash scripts/lint-php.sh",
+		"phpcs": "phpcs --standard=phpcs.xml.dist",
+		"phpstan": "phpstan analyse --configuration=phpstan.neon.dist --no-progress --memory-limit=1G",
+		"test-unit": "bash scripts/run-test-suite.sh unit",
+		"test-integration": "bash scripts/run-test-suite.sh integration"
+	}
 }

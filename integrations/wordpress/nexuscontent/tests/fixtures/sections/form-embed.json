@@ -1,1 +1,10 @@
-{"type":"form_embed","data":{"heading":"Contact","provider":"example","form_id":"contact","embed_code":"<form action=\"https://example.test/submit\" method=\"post\"><input name=\"email\"></form>"},"settings":{"variant":"default","theme":"light"}}
+{
+	"type": "form_embed",
+	"data": {
+		"heading": "Contact",
+		"provider": "example",
+		"form_id": "contact",
+		"embed_code": "<form action=\"https://example.test/submit\" method=\"post\"><input name=\"email\"></form>"
+	},
+	"settings": { "variant": "default", "theme": "light" }
+}

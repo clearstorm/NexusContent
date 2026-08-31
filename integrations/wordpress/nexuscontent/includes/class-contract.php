@@ -26,6 +26,7 @@ final class Contract {
 	public const ERROR_INVALID_SECTION             = 'wordpress/section/invalid';
 	public const ERROR_MEDIA_UNAVAILABLE           = 'wordpress/media/resolution-failed';
 	public const ERROR_CONFLICTING_SECTION_SOURCES = 'wordpress/section/conflicting-sources';
+	public const ERROR_INVALID_PREVIEW_TOKEN       = 'wordpress/preview/invalid-token';
 
 	/**
 	 * Validates only the public envelope and endpoint-owned fields.
@@ -50,11 +51,12 @@ final class Contract {
 		}
 
 		return match ( $shape ) {
-			'page'         => $this->valid_page( $data ),
-			'pages'        => isset( $data['items'], $data['pagination'] ) && is_array( $data['items'] ) && is_array( $data['pagination'] ) && $this->valid_pages( $data['items'] ) && $this->valid_pagination( $data['pagination'] ),
-			'schema'       => $this->valid_schema( $data ),
-			'capabilities' => $this->valid_capabilities( $data ),
-			default        => false,
+			'page'           => $this->valid_page( $data ),
+			'pages'          => isset( $data['items'], $data['pagination'] ) && is_array( $data['items'] ) && is_array( $data['pagination'] ) && $this->valid_pages( $data['items'] ) && $this->valid_pagination( $data['pagination'] ),
+			'schema'         => $this->valid_schema( $data ),
+			'capabilities'   => $this->valid_capabilities( $data ),
+			'preview_token'  => $this->valid_preview_token( $data ),
+			default          => false,
 		};
 	}
 
@@ -174,6 +176,11 @@ final class Contract {
 		}
 
 		return is_array( $capabilities['editorModes'] ?? null ) && $this->all_strings( $capabilities['editorModes'] ) && is_array( $capabilities['sectionTypes'] ?? null ) && $this->all_strings( $capabilities['sectionTypes'] );
+	}
+
+	/** @param array<string, mixed> $data */
+	private function valid_preview_token( array $data ): bool {
+		return is_string( $data['token'] ?? null ) && is_string( $data['expiresAt'] ?? null );
 	}
 
 	/** @param array<int, mixed> $values */

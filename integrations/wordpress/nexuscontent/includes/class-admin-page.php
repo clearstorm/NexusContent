@@ -125,6 +125,14 @@ final class Admin_Page {
 			self::SETTINGS_SLUG,
 			'nexuscontent_config'
 		);
+
+		add_settings_field(
+			'preview_frontend_url',
+			__( 'Frontend preview URL', 'nexuscontent' ),
+			array( $this, 'render_preview_frontend_url_field' ),
+			self::SETTINGS_SLUG,
+			'nexuscontent_config'
+		);
 	}
 
 	/* ----------------------------------------------------------------
@@ -757,6 +765,22 @@ final class Admin_Page {
 		<?php
 	}
 
+	public function render_preview_frontend_url_field(): void {
+		$settings = $this->get_settings();
+		$current  = $settings['preview_frontend_url'];
+		?>
+		<input
+			type="url"
+			name="<?php echo esc_attr( self::OPTION_DEFAULT . '[preview_frontend_url]' ); ?>"
+			id="nexuscontent-preview-frontend-url"
+			value="<?php echo esc_attr( $current ); ?>"
+			class="regular-text"
+			placeholder="https://example.com"
+		>
+		<p class="description"><?php esc_html_e( 'Base URL of the consuming frontend. The Gutenberg preview button opens a tokenized preview URL against this domain.', 'nexuscontent' ); ?></p>
+		<?php
+	}
+
 	/* ----------------------------------------------------------------
 	 * Settings logic
 	 * --------------------------------------------------------------- */
@@ -781,13 +805,23 @@ final class Admin_Page {
 		$resolution  = is_string( $input['media_resolution'] ?? null ) ? sanitize_key( $input['media_resolution'] ) : $defaults['media_resolution'];
 		$resolution  = in_array( $resolution, $resolutions, true ) ? $resolution : $defaults['media_resolution'];
 
+		// Accept only an absolute http(s) URL or an empty value for previews.
+		$preview_url = '';
+		if ( isset( $input['preview_frontend_url'] ) && is_string( $input['preview_frontend_url'] ) ) {
+			$candidate = esc_url_raw( trim( $input['preview_frontend_url'] ) );
+			if ( '' === $candidate || wp_http_validate_url( $candidate ) ) {
+				$preview_url = $candidate;
+			}
+		}
+
 		// Preserve the REST-pushed project contract across a settings form save.
 		$project = $this->capabilities->project_contract();
 
 		$result = array(
-			'default_editor_mode' => $mode,
-			'enabled_sections'    => $enabled,
-			'media_resolution'    => $resolution,
+			'default_editor_mode'  => $mode,
+			'enabled_sections'     => $enabled,
+			'media_resolution'     => $resolution,
+			'preview_frontend_url' => $preview_url,
 		);
 		if ( null !== $project ) {
 			$result['project_components'] = $project;
@@ -805,9 +839,10 @@ final class Admin_Page {
 		$defaults = $this->default_settings();
 
 		return array(
-			'default_editor_mode' => is_string( $stored['default_editor_mode'] ?? null ) ? $stored['default_editor_mode'] : $defaults['default_editor_mode'],
-			'enabled_sections'    => isset( $stored['enabled_sections'] ) && is_array( $stored['enabled_sections'] ) ? $stored['enabled_sections'] : $defaults['enabled_sections'],
-			'media_resolution'    => is_string( $stored['media_resolution'] ?? null ) ? $stored['media_resolution'] : $defaults['media_resolution'],
+			'default_editor_mode'  => is_string( $stored['default_editor_mode'] ?? null ) ? $stored['default_editor_mode'] : $defaults['default_editor_mode'],
+			'enabled_sections'     => isset( $stored['enabled_sections'] ) && is_array( $stored['enabled_sections'] ) ? $stored['enabled_sections'] : $defaults['enabled_sections'],
+			'media_resolution'     => is_string( $stored['media_resolution'] ?? null ) ? $stored['media_resolution'] : $defaults['media_resolution'],
+			'preview_frontend_url' => isset( $stored['preview_frontend_url'] ) && is_string( $stored['preview_frontend_url'] ) ? $stored['preview_frontend_url'] : $defaults['preview_frontend_url'],
 		);
 	}
 
@@ -816,9 +851,10 @@ final class Admin_Page {
 	 */
 	private function default_settings(): array {
 		return array(
-			'default_editor_mode' => Editor_Mode::GUTENBERG,
-			'enabled_sections'    => array_keys( $this->registry->definitions() ),
-			'media_resolution'    => 'large',
+			'default_editor_mode'  => Editor_Mode::GUTENBERG,
+			'enabled_sections'     => array_keys( $this->registry->definitions() ),
+			'media_resolution'     => 'large',
+			'preview_frontend_url' => '',
 		);
 	}
 

@@ -29,6 +29,7 @@ $nexuscontent_companion_files = array(
 	'includes/class-section-registry.php',
 	'includes/class-media-normalizer.php',
 	'includes/class-normalizer.php',
+	'includes/class-preview-token.php',
 	'includes/class-rest-controller.php',
 	'includes/class-admin-page.php',
 	'includes/class-plugin.php',

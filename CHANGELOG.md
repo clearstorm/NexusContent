@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The WordPress companion plugin now mints short-lived, post-scoped preview tokens and serves draft/scheduled content to them: `POST /nexuscontent/v1/preview-token` (requires `edit_posts`) returns a 64-character hex token bound to a single post id, stored in a WordPress transient with a filterable TTL (default 15 minutes); the public `GET /nexuscontent/v1/preview/{token}/{id}` route returns the normalized page/post envelope for a valid token. Anonymous requests are served directly — the token itself is the auth — so a consumer preview route never needs a session or persisted state. Invalid, expired, or mismatched tokens return a 401 and are revoked on use.
+- A Gutenberg "Open frontend preview" button in `PluginDocumentSettingPanel` (`assets/src/preview.js`) mints a token via the plugin and opens the configured `preview_frontend_url` with `?token=...&id=...`. The plugin adds a `preview_frontend_url` setting to its admin page; the editor script is enqueued on page and post screens with the localized REST root and labels.
+- The astro-wordpress reference consumer adds a consumer-owned `preview.astro` route: it resolves the companion namespace from `WORDPRESS_API_URL`, fetches `preview/{token}/{id}`, and renders the result through the shared `PostSections` components (or the raw-HTML fallback). It is build-time static with no persisted state, emits `noindex`, and shows a clear message for expired/invalid tokens.
+
 ### Fixed
 
 - The companion plugin now emits the post's rendered body as `rawFields.content` (the same HTML the WordPress core REST API exposes as `content.rendered`) on every normalized page and post, alongside the existing `rawFields.editorMode`. Posts that yield no structured sections (for example content not authored with the provided section blocks, or posts read in an empty ACF editor mode) previously reached consumers with no body at all; the astro-wordpress consumer's raw-HTML fallback now renders them end-to-end. Rendered HTML remains untrusted external content owned by the consumer.

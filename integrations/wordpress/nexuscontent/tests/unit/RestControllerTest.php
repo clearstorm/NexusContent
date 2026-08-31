@@ -27,7 +27,7 @@ final class RestControllerTest extends TestCase {
 	public function test_routes_register_expected_public_and_content_endpoints(): void {
 		$this->controller()->register_routes();
 		self::assertSame(
-			array( 'nexuscontent/v1/pages', 'nexuscontent/v1/pages/(?P<id>\d+)', 'nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/posts', 'nexuscontent/v1/posts/(?P<id>\d+)', 'nexuscontent/v1/posts/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/schema', 'nexuscontent/v1/capabilities', 'nexuscontent/v1/project-contract' ),
+			array( 'nexuscontent/v1/pages', 'nexuscontent/v1/pages/(?P<id>\d+)', 'nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/posts', 'nexuscontent/v1/posts/(?P<id>\d+)', 'nexuscontent/v1/posts/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/schema', 'nexuscontent/v1/capabilities', 'nexuscontent/v1/project-contract', 'nexuscontent/v1/preview-token', 'nexuscontent/v1/preview/(?P<token>[0-9a-f]+)/(?P<id>\d+)' ),
 			array_keys( $GLOBALS['nc_test']['routes'] )
 		);
 	}
@@ -162,5 +162,99 @@ final class RestControllerTest extends TestCase {
 		$request->set_param( 'status', 'private' );
 		$GLOBALS['nc_test']['caps']['read_private_posts'] = true;
 		self::assertTrue( $this->controller()->pages_permissions_check( $request ) );
+	}
+
+	public function test_preview_token_permission_requires_edit_posts(): void {
+		$controller = $this->controller();
+		$GLOBALS['nc_test']['caps']['edit_posts'] = false;
+		self::assertInstanceOf( WP_Error::class, $controller->preview_token_permissions_check() );
+		$GLOBALS['nc_test']['caps']['edit_posts'] = true;
+		self::assertTrue( $controller->preview_token_permissions_check() );
+	}
+
+	public function test_create_preview_token_mints_scoped_token(): void {
+		$controller = $this->controller();
+		$post       = $this->post( array( 'ID' => 7, 'post_type' => 'page', 'post_name' => 'draft-page', 'post_title' => 'Draft page', 'post_status' => 'draft' ) );
+		$GLOBALS['nc_test']['caps']['edit_post']  = true;
+		$GLOBALS['nc_test']['options']['nexuscontent_settings'] = array( 'preview_frontend_url' => 'https://example.test' );
+
+		$request = new WP_REST_Request( 'POST', '/nexuscontent/v1/preview-token' );
+		$request->set_param( 'postId', $post->ID );
+
+		$response = $controller->create_preview_token( $request );
+		self::assertInstanceOf( WP_REST_Response::class, $response );
+
+		$data = $response->get_data()['data'];
+		self::assertMatchesRegularExpression( '/^[0-9a-f]{64}$/', $data['token'] );
+		self::assertIsString( $data['expiresAt'] );
+		self::assertStringContainsString( 'preview?token=' . $data['token'] . '&id=7', $data['previewUrl'] );
+	}
+
+	public function test_create_preview_token_rejects_missing_post(): void {
+		$controller = $this->controller();
+		$GLOBALS['nc_test']['caps']['edit_post'] = true;
+
+		$request = new WP_REST_Request( 'POST', '/nexuscontent/v1/preview-token' );
+		$request->set_param( 'postId', 999 );
+
+		$result = $controller->create_preview_token( $request );
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( Contract::ERROR_NOT_FOUND, $result->get_error_code() );
+	}
+
+	public function test_create_preview_token_rejects_without_edit_capability(): void {
+		$controller = $this->controller();
+		$this->post( array( 'ID' => 8, 'post_type' => 'page' ) );
+
+		$request = new WP_REST_Request( 'POST', '/nexuscontent/v1/preview-token' );
+		$request->set_param( 'postId', 8 );
+
+		$result = $controller->create_preview_token( $request );
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( Contract::ERROR_FORBIDDEN, $result->get_error_code() );
+	}
+
+	public function test_get_preview_returns_normalized_content_for_valid_token(): void {
+		$controller = $this->controller();
+		$this->post( array( 'ID' => 5, 'post_type' => 'page', 'post_name' => 'preview-page', 'post_title' => 'Preview page', 'post_status' => 'draft' ) );
+
+		$token = \NexusContent\Companion\Preview_Token::mint( 5 );
+		$request = new WP_REST_Request( 'GET', '/nexuscontent/v1/preview/{token}/{id}' );
+		$request->set_param( 'token', $token['token'] );
+		$request->set_param( 'id', 5 );
+
+		$response = $controller->get_preview( $request );
+		self::assertInstanceOf( WP_REST_Response::class, $response );
+		self::assertSame( 'Preview page', $response->get_data()['data']['title'] );
+		self::assertSame( 'draft', $response->get_data()['data']['status'] );
+	}
+
+	public function test_get_preview_rejects_invalid_token(): void {
+		$controller = $this->controller();
+		$this->post( array( 'ID' => 6, 'post_type' => 'page' ) );
+
+		$request = new WP_REST_Request( 'GET', '/nexuscontent/v1/preview/{token}/{id}' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'id', 6 );
+
+		$result = $controller->get_preview( $request );
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( Contract::ERROR_INVALID_PREVIEW_TOKEN, $result->get_error_code() );
+	}
+
+	public function test_get_preview_rejects_token_bound_to_different_post(): void {
+		$controller = $this->controller();
+		$this->post( array( 'ID' => 9, 'post_type' => 'page' ) );
+		$this->post( array( 'ID' => 10, 'post_type' => 'page' ) );
+
+		$token = \NexusContent\Companion\Preview_Token::mint( 9 );
+		$request = new WP_REST_Request( 'GET', '/nexuscontent/v1/preview/{token}/{id}' );
+		$request->set_param( 'token', $token['token'] );
+		$request->set_param( 'id', 10 );
+
+		$result = $controller->get_preview( $request );
+		self::assertInstanceOf( WP_Error::class, $result );
+		self::assertSame( Contract::ERROR_INVALID_PREVIEW_TOKEN, $result->get_error_code() );
+		self::assertNull( \NexusContent\Companion\Preview_Token::validate( $token['token'] ) );
 	}
 }

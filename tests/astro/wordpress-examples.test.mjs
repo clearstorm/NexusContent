@@ -118,6 +118,27 @@ test("WordPress Astro examples build against a local companion API", async (t) =
       response.end(JSON.stringify(pageEnvelope({ items: collectionItems(), pagination: { total: 2, totalPages: 1, page: 1, perPage: 20 } })));
       return;
     }
+    const tokenMatch = path.match(/^\/nexuscontent\/v1\/preview\/([0-9a-f]{64})\/(\d+)$/);
+    if (tokenMatch) {
+      // The preview token is short-lived and bound to a single post id. A
+      // valid token serves the matching post's draft content; anything else is
+      // rejected as a 401 so the consumer route renders the expired message.
+      const token = tokenMatch[1];
+      const id = tokenMatch[2];
+      const valid = id === "2" && token === "a".repeat(64);
+      if (!valid) {
+        response.writeHead(401);
+        response.end();
+        return;
+      }
+      const post = companionPosts["first-post"];
+      response.end(JSON.stringify(pageEnvelope({ ...post, id, status: "draft" })));
+      return;
+    }
+    if (path === "/nexuscontent/v1/preview-token") {
+      response.end(JSON.stringify(pageEnvelope({ token: "a".repeat(64), expiresAt: "2026-08-31T12:00:00Z" })));
+      return;
+    }
     const slugMatch = path.match(/^\/wp-json\/nexuscontent\/v1\/posts\/slug\/(.+)$/);
     if (slugMatch) {
       const post = companionPosts[decodeURIComponent(slugMatch[1])];
@@ -200,4 +221,10 @@ test("WordPress Astro examples build against a local companion API", async (t) =
   assert.match(gutenbergThemeCss, /wp-block-table/);
   assert.match(secondPost, /href="\/gutenberg\/wp-block-library\.css"/);
   assert.match(secondPost, /href="\/gutenberg\/wp-block-library-theme\.css"/);
+
+  // The consumer-owned preview route builds as a static page. It has no
+  // session or persisted state: it only ever renders content when given a
+  // valid `?token=...&id=...`, and otherwise shows a placeholder.
+  const previewPage = await readFile(`${singleRoot}dist/preview/index.html`, "utf8");
+  assert.match(previewPage, /Missing preview token or content id/);
 });

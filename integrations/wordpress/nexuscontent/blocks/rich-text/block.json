@@ -1,23 +1,23 @@
 {
-  "$schema": "https://schemas.wp.org/trunk/block.json",
-  "apiVersion": 3,
-  "name": "nexuscontent/rich-text",
-  "version": "0.1.0",
-  "title": "Rich Text",
-  "category": "nexuscontent",
-  "icon": "editor-paragraph",
-  "description": "A section for formatted editorial content.",
-  "textdomain": "nexuscontent",
-  "attributes": {
-    "section_id": { "type": "string", "default": "" },
-    "variant": { "type": "string", "default": "" },
-    "heading": { "type": "string", "default": "" },
-    "body": { "type": "string", "default": "" },
-    "theme": { "type": "string", "default": "" },
-    "preview": { "type": "boolean", "default": false }
-  },
-  "example": { "attributes": { "preview": true } },
-  "supports": { "anchor": true, "html": false },
-  "editorScript": "nexuscontent-editor",
-  "editorStyle": "nexuscontent-editor"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "nexuscontent/rich-text",
+	"version": "0.1.0",
+	"title": "Rich Text",
+	"category": "nexuscontent",
+	"icon": "editor-paragraph",
+	"description": "A section for formatted editorial content.",
+	"textdomain": "nexuscontent",
+	"attributes": {
+		"section_id": { "type": "string", "default": "" },
+		"variant": { "type": "string", "default": "" },
+		"heading": { "type": "string", "default": "" },
+		"body": { "type": "string", "default": "" },
+		"theme": { "type": "string", "default": "" },
+		"preview": { "type": "boolean", "default": false }
+	},
+	"example": { "attributes": { "preview": true } },
+	"supports": { "anchor": true, "html": false },
+	"editorScript": "nexuscontent-editor",
+	"editorStyle": "nexuscontent-editor"
 }
