@@ -455,8 +455,8 @@ test("WordPressProvider exposes capabilities() method", async () => {
   assert.equal(caps.acfFields, true);
   assert.equal(caps.mediaLibrary, true);
   assert.equal(caps.localeAware, false);
-  assert.equal(caps.previewSupport, false);
-  assert.equal(caps.webhookSupport, false);
+  assert.equal(caps.previewSupport, true);
+  assert.equal(caps.webhookSupport, true);
 });
 
 test("WordPressProvider reflects ACF editor mode in capabilities", async () => {

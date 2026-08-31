@@ -35,6 +35,9 @@ final class Plugin {
 		$admin_page = new Admin_Page( $capabilities, $registry );
 		$admin_page->register();
 
+		$webhook = new Webhook_Dispatcher();
+		$webhook->register();
+
 		self::boot_optional_integrations( $registry );
 
 		/**

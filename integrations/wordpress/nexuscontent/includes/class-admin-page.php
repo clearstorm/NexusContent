@@ -133,6 +133,32 @@ final class Admin_Page {
 			self::SETTINGS_SLUG,
 			'nexuscontent_config'
 		);
+
+		add_settings_field(
+			'webhook_url',
+			__( 'Webhook URL', 'nexuscontent' ),
+			array( $this, 'render_webhook_url_field' ),
+			self::SETTINGS_SLUG,
+			'nexuscontent_config'
+		);
+
+		register_setting(
+			self::OPTION_GROUP,
+			Webhook_Dispatcher::OPTION_SECRET,
+			array(
+				'type'              => 'string',
+				'sanitize_callback' => array( $this, 'sanitize_webhook_secret' ),
+				'default'           => '',
+			)
+		);
+
+		add_settings_field(
+			'webhook_secret',
+			__( 'Webhook secret', 'nexuscontent' ),
+			array( $this, 'render_webhook_secret_field' ),
+			self::SETTINGS_SLUG,
+			'nexuscontent_config'
+		);
 	}
 
 	/* ----------------------------------------------------------------
@@ -781,6 +807,36 @@ final class Admin_Page {
 		<?php
 	}
 
+	public function render_webhook_url_field(): void {
+		$settings = $this->get_settings();
+		$current  = $settings['webhook_url'];
+		?>
+		<input
+			type="url"
+			name="<?php echo esc_attr( self::OPTION_DEFAULT . '[webhook_url]' ); ?>"
+			id="nexuscontent-webhook-url"
+			value="<?php echo esc_attr( $current ); ?>"
+			class="regular-text"
+			placeholder="https://frontend.example.com/_nexus/webhook"
+		>
+		<p class="description"><?php esc_html_e( 'Outbound endpoint notified on page/post create, update, trash, and restore. Leave empty to disable.', 'nexuscontent' ); ?></p>
+		<?php
+	}
+
+	public function render_webhook_secret_field(): void {
+		?>
+		<input
+			type="password"
+			name="<?php echo esc_attr( Webhook_Dispatcher::OPTION_SECRET ); ?>"
+			id="nexuscontent-webhook-secret"
+			class="regular-text"
+			autocomplete="new-password"
+			placeholder="<?php esc_html_e( 'Leave blank to keep the current secret', 'nexuscontent' ); ?>"
+		>
+		<p class="description"><?php esc_html_e( 'Shared secret used to sign webhook payloads with an HMAC-SHA256 signature. The stored value is never displayed. Leave blank to keep the current secret.', 'nexuscontent' ); ?></p>
+		<?php
+	}
+
 	/* ----------------------------------------------------------------
 	 * Settings logic
 	 * --------------------------------------------------------------- */
@@ -814,6 +870,15 @@ final class Admin_Page {
 			}
 		}
 
+		// Accept only an absolute http(s) URL or an empty value for webhooks.
+		$webhook_url = '';
+		if ( isset( $input['webhook_url'] ) && is_string( $input['webhook_url'] ) ) {
+			$candidate = esc_url_raw( trim( $input['webhook_url'] ) );
+			if ( '' === $candidate || wp_http_validate_url( $candidate ) ) {
+				$webhook_url = $candidate;
+			}
+		}
+
 		// Preserve the REST-pushed project contract across a settings form save.
 		$project = $this->capabilities->project_contract();
 
@@ -822,6 +887,7 @@ final class Admin_Page {
 			'enabled_sections'     => $enabled,
 			'media_resolution'     => $resolution,
 			'preview_frontend_url' => $preview_url,
+			'webhook_url'          => $webhook_url,
 		);
 		if ( null !== $project ) {
 			$result['project_components'] = $project;
@@ -843,7 +909,25 @@ final class Admin_Page {
 			'enabled_sections'     => isset( $stored['enabled_sections'] ) && is_array( $stored['enabled_sections'] ) ? $stored['enabled_sections'] : $defaults['enabled_sections'],
 			'media_resolution'     => is_string( $stored['media_resolution'] ?? null ) ? $stored['media_resolution'] : $defaults['media_resolution'],
 			'preview_frontend_url' => isset( $stored['preview_frontend_url'] ) && is_string( $stored['preview_frontend_url'] ) ? $stored['preview_frontend_url'] : $defaults['preview_frontend_url'],
+			'webhook_url'          => isset( $stored['webhook_url'] ) && is_string( $stored['webhook_url'] ) ? $stored['webhook_url'] : $defaults['webhook_url'],
 		);
+	}
+
+	/**
+	 * Sanitize a submitted webhook secret.
+	 *
+	 * A blank submission preserves the currently stored secret so the value is
+	 * never round-tripped through the browser.
+	 *
+	 * @param mixed $input Submitted value.
+	 * @return string
+	 */
+	public function sanitize_webhook_secret( $input ): string {
+		if ( is_string( $input ) && '' !== trim( $input ) ) {
+			return sanitize_text_field( $input );
+		}
+		$stored = get_option( Webhook_Dispatcher::OPTION_SECRET, '' );
+		return is_string( $stored ) ? $stored : '';
 	}
 
 	/**
@@ -855,6 +939,7 @@ final class Admin_Page {
 			'enabled_sections'     => array_keys( $this->registry->definitions() ),
 			'media_resolution'     => 'large',
 			'preview_frontend_url' => '',
+			'webhook_url'          => '',
 		);
 	}
 

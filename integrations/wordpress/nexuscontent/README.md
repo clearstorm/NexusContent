@@ -14,7 +14,7 @@ Activate **NexusContent Companion** in WordPress Admin or run `wp plugin activat
 
 ## Requirements
 
-- Plugin version `0.1.1`; companion contract `1` (`contract1`).
+- Plugin version `0.1.2`; companion contract `1` (`contract1`).
 - WordPress 6.6 or newer and PHP 8.1 or newer.
 - Gutenberg uses WordPress core. ACF is optional.
 - ACF Free 6.2 or newer supports fixed fields. A legally supplied ACF Pro 6.2 or newer enables Pro-only capabilities where available.
@@ -95,6 +95,20 @@ curl -X POST https://example.com/wp-json/nexuscontent/v1/project-contract \
   -d '{"components":["hero","servicesList"],"sectionTypes":["hero","features"]}'
 ```
 
+### Preview routes
+
+`POST /wp-json/nexuscontent/v1/preview-token` (requires `edit_posts`) mints a short-lived, single-use preview token bound to one post id and returns `{ token, expires_at }` plus a ready-to-open `previewUrl` when `preview_frontend_url` is configured. `GET /wp-json/nexuscontent/v1/preview/{token}/{id}` serves the normalized page/post envelope for a valid token without further authentication; the token itself is the auth. Each token is revoked on first use and expires on its (filterable) TTL. The "Open frontend preview" button in the document settings panel drives this flow.
+
+### Webhooks
+
+Optional outbound change notifications configured on the NexusContent Settings page (`webhook_url`, plus an optional shared secret stored in a separate option). On page/post create, update, trash, or restore, the plugin POSTs a compact JSON payload:
+
+```json
+{ "event": "updated", "id": 42, "type": "page", "slug": "about", "status": "publish", "title": "About", "modifiedAt": "2026-08-31T12:00:00Z", "source": "wordpress" }
+```
+
+When a shared secret is set, the request carries `X-NexusContent-Signature: sha256=<HMAC-SHA256 of the raw JSON body>`. Dispatch is opt-in, outbound-only, best-effort, non-blocking, and never triggers rebuilds or other site mutations. The consumer verifies the signature and decides what to do.
+
 ## Authentication
 
 Published, passwordless pages and posts, schema, and capabilities are public. Non-published collection queries require `edit_posts`; a non-public individual entry requires `edit_post` for that entry. Use normal WordPress REST authentication, such as an authenticated admin cookie plus nonce or an Application Password over HTTPS. The plugin adds no credentials and never accepts secrets in URLs.
@@ -151,7 +165,7 @@ npm run format:check
 npm run package
 ```
 
-`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.1.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
+`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.2.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
 
 ## Tests
 
@@ -174,7 +188,7 @@ The default wp-env has no ACF. Run `npm run env:acf-free` for the development si
 
 ## Limitations
 
-Version 0.1.1 is page/post-focused, scoped to pages and standard posts. Published transport and single-use draft preview are provided; it does not provide mutations, webhooks, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
+Version 0.1.2 is page/post-focused, scoped to pages and standard posts. Published transport and single-use draft preview are provided, and opt-in outbound webhooks notify on page/post changes; it does not provide mutations, webhook-triggered rebuilds, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
 
 ## Phase 3 Status
 

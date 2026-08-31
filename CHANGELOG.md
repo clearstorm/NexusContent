@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The WordPress companion plugin now dispatches opt-in, outbound-only change notifications on page/post create, update, trash, and restore. A `webhook_url` (absolute http(s), empty disables) is stored in `nexuscontent_settings`; an optional shared secret lives in a separate `nexuscontent_webhook_secret` option that is never echoed or logged. Each request POSTs a compact JSON payload (`event`, `id`, `type`, `slug`, `status`, `title`, `modifiedAt`, `source`) with an `X-NexusContent-Signature: sha256=<HMAC-SHA256 of the raw JSON body>` header when a secret is set. Dispatch is best-effort and non-blocking, and never triggers rebuilds or other site mutations — the consuming frontend verifies the signature and decides whether to act.
+- The WordPress provider `capabilities()` now reports `webhookSupport` (and the `previewSupport` missed in `0.2.6`).
+
 ## [0.2.6] - 2026-08-31
 
 WordPress companion draft preview release.

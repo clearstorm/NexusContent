@@ -124,6 +124,7 @@ if ( ! function_exists( 'nc_test_reset' ) ) {
 			'posts' => array(), 'blocks' => array(), 'caps' => array(), 'attachment_calls' => array(),
 			'styles' => array(), 'options' => array(), 'menus' => array(), 'query_posts' => array(),
 			'query_args' => array(), 'registered_meta' => array(), 'transients' => array(),
+			'webhooks' => array(), 'settings' => array(), 'settings_fields' => array(), 'settings_sections' => array(),
 		);
 		$GLOBALS['wp_version'] = '6.6-test';
 	}
@@ -205,12 +206,14 @@ if ( ! function_exists( 'get_transient' ) ) { function get_transient( $key ) { $
 if ( ! function_exists( 'delete_transient' ) ) { function delete_transient( $key ) { unset( $GLOBALS['nc_test']['transients'][ $key ] ); return true; } }
 if ( ! function_exists( 'wp_http_validate_url' ) ) { function wp_http_validate_url( $url ) { $parsed = wp_parse_url( $url ); return isset( $parsed['scheme'], $parsed['host'] ) && in_array( strtolower( $parsed['scheme'] ), array( 'http', 'https' ), true ) ? (string) $url : false; } }
 if ( ! function_exists( 'wp_parse_url' ) ) { function wp_parse_url( $url ) { return parse_url( (string) $url ); } }
+if ( ! function_exists( 'wp_json_encode' ) ) { function wp_json_encode( $value, $options = 0, $depth = 512 ) { return json_encode( $value, $options, $depth ); } }
+if ( ! function_exists( 'wp_remote_post' ) ) { function wp_remote_post( $url, $args = array() ) { $GLOBALS['nc_test']['webhooks'][] = array( 'url' => $url, 'args' => $args ); return new WP_Error( 'http_request_failed', 'unit-test' ); } }
 
 $root = dirname( __DIR__ );
 foreach ( array(
 	'includes/class-contract.php', 'includes/class-diagnostics.php', 'includes/class-capabilities.php',
 	'includes/class-editor-mode.php', 'includes/class-section-registry.php', 'includes/class-media-normalizer.php',
-	'includes/class-normalizer.php', 'includes/class-preview-token.php', 'includes/class-rest-controller.php', 'includes/class-admin-page.php',
+	'includes/class-normalizer.php', 'includes/class-preview-token.php', 'includes/class-webhook-dispatcher.php', 'includes/class-rest-controller.php', 'includes/class-admin-page.php',
 	'includes/blocks/class-block-normalizer.php', 'includes/blocks/class-block-loader.php',
 	'includes/acf/class-acf-field-factory.php', 'includes/acf/class-acf-loader.php',
 ) as $file ) {

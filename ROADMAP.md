@@ -245,9 +245,9 @@ This was a pre-release contract repair because the earlier committed definitions
 - CLI unit and packaging tests pass; a generated mu-plugin lints under `php -l`; `npm run typecheck`, `npm test`, `npm run check:sections`, `npm run test:astro`, and `npm run validate:project-state` all pass.
 - State files, CHANGELOG, README, and companion docs reflect the CLI and its `0.7.0` scoped exception.
 
-## 0.2.6 - WordPress Companion Preview (in progress)
+## 0.2.6 - WordPress Companion Preview (Released)
 
-**State:** In progress (root package `0.2.6`).
+**State:** Released on 2026-08-31 (root package `0.2.6`, plugin `0.1.1`).
 
 **Goal:** Bring WordPress draft/scheduled preview forward into the `0.2.x` consolidation (preview was previously a `0.6.0` directional target). The companion plugin mints short-lived, post-scoped preview tokens and serves draft content through a public tokenized route, with a Gutenberg button and a static consumer preview route.
 
@@ -268,6 +268,30 @@ This was a pre-release contract repair because the earlier committed definitions
 
 - Companion PHP unit tests (Preview_Token mint/validate/expiry/revoke, preview-token permissions, `preview/{token}/{id}` normalized/draft, invalid/mismatched tokens) pass; astro-wordpress consumer test covers the static preview page; `npm run typecheck`, `npm test`, `npm run test:astro`, plugin unit/phpcs/phpstan, and `npm run validate:project-state` all pass; WordPress integration passes in CI.
 - State files, CHANGELOG, README, and companion docs reflect preview and its `0.2.7` webhooks follow-up.
+
+## 0.2.7 - WordPress Companion Webhooks
+
+**State:** In progress (root package `0.2.7`, plugin `0.1.2`).
+
+**Goal:** Bring opt-in outbound change notification forward into the `0.2.x` consolidation. The companion plugin dispatches HMAC-signed webhooks on page/post lifecycle events so a consuming frontend can choose to react (for example, rebuild) after verifying the payload.
+
+**Required capabilities:**
+
+- An admin Settings `webhook_url` (absolute http(s), empty disables) stored in `nexuscontent_settings`, plus an optional shared secret stored in a separate `nexuscontent_webhook_secret` option that is never echoed or logged.
+- On page/post create, update, trash, or restore, the plugin POSTs a compact JSON payload (`event`, `id`, `type`, `slug`, `status`, `title`, `modifiedAt`, `source`) to the configured URL. When a secret is set, the request carries `X-NexusContent-Signature: sha256=<HMAC-SHA256 of the raw JSON body>`.
+- Dispatch is opt-in, outbound-only, best-effort, non-blocking, and never triggers rebuilds or other site mutations — the consuming frontend verifies the signature and decides what to do.
+- The WordPress provider `capabilities()` reports `webhookSupport` (and corrects the missed `previewSupport` from `0.2.6`).
+
+**Explicit exclusions:**
+
+- No rebuild triggering, synchronization, inbound webhooks, queues, or workers.
+- No full-content payloads; events carry change metadata only.
+- No changes to contract v1, released standard REST retrieval, or editor modes.
+
+**Exit criteria:**
+
+- Companion PHP unit tests cover registering the lifecycle hooks, no-op without a URL, unsigned dispatch, HMAC-signed dispatch, and unsupported post-type ignore; plugin lint/phpcs/phpstan, `npm run typecheck`, `npm test`, `npm run test:astro`, and `npm run validate:project-state` all pass; WordPress integration passes in CI.
+- The `dist/nexuscontent-0.1.2.zip` artifact ships; state files, CHANGELOG, README, and companion docs reflect webhooks.
 
 ## 0.2.3 - WordPress Companion Consumer
 

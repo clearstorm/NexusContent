@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly version="0.1.1"
+readonly version="0.1.2"
 readonly plugin_slug="nexuscontent"
 plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 repo_root="$(cd "$plugin_root/../../.." && pwd)"
@@ -40,6 +40,7 @@ required_files=(
   "includes/class-rest-controller.php"
   "includes/class-admin-page.php"
   "includes/class-preview-token.php"
+  "includes/class-webhook-dispatcher.php"
   "includes/class-plugin.php"
   "includes/acf/class-registration.php"
   "includes/acf/class-acf-loader.php"

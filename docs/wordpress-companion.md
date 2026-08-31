@@ -6,7 +6,7 @@ plugin is, why it exists, and the permanent boundaries around it.
 
 ## What It Is
 
-NexusContent Companion is an optional WordPress plugin (version `0.1.1`) that
+NexusContent Companion is an optional WordPress plugin (version `0.1.2`) that
 turns a standard WordPress install into a source of normalized, contract-
 versioned JSON for NexusContent consumers.
 
@@ -154,6 +154,20 @@ stores only sanitized `components`/`sectionTypes` arrays in
 `contractVersion` negotiation), and never reconfigures editor settings. Its
 Dashboard card is a read-only expected-vs-installed drift comparison.
 
+### Webhooks
+
+Outbound change notifications are opt-in and configured from the admin
+Settings page: `webhook_url` (stored in `nexuscontent_settings`, validated as
+an absolute http(s) URL) plus an optional shared secret stored in a separate
+`nexuscontent_webhook_secret` option that is never echoed or logged. On
+page/post create, update, trash, or restore the plugin POSTs a compact JSON
+payload (`event`, `id`, `type`, `slug`, `status`, `title`, `modifiedAt`,
+`source`). When a secret is set, the request carries an
+`X-NexusContent-Signature: sha256=<HMAC-SHA256 of the raw body>` header.
+Dispatch is outbound-only, best-effort, non-blocking, and never triggers
+rebuilds or other site mutations — the consuming frontend verifies the
+signature and decides what to do.
+
 ## Provider ↔ Plugin Interaction
 
 The TypeScript provider talks to the plugin only under the companion API
@@ -177,7 +191,8 @@ converts companion section media recursively (`wire image.url` →
   call the companion plugin.
 - ACF is optional. ACF Free supports the fixed fields; ACF Pro (only with a
   legally supplied license) enables flexible layouts and opt-in ACF Blocks.
-- No webhooks, mutations, or synchronization.
+- No mutations, synchronization, or rebuild-triggering webhooks. Opt-in
+  outbound webhooks are signed, best-effort, and consumer-driven.
 - No plugin SEO mapping, localisation-plugin contracts, or multi-site logic.
 - WordPress stays the content system; consumers own routes and rendering.
 - Plugin code stays under `integrations/wordpress/nexuscontent/`. It is never
@@ -188,7 +203,7 @@ converts companion section media recursively (`wire image.url` →
 - WordPress 6.6+ and PHP 8.1+.
 - Gutenberg uses WordPress core. ACF Free 6.2+ and ACF Pro 6.2+ are optional.
 - Node.js and Composer are build-only; production servers need neither.
-- The release artifact is `dist/nexuscontent-0.1.1.zip`.
+- The release artifact is `dist/nexuscontent-0.1.2.zip`.
 
 ## Version History
 
@@ -196,3 +211,4 @@ converts companion section media recursively (`wire image.url` →
 |---------|--------|
 | `0.1.0` | Phase 2 base: editor modes, section normalization, schema/capabilities, and route scaffolding delivered through the `pages` routes |
 | `0.1.1` | Dedicated `posts`, `posts/{id}`, and `posts/slug/{slug}` routes with post-type-aware handlers; provider routes the built-in `posts` collection to them |
+| `0.1.2` | Single-use draft preview (preview-token / preview/{token}/{id}, Gutenberg button); opt-in signed outbound webhooks (create/update/trash/restore); provider capabilities report `previewSupport` and `webhookSupport` |

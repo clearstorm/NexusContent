@@ -243,8 +243,8 @@ export class WordPressProvider implements ContentProvider {
           ? "synced"
           : "unsynced",
       localeAware: false,
-      previewSupport: false,
-      webhookSupport: false
+      previewSupport: true,
+      webhookSupport: true
     };
   }
 

@@ -300,6 +300,35 @@ example's `preview.astro` route is a static, consumer-owned preview that fetches
 the tokenized route and renders through the shared section components, emitting
 `noindex` so previews never leak into production.
 
+### Webhooks
+
+The companion plugin can notify the consuming frontend of WordPress content
+changes. It is opt-in and configured on the plugin's Settings page
+(`webhook_url`, plus an optional shared secret stored in a separate option
+that is never echoed or logged). On page/post create, update, trash, or
+restore, the plugin POSTs a compact JSON payload carrying only change metadata
+(no full content):
+
+```json
+{
+  "event": "updated",
+  "id": 42,
+  "type": "page",
+  "slug": "about",
+  "status": "publish",
+  "title": "About",
+  "modifiedAt": "2026-08-31T12:00:00Z",
+  "source": "wordpress"
+}
+```
+
+When a shared secret is set, the request carries an
+`X-NexusContent-Signature: sha256=<HMAC-SHA256 of the raw JSON body>` header so
+the consumer can verify the request genuinely came from WordPress. Dispatch is
+outbound-only, best-effort, non-blocking, and never triggers rebuilds or other
+site mutations — the consumer verifies the signature and decides whether to
+act.
+
 ### Editor Modes
 
 Pages can use one of three editor modes. The companion plugin stores the mode per-page in WordPress, so different pages on the same site can use different modes:
