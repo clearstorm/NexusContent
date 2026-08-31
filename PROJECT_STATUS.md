@@ -8,7 +8,7 @@
 | Current version | `0.2.7` |
 | Current milestone | `0.3.0-strapi` |
 | Project status | Active, early development; internal private package |
-| Current focus | `0.2.7` WordPress companion outbound webhooks in progress; directional `0.3.0` Strapi provider next |
+| Current focus | `0.2.7` WordPress companion outbound webhooks released; directional `0.3.0` Strapi provider next |
 
 The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.3` companion consumer milestone shipped V1 companion section parity, and `0.2.4` fixed the companion posts routing (dedicated posts routes, `companionRoute`, recursive media normalization). The `0.2.5` release adds the `nexus-contract` CLI: `generate` derives a consumer contract from the developer's own field schema and scaffolds ACF layouts for consumer custom sections (offline via the bundled `scripts/sections.json` vocabulary or against the live companion `/schema`), while `push` stores the contract through the admin-only project-contract route with an Application Password. The example's section/push scripts now drive the shipped CLI instead of example-owned scripts. The `0.2.6` release adds WordPress companion preview: the plugin mints short-lived post-scoped preview tokens, serves draft/scheduled content through the public `preview/{token}/{id}` route (the token is the auth), a Gutenberg "Open frontend preview" button opens the configured `preview_frontend_url`, and the astro-wordpress reference consumer fetches the tokenized route from a static `preview.astro` page. The `0.2.7` release adds WordPress companion outbound webhooks: an opt-in `webhook_url` (plus an optional shared secret stored in a separate, never-echoed option) makes the plugin POST compact HMAC-signed change metadata on page/post create, update, trash, and restore, without triggering rebuilds or other site mutations.
 
@@ -67,7 +67,7 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Plain Node compatibility example and framework-neutrality tests.
 - Companion plugin admin page with card-based status dashboard, colored mode badges, responsive section-checkbox grid, and WordPress color scheme variable compatibility. The editor-mode selector, ACF section field groups (fixed and flexible), meta boxes, and block-editor panels cover standard posts as well as pages.
 - Fixed admin page "Content by editor mode" to count all published pages and posts, including those without an explicit `nexus_editor_mode` meta row.
-- Companion plugin WordPress integration tests passing in CI (84 unit tests, 449 assertions; 13 integration tests, 125 assertions).
+- Companion plugin WordPress integration tests passing in CI (104 unit tests, 498 assertions; 22 integration tests, 184 assertions, plus 20 ACF-free integration tests, 170 assertions).
 - Type checking, tests, package build, Astro example build, and Node example execution in CI.
 - Unified `schema.models` configuration with model kinds and provider sources; `source.mode: "page"` vs `"singleton"` selects the provider operation.
 - Declarative field schemas with required/list/options/nested-object/reference/media/richText/component/blocks support, `schema.components` references, and retrieval-time `SchemaError` validation.
@@ -95,7 +95,7 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 
 ## Next
 
-1. Finish the `0.2.7` WordPress companion webhooks release (WordPress integration is verified in CI), then release.
+1. The `0.2.7` WordPress companion webhooks release is complete and released (WordPress integration verified in CI).
 2. Begin the directional `0.3.0` Strapi provider; confirm its minimum REST API scope and contract test strategy.
 
 ## Not Implementing Yet

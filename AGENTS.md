@@ -137,7 +137,7 @@ Before completing a state-changing task, run `npm run validate:project-state` in
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.2.2-core-contract
+- **Current milestone:** 0.3.0-strapi
 - **Primary implementation language:** TypeScript
 - **Primary initial consumer:** Astro (reference consumer only)
 
@@ -1424,7 +1424,7 @@ The `0.2.5` NexusContent CLI release was released on 2026-08-29 as `v0.2.5` (roo
 
 The `0.2.6` WordPress companion preview release was released as `v0.2.6` on 2026-08-31 (root package version `0.2.6`): the companion plugin mints short-lived, post-scoped preview tokens (`POST /nexuscontent/v1/preview-token`, requires `edit_posts`, transient-backed with a filterable TTL) and serves draft/scheduled content through the public `GET /nexuscontent/v1/preview/{token}/{id}` route, where the token is the auth — invalid, expired, or mismatched tokens return 401 and are revoked on use. A Gutenberg "Open frontend preview" button (`assets/src/preview.js`), gated by the new `preview_frontend_url` admin setting, opens the consumer route with `?token=...&id=...`. The astro-wordpress reference consumer adds a static `preview.astro` route that fetches the tokenized companion route and renders through the shared section components.
 
-The `0.2.7` WordPress companion webhooks release is the current in-progress release (root package version `0.2.7`, plugin version `0.1.2`): the companion plugin dispatches opt-in, outbound-only change notifications on page/post create, update, trash, and restore to a configured `webhook_url` (stored in `nexuscontent_settings`, absolute http(s), empty disables), signed with `X-NexusContent-Signature: sha256=<HMAC-SHA256 of the raw JSON body>` when the shared secret in the separate, never-echoed `nexuscontent_webhook_secret` option is set. Dispatch is best-effort, non-blocking, and never triggers rebuilds or other site mutations — the consuming frontend verifies the signature and decides what to do. The WordPress provider `capabilities()` reports `webhookSupport` (and corrects the missed `previewSupport` from `0.2.6`).
+The `0.2.7` WordPress companion webhooks release was released as `v0.2.7` on 2026-08-31 (root package version `0.2.7`, plugin version `0.1.2`): the companion plugin dispatches opt-in, outbound-only change notifications on page/post create, update, trash, and restore to a configured `webhook_url` (stored in `nexuscontent_settings`, absolute http(s), empty disables), signed with `X-NexusContent-Signature: sha256=<HMAC-SHA256 of the raw JSON body>` when the shared secret in the separate, never-echoed `nexuscontent_webhook_secret` option is set. Dispatch is best-effort, non-blocking, and never triggers rebuilds or other site mutations — the consuming frontend verifies the signature and decides what to do. The WordPress provider `capabilities()` reports `webhookSupport` (and corrects the missed `previewSupport` from `0.2.6`).
 
 The recommended next focus is the directional `0.3.0` Strapi provider, followed by the remaining `0.2.x` consolidation if any.
 

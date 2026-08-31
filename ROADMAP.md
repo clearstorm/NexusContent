@@ -271,7 +271,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ## 0.2.7 - WordPress Companion Webhooks
 
-**State:** In progress (root package `0.2.7`, plugin `0.1.2`).
+**State:** Released on 2026-08-31 (root package `0.2.7`, plugin `0.1.2`; tag `v0.2.7`).
 
 **Goal:** Bring opt-in outbound change notification forward into the `0.2.x` consolidation. The companion plugin dispatches HMAC-signed webhooks on page/post lifecycle events so a consuming frontend can choose to react (for example, rebuild) after verifying the payload.
 
