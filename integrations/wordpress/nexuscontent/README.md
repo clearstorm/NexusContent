@@ -103,6 +103,8 @@ Published, passwordless pages and posts, schema, and capabilities are public. No
 
 Contract 1 responses use `{ "contractVersion": 1, "data": ..., "diagnostics"?: [...] }`. Diagnostics contain `severity`, `code`, `message`, and optional `path`. Endpoint-owned output is validated before sending; invalid output becomes a structured 500 error. Contract changes require an explicit version rather than silent shape drift.
 
+Each normalized page or post carries `sections` plus `rawFields`, which always includes the active `editorMode` and the post's rendered `content` (the same HTML the WordPress core REST API exposes as `content.rendered`). Rendered HTML remains untrusted external content; consumers own sanitization and trust decisions.
+
 ## Capabilities
 
 `/capabilities` reports `pluginVersion`, `wordpressVersion`, `gutenberg`, `acf`, `acfPro`, `acfBlocks`, `flexibleContent`, `editorModes`, `sectionTypes`, and `acfVersion` when available. Values describe the current installation and are sanitized before REST output.

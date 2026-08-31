@@ -4,6 +4,7 @@ import PostSections from "../../components/PostSections.astro";
 import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { gutenbergStyleSheets } from "../../app/gutenberg";
 import { resolveMediaFields } from "../../app/media";
 
 export async function getStaticPaths() {
@@ -54,7 +55,7 @@ const seo = resolveSeo({
 }, siteSeoDefaults);
 ---
 
-<BaseLayout seo={seo}>
+<BaseLayout seo={seo} styles={gutenbergStyleSheets}>
   <article class="post">
     <p class="back">
       <a href="/blog">← Blog</a>
@@ -114,6 +115,113 @@ const seo = resolveSeo({
       font-size: 1.15rem;
       color: var(--muted);
       line-height: 1.8;
+    }
+
+    /* Consumer-owned prose layer for raw WordPress content. The vendored
+    Gutenberg block-library CSS styles the .wp-block-* classes; these rules
+    cover what Gutenberg leaves to the theme. */
+    .wordpress-content :global(h2),
+    .wordpress-content :global(h3) {
+      margin: 2rem 0 0.5rem;
+      line-height: 1.2;
+      color: var(--fg);
+    }
+
+    .wordpress-content :global(p) {
+      margin: 0 0 1rem;
+    }
+
+    .wordpress-content :global(img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+    }
+
+    .wordpress-content :global(figure) {
+      margin: 1.5rem 0;
+    }
+
+    .wordpress-content :global(figcaption) {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .wordpress-content :global(video),
+    .wordpress-content :global(iframe),
+    .wordpress-content :global(embed),
+    .wordpress-content :global(audio) {
+      max-width: 100%;
+    }
+
+    .wordpress-content :global(ul),
+    .wordpress-content :global(ol) {
+      margin: 0 0 1rem;
+      padding-left: 1.5rem;
+    }
+
+    .wordpress-content :global(blockquote) {
+      margin: 1.5rem 0;
+      padding: 0.25rem 0 0.25rem 1rem;
+      border-left: 4px solid var(--accent);
+      color: var(--muted);
+    }
+
+    .wordpress-content :global(a) {
+      color: var(--accent);
+    }
+
+    .wordpress-content :global(code) {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.9em;
+      background: var(--accent-soft);
+      padding: 0.15em 0.4em;
+      border-radius: 0.25rem;
+    }
+
+    .wordpress-content :global(pre) {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      overflow-x: auto;
+      background: var(--fg);
+      color: #fafaf9;
+      border-radius: var(--radius);
+    }
+
+    .wordpress-content :global(pre code) {
+      background: transparent;
+      padding: 0;
+    }
+
+    .wordpress-content :global(hr) {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    .wordpress-content :global(table) {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .wordpress-content :global(thead th) {
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      padding: 0.5rem;
+    }
+
+    .wordpress-content :global(td),
+    .wordpress-content :global(tbody th) {
+      border-bottom: 1px solid var(--border);
+      padding: 0.5rem;
+      vertical-align: top;
+    }
+
+    /* Gutenberg align classes stay inside the 52rem post column. */
+    .wordpress-content :global(.alignwide),
+    .wordpress-content :global(.alignfull) {
+      width: 100%;
     }
 
     .wordpress-content :global(.nexuscontent-section__gallery) {

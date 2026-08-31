@@ -96,6 +96,16 @@ test("WordPress Astro examples build against a local companion API", async (t) =
     const path = url.pathname;
 
     response.setHeader("Content-Type", "application/json");
+    if (path === "/wp-includes/css/dist/block-library/style.min.css") {
+      response.setHeader("Content-Type", "text/css");
+      response.end(".wp-block-image img{max-width:100%;height:auto}");
+      return;
+    }
+    if (path === "/wp-includes/css/dist/block-library/theme.min.css") {
+      response.setHeader("Content-Type", "text/css");
+      response.end(".wp-block-table{width:100%}");
+      return;
+    }
     if (path === "/wp-json/nexuscontent/v1/capabilities") {
       response.end(JSON.stringify(capabilities));
       return;
@@ -181,4 +191,13 @@ test("WordPress Astro examples build against a local companion API", async (t) =
 
   // A post with no sections keeps the raw-HTML fallback path.
   assert.match(secondPost, /Second post body from WordPress/);
+
+  // Gutenberg block styles are vendored at build time into dist/gutenberg/ and
+  // linked from fallback post pages, keeping the static dist self-contained.
+  const gutenbergCss = await readFile(`${singleRoot}dist/gutenberg/wp-block-library.css`, "utf8");
+  const gutenbergThemeCss = await readFile(`${singleRoot}dist/gutenberg/wp-block-library-theme.css`, "utf8");
+  assert.match(gutenbergCss, /wp-block-image img/);
+  assert.match(gutenbergThemeCss, /wp-block-table/);
+  assert.match(secondPost, /href="\/gutenberg\/wp-block-library\.css"/);
+  assert.match(secondPost, /href="\/gutenberg\/wp-block-library-theme\.css"/);
 });

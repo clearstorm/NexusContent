@@ -86,6 +86,18 @@ Passwords** in WordPress. `NEXUS_GIT_CONTENT_PATH` defaults to `content` — thi
 example's committed content directory. Never expose credentials in client-side
 code, committed files, logs, or public environment variables.
 
+## Fallback body styling
+
+Posts without sections render WordPress `content` HTML and load Gutenberg's own
+block styles (`wp-includes/css/dist/block-library/style.min.css` +
+`theme.min.css`) so blocks keep their editor look. `npm run build` first runs
+`scripts/vendor-gutenberg.mjs`, which fetches those two files from the
+`WORDPRESS_API_URL` origin into `public/gutenberg/` (gitignored) — the static
+`dist/` stays self-contained. If the origin is unreachable the build warns and
+fallback bodies render unstyled (a consumer-planned degradation). The vendored
+files are WordPress core block styles (GPL); see `scripts/vendor-gutenberg.mjs`
+for their source.
+
 ## HTML trust
 
 The `rich_text`, `image_text`, and `form_embed` sections insert provided HTML

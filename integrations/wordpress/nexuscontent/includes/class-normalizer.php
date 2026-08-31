@@ -51,7 +51,15 @@ final class Normalizer {
 			'excerpt'    => wp_kses_post( $post->post_excerpt ),
 			'modifiedAt' => is_string( $modified ) ? $modified : '',
 			'sections'   => array_values( array_filter( $sections ) ),
-			'rawFields'  => array( 'editorMode' => $mode ),
+			// The rendered body is always exposed so consumers can fall back
+			// to raw HTML when a post yields no structured sections. This is
+			// the same rendered content the WordPress core REST API exposes as
+			// `content.rendered`. Rendered HTML remains untrusted external
+			// content; sanitization and trust decisions belong to the consumer.
+			'rawFields'  => array(
+				'editorMode' => $mode,
+				'content'    => wp_kses_post( apply_filters( 'the_content', $post->post_content ) ),
+			),
 		);
 		$featured_image = $this->media->normalize( get_post_thumbnail_id( $post ), $diagnostics, 'featuredImage' );
 		if ( $featured_image ) {

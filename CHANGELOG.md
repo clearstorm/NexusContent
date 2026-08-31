@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- The companion plugin now emits the post's rendered body as `rawFields.content` (the same HTML the WordPress core REST API exposes as `content.rendered`) on every normalized page and post, alongside the existing `rawFields.editorMode`. Posts that yield no structured sections (for example content not authored with the provided section blocks, or posts read in an empty ACF editor mode) previously reached consumers with no body at all; the astro-wordpress consumer's raw-HTML fallback now renders them end-to-end. Rendered HTML remains untrusted external content owned by the consumer.
+
+### Changed
+
+- The astro-wordpress example keeps Gutenberg's own styling on raw-HTML fallback post bodies: `npm run build` vendors WordPress' `wp-includes/css/dist/block-library/style.min.css` and `theme.min.css` from the `WORDPRESS_API_URL` origin into `public/gutenberg/` (build artifact, gitignored), so the static `dist/` stays self-contained. A consumer-owned prose layer in `[slug].astro` covers typography, image scaling, tables, and confines Gutenberg `alignwide`/`alignfull` to the post column. If the WordPress origin is unreachable the build warns and fallback bodies render unstyled.
+
 ## [0.2.5] - 2026-08-29
 
 NexusContent CLI and consumer custom-section scaffolding release.

@@ -42,7 +42,7 @@ final class RestPagesIntegrationTest extends IntegrationTestCase {
 		$id = $this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_content' => '', 'post_excerpt' => '' ) );
 		$page = $this->envelope( $this->request( '/nexuscontent/v1/pages/' . $id ) )['data'];
 		self::assertSame( array(), $page['sections'] );
-		self::assertSame( array( 'editorMode' => 'gutenberg' ), $page['rawFields'] );
+		self::assertSame( array( 'editorMode' => 'gutenberg', 'content' => '' ), $page['rawFields'] );
 	}
 
 	public function test_collection_paginates_and_emits_consistent_headers(): void {

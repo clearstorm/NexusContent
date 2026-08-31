@@ -18,9 +18,10 @@ interface SiteData {
 
 interface Props {
   seo: SeoData;
+  styles?: string[];
 }
 
-const { seo } = Astro.props;
+const { seo, styles } = Astro.props;
 const lang = "en";
 
 // Navigation and settings are declared as NexusContent models wired to the Git
@@ -56,6 +57,7 @@ const siteData: SiteData = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <NexusSeo seo={seo} />
+    {styles?.map((href) => <link rel="stylesheet" href={href} />)}
     <style is:global>
       :root {
         --bg: #fafaf9;

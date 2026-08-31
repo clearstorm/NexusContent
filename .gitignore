@@ -16,6 +16,7 @@ examples/astro-basic-localised/dist/
 examples/astro-basic-localised/.astro/
 examples/astro-wordpress/dist/
 examples/astro-wordpress/.astro/
+examples/astro-wordpress/public/gutenberg/
 
 integrations/wordpress/nexuscontent/vendor/
 integrations/wordpress/nexuscontent/.phpunit.cache/
