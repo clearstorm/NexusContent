@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-08-31
+
+WordPress companion draft preview release.
+
 ### Added
 
 - The WordPress companion plugin now mints short-lived, post-scoped preview tokens and serves draft/scheduled content to them: `POST /nexuscontent/v1/preview-token` (requires `edit_posts`) returns a 64-character hex token bound to a single post id, stored in a WordPress transient with a filterable TTL (default 15 minutes); the public `GET /nexuscontent/v1/preview/{token}/{id}` route returns the normalized page/post envelope for a valid token. Anonymous requests are served directly — the token itself is the auth — so a consumer preview route never needs a session or persisted state. Invalid, expired, or mismatched tokens return a 401 and are revoked on use.
