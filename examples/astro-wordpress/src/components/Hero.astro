@@ -4,18 +4,23 @@ interface Image {
   alt?: string;
 }
 
+interface Button {
+  label: string;
+  url: string;
+  variant?: string;
+}
+
 export interface Props {
   eyebrow?: string;
   heading: string;
   body?: string;
   image?: Image;
-  primary_action_label?: string;
-  primary_action_url?: string;
-  secondary_action_label?: string;
-  secondary_action_url?: string;
+  buttons?: Button[];
 }
 
-const { eyebrow, heading, body, image, primary_action_label, primary_action_url, secondary_action_label, secondary_action_url } = Astro.props;
+const { eyebrow, heading, body, image, buttons } = Astro.props;
+const btnClass = (variant: string | undefined) =>
+  variant === "secondary" || variant === "light" ? "btn-light" : "btn-primary";
 ---
 
 <section class="hero">
@@ -23,14 +28,11 @@ const { eyebrow, heading, body, image, primary_action_label, primary_action_url,
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
     <h1>{heading}</h1>
     {body && <p class="body">{body}</p>}
-    {(primary_action_label || secondary_action_label) && (
+    {buttons && buttons.length > 0 && (
       <div class="actions">
-        {primary_action_label && primary_action_url && (
-          <a class="btn btn-primary" href={primary_action_url}>{primary_action_label}</a>
-        )}
-        {secondary_action_label && secondary_action_url && (
-          <a class="btn btn-light" href={secondary_action_url}>{secondary_action_label}</a>
-        )}
+        {buttons.map((button) => (
+          <a class={`btn ${btnClass(button.variant)}`} href={button.url}>{button.label}</a>
+        ))}
       </div>
     )}
   </div>

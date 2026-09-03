@@ -16,8 +16,12 @@
       "alt": "Office space"
     },
     "image_position": "right",
-    "action_label": "Email the team",
-    "action_url": "mailto:hello@nexuscontent.dev"
+    "buttons": [
+      {
+        "label": "Email the team",
+        "url": "mailto:hello@nexuscontent.dev"
+      }
+    ]
   },
   "logo_grid": {
     "eyebrow": "Partners",

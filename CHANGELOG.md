@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+WordPress companion plugin `0.1.3` (section-editor alignment; core `0.2.7` unchanged).
+
+### Changed
+
+- The companion plugin's editorial experience is aligned with the Gutenberg blocks and the section schema: eyebrow is edited inline above the heading, the "Additional fields" inspector panel is merged into a Section settings panel (section ID, variant, and theme), and Hero, Image and Text, and Call to Action use a repeatable Buttons subcomponent (`label`, `url`, `style`) instead of the legacy action label/url pairs.
+- Canonical section field shapes: Features items expose `title`, `description`, `points`, and `thumbnail`; Testimonials items expose `quote`, `author`, and `avatar`; Logo Grid items expose `name` and `image`. The TypeScript `sections.generated.ts`, the companion `/schema` definition fixture, the component-validation schema, and the consumer fixtures move together with `sections.json`.
+- ACF editor fields align with the new shapes. ACF Free fixed fields now degrade gracefully: an unavailable repeater (for example the hero/cta `buttons` subcomponent) is skipped with a limitation instead of dropping the whole section, so fixed Hero/CTA text fields still register without ACF Pro.
+
 ## [0.2.7] - 2026-08-31
 
 WordPress companion outbound webhooks release (plugin `0.1.2`).

@@ -3,8 +3,12 @@
 	"data": {
 		"heading": "Ready to continue?",
 		"body": "Take the next step.",
-		"primary_action_label": "Contact us",
-		"primary_action_url": "https://example.test/contact"
+		"buttons": [
+			{
+				"label": "Contact us",
+				"url": "https://example.test/contact"
+			}
+		]
 	},
 	"settings": { "variant": "banner", "theme": "dark" }
 }

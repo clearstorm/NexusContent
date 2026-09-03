@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly version="0.1.2"
+readonly version="0.1.3"
 readonly plugin_slug="nexuscontent"
 plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 repo_root="$(cd "$plugin_root/../../.." && pwd)"

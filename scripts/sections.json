@@ -30,20 +30,8 @@
 					"type": "media"
 				},
 				{
-					"name": "primary_action_label",
-					"type": "string"
-				},
-				{
-					"name": "primary_action_url",
-					"type": "string"
-				},
-				{
-					"name": "secondary_action_label",
-					"type": "string"
-				},
-				{
-					"name": "secondary_action_url",
-					"type": "string"
+					"name": "buttons",
+					"type": "json"
 				},
 				{
 					"name": "theme",
@@ -149,12 +137,8 @@
 					"type": "string"
 				},
 				{
-					"name": "action_label",
-					"type": "string"
-				},
-				{
-					"name": "action_url",
-					"type": "string"
+					"name": "buttons",
+					"type": "json"
 				},
 				{
 					"name": "theme",
@@ -308,20 +292,8 @@
 					"type": "string"
 				},
 				{
-					"name": "primary_action_label",
-					"type": "string"
-				},
-				{
-					"name": "primary_action_url",
-					"type": "string"
-				},
-				{
-					"name": "secondary_action_label",
-					"type": "string"
-				},
-				{
-					"name": "secondary_action_url",
-					"type": "string"
+					"name": "buttons",
+					"type": "json"
 				},
 				{
 					"name": "background_image",

@@ -154,7 +154,7 @@ final class Block_Loader {
 		}
 
 		$base_url     = $this->root_url();
-		$version      = defined( 'NEXUSCONTENT_COMPANION_VERSION' ) ? NEXUSCONTENT_COMPANION_VERSION : '0.1.2';
+		$version      = defined( 'NEXUSCONTENT_COMPANION_VERSION' ) ? NEXUSCONTENT_COMPANION_VERSION : '0.1.3';
 		$dependencies = array( 'wp-api-fetch', 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-data', 'wp-plugins', 'wp-edit-post' );
 		$asset_file   = $this->root . '/assets/build/editor.asset.php';
 		if ( is_readable( $asset_file ) ) {

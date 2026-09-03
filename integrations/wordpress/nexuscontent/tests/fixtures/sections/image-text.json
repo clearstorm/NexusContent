@@ -10,8 +10,12 @@
 			"height": 600
 		},
 		"image_position": "left",
-		"action_label": "Learn more",
-		"action_url": "https://example.test/more"
+		"buttons": [
+			{
+				"label": "Learn more",
+				"url": "https://example.test/more"
+			}
+		]
 	},
 	"settings": { "variant": "default", "theme": "light" }
 }

@@ -15,10 +15,17 @@
       "src": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80&auto=format&fit=crop",
       "alt": "Team collaborating around a laptop"
     },
-    "primary_action_label": "Our services",
-    "primary_action_url": "/services",
-    "secondary_action_label": "Contact us",
-    "secondary_action_url": "/contact"
+    "buttons": [
+      {
+        "label": "Our services",
+        "url": "/services"
+      },
+      {
+        "label": "Contact us",
+        "url": "/contact",
+        "variant": "secondary"
+      }
+    ]
   },
   "rich_text": {
     "heading": "Our story",
@@ -33,8 +40,12 @@
       "alt": "Person typing on a laptop"
     },
     "image_position": "left",
-    "action_label": "See how it works",
-    "action_url": "/services"
+    "buttons": [
+      {
+        "label": "See how it works",
+        "url": "/services"
+      }
+    ]
   },
   "statistics": {
     "eyebrow": "Track record",

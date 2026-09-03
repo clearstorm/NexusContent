@@ -468,7 +468,7 @@ final class Normalizer {
 
 	/** @param mixed $value @return mixed */
 	private function normalize_media_values( $value, Diagnostics $diagnostics, string $path, string $field = '' ) {
-		if ( in_array( $field, array( 'image', 'background_image', 'logo' ), true ) ) {
+		if ( in_array( $field, array( 'image', 'background_image', 'thumbnail', 'avatar' ), true ) ) {
 			return $this->media->normalize( $value, $diagnostics, $path );
 		}
 		if ( 'images' === $field && is_array( $value ) ) {

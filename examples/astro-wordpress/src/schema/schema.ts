@@ -1,4 +1,4 @@
-import type { ComponentSchema, ModelSchema } from "@nexuscontent/core";
+import type { ComponentSchema, FieldSchema, ModelSchema } from "@nexuscontent/core";
 
 /**
  * Reusable component schemas.
@@ -10,10 +10,21 @@ import type { ComponentSchema, ModelSchema } from "@nexuscontent/core";
  * Git content repository does, and the consumer pushes the same 12 section
  * types to the plugin contract.
  *
- * `button` is intentionally absent: the canonical sections expose their own
- * action fields (primary_action_label/url, secondary_action_label/url,
- * action_label/url) rather than an explicit `button` component.
+ * `button` is exposed as a reusable `buttons` list on hero, image_text, and
+ * cta: each button is `{ label, url, variant? }`, so an editor adds as many
+ * buttons as they see fit instead of dealing with fixed primary/secondary
+ * action pairs.
  */
+export const buttons = {
+  type: "object",
+  list: true,
+  fields: {
+    label: { type: "string", required: true },
+    url: { type: "string", required: true },
+    variant: { type: "string" }
+  }
+} satisfies FieldSchema;
+
 export const components = {
   hero: {
     fields: {
@@ -21,10 +32,7 @@ export const components = {
       heading: { type: "string", required: true },
       body: { type: "string" },
       image: { type: "media" },
-      primary_action_label: { type: "string" },
-      primary_action_url: { type: "string" },
-      secondary_action_label: { type: "string" },
-      secondary_action_url: { type: "string" }
+      buttons
     }
   },
   intro: {
@@ -49,8 +57,7 @@ export const components = {
       body: { type: "richText" },
       image: { type: "media" },
       image_position: { type: "string" },
-      action_label: { type: "string" },
-      action_url: { type: "string" }
+      buttons
     }
   },
   features: {
@@ -110,10 +117,7 @@ export const components = {
     fields: {
       heading: { type: "string", required: true },
       body: { type: "string" },
-      primary_action_label: { type: "string", required: true },
-      primary_action_url: { type: "string", required: true },
-      secondary_action_label: { type: "string" },
-      secondary_action_url: { type: "string" },
+      buttons,
       background_image: { type: "media" }
     }
   },

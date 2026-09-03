@@ -3,6 +3,19 @@ import type { BuiltinSectionType, WordPressFixedSectionConfig } from "./config.t
 import { FIXED_SECTION_TYPES } from "./config.ts";
 import { normalizeAcfImageToMediaAsset } from "./core-media.ts";
 
+function normalizeButtons(value: unknown): JsonValue {
+  if (!Array.isArray(value)) return value as JsonValue;
+  return value.map((button) => {
+    if (typeof button !== "object" || button === null) return button as JsonValue;
+    const b = button as Record<string, unknown>;
+    const out: Record<string, JsonValue> = {};
+    if (typeof b.label !== "undefined") out.label = b.label as JsonValue;
+    if (typeof b.url !== "undefined") out.url = b.url as JsonValue;
+    if (typeof b.variant !== "undefined") out.variant = b.variant as JsonValue;
+    return out;
+  }) as unknown as JsonValue;
+}
+
 /**
  * Extract ACF fields from a WordPress REST response's `acf` property.
  * Maps ACF field groups to canonical section types.
@@ -146,10 +159,19 @@ function extractAcfLayoutData(
       data.body = layout.body ?? layout.description ?? layout.hero_description;
       data.eyebrow = layout.eyebrow;
       data.image = normalizeAcfImageToMediaAsset(layout.image ?? layout.hero_image);
-      data.primary_action_label = layout.primary_action_label ?? layout.button_label;
-      data.primary_action_url = layout.primary_action_url ?? layout.button_url;
-      data.secondary_action_label = layout.secondary_action_label;
-      data.secondary_action_url = layout.secondary_action_url;
+      data.buttons = normalizeButtons(
+        layout.buttons ??
+          (layout.primary_action_label || layout.button_label
+            ? [
+                {
+                  label:
+                    layout.primary_action_label ?? layout.button_label,
+                  url: layout.primary_action_url ?? layout.button_url,
+                  variant: "primary"
+                }
+              ]
+            : [])
+      );
       data.theme = layout.theme;
       break;
 
@@ -174,8 +196,18 @@ function extractAcfLayoutData(
       data.eyebrow = layout.eyebrow;
       data.image = normalizeAcfImageToMediaAsset(layout.image);
       data.image_position = layout.image_position;
-      data.action_label = layout.action_label ?? layout.button_label;
-      data.action_url = layout.action_url ?? layout.button_url;
+      data.buttons = normalizeButtons(
+        layout.buttons ??
+          (layout.action_label || layout.button_label
+            ? [
+                {
+                  label: layout.action_label ?? layout.button_label,
+                  url: layout.action_url ?? layout.button_url,
+                  variant: "primary"
+                }
+              ]
+            : [])
+      );
       data.theme = layout.theme;
       break;
 
@@ -211,10 +243,19 @@ function extractAcfLayoutData(
     case "cta":
       data.heading = layout.heading ?? layout.title;
       data.body = layout.body ?? layout.description;
-      data.primary_action_label = layout.primary_action_label ?? layout.button_label;
-      data.primary_action_url = layout.primary_action_url ?? layout.button_url;
-      data.secondary_action_label = layout.secondary_action_label;
-      data.secondary_action_url = layout.secondary_action_url;
+      data.buttons = normalizeButtons(
+        layout.buttons ??
+          (layout.primary_action_label || layout.button_label
+            ? [
+                {
+                  label:
+                    layout.primary_action_label ?? layout.button_label,
+                  url: layout.primary_action_url ?? layout.button_url,
+                  variant: "primary"
+                }
+              ]
+            : [])
+      );
       data.background_image = normalizeAcfImageToMediaAsset(layout.background_image);
       data.theme = layout.theme;
       break;

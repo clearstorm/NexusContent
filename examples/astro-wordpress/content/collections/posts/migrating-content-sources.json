@@ -20,8 +20,12 @@
           "src": "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?w=1200&q=80&auto=format&fit=crop",
           "alt": "Migration arrows on a whiteboard"
         },
-        "primary_action_label": "Read the docs",
-        "primary_action_url": "/services"
+        "buttons": [
+          {
+            "label": "Read the docs",
+            "url": "/services"
+          }
+        ]
       }
     },
     {
@@ -48,10 +52,17 @@
       "data": {
         "heading": "See the pattern live",
         "body": "Every model in this example declares its provider source. Flip one and rebuild to watch the swap.",
-        "primary_action_label": "Explore the example",
-        "primary_action_url": "/",
-        "secondary_action_label": "Contact us",
-        "secondary_action_url": "/contact"
+        "buttons": [
+          {
+            "label": "Explore the example",
+            "url": "/"
+          },
+          {
+            "label": "Contact us",
+            "url": "/contact",
+            "variant": "secondary"
+          }
+        ]
       }
     }
   ]

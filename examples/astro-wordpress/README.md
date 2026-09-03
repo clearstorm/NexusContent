@@ -54,8 +54,9 @@ wire shape both providers share:
 `hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`,
 `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, `form_embed` — with the
 `{ type, data }` shape. Components render against the same field names the
-companion plugin's `sections.json` defines (no `button` component; actions are
-`primary_action_label` / `primary_action_url` and friends).
+companion plugin's `sections.json` defines. A reusable `buttons` subcomponent
+(`{ label, url, variant? }`) appears on hero, image_text, and cta instead of
+fixed primary/secondary action field pairs.
 
 Singleton pages (home, about, services, contact) use the same names as declared
 component fields, so a page authored in the WordPress plugin's ACF layouts maps

@@ -4,18 +4,25 @@ interface Image {
   alt?: string;
 }
 
+interface Button {
+  label: string;
+  url: string;
+  variant?: string;
+}
+
 export interface Props {
   eyebrow?: string;
   heading: string;
   body?: string;
   image?: Image;
   image_position?: string;
-  action_label?: string;
-  action_url?: string;
+  buttons?: Button[];
 }
 
-const { eyebrow, heading, body, image, image_position, action_label, action_url } = Astro.props;
+const { eyebrow, heading, body, image, image_position, buttons } = Astro.props;
 const flip = image_position === "left" && Boolean(image?.src);
+const btnClass = (variant: string | undefined) =>
+  variant === "secondary" || variant === "light" ? "btn-light" : "btn-primary";
 ---
 
 <section class="section image-text" class:list={{ flip }}>
@@ -26,8 +33,12 @@ const flip = image_position === "left" && Boolean(image?.src);
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
     <h2>{heading}</h2>
     {body && <div class="body" set:html={body} />}
-    {action_label && action_url && (
-      <a class="btn btn-primary" href={action_url}>{action_label}</a>
+    {buttons && buttons.length > 0 && (
+      <div class="actions">
+        {buttons.map((button) => (
+          <a class={`btn ${btnClass(button.variant)}`} href={button.url}>{button.label}</a>
+        ))}
+      </div>
     )}
   </div>
   <style>
@@ -49,6 +60,13 @@ const flip = image_position === "left" && Boolean(image?.src);
     .body {
       color: var(--muted);
       line-height: 1.7;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
     }
 
     .media {

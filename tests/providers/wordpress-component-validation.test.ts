@@ -17,10 +17,15 @@ const components: Record<string, ComponentSchema> = {
       heading: { type: "string", required: true },
       body: { type: "richText", required: true },
       image: { type: "media" },
-      primary_action_label: { type: "string" },
-      primary_action_url: { type: "string" },
-      secondary_action_label: { type: "string" },
-      secondary_action_url: { type: "string" }
+      buttons: {
+        type: "object",
+        list: true,
+        fields: {
+          label: { type: "string" },
+          url: { type: "string" },
+          variant: { type: "string" }
+        }
+      }
     }
   },
   servicesList: {

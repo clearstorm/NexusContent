@@ -5,9 +5,13 @@
 		"body": "Core benefits.",
 		"items": [
 			{
-				"heading": "Portable",
-				"body": "Works across consumers.",
-				"icon": "layers"
+				"title": "Portable",
+				"description": "Works across consumers.",
+				"points": [ "Framework neutral", "Editor independent" ],
+				"thumbnail": {
+					"url": "https://example.test/features.jpg",
+					"alt": "Portable"
+				}
 			}
 		]
 	},

@@ -30,7 +30,14 @@ final class ACF_Field_Factory {
 		foreach ( $definitions as $name => $definition ) {
 			$field = self::field( $type, $name, $definition, $field_types, $limitations, $context );
 			if ( null === $field ) {
-				return null;
+				// Fixed fields degrade gracefully: an unavailable optional field
+				// (for example the hero/cta buttons repeater on ACF Free) is
+				// skipped while the remaining text and image fields still register.
+				// Flexible layouts and blocks omit the whole section instead.
+				if ( 'fixed' !== $context ) {
+					return null;
+				}
+				continue;
 			}
 			$fields[] = $field;
 		}
@@ -90,41 +97,30 @@ final class ACF_Field_Factory {
 		);
 		$map        = array(
 			'hero'         => array(
-				'section_id'             => $section_id,
-				'variant'                => $variant,
-				'eyebrow'                => array(
+				'section_id' => $section_id,
+				'variant'    => $variant,
+				'eyebrow'    => array(
 					'type'  => 'text',
 					'label' => __( 'Eyebrow', 'nexuscontent' ),
 				),
-				'heading'                => array(
+				'heading'    => array(
 					'type'  => 'text',
 					'label' => __( 'Heading', 'nexuscontent' ),
 				),
-				'body'                   => array(
+				'body'       => array(
 					'type'  => 'textarea',
 					'label' => __( 'Body', 'nexuscontent' ),
 				),
-				'image'                  => array(
+				'image'      => array(
 					'type'  => 'image',
 					'label' => __( 'Image', 'nexuscontent' ),
 				),
-				'primary_action_label'   => array(
-					'type'  => 'text',
-					'label' => __( 'Primary action label', 'nexuscontent' ),
+				'buttons'    => array(
+					'type'       => 'repeater',
+					'label'      => __( 'Buttons', 'nexuscontent' ),
+					'sub_fields' => self::button_fields(),
 				),
-				'primary_action_url'     => array(
-					'type'  => 'url',
-					'label' => __( 'Primary action URL', 'nexuscontent' ),
-				),
-				'secondary_action_label' => array(
-					'type'  => 'text',
-					'label' => __( 'Secondary action label', 'nexuscontent' ),
-				),
-				'secondary_action_url'   => array(
-					'type'  => 'url',
-					'label' => __( 'Secondary action URL', 'nexuscontent' ),
-				),
-				'theme'                  => $theme,
+				'theme'      => $theme,
 			),
 			'intro'        => array(
 				'section_id'     => $section_id,
@@ -195,13 +191,10 @@ final class ACF_Field_Factory {
 						'right' => __( 'Right', 'nexuscontent' ),
 					),
 				),
-				'action_label'   => array(
-					'type'  => 'text',
-					'label' => __( 'Action label', 'nexuscontent' ),
-				),
-				'action_url'     => array(
-					'type'  => 'url',
-					'label' => __( 'Action URL', 'nexuscontent' ),
+				'buttons'        => array(
+					'type'       => 'repeater',
+					'label'      => __( 'Buttons', 'nexuscontent' ),
+					'sub_fields' => self::button_fields(),
 				),
 				'theme'          => $theme,
 			),
@@ -282,37 +275,26 @@ final class ACF_Field_Factory {
 				'theme'      => $theme,
 			),
 			'cta'          => array(
-				'section_id'             => $section_id,
-				'variant'                => $variant,
-				'heading'                => array(
+				'section_id'       => $section_id,
+				'variant'          => $variant,
+				'heading'          => array(
 					'type'  => 'text',
 					'label' => __( 'Heading', 'nexuscontent' ),
 				),
-				'body'                   => array(
+				'body'             => array(
 					'type'  => 'textarea',
 					'label' => __( 'Body', 'nexuscontent' ),
 				),
-				'primary_action_label'   => array(
-					'type'  => 'text',
-					'label' => __( 'Primary action label', 'nexuscontent' ),
+				'buttons'          => array(
+					'type'       => 'repeater',
+					'label'      => __( 'Buttons', 'nexuscontent' ),
+					'sub_fields' => self::button_fields(),
 				),
-				'primary_action_url'     => array(
-					'type'  => 'url',
-					'label' => __( 'Primary action URL', 'nexuscontent' ),
-				),
-				'secondary_action_label' => array(
-					'type'  => 'text',
-					'label' => __( 'Secondary action label', 'nexuscontent' ),
-				),
-				'secondary_action_url'   => array(
-					'type'  => 'url',
-					'label' => __( 'Secondary action URL', 'nexuscontent' ),
-				),
-				'background_image'       => array(
+				'background_image' => array(
 					'type'  => 'image',
 					'label' => __( 'Background image', 'nexuscontent' ),
 				),
-				'theme'                  => $theme,
+				'theme'            => $theme,
 			),
 			'faq'          => array(
 				'section_id' => $section_id,
@@ -431,17 +413,47 @@ final class ACF_Field_Factory {
 	}
 
 	/**
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function button_fields() {
+		return array(
+			array(
+				'key'   => 'field_nc_buttons_label',
+				'name'  => 'label',
+				'label' => __( 'Label', 'nexuscontent' ),
+				'type'  => 'text',
+			),
+			array(
+				'key'   => 'field_nc_buttons_url',
+				'name'  => 'url',
+				'label' => __( 'URL', 'nexuscontent' ),
+				'type'  => 'url',
+			),
+			array(
+				'key'     => 'field_nc_buttons_variant',
+				'name'    => 'variant',
+				'label'   => __( 'Style', 'nexuscontent' ),
+				'type'    => 'select',
+				'choices' => array(
+					'primary'   => __( 'Primary', 'nexuscontent' ),
+					'secondary' => __( 'Secondary', 'nexuscontent' ),
+					'light'     => __( 'Light', 'nexuscontent' ),
+				),
+			),
+		);
+	}
+
+	/**
 	 * @param string $kind Item kind.
 	 * @return array<int, array<string, mixed>>
 	 */
 	private static function item_fields( $kind ) {
 		$map    = array(
 			'feature'     => array(
-				'heading' => 'text',
-				'body'    => 'textarea',
-				'icon'    => 'text',
-				'image'   => 'image',
-				'url'     => 'url',
+				'title'       => 'text',
+				'description' => 'textarea',
+				'points'      => 'repeater',
+				'thumbnail'   => 'image',
 			),
 			'statistic'   => array(
 				'value'       => 'text',
@@ -449,20 +461,17 @@ final class ACF_Field_Factory {
 				'description' => 'textarea',
 			),
 			'testimonial' => array(
-				'quote'        => 'textarea',
-				'name'         => 'text',
-				'role'         => 'text',
-				'organisation' => 'text',
-				'image'        => 'image',
+				'quote'  => 'textarea',
+				'author' => 'text',
+				'avatar' => 'image',
 			),
 			'faq'         => array(
 				'question' => 'text',
 				'answer'   => 'wysiwyg',
 			),
 			'logo'        => array(
-				'name' => 'text',
-				'logo' => 'image',
-				'url'  => 'url',
+				'name'  => 'text',
+				'image' => 'image',
 			),
 		);
 		$fields = array();
@@ -476,13 +485,26 @@ final class ACF_Field_Factory {
 			);
 			if ( 'logo' === $kind && 'name' === $name ) {
 				$field['label']        = __( 'Label', 'nexuscontent' );
-				$field['instructions'] = __( 'Optional. Displayed with the logo when both are supplied.', 'nexuscontent' );
+				$field['instructions'] = __( 'Optional. Displayed alongside the logo image.', 'nexuscontent' );
 			}
-			if ( 'logo' === $kind && 'logo' === $name ) {
-				$field['instructions'] = __( 'Optional. Each item may contain a label, a logo, or both.', 'nexuscontent' );
+			if ( 'logo' === $kind && 'image' === $name ) {
+				$field['instructions'] = __( 'The logo image.', 'nexuscontent' );
+			}
+			if ( 'feature' === $kind && 'points' === $name ) {
+				$field['label']      = __( 'Points', 'nexuscontent' );
+				$field['sub_fields'] = array(
+					array(
+						'key'   => 'field_nc_item_feature_points_text',
+						'name'  => 'text',
+						'label' => __( 'Point', 'nexuscontent' ),
+						'type'  => 'text',
+					),
+				);
 			}
 			if ( 'image' === $type ) {
 				$field['return_format'] = 'id';
+				$field['preview_size']  = 'medium';
+				$field['library']       = 'all';
 			}
 			$fields[] = $field;
 		}

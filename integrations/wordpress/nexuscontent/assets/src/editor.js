@@ -39,10 +39,7 @@ import './editor.css';
 			'heading',
 			'body',
 			'image',
-			'primary_action_label',
-			'primary_action_url',
-			'secondary_action_label',
-			'secondary_action_url',
+			'buttons',
 			'theme',
 		],
 		intro: [
@@ -64,8 +61,7 @@ import './editor.css';
 			'body',
 			'image',
 			'image_position',
-			'action_label',
-			'action_url',
+			'buttons',
 			'theme',
 		],
 		features: [
@@ -106,10 +102,7 @@ import './editor.css';
 			'variant',
 			'heading',
 			'body',
-			'primary_action_label',
-			'primary_action_url',
-			'secondary_action_label',
-			'secondary_action_url',
+			'buttons',
 			'background_image',
 			'theme',
 		],
@@ -155,14 +148,25 @@ import './editor.css';
 	};
 	const mediaFields = [ 'image', 'background_image' ];
 
-	const sidebarHiddenFields = [ 'form_id', 'heading', 'body', 'items' ];
-	const additionalFields = [ 'eyebrow', 'section_id', 'variant', 'theme' ];
+	const sidebarHiddenFields = [
+		'form_id',
+		'heading',
+		'body',
+		'items',
+		'buttons',
+		'eyebrow',
+	];
+	const settingsFields = [ 'section_id', 'variant', 'theme' ];
 
 	function attributesFor( fields ) {
 		const attributes = {};
 		fields.forEach( function ( field ) {
 			attributes[ field ] = { type: 'string', default: '' };
-			if ( 'items' === field || 'images' === field ) {
+			if (
+				'items' === field ||
+				'images' === field ||
+				'buttons' === field
+			) {
 				attributes[ field ] = { type: 'array', default: [] };
 			} else if ( mediaFields.indexOf( field ) !== -1 ) {
 				attributes[ field ] = { type: 'object', default: {} };
@@ -440,6 +444,40 @@ import './editor.css';
 						},
 					} );
 				}
+				if ( 'select' === def.type ) {
+					return el( SelectControl, {
+						key: def.key,
+						label: def.label,
+						value:
+							item[ def.key ] ||
+							( def.options && def.options[ 0 ]
+								? def.options[ 0 ].value
+								: '' ),
+						options: def.options || [],
+						onChange( value ) {
+							updateItem( index, def.key, value );
+						},
+					} );
+				}
+				if ( 'list' === def.type ) {
+					const listValue = Array.isArray( item[ def.key ] )
+						? item[ def.key ].join( ', ' )
+						: item[ def.key ] || '';
+					return el( TextControl, {
+						key: def.key,
+						label: def.label + ' (comma-separated)',
+						value: listValue,
+						onChange( value ) {
+							const arr = value
+								.split( ',' )
+								.map( function ( s ) {
+									return s.trim();
+								} )
+								.filter( Boolean );
+							updateItem( index, def.key, arr.length ? arr : [] );
+						},
+					} );
+				}
 				return el( TextControl, {
 					key: def.key,
 					label: def.label,
@@ -573,8 +611,10 @@ import './editor.css';
 
 	const itemFieldDefs = {
 		features: [
-			{ key: 'heading', label: 'Title', type: 'text' },
-			{ key: 'body', label: 'Description', type: 'textarea' },
+			{ key: 'title', label: 'Title', type: 'text' },
+			{ key: 'description', label: 'Description', type: 'textarea' },
+			{ key: 'points', label: 'Points', type: 'list' },
+			{ key: 'thumbnail', label: 'Thumbnail', type: 'image' },
 		],
 		statistics: [
 			{ key: 'value', label: 'Value', type: 'text' },
@@ -582,14 +622,15 @@ import './editor.css';
 		],
 		testimonials: [
 			{ key: 'quote', label: 'Quote', type: 'textarea' },
-			{ key: 'name', label: 'Name', type: 'text' },
+			{ key: 'author', label: 'Author', type: 'text' },
+			{ key: 'avatar', label: 'Avatar', type: 'image' },
 		],
 		faq: [
 			{ key: 'question', label: 'Question', type: 'text' },
 			{ key: 'answer', label: 'Answer', type: 'textarea' },
 		],
 		'logo-grid': [
-			{ key: 'label', label: 'Label', type: 'text' },
+			{ key: 'name', label: 'Name', type: 'text' },
 			{ key: 'image', label: 'Logo', type: 'image' },
 		],
 	};
@@ -629,6 +670,19 @@ import './editor.css';
 		} );
 	}
 
+	function buildEyebrow( attrs, set ) {
+		return el( RichText, {
+			tagName: 'p',
+			className: 'nc-content-eyebrow',
+			value: attrs.eyebrow,
+			onChange( value ) {
+				set( 'eyebrow', value );
+			},
+			placeholder: 'Eyebrow',
+			allowedFormats: [],
+		} );
+	}
+
 	function buildItems( attrs, set, type ) {
 		const defs = itemFieldDefs[ type ];
 		if ( ! defs ) {
@@ -644,6 +698,32 @@ import './editor.css';
 		} );
 	}
 
+	const buttonFieldDefs = [
+		{ key: 'label', label: 'Label', type: 'text' },
+		{ key: 'url', label: 'URL', type: 'text' },
+		{
+			key: 'variant',
+			label: 'Style',
+			type: 'select',
+			options: [
+				{ label: 'Primary', value: 'primary' },
+				{ label: 'Secondary', value: 'secondary' },
+				{ label: 'Light', value: 'light' },
+			],
+		},
+	];
+
+	function buildButtons( attrs, set ) {
+		return el( RepeatControl, {
+			label: 'Buttons',
+			value: attrs.buttons,
+			fieldDefs: buttonFieldDefs,
+			onChange( value ) {
+				set( 'buttons', value );
+			},
+		} );
+	}
+
 	function contentHero( attrs, set ) {
 		return el(
 			'div',
@@ -651,13 +731,10 @@ import './editor.css';
 			el(
 				'div',
 				{ className: 'nc-content-col nc-content-col--text' },
+				buildEyebrow( attrs, set ),
 				buildHeading( attrs, set, 'Hero heading' ),
 				buildBody( attrs, set, 'Write a compelling introduction...' ),
-				el(
-					'div',
-					{ className: 'nc-content-hint' },
-					'Add buttons in the sidebar panel.'
-				)
+				buildButtons( attrs, set )
 			),
 			el(
 				'div',
@@ -682,6 +759,7 @@ import './editor.css';
 		const textCol = el(
 			'div',
 			{ className: 'nc-content-col nc-content-col--text' },
+			buildEyebrow( attrs, set ),
 			buildHeading( attrs, set, 'Introduction heading' ),
 			buildBody( attrs, set, 'Write an introduction...' )
 		);
@@ -727,13 +805,10 @@ import './editor.css';
 		const textCol = el(
 			'div',
 			{ className: 'nc-content-col nc-content-col--text' },
+			buildEyebrow( attrs, set ),
 			buildHeading( attrs, set, 'Section heading' ),
 			buildBody( attrs, set, 'Write your content...' ),
-			el(
-				'div',
-				{ className: 'nc-content-hint' },
-				'Add button in sidebar panel.'
-			)
+			buildButtons( attrs, set )
 		);
 		const mediaCol = el(
 			'div',
@@ -767,6 +842,7 @@ import './editor.css';
 		return el(
 			'div',
 			{ className: 'nc-content-stack' },
+			buildEyebrow( attrs, set ),
 			buildHeading( attrs, set, 'Features heading' ),
 			buildBody( attrs, set, 'Describe your features...' ),
 			buildItems( attrs, set, 'features' )
@@ -777,6 +853,7 @@ import './editor.css';
 		return el(
 			'div',
 			{ className: 'nc-content-stack' },
+			buildEyebrow( attrs, set ),
 			buildHeading( attrs, set, 'Statistics heading' ),
 			buildItems( attrs, set, 'statistics' )
 		);
@@ -786,6 +863,7 @@ import './editor.css';
 		return el(
 			'div',
 			{ className: 'nc-content-stack' },
+			buildEyebrow( attrs, set ),
 			buildHeading( attrs, set, 'Testimonials' ),
 			buildItems( attrs, set, 'testimonials' )
 		);
@@ -795,6 +873,7 @@ import './editor.css';
 		return el(
 			'div',
 			{ className: 'nc-content-stack' },
+			buildEyebrow( attrs, set ),
 			buildHeading( attrs, set, 'Gallery' )
 		);
 	}
@@ -805,11 +884,7 @@ import './editor.css';
 			{ className: 'nc-content-stack nc-content-stack--centered' },
 			buildHeading( attrs, set, 'Call to action' ),
 			buildBody( attrs, set, 'Write a persuasive message...' ),
-			el(
-				'div',
-				{ className: 'nc-content-hint' },
-				'Add buttons in sidebar panel.'
-			)
+			buildButtons( attrs, set )
 		);
 	}
 
@@ -817,6 +892,7 @@ import './editor.css';
 		return el(
 			'div',
 			{ className: 'nc-content-stack' },
+			buildEyebrow( attrs, set ),
 			buildHeading( attrs, set, 'FAQ' ),
 			buildItems( attrs, set, 'faq' )
 		);
@@ -826,13 +902,9 @@ import './editor.css';
 		return el(
 			'div',
 			{ className: 'nc-content-stack' },
+			buildEyebrow( attrs, set ),
 			buildHeading( attrs, set, 'Logo grid' ),
-			buildItems( attrs, set, 'logo-grid' ),
-			el(
-				'div',
-				{ className: 'nc-content-hint' },
-				'Each item can have a label, a logo image, or both.'
-			)
+			buildItems( attrs, set, 'logo-grid' )
 		);
 	}
 
@@ -956,16 +1028,16 @@ import './editor.css';
 						eyebrow: '',
 						items: [
 							{
-								heading: 'Feature One',
-								body: 'Description of this feature.',
+								title: 'Feature One',
+								description: 'Description of this feature.',
 							},
 							{
-								heading: 'Feature Two',
-								body: 'Description of this feature.',
+								title: 'Feature Two',
+								description: 'Description of this feature.',
 							},
 							{
-								heading: 'Feature Three',
-								body: 'Description of this feature.',
+								title: 'Feature Three',
+								description: 'Description of this feature.',
 							},
 						],
 					},
@@ -984,11 +1056,11 @@ import './editor.css';
 						items: [
 							{
 								quote: 'A great testimonial from a happy client.',
-								name: 'Client Name',
+								author: 'Client Name',
 							},
 							{
 								quote: 'Another wonderful testimonial.',
-								name: 'Client Name',
+								author: 'Client Name',
 							},
 						],
 					},
@@ -1056,16 +1128,16 @@ import './editor.css';
 			return el( 'div', blockProps, el( PreviewImage, { type } ) );
 		}
 
-		/* Sidebar controls – media, actions, secondary fields. */
+		/* Sidebar controls – media, secondary fields, and section settings. */
 		const controls = [];
-		const additionalControls = [];
+		const settingsControls = [];
 		fields.forEach( function ( field ) {
 			if ( sidebarHiddenFields.indexOf( field ) !== -1 ) {
 				return;
 			}
 			const fieldControls =
-				additionalFields.indexOf( field ) !== -1
-					? additionalControls
+				settingsFields.indexOf( field ) !== -1
+					? settingsControls
 					: controls;
 			if ( mediaFields.indexOf( field ) !== -1 ) {
 				fieldControls.push(
@@ -1146,7 +1218,6 @@ import './editor.css';
 				return;
 			}
 			const labels = {
-				eyebrow: 'Eyebrow',
 				section_id: 'Section ID',
 				variant: 'Variant',
 				theme: 'Theme',
@@ -1200,15 +1271,12 @@ import './editor.css';
 				el(
 					PanelBody,
 					{ title: 'Section settings', initialOpen: true },
-					controls
+					controls,
+					settingsControls.length
+						? el( 'div', { className: 'nc-settings-separator' } )
+						: null,
+					...settingsControls
 				),
-				additionalControls.length
-					? el(
-							PanelBody,
-							{ title: 'Additional fields', initialOpen: false },
-							additionalControls
-					  )
-					: null,
 				el(
 					PanelBody,
 					{ title: 'Block preview', initialOpen: false },

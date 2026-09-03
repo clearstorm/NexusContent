@@ -15,10 +15,17 @@
       "src": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&q=80&auto=format&fit=crop",
       "alt": "Documents on a desk"
     },
-    "primary_action_label": "Get a quote",
-    "primary_action_url": "/contact",
-    "secondary_action_label": "What clients say",
-    "secondary_action_url": "/#testimonials"
+    "buttons": [
+      {
+        "label": "Get a quote",
+        "url": "/contact"
+      },
+      {
+        "label": "What clients say",
+        "url": "/#testimonials",
+        "variant": "secondary"
+      }
+    ]
   },
   "features": {
     "eyebrow": "Offering",
@@ -88,10 +95,17 @@
   "cta": {
     "heading": "Want the same setup?",
     "body": "From a two-provider reference consumer to a full content strategy, the shape is the same.",
-    "primary_action_label": "Book a call",
-    "primary_action_url": "/contact",
-    "secondary_action_label": "Browse posts",
-    "secondary_action_url": "/blog",
+    "buttons": [
+      {
+        "label": "Book a call",
+        "url": "/contact"
+      },
+      {
+        "label": "Browse posts",
+        "url": "/blog",
+        "variant": "secondary"
+      }
+    ],
     "background_image": {
       "src": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600&q=80&auto=format&fit=crop",
       "alt": ""

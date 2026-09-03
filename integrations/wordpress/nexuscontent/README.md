@@ -14,7 +14,7 @@ Activate **NexusContent Companion** in WordPress Admin or run `wp plugin activat
 
 ## Requirements
 
-- Plugin version `0.1.2`; companion contract `1` (`contract1`).
+- Plugin version `0.1.3`; companion contract `1` (`contract1`).
 - WordPress 6.6 or newer and PHP 8.1 or newer.
 - Gutenberg uses WordPress core. ACF is optional.
 - ACF Free 6.2 or newer supports fixed fields. A legally supplied ACF Pro 6.2 or newer enables Pro-only capabilities where available.
@@ -28,7 +28,7 @@ Each page and post stores one `nexus_editor_mode`: `gutenberg`, `acf_fixed`, or 
 
 Gutenberg is available when the page or post type supports the block editor. Core rich-text, image, gallery, cover, and container blocks are normalized, alongside registered NexusContent blocks. Unsupported visible blocks are retained as flagged rich-text data with diagnostics where possible.
 
-NexusContent blocks edit headings and primary content in place. The inspector's Additional fields panel exposes eyebrow, section ID, variant, and theme. Section IDs follow the heading until an editor enters a custom value. Every block includes a packaged static illustration in the inserter preview and Block preview panel.
+NexusContent blocks edit headings and primary content in place. Eyebrow is edited inline above the heading. The inspector's Section settings panel exposes section ID, variant, and theme. Hero, Image and Text, and Call to Action blocks use a repeatable Buttons subcomponent with `label`, `url`, and `style`. Section IDs follow the heading until an editor enters a custom value. Every block includes a packaged static illustration in the inserter preview and Block preview panel.
 
 ## ACF Free
 
@@ -165,7 +165,7 @@ npm run format:check
 npm run package
 ```
 
-`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.2.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
+`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.3.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
 
 ## Tests
 
@@ -188,7 +188,7 @@ The default wp-env has no ACF. Run `npm run env:acf-free` for the development si
 
 ## Limitations
 
-Version 0.1.2 is page/post-focused, scoped to pages and standard posts. Published transport and single-use draft preview are provided, and opt-in outbound webhooks notify on page/post changes; it does not provide mutations, webhook-triggered rebuilds, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
+Version 0.1.3 is page/post-focused, scoped to pages and standard posts. Published transport and single-use draft preview are provided, and opt-in outbound webhooks notify on page/post changes; it does not provide mutations, webhook-triggered rebuilds, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
 
 ## Phase 3 Status
 

@@ -106,17 +106,8 @@ final class Block_Normalizer {
 			$output .= self::render_media( $data['background_image'] );
 		}
 
-		foreach ( array( 'primary_action', 'secondary_action', 'action' ) as $action ) {
-			$url_key   = $action . '_url';
-			$label_key = $action . '_label';
-			if ( isset( $data[ $url_key ] ) && is_string( $data[ $url_key ] ) ) {
-				$output .= self::render_link(
-					array(
-						'url'   => $data[ $url_key ],
-						'label' => $data[ $label_key ] ?? $data[ $url_key ],
-					)
-				);
-			}
+		if ( isset( $data['buttons'] ) && is_array( $data['buttons'] ) ) {
+			$output .= self::render_buttons( $data['buttons'] );
 		}
 
 		if ( 'gallery' === $type && isset( $data['images'] ) ) {
@@ -188,6 +179,26 @@ final class Block_Normalizer {
 	}
 
 	/**
+	 * @param array<int, mixed> $buttons Button values.
+	 * @return string
+	 */
+	private static function render_buttons( $buttons ) {
+		$links = array();
+		foreach ( $buttons as $button ) {
+			if ( ! is_array( $button ) ) {
+				continue;
+			}
+			if ( isset( $button['url'] ) && is_string( $button['url'] ) && '' !== $button['url'] ) {
+				$links[] = self::render_link( $button );
+			}
+		}
+		if ( empty( $links ) ) {
+			return '';
+		}
+		return '<div class="nexuscontent-section__buttons">' . implode( '', $links ) . '</div>';
+	}
+
+	/**
 	 * @param string              $type  Section type.
 	 * @param array<int, mixed>   $items Item values.
 	 * @return string
@@ -213,7 +224,7 @@ final class Block_Normalizer {
 			}
 
 			$primary = '';
-			foreach ( array( 'heading', 'value', 'quote', 'name', 'label' ) as $key ) {
+			foreach ( array( 'title', 'heading', 'value', 'quote', 'name', 'author', 'label' ) as $key ) {
 				if ( isset( $item[ $key ] ) && is_scalar( $item[ $key ] ) ) {
 					$primary = (string) $item[ $key ];
 					break;
@@ -227,7 +238,16 @@ final class Block_Normalizer {
 			} elseif ( isset( $item['description'] ) ) {
 				$output .= wp_kses_post( wpautop( (string) $item['description'] ) );
 			}
-			$output .= self::render_media( isset( $item['image'] ) ? $item['image'] : ( $item['logo'] ?? array() ) );
+			if ( isset( $item['points'] ) && is_array( $item['points'] ) ) {
+				$output .= '<ul class="nexuscontent-section__points">';
+				foreach ( $item['points'] as $point ) {
+					if ( is_scalar( $point ) ) {
+						$output .= '<li>' . esc_html( (string) $point ) . '</li>';
+					}
+				}
+				$output .= '</ul>';
+			}
+			$output .= self::render_media( isset( $item['thumbnail'] ) ? $item['thumbnail'] : ( isset( $item['avatar'] ) ? $item['avatar'] : ( $item['image'] ?? array() ) ) );
 			$output .= self::render_link(
 				isset( $item['url'] ) ? array(
 					'url'   => $item['url'],

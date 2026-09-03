@@ -39,10 +39,7 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "heading", type: "string" },
     { name: "body", type: "string" },
     { name: "image", type: "media" },
-    { name: "primary_action_label", type: "string" },
-    { name: "primary_action_url", type: "string" },
-    { name: "secondary_action_label", type: "string" },
-    { name: "secondary_action_url", type: "string" },
+    { name: "buttons", type: "json" },
     { name: "theme", type: "string" }
   ],
   "intro": [
@@ -70,8 +67,7 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "body", type: "string" },
     { name: "image", type: "media" },
     { name: "image_position", type: "string" },
-    { name: "action_label", type: "string" },
-    { name: "action_url", type: "string" },
+    { name: "buttons", type: "json" },
     { name: "theme", type: "string" }
   ],
   "features": [
@@ -112,10 +108,7 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "variant", type: "string" },
     { name: "heading", type: "string" },
     { name: "body", type: "string" },
-    { name: "primary_action_label", type: "string" },
-    { name: "primary_action_url", type: "string" },
-    { name: "secondary_action_label", type: "string" },
-    { name: "secondary_action_url", type: "string" },
+    { name: "buttons", type: "json" },
     { name: "background_image", type: "media" },
     { name: "theme", type: "string" }
   ],

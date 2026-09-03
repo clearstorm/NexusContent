@@ -5,14 +5,13 @@
 		"items": [
 			{
 				"name": "Example Co",
-				"logo": {
+				"image": {
 					"url": "https://example.test/logo.png",
 					"alt": "Example Co"
-				},
-				"url": "https://example.test"
+				}
 			},
 			{
-				"label": "Acme",
+				"name": "Acme",
 				"image": {
 					"url": "https://example.test/acme.png",
 					"alt": "Acme logo"

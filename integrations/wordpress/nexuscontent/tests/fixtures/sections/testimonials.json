@@ -5,9 +5,11 @@
 		"items": [
 			{
 				"quote": "Predictable and clear.",
-				"name": "Alex Example",
-				"role": "Editor",
-				"organisation": "Example Co"
+				"author": "Alex Example",
+				"avatar": {
+					"url": "https://example.test/avatar.jpg",
+					"alt": "Alex Example"
+				}
 			}
 		]
 	},
