@@ -48,6 +48,8 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `provider.wordpress.pagination` WordPress pagination | implemented | 0.2.0 | - | Loads collection pages sequentially, verifies WordPress total headers, and throws rather than truncating at `maxPages`. |
 | `provider.wordpress.errors` WordPress errors | implemented | 0.2.0 | - | Actionable configuration, HTTP, network, timeout, JSON, payload, and pagination errors without header secret leakage. |
 | `provider.wordpress.media` WordPress featured media | implemented | 0.2.0 | - | Requests embedded featured media and maps its basic fields to `MediaAsset` (`src` since `0.2.2`). |
+| `provider.wordpress.navigation` WordPress navigation | implemented | 0.2.9 | - | `getNavigation(key)` looks up the menu by slug on native `wp/v2/menus`, loads items from `wp/v2/menu-items`, and maps `title.rendered`, `url`, `parent`, and `menu_order` into a validated nested `NavigationContent` tree; an unknown menu class returns `null`. |
+| `provider.wordpress.settings` WordPress settings | implemented | 0.2.9 | - | `getSettings(key)` maps the native `wp/v2/settings` singleton into a generic `SettingsContent` (`wp-settings-<key>` id, `settings/<key>` provenance). A companion `/settings` route is deferred to the next release. |
 | `provider.wordpress.phase1.config` WordPress Phase 1 configuration | implemented | 0.2.1 | - | Editor modes `gutenberg`, `acf_flexible`, and `acf_fixed`, plus API strategy, unknown content policy, media resolution, ACF, and fixed section options. |
 | `provider.wordpress.phase1.sections` WordPress Phase 1 section registry | implemented | 0.2.1 | - | Exactly 12 canonical short names: `hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`, `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, and `form_embed`. |
 | `provider.wordpress.phase1.capabilities` WordPress Phase 1 provider capabilities | implemented | 0.2.1 | - | Provider-facing capabilities cover editor mode, Gutenberg, ACF flexible/fixed/fields, media library, custom post types, sections, locale awareness, preview, and webhooks. |
@@ -103,7 +105,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
-| `seo.normalized-contract` Normalized SEO contract | implemented | 0.1.4 | - | Public robots, Open Graph, Twitter, canonical URL, JSON-compatible structured data, and media types; `PageContent.seo` remains optional and legacy `canonical` is deprecated. |
+| `seo.normalized-contract` Normalized SEO contract | implemented | 0.1.4 | - | Public robots, Open Graph, Twitter, canonical URL, JSON-compatible structured data, and media types; `PageContent.seo` remains optional and legacy `canonical` is deprecated. Extended in `0.2.9` (all optional): robots `noarchive`/`nosnippet`, Open Graph `siteName`/`url`/`locale`, and Twitter `url`/`site`. |
 | `seo.resolution` Deterministic SEO resolution | implemented | 0.1.4 | - | Pure `resolveSeo` applies documented content and site-default fallback chains without mutating input. |
 | `seo.validation-provider-mapping` SEO validation and provider mapping | implemented | 0.1.4 | - | Zod validates normalized SEO at the provider boundary; providers map source-specific fields and the Git provider accepts normalized JSON SEO. |
 | `seo.astro-rendering` Astro SEO rendering | implemented | 0.1.4 | - | Consumer-owned reference components render metadata and safely escaped JSON-LD across the Astro examples. |

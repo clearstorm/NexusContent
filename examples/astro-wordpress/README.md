@@ -33,10 +33,11 @@ matching the `sections` field the Git blog posts author. A site that needs both
 at once can register two WordPress instances (one per editor mode, see
 "Multiple provider instances" in the root `AGENTS.md`).
 
-Navigation and settings are NexusContent models on the Git provider (the
-WordPress provider returns `null` for those operations). `BaseLayout` loads
+Navigation and settings are NexusContent models; this example resolves them
+through the Git provider. `BaseLayout` loads
 them through `nexus.getNavigation("primary")` / `nexus.getSettings("site")` and
-falls back to small constants if either is missing.
+falls back to small constants if either is missing. (The WordPress provider
+also resolves native `wp/v2` navigation and settings since `0.2.9`.)
 
 ## The twelve canonical sections
 

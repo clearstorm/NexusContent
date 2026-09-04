@@ -23,21 +23,28 @@ export const mediaAssetSchema = z.object({
 
 export const seoRobotsSchema = z.object({
   index: z.boolean().optional(),
-  follow: z.boolean().optional()
+  follow: z.boolean().optional(),
+  noarchive: z.boolean().optional(),
+  nosnippet: z.boolean().optional()
 });
 
 export const seoOpenGraphSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   image: mediaAssetSchema.optional(),
-  type: z.string().optional()
+  type: z.string().optional(),
+  siteName: z.string().optional(),
+  url: z.url().optional(),
+  locale: z.string().optional()
 });
 
 export const seoTwitterSchema = z.object({
   card: z.enum(["summary", "summary_large_image"]).optional(),
   title: z.string().optional(),
   description: z.string().optional(),
-  image: mediaAssetSchema.optional()
+  image: mediaAssetSchema.optional(),
+  url: z.url().optional(),
+  site: z.string().optional()
 });
 
 export const seoSchema = z.object({

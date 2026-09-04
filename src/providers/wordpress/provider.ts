@@ -8,6 +8,7 @@ import type {
   CollectionItem,
   FieldMap,
   NavigationContent,
+  NavigationItem,
   PageContent,
   SchemaConfig,
   SettingsContent
@@ -457,18 +458,55 @@ export class WordPressProvider implements ContentProvider {
     return this.coreGetPage(key, context) as Promise<PageContent<TData> | null>;
   }
 
-  getNavigation(
-    _key: string,
+  async getNavigation(
+    key: string,
     _options: ProviderRetrievalOptions = {}
   ): Promise<NavigationContent | null> {
-    return Promise.resolve(null);
+    const context = this.context("getNavigation", key);
+
+    const menuResponse = await this.client.request(
+      "menus",
+      { slug: key },
+      context,
+      { skipStatus: true }
+    );
+    const menu = readMenuLookup(menuResponse.data, key, context);
+    if (menu === null) {
+      return null;
+    }
+
+    const itemsResponse = await this.client.request(
+      "menu-items",
+      { menus: String(menu.id), per_page: this.perPage },
+      context,
+      { skipStatus: true }
+    );
+    const rawItems = readWireArray(itemsResponse.data, "menu-items", context);
+
+    return {
+      id: `wp-menu-${menu.id}`,
+      key,
+      items: buildMenuTree(rawItems, context),
+      meta: { source: "wordpress", sourceId: `menus/${menu.slug}` }
+    };
   }
 
-  getSettings<TData = Record<string, unknown>>(
-    _key: string,
+  async getSettings<TData = Record<string, unknown>>(
+    key: string,
     _options: ProviderRetrievalOptions = {}
   ): Promise<SettingsContent<TData> | null> {
-    return Promise.resolve(null);
+    const context = this.context("getSettings", key);
+    const response = await this.client.request("settings", {}, context, {
+      skipStatus: true
+    });
+    const data = readWireObject(response.data, "settings", context);
+
+    return {
+      id: `wp-settings-${key}`,
+      key,
+      data: data as TData,
+      meta: { source: "wordpress", sourceId: `settings/${key}` }
+    };
   }
 
   async getCollection<TData = WordPressContentData>(
@@ -777,6 +815,135 @@ export class WordPressProvider implements ContentProvider {
   ): ProviderError {
     return new ProviderError(message, { ...context, reason });
   }
+}
+
+interface WireMenuItem {
+  id: number;
+  title?: { rendered?: string };
+  url?: string;
+  parent?: number;
+  menu_order?: number;
+}
+
+function readWireArray(
+  data: unknown,
+  endpoint: string,
+  context: WordPressNormalizeContext
+): unknown[] {
+  if (!Array.isArray(data)) {
+    throw new ProviderError(
+      "WordPress returned an invalid payload.",
+      { ...context, reason: `Expected a JSON array from endpoint "${endpoint}".` }
+    );
+  }
+  return data;
+}
+
+function readWireObject(
+  data: unknown,
+  endpoint: string,
+  context: WordPressNormalizeContext
+): Record<string, unknown> {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    throw new ProviderError(
+      "WordPress returned an invalid payload.",
+      { ...context, reason: `Expected a JSON object from endpoint "${endpoint}".` }
+    );
+  }
+  return data as Record<string, unknown>;
+}
+
+function readMenuLookup(
+  data: unknown,
+  key: string,
+  context: WordPressNormalizeContext
+): { id: number; slug: string } | null {
+  const menus = readWireArray(data, "menus", context);
+  if (menus.length === 0) {
+    return null;
+  }
+  const menu = menus[0] as { id?: unknown; slug?: unknown };
+  if (
+    typeof menu.id !== "number" ||
+    (menu.slug !== undefined && typeof menu.slug !== "string")
+  ) {
+    throw new ProviderError(
+      "WordPress returned an invalid menu lookup.",
+      { ...context, reason: `Menu "${key}" response did not include a numeric id.` }
+    );
+  }
+  return { id: menu.id, slug: typeof menu.slug === "string" ? menu.slug : key };
+}
+
+function buildMenuTree(
+  rawItems: unknown[],
+  context: WordPressNormalizeContext
+): NavigationItem[] {
+  const items = rawItems.map((raw, index): WireMenuItem & { index: number } => {
+    if (typeof raw !== "object" || raw === null) {
+      throw new ProviderError(
+        "WordPress returned an invalid menu item.",
+        { ...context, reason: `Menu item at index ${index} is not an object.` }
+      );
+    }
+    const item = raw as Record<string, unknown>;
+    if (typeof item.id !== "number") {
+      throw new ProviderError(
+        "WordPress returned an invalid menu item.",
+        { ...context, reason: `Menu item at index ${index} has no numeric id.` }
+      );
+    }
+    return {
+      id: item.id,
+      title: item.title as WireMenuItem["title"],
+      url: item.url as string | undefined,
+      parent: item.parent as number | undefined,
+      index
+    };
+  });
+
+  const byId = new Map<number, WireMenuItem & { index: number }>();
+  for (const item of items) {
+    byId.set(item.id, item);
+  }
+
+  const childrenOf = new Map<number, (WireMenuItem & { index: number })[]>();
+  const roots: (WireMenuItem & { index: number })[] = [];
+  for (const item of items) {
+    const parent = item.parent !== undefined ? byId.get(item.parent) : undefined;
+    if (parent) {
+      const siblings = childrenOf.get(parent.id) ?? [];
+      siblings.push(item);
+      childrenOf.set(parent.id, siblings);
+    } else {
+      roots.push(item);
+    }
+  }
+
+  roots.sort(compareMenuOrder);
+
+  const toNav = (item: WireMenuItem & { index: number }): NavigationItem => {
+    const children = (childrenOf.get(item.id) ?? []).sort(compareMenuOrder);
+    const node: NavigationItem = {
+      label: item.title?.rendered ?? "",
+      href: item.url ?? ""
+    };
+    if (children.length > 0) {
+      node.children = children.map(toNav);
+    }
+    return node;
+  };
+
+  return roots.map(toNav);
+}
+
+function compareMenuOrder(
+  a: { menu_order?: number; index: number },
+  b: { menu_order?: number; index: number }
+): number {
+  const left = typeof a.menu_order === "number" ? a.menu_order : 0;
+  const right = typeof b.menu_order === "number" ? b.menu_order : 0;
+  return left - right || a.index - b.index;
 }
 
 function validateBaseUrl(value: unknown, provider: string): URL {

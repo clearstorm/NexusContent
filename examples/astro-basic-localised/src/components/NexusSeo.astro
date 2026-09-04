@@ -12,7 +12,9 @@ const openGraph = seo.openGraph;
 const twitter = seo.twitter;
 const robots = [
   seo.robots?.index === undefined ? undefined : seo.robots.index ? "index" : "noindex",
-  seo.robots?.follow === undefined ? undefined : seo.robots.follow ? "follow" : "nofollow"
+  seo.robots?.follow === undefined ? undefined : seo.robots.follow ? "follow" : "nofollow",
+  seo.robots?.noarchive ? "noarchive" : undefined,
+  seo.robots?.nosnippet ? "nosnippet" : undefined
 ].filter((directive): directive is string => directive !== undefined).join(", ");
 ---
 
@@ -23,12 +25,17 @@ const robots = [
 {openGraph?.type !== undefined && <meta property="og:type" content={openGraph.type} />}
 {openGraph?.title !== undefined && <meta property="og:title" content={openGraph.title} />}
 {openGraph?.description !== undefined && <meta property="og:description" content={openGraph.description} />}
+{openGraph?.siteName !== undefined && <meta property="og:site_name" content={openGraph.siteName} />}
+{openGraph?.url !== undefined && <meta property="og:url" content={openGraph.url} />}
+{openGraph?.locale !== undefined && <meta property="og:locale" content={openGraph.locale} />}
 {openGraph?.image && (
   <meta property="og:image" content={openGraph.image.src} />
 )}
 {twitter?.card && <meta name="twitter:card" content={twitter.card} />}
 {twitter?.title !== undefined && <meta name="twitter:title" content={twitter.title} />}
 {twitter?.description !== undefined && <meta name="twitter:description" content={twitter.description} />}
+{twitter?.url !== undefined && <meta name="twitter:url" content={twitter.url} />}
+{twitter?.site !== undefined && <meta name="twitter:site" content={twitter.site} />}
 {twitter?.image && <meta name="twitter:image" content={twitter.image.src} />}
 {seo.structuredData?.map((value) => (
   <script type="application/ld+json" is:inline set:html={serializeJsonLd(value)} />

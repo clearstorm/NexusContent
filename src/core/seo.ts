@@ -60,7 +60,10 @@ function resolveOpenGraph(
     title: openGraph?.title ?? fallback.title,
     description: openGraph?.description ?? fallback.description,
     image: openGraph?.image ?? fallback.image,
-    type: openGraph?.type
+    type: openGraph?.type,
+    siteName: openGraph?.siteName,
+    url: openGraph?.url,
+    locale: openGraph?.locale
   });
 }
 
@@ -76,7 +79,9 @@ function resolveTwitter(
     card: twitter?.card,
     title: twitter?.title ?? fallback.title,
     description: twitter?.description ?? fallback.description,
-    image: twitter?.image ?? fallback.image
+    image: twitter?.image ?? fallback.image,
+    url: twitter?.url,
+    site: twitter?.site
   });
 }
 

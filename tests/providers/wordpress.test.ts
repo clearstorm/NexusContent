@@ -471,10 +471,57 @@ test("reports invalid JSON, timeout, and invalid WordPress entries", async (t) =
   });
 });
 
-test("returns null for unsupported navigation and settings operations", async () => {
-  const wordpress = provider("https://example.test/wp-json/wp/v2");
-  assert.equal(await wordpress.getNavigation("main"), null);
-  assert.equal(await wordpress.getSettings("site"), null);
+test("returns null for an unsupported navigation key", async () => {
+  await withServer((_request, response) => sendJson(response, []), async (baseUrl) => {
+    assert.equal(await provider(baseUrl).getNavigation("missing"), null);
+  });
+});
+
+test("maps a WordPress menu into a nested navigation tree", async () => {
+  await withServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://local.test");
+    if (url.pathname.endsWith("/menus")) {
+      sendJson(response, [{ id: 5, slug: "main", name: "Main" }]);
+      return;
+    }
+    sendJson(response, [
+      { id: 1, title: { rendered: "Home" }, url: "https://example.com/", parent: 0, menu_order: 1 },
+      { id: 2, title: { rendered: "Services" }, url: "https://example.com/services/", parent: 0, menu_order: 2 },
+      { id: 3, title: { rendered: "SEO" }, url: "https://example.com/services/seo/", parent: 2, menu_order: 1 },
+      { id: 4, title: { rendered: "Contact" }, url: "https://example.com/contact/", parent: 0, menu_order: 3 }
+    ]);
+  }, async (baseUrl) => {
+    const navigation = await provider(baseUrl).getNavigation("main");
+    assert.equal(navigation?.key, "main");
+    assert.equal(navigation?.meta.source, "wordpress");
+    assert.deepEqual(navigation?.items, [
+      { label: "Home", href: "https://example.com/" },
+      {
+        label: "Services",
+        href: "https://example.com/services/",
+        children: [{ label: "SEO", href: "https://example.com/services/seo/" }]
+      },
+      { label: "Contact", href: "https://example.com/contact/" }
+    ]);
+  });
+});
+
+test("maps WordPress settings into a SettingsContent payload", async () => {
+  await withServer((_request, response) => {
+    sendJson(response, {
+      title: "Example Site",
+      description: "Just another example",
+      url: "https://example.com",
+      language: "en-US",
+      show_on_front: "posts"
+    });
+  }, async (baseUrl) => {
+    const settings = await provider(baseUrl).getSettings("site");
+    assert.equal(settings?.key, "site");
+    assert.equal(settings?.meta.source, "wordpress");
+    assert.equal(settings?.data.title, "Example Site");
+    assert.equal(settings?.data.description, "Just another example");
+  });
 });
 
 test("normalized WordPress output passes through the NexusContent service", async () => {

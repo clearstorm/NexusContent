@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.9] - 2026-09-04
+
+WordPress provider parity for navigation and settings, plus an additive extension of the core SEO contract.
+
+### Added
+
+- The WordPress provider now resolves dedicated navigation models through native WordPress REST. `getNavigation(key)` looks up the menu by slug on the core `wp/v2/menus` endpoint, then loads its items from `wp/v2/menu-items`, mapping `title.rendered`, `url`, `parent`, and `menu_order` into a validated nested `NavigationContent` tree. An unknown menu slug returns `null`.
+- The WordPress provider now resolves dedicated settings models through the native `wp/v2/settings` endpoint (`skipStatus`, since the singleton is not a status-filtered post type), mapped into a generic `SettingsContent` with a `wp-settings-<key>` id and `settings/<key>` provenance. This is the provider-level `getSettings` that previously returned `null`.
+- Core SEO contract fields are extended additively (all optional, non-breaking): `SeoRobots` gains `noarchive` and `nosnippet`; `SeoOpenGraph` gains `siteName`, `url`, and `locale`; `SeoTwitter` gains `url` and `site`. `resolveSeo` passes these through (no synthesis), the Zod schemas mirror them, and the Astro `NexusSeo` reference renderers emit `noarchive`/`nosnippet` robots directives plus `og:site_name`, `og:url`, `og:locale`, `twitter:url`, and `twitter:site` meta tags.
+
+### Changed
+
+- The WordPress provider is no longer documented or treated as returning `null` for navigation and settings; the base native REST path is implemented. (A companion `/settings` route and per-page SEO authoring are deferred to the next release.)
+
 ## [0.2.8] - 2026-09-04
 
 Seamless provider switching for CMS-ordered sections (core `0.2.8`); singleton models unified onto `getPage` (breaking pre-1.0). The companion plugin `0.1.3` section-editor alignment ships alongside.

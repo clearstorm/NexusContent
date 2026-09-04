@@ -146,6 +146,30 @@ test("supports the legacy canonical field without changing input", () => {
   assert.deepEqual(input, before);
 });
 
+test("passes through extended robots, Open Graph, and Twitter fields", () => {
+  const resolved = resolveSeo({
+    seo: {
+      title: "SEO title",
+      robots: { index: false, noarchive: true, nosnippet: true },
+      openGraph: { title: "OG title", siteName: "Example", url: "https://example.com/p", locale: "en_US" },
+      twitter: { title: "Twitter title", url: "https://example.com/p", site: "@example" }
+    }
+  });
+
+  assert.deepEqual(resolved.robots, { index: false, noarchive: true, nosnippet: true });
+  assert.deepEqual(resolved.openGraph, {
+    title: "OG title",
+    siteName: "Example",
+    url: "https://example.com/p",
+    locale: "en_US"
+  });
+  assert.deepEqual(resolved.twitter, {
+    title: "Twitter title",
+    url: "https://example.com/p",
+    site: "@example"
+  });
+});
+
 test("uses summary as description when excerpt is absent", () => {
   const resolved = resolveSeo(
     { summary: "Blog summary text" },

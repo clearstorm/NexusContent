@@ -50,6 +50,8 @@ export interface MediaReference {
 export interface SeoRobots {
   index?: boolean;
   follow?: boolean;
+  noarchive?: boolean;
+  nosnippet?: boolean;
 }
 
 export interface SeoOpenGraph {
@@ -57,6 +59,9 @@ export interface SeoOpenGraph {
   description?: string;
   image?: MediaAsset;
   type?: string;
+  siteName?: string;
+  url?: string;
+  locale?: string;
 }
 
 export interface SeoTwitter {
@@ -64,6 +69,8 @@ export interface SeoTwitter {
   title?: string;
   description?: string;
   image?: MediaAsset;
+  url?: string;
+  site?: string;
 }
 
 export interface SeoData {
