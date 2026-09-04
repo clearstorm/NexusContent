@@ -223,7 +223,12 @@ final class Normalizer {
 			return array();
 		}
 
-		$rows = get_field( 'nexus_sections', $post->ID, false );
+		// Use the formatted (default) value so ACF returns flexible rows keyed by
+		// canonical field *names* (`heading`, `body`, ...). The unformatted value
+		// (get_field(..., false)) keys sub-fields by their ACF field *keys*
+		// (`field_nc_flexible_hero_heading`), which would leak into the wire and
+		// break the canonical section data contract the consumer schema expects.
+		$rows = get_field( 'nexus_sections', $post->ID );
 		if ( ! is_array( $rows ) ) {
 			return array();
 		}
@@ -298,6 +303,7 @@ final class Normalizer {
 		$normalized = $this->json_value( $data, $diagnostics, 'sections.' . $index );
 		$normalized = is_array( $normalized ) ? $normalized : array();
 		$normalized = $this->remove_null_values( $normalized );
+		$normalized = $this->normalize_section_shape( $type, $normalized );
 		if ( null !== $embed_code ) {
 			$normalized['embed_code'] = $embed_code;
 		}
@@ -523,6 +529,50 @@ final class Normalizer {
 		}
 
 		return array_is_list( $value ) ? array_values( $result ) : $result;
+	}
+
+	/**
+	 * Apply canonical section-shape normalizations that real CMS sources emit
+	 * differently from the wire contract. Currently the features section's
+	 * `points` are authored in ACF as a repeater of a single `text` sub-field
+	 * (`[ { text: "..." } ]`), but the canonical contract (and every consumer
+	 * schema) expects flat `points: string[]`. Flatten to the shared shape so
+	 * Git, Gutenberg, and ACF sources stay equivalent.
+	 *
+	 * @param string               $type Canonical section type.
+	 * @param array<string, mixed> $data Normalized section data.
+	 * @return array<string, mixed>
+	 */
+	private function normalize_section_shape( string $type, array $data ): array {
+		if ( 'features' !== $type || empty( $data['items'] ) || ! is_array( $data['items'] ) ) {
+			return $data;
+		}
+		foreach ( $data['items'] as $index => $item ) {
+			if ( is_array( $item ) && isset( $item['points'] ) && is_array( $item['points'] ) ) {
+				$data['items'][ $index ]['points'] = $this->flatten_text_entries( $item['points'] );
+			}
+		}
+		return $data;
+	}
+
+	/**
+	 * Flatten a list of `{ text: "..." }` objects into `[ "...", ... ]`.
+	 * Already-flat (string) lists are returned unchanged, so multiple authoring
+	 * paths converge on the canonical shape without corrupting them.
+	 *
+	 * @param array<mixed> $entries
+	 * @return array<mixed>
+	 */
+	private function flatten_text_entries( array $entries ): array {
+		$flat = array();
+		foreach ( $entries as $entry ) {
+			if ( is_array( $entry ) && array_key_exists( 'text', $entry ) ) {
+				$flat[] = $entry['text'];
+				continue;
+			}
+			return $entries;
+		}
+		return $flat;
 	}
 
 	private function source_count( WP_Post $post ): int {

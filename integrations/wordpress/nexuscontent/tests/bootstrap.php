@@ -125,6 +125,7 @@ if ( ! function_exists( 'nc_test_reset' ) ) {
 			'styles' => array(), 'options' => array(), 'menus' => array(), 'query_posts' => array(),
 			'query_args' => array(), 'registered_meta' => array(), 'transients' => array(),
 			'webhooks' => array(), 'settings' => array(), 'settings_fields' => array(), 'settings_sections' => array(),
+			'get_field_formats' => array(),
 		);
 		$GLOBALS['wp_version'] = '6.6-test';
 	}
@@ -162,7 +163,7 @@ if ( ! function_exists( 'current_user_can' ) ) { function current_user_can( $cap
 if ( ! function_exists( 'get_post_meta' ) ) { function get_post_meta( $id, $key, $single = false ) { return $GLOBALS['nc_test']['meta'][ $id ][ $key ] ?? ''; } }
 if ( ! function_exists( 'update_post_meta' ) ) { function update_post_meta( $id, $key, $value ) { $GLOBALS['nc_test']['meta'][ $id ][ $key ] = $value; return true; } }
 if ( ! function_exists( 'metadata_exists' ) ) { function metadata_exists( $type, $id, $key ) { return array_key_exists( $key, $GLOBALS['nc_test']['meta'][ $id ] ?? array() ); } }
-if ( ! function_exists( 'get_field' ) ) { function get_field( $key, $id = false, $format = true ) { return $GLOBALS['nc_test']['fields'][ $id ][ $key ] ?? null; } }
+if ( ! function_exists( 'get_field' ) ) { function get_field( $key, $id = false, $format = true ) { $GLOBALS['nc_test']['get_field_formats'][ $id ][ $key ] = $format; return $GLOBALS['nc_test']['fields'][ $id ][ $key ] ?? null; } }
 if ( ! function_exists( 'acf_get_field_type' ) ) { function acf_get_field_type( $type ) { return (bool) ( $GLOBALS['nc_test']['acf_field_types'][ $type ] ?? false ); } }
 if ( ! function_exists( 'get_post' ) ) { function get_post( $id ) { return $GLOBALS['nc_test']['posts'][ (int) $id ] ?? null; } }
 if ( ! function_exists( 'get_page_by_path' ) ) { function get_page_by_path( $slug, $output = OBJECT, $type = 'page' ) { foreach ( $GLOBALS['nc_test']['posts'] as $post ) { if ( $post->post_name === $slug && $post->post_type === $type ) return $post; } return null; } }

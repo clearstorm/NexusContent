@@ -102,4 +102,62 @@ final class NormalizationEquivalenceTest extends TestCase {
 		self::assertCount( 1, $sections, 'Fixed post sections were not extracted' );
 		self::assertSame( array_diff_key( $expected['data'], array( 'variant' => true, 'theme' => true ) ), $this->canonical( $sections[0] )['data'] );
 	}
+
+	public function test_flexible_sections_read_formatted_values_so_names_reach_the_wire(): void {
+		$post = $this->post();
+		$GLOBALS['nc_test']['meta'][42][ Editor_Mode::META_KEY ] = Editor_Mode::ACF_FLEXIBLE;
+		$GLOBALS['nc_test']['fields'][42]['nexus_sections'] = array( array_merge( array( 'acf_fc_layout' => 'hero' ), $this->fixture( 'hero' )['data'] ) );
+
+		$this->normalizedPage( $post );
+		$format = $GLOBALS['nc_test']['get_field_formats'][42]['nexus_sections'] ?? null;
+
+		self::assertSame( true, $format, 'flexible_sections() must read the formatted value so ACF returns rows keyed by canonical field names (not field_nc_* keys).' );
+	}
+
+	public function test_features_points_flatten_from_repeater_to_flat_strings(): void {
+		$post = $this->post();
+		$GLOBALS['nc_test']['meta'][42][ Editor_Mode::META_KEY ] = Editor_Mode::ACF_FLEXIBLE;
+		$GLOBALS['nc_test']['fields'][42]['nexus_sections'] = array(
+			array(
+				'acf_fc_layout' => 'features',
+				'heading'       => 'Features',
+				'items'         => array(
+					array(
+						'title'       => 'Portable',
+						'description' => 'Works across consumers.',
+						// The shape real ACF emits for a repeater of a `text` sub-field.
+						'points'      => array(
+							array( 'text' => 'Framework neutral' ),
+							array( 'text' => 'Editor independent' ),
+						),
+					),
+				),
+			),
+		);
+
+		$sections = $this->normalizedPage( $post )['sections'];
+		self::assertCount( 1, $sections );
+		self::assertSame( 'features', $sections[0]['type'] );
+		self::assertSame( array( 'Framework neutral', 'Editor independent' ), $sections[0]['data']['items'][0]['points'] );
+	}
+
+	public function test_features_points_leave_flat_strings_untouched(): void {
+		$post = $this->post();
+		$GLOBALS['nc_test']['meta'][42][ Editor_Mode::META_KEY ] = Editor_Mode::ACF_FLEXIBLE;
+		$GLOBALS['nc_test']['fields'][42]['nexus_sections'] = array(
+			array(
+				'acf_fc_layout' => 'features',
+				'heading'       => 'Features',
+				'items'         => array(
+					array(
+						'title'  => 'Portable',
+						'points' => array( 'Framework neutral', 'Editor independent' ),
+					),
+				),
+			),
+		);
+
+		$sections = $this->normalizedPage( $post )['sections'];
+		self::assertSame( array( 'Framework neutral', 'Editor independent' ), $sections[0]['data']['items'][0]['points'] );
+	}
 }

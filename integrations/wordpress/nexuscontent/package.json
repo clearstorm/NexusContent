@@ -1,6 +1,6 @@
 {
 	"name": "@nexuscontent/wordpress-companion",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"description": "Build and local-development tooling for the NexusContent Companion WordPress plugin.",
 	"private": true,
 	"license": "MIT",

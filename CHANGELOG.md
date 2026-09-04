@@ -35,6 +35,12 @@ Seamless provider switching for CMS-ordered sections (core `0.2.8`); singleton m
 - The ACF flexible-content button `url` field is now a plain `text` field instead of the ACF `url` type. ACF's `url` type validates for an absolute, protocol-qualified URL, so a root-relative value such as `/contact` was rejected in the editor. A `text` field stores the value verbatim, so both fully-qualified URLs (`https://localhost:4321/contact`) and root-relative paths (`/contact`) are accepted and preserved through to consumers. The change applies to the shared Buttons subcomponent used by the Hero, Image and Text, and Call to Action flexible layouts. No wire-contract, schema, or TypeScript changes were required; the server's `esc_url`-based rendering already preserves root-relative paths.
 - Plugin artifact is now `dist/nexuscontent-0.1.5.zip`.
 
+### Companion plugin 0.1.6
+
+- ACF flexible sections now reach consumers with canonical field names. The server normalizer reads the *formatted* ACF value (`get_field(..., $post->ID)` instead of the unformatted `get_field(..., $post->ID, false)`), so flexible rows are keyed by their field *names* (`heading`, `body`, ...) rather than their raw ACF field *keys* (`field_nc_flexible_hero_heading`, ...). Previously the prefixed keys leaked into the wire, leaving every declared component field undefined against the consumer schema and producing a `SchemaError` on retrieval.
+- The Features section's `points` are normalized to the canonical flat shape. ACF authors them as a repeater of a single `text` sub-field (`[ { text: "..." } ]`), and the server now flattens them to `points: ["...", ...]`, matching `sections.json`, the consumer schema, and Git-authored features. Already-flat string lists are left unchanged, so Gutenberg/block and Git paths remain equivalent.
+- Plugin artifact is now `dist/nexuscontent-0.1.6.zip`.
+
 ## [0.2.7] - 2026-08-31
 
 WordPress companion outbound webhooks release (plugin `0.1.2`).
