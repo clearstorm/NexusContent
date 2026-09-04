@@ -7,14 +7,16 @@
 				"name": "Example Co",
 				"image": {
 					"url": "https://example.test/logo.png",
-					"alt": "Example Co"
+					"alt": "Example Co",
+					"mimetype": "image/*"
 				}
 			},
 			{
 				"name": "Acme",
 				"image": {
 					"url": "https://example.test/acme.png",
-					"alt": "Acme logo"
+					"alt": "Acme logo",
+					"mimetype": "image/*"
 				}
 			}
 		]

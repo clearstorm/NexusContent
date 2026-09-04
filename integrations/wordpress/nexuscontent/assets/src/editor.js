@@ -235,6 +235,17 @@ import './editor.css';
 					},
 				} )
 			),
+			el( TextControl, {
+				label: '…or paste image URL',
+				help: 'External/remote images are supported.',
+				value: value.url || '',
+				onChange( url ) {
+					const trimmed = url.trim();
+					props.onChange(
+						trimmed ? { url: trimmed, alt: value.alt || '' } : {}
+					);
+				},
+			} ),
 			value.url
 				? el(
 						Button,
@@ -252,21 +263,43 @@ import './editor.css';
 	}
 
 	function GalleryControl( props ) {
-		const images = props.value || [];
+		const images = Array.isArray( props.value ) ? props.value : [];
+
+		function updateImage( index, url ) {
+			const trimmed = url.trim();
+			const next = images.slice();
+			if ( ! trimmed ) {
+				next.splice( index, 1 );
+			} else {
+				next[ index ] = {
+					url: trimmed,
+					alt: ( next[ index ] && next[ index ].alt ) || '',
+				};
+			}
+			props.onChange( next );
+		}
+
 		return el(
 			Fragment,
 			{},
-			el(
-				'div',
-				{ className: 'nexuscontent-gallery-preview' },
-				images.map( function ( image, index ) {
-					return el( 'img', {
-						key: image.id || index,
+			images.map( function ( image, index ) {
+				return el(
+					'div',
+					{ key: image.id || index, className: 'nc-gallery-item' },
+					el( 'img', {
 						src: image.url,
 						alt: image.alt || '',
-					} );
-				} )
-			),
+						className: 'nexuscontent-gallery-thumb',
+					} ),
+					el( TextControl, {
+						label: 'Image URL',
+						value: image.url || '',
+						onChange( url ) {
+							updateImage( index, url );
+						},
+					} )
+				);
+			} ),
 			el(
 				MediaUploadCheck,
 				{},
@@ -416,6 +449,20 @@ import './editor.css';
 								},
 							} )
 						),
+						el( TextControl, {
+							label: '…or paste image URL',
+							value: img.url || '',
+							onChange( url ) {
+								const trimmed = url.trim();
+								updateItem(
+									index,
+									def.key,
+									trimmed
+										? { url: trimmed, alt: img.alt || '' }
+										: {}
+								);
+							},
+						} ),
 						img.url
 							? el(
 									Button,

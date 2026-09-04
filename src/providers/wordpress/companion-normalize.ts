@@ -128,7 +128,7 @@ function toMediaAsset(value: Record<string, unknown> & { url: string }): MediaAs
   if (alt !== undefined) asset.alt = alt;
   const caption = wireString(value.caption);
   if (caption !== undefined) asset.caption = caption;
-  const mimeType = wireString(value.mimeType);
+  const mimeType = wireString(value.mimeType ?? value.mimetype);
   if (mimeType !== undefined) asset.mimeType = mimeType;
   const width = wireNumber(value.width);
   if (width !== undefined) asset.width = width;
@@ -155,6 +155,7 @@ function isWireMedia(value: Record<string, unknown>): value is Record<string, un
   return (
     value.id !== undefined ||
     value.mimeType !== undefined ||
+    value.mimetype !== undefined ||
     value.width !== undefined ||
     value.height !== undefined ||
     Array.isArray(value.sizes)

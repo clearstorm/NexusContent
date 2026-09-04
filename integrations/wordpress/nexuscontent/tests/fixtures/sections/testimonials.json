@@ -8,7 +8,8 @@
 				"author": "Alex Example",
 				"avatar": {
 					"url": "https://example.test/avatar.jpg",
-					"alt": "Alex Example"
+					"alt": "Alex Example",
+					"mimetype": "image/*"
 				}
 			}
 		]

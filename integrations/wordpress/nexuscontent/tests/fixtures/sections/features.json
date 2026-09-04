@@ -10,7 +10,8 @@
 				"points": [ "Framework neutral", "Editor independent" ],
 				"thumbnail": {
 					"url": "https://example.test/features.jpg",
-					"alt": "Portable"
+					"alt": "Portable",
+					"mimetype": "image/*"
 				}
 			}
 		]

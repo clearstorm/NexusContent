@@ -6,6 +6,7 @@
 			{
 				"url": "https://example.test/gallery-1.jpg",
 				"alt": "First image",
+				"mimetype": "image/*",
 				"width": 640,
 				"height": 480
 			}

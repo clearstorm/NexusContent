@@ -23,6 +23,13 @@ Seamless provider switching for CMS-ordered sections (core `0.2.8`); singleton m
 - Canonical section field shapes: Features items expose `title`, `description`, `points`, and `thumbnail`; Testimonials items expose `quote`, `author`, and `avatar`; Logo Grid items expose `name` and `image`. The TypeScript `sections.generated.ts`, the companion `/schema` definition fixture, the component-validation schema, and the consumer fixtures move together with `sections.json`.
 - ACF editor fields align with the new shapes. ACF Free fixed fields now degrade gracefully: an unavailable repeater (for example the hero/cta `buttons` subcomponent) is skipped with a limitation instead of dropping the whole section, so fixed Hero/CTA text fields still register without ACF Pro.
 
+### Companion plugin 0.1.4
+
+- External-images authoring: single-image media controls, Gallery items, and repeater media fields (Features thumbnails, Testimonials avatars, Logo Grid) now offer a "paste image URL" text field beside the media-library picker, so editors can author remote/external images without uploading them to the site media library. When an entered URL is selected instead of a library attachment, the editor writes `{ url, alt }` with no attachment `id`.
+- The companion media normalizer treats URL-only / non-attachment media as media by defaulting its `mimeType` to `image/*` (any `mime_type`/`mimeType` already on the source wins), so remote images are not mistaken for plain links or embeddings.
+- The WordPress provider `isWireMedia`/`toMediaAsset` wire boundary now also recognises the lowercased `mimetype` key the companion emits (section keys are lower-cased during wire serialization), mapping such URL-only media to `MediaAsset { src, alt, mimeType }` even without a dimension or attachment id.
+- Plugin artifact is now `dist/nexuscontent-0.1.4.zip`.
+
 ## [0.2.7] - 2026-08-31
 
 WordPress companion outbound webhooks release (plugin `0.1.2`).

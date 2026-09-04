@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       NexusContent Companion
  * Description:       Exposes normalized WordPress content for NexusContent consumers.
- * Version:           0.1.3
+ * Version:           0.1.4
  * Requires at least: 6.6
  * Requires PHP:      8.1
  * Author:            NexusContent
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'NEXUSCONTENT_COMPANION_VERSION', '0.1.3' );
+define( 'NEXUSCONTENT_COMPANION_VERSION', '0.1.4' );
 define( 'NEXUSCONTENT_COMPANION_CONTRACT_VERSION', 1 );
 define( 'NEXUSCONTENT_COMPANION_REST_NAMESPACE', 'nexuscontent/v1' );
 define( 'NEXUSCONTENT_COMPANION_FILE', __FILE__ );

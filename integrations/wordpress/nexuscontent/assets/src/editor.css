@@ -732,6 +732,33 @@
 	width: 100%;
 }
 
+/* Gallery item rows with a per-image external URL field. */
+.nc-gallery-item {
+	border-bottom: 1px solid #e2e4e7;
+	padding: 0.5rem 0 0.9rem;
+}
+.nc-gallery-item:last-child {
+	border-bottom: 0;
+}
+.nexuscontent-gallery-thumb {
+	border-radius: 3px;
+	display: block;
+	height: auto;
+	margin-bottom: 0.4rem;
+	max-height: 6rem;
+	max-width: 100%;
+	object-fit: cover;
+}
+
+/* External-URL input under the media library picker. */
+.nexuscontent-media-control .components-text-control__input,
+.nc-repeater-media-field .components-text-control__input {
+	max-width: 100%;
+}
+.nexuscontent-media-control .components-base-control {
+	margin-bottom: 0.6rem;
+}
+
 /* ---------------------------------------------------------------
  * Media control sidebar thumbnail (existing)
  * --------------------------------------------------------------- */

@@ -519,6 +519,39 @@ test("normalizeCompanionPageItem surfaces featuredImage and excerpt and converts
   assert.deepEqual(hero.link, { url: "https://example.test/not-media", label: "CTA" });
 });
 
+test("normalizeCompanionPageItem converts URL-only external images (no id) to media via mimeType", () => {
+  const result = normalizeCompanionPageItem({
+    id: "6",
+    key: "external-media",
+    slug: "external-media",
+    title: "External Media",
+    rawFields: {},
+    sections: [
+      {
+        id: "hero-1",
+        type: "hero",
+        data: {
+          heading: "Hi",
+          // A remote image carries no attachment id; the companion tags it
+          // with a generic image mimeType so the wire boundary recognises it.
+          // The wire lowercases section keys, hence `mimetype` (not `mimeType`).
+          image: { url: "https://cdn.example.com/remote.jpg", mimetype: "image/*" },
+          gallery: [{ url: "https://cdn.example.com/one.jpg", mimetype: "image/*" }],
+          link: { url: "https://example.test/not-media", label: "CTA" }
+        }
+      }
+    ]
+  });
+
+  const data = result.data as { sections: Array<{ data: Record<string, unknown> }> };
+  const hero = data.sections[0]?.data;
+  assert.ok(hero);
+  assert.deepEqual(hero.image, { id: undefined, src: "https://cdn.example.com/remote.jpg", mimeType: "image/*" });
+  assert.deepEqual(hero.gallery, [{ id: undefined, src: "https://cdn.example.com/one.jpg", mimeType: "image/*" }]);
+  // A plain `{ url, label }` object is still not media.
+  assert.deepEqual(hero.link, { url: "https://example.test/not-media", label: "CTA" });
+});
+
 // ─── URL derivation ────────────────────────────────────────────────
 
 test("deriveRestRoot extracts WordPress REST root from baseUrl", () => {

@@ -154,7 +154,10 @@ final class Media_Normalizer {
 				'caption'  => $direct['caption'] ?? '',
 				'width'    => $direct['width'] ?? null,
 				'height'   => $direct['height'] ?? null,
-				'mimeType' => $direct['mime_type'] ?? $direct['mimeType'] ?? '',
+				// External/URL-only images carry no attachment metadata, so a
+				// generic image mimeType lets the wire boundary treat them as
+				// media rather than plain section data.
+				'mimeType' => $direct['mime_type'] ?? $direct['mimeType'] ?? 'image/*',
 				'sizes'    => $direct['sizes'] ?? array(),
 			)
 		);

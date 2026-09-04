@@ -14,7 +14,14 @@ use WP_Post;
 final class MediaNormalizerTest extends TestCase {
 	public function test_normalizes_url_acf_array_and_object_shapes(): void {
 		$media = new Media_Normalizer();
-		self::assertSame( array( 'url' => 'https://example.test/a.jpg' ), $media->normalize( 'https://example.test/a.jpg' ) );
+		self::assertSame(
+			array( 'url' => 'https://example.test/a.jpg', 'mimeType' => 'image/*' ),
+			$media->normalize( 'https://example.test/a.jpg' )
+		);
+		self::assertSame(
+			array( 'url' => 'https://example.test/a.jpg', 'alt' => 'Remote', 'mimeType' => 'image/*' ),
+			$media->normalize( array( 'url' => 'https://example.test/a.jpg', 'alt' => 'Remote' ) )
+		);
 		$expected = array(
 			'url' => 'https://example.test/b.jpg', 'alt' => 'Alternative', 'caption' => '<em>Caption</em>',
 			'width' => 800, 'height' => 600, 'mimeType' => 'image/jpeg',
