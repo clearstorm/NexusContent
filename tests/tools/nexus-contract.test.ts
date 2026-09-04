@@ -8,13 +8,16 @@ import assert from "node:assert/strict";
 
 import {
   BUNDLED_SECTIONS_PATH,
+  CONFIG_FILE,
   classify,
   deriveContractFromSchema,
   expectedTypes,
   fetchInstalledSections,
   generateCommand,
+  initCommand,
   installedSet,
   loadBundledSections,
+  loadConfig,
   loadContract,
   main,
   normalizeCustomSections,
@@ -22,8 +25,11 @@ import {
   phpString,
   projectContractRouteUrl,
   pushCommand,
+  regenerateCommand,
   renderPhp,
-  schemaRouteUrl
+  resolveConfig,
+  schemaRouteUrl,
+  validateCommand
 } from "../../scripts/nexus-contract.mjs";
 
 const root = path.resolve(
@@ -353,12 +359,20 @@ test("parseArgs handles commands, flags, help, and unknown input", () => {
   assert.equal(parsed.writePath, "out.php");
   assert.equal(parsed.apiRoot, "https://wp.test/wp-json/wp/v2");
 
+  const init = parseArgs(["init", "--config", "nc.json", "--custom", "c.json", "--force"]);
+  assert.equal(init.command, "init");
+  assert.equal(init.configPath, "nc.json");
+  assert.equal(init.force, true);
+  assert.equal(init.customPath, "c.json");
+
   assert.equal(parseArgs(["--help"]).help, true);
   assert.throws(() => parseArgs(["--nope"]), /unknown argument/);
   assert.throws(() => parseArgs(["generate", "extra"]), /extra arguments/);
 });
 
-test("main rejects unknown commands", async () => {
+test("main dispatches the config-driven commands", async () => {
+  await assert.rejects(() => main(["regenerate", "--config", "/nonexistent/nc.json"]), /not valid JSON/);
+  await assert.rejects(() => main(["validate", "--config", "/nonexistent/nc.json"]), /not valid JSON/);
   await assert.rejects(() => main(["frobnicate"]), /unknown command/);
 });
 
@@ -394,6 +408,120 @@ test("a contract sectionType with no definition is classified as missing, not em
   const state = classify({ installed: INSTALLED, custom: custom(), contract });
   assert.deepEqual(state.missing, ["unknown_section"]);
   assert.deepEqual(state.emittedTypes, ["promo", "services_list"]);
+});
+
+test("initCommand writes the config and starter custom file, guarding overwrite", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "nexus-init-"));
+  const configPath = path.join(dir, "nexus.contract.json");
+  const customPath = path.join(dir, "sections.custom.json");
+  const writePath = path.join(dir, "mu-sections.php");
+  try {
+    initCommand({ configPath, customPath, writePath, apiRoot: "https://wp.test" });
+    assert.deepEqual(JSON.parse(readFileSync(customPath, "utf8")), { sections: [] });
+    const config = JSON.parse(readFileSync(configPath, "utf8")) as Record<string, string>;
+    assert.equal(config.custom, customPath);
+    assert.equal(config.write, writePath);
+    assert.equal(config.apiRoot, "https://wp.test");
+
+    assert.throws(
+      () => initCommand({ configPath, customPath }),
+      /already exists/
+    );
+    initCommand({ configPath, customPath, force: true });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("loadConfig validates types and resolveConfig merges config with CLI overrides", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "nexus-config-"));
+  const configPath = path.join(dir, "nexus.contract.json");
+  try {
+    writeFileSync(
+      configPath,
+      JSON.stringify({ custom: "custom.json", apiRoot: "https://wp.test", write: "out.php" })
+    );
+    assert.throws(
+      () => loadConfig(path.join(dir, "missing.json")),
+      /not valid JSON/
+    );
+    writeFileSync(configPath, JSON.stringify({ custom: 5 }));
+    assert.throws(() => loadConfig(configPath), /must be a non-empty string/);
+
+    writeFileSync(
+      configPath,
+      JSON.stringify({ custom: "from-config.json", apiRoot: "https://config.test" })
+    );
+    const merged = resolveConfig({ configPath, customPath: "override.json" });
+    assert.equal(merged.customPath, "override.json");
+    assert.equal(merged.apiRoot, "https://config.test");
+    assert.equal(merged.schemaPath, undefined);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+  assert.equal(CONFIG_FILE, "nexus.contract.json");
+});
+
+test("regenerateCommand reads config paths and writes lintable PHP", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "nexus-regenerate-"));
+  try {
+    const customPath = path.join(dir, "custom.json");
+    const writePath = path.join(dir, "nexuscontent-sections.php");
+    const configPath = path.join(dir, "nexus.contract.json");
+    writeFileSync(customPath, JSON.stringify({ sections: CUSTOM_RAW }));
+    writeFileSync(configPath, JSON.stringify({ custom: customPath, write: writePath }));
+    await regenerateCommand({ configPath });
+    const php = readFileSync(writePath, "utf8");
+    assert.ok(php.includes("'services_list' => array("));
+    execFileSync("php", ["-l", writePath], { stdio: "pipe" });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("regenerateCommand fails actionably without a custom file source", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "nexus-regenerate-"));
+  try {
+    const configPath = path.join(dir, "nexus.contract.json");
+    writeFileSync(configPath, JSON.stringify({}));
+    await assert.rejects(
+      () => regenerateCommand({ configPath }),
+      /run `nexus-contract init` to create it/
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("validateCommand passes clean contracts and rejects missing definitions", async () => {
+  const clean = await (async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "nexus-validate-clean-"));
+    try {
+      const customPath = path.join(dir, "custom.json");
+      const contractPath = path.join(dir, "contract.json");
+      writeFileSync(customPath, JSON.stringify({ sections: [] }));
+      writeFileSync(contractPath, JSON.stringify({ components: [], sectionTypes: ["hero"] }));
+      await validateCommand({ customPath, contractPath });
+      return true;
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  })();
+
+  const dir = mkdtempSync(path.join(tmpdir(), "nexus-validate-"));
+  try {
+    const customPath = path.join(dir, "custom.json");
+    const contractPath = path.join(dir, "contract.json");
+    writeFileSync(customPath, JSON.stringify({ sections: [] }));
+    writeFileSync(contractPath, JSON.stringify({ components: [], sectionTypes: ["hero", "mystery"] }));
+    await assert.rejects(
+      () => validateCommand({ customPath, contractPath }),
+      /mystery/
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+  assert.equal(clean, true);
 });
 
 test("package wiring ships the CLI and bundled vocabulary", async () => {

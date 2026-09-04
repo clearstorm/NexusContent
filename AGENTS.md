@@ -137,7 +137,7 @@ Before completing a state-changing task, run `npm run validate:project-state` in
 
 - **Project name:** NexusContent
 - **Current development stage:** Early development
-- **Current milestone:** 0.3.0-strapi
+- **Current milestone:** 0.3.0-cli
 - **Primary implementation language:** TypeScript
 - **Primary initial consumer:** Astro (reference consumer only)
 
@@ -1259,7 +1259,7 @@ Preserve these rules:
 
 # 26. Strapi
 
-Strapi is the directional provider milestone for `0.3.0`, after the `0.2.1` companion work.
+Strapi is the next directional provider milestone (`0.3.1`), deferred out of `0.3.0` when that milestone was re-scoped to the contract workflow CLI by user decision. It follows the `0.2.1` companion work and the `0.3.0` CLI.
 
 Do not expand its scope beyond the reviewed milestone merely because adjacent capabilities might be useful.
 
@@ -1409,7 +1409,9 @@ The project may integrate with existing systems that provide these capabilities.
 
 # 32. Current Milestone
 
-**CURRENT MILESTONE:** 0.3.0-strapi
+**CURRENT MILESTONE:** 0.3.0-cli
+
+The `0.3.0` milestone is the contract workflow CLI, re-scoped from the originally planned Strapi milestone by user decision: `nexus-contract` gains `init` (scaffold a `nexus.contract.json` config and a starter `sections.custom.json`), `regenerate` (re-derive the consumer contract and re-render the ACF-layout mu-plugin from the recorded paths, with explicit flags overriding config), and `validate` (classify against the live companion `/schema` or the bundled offline vocabulary, print the drift without writing, and fail on undefined sections). The existing `generate`/`push` subcommands are unchanged. The Strapi provider milestone was deferred to `0.3.1`; the general-purpose CLI (`tooling.cli`) remains directional at `0.7.0`.
 
 The WordPress provider `0.2.0` release was completed internally on 2026-08-18. The `0.2.1` WordPress companion milestone (repaired Phase 1 contracts, Phase 2 plugin, Phase 3 integration) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference consumer) were released together on 2026-08-29 (`v0.2.1` and `v0.2.2` tags at the same commit; root package version `0.2.2`). The `0.2.3` WordPress companion consumer milestone was released on 2026-08-29 as `v0.2.3` (root package version `0.2.3`); it proved the Phase 3 companion path through the reference consumer: normalized companion sections on collection items (`data.sections`), the `astro-wordpress` example's `apiStrategy: "companion"` flip (built in CI against a local companion API), and Git-vs-WordPress section parity through the shared `PostSections` components.
 
@@ -1435,7 +1437,7 @@ The `0.1.7` companion plugin release (root package version stays `0.2.8`, plugin
 
 The `0.1.8` companion plugin release (root package version stays `0.2.9`, plugin `0.1.8`) adds public contract-v1 site settings and editor-mode-aware page/post SEO authoring. ACF Pro or Secure Custom Fields registers the site option page; ACF Free and plugin-free installs fall back to WordPress core site values. Gutenberg uses a document sidebar and ACF modes use a field group, both writing shared `nexus_seo_*` meta that the companion emits as optional `seo`; the TypeScript provider converts wire media `url` to normalized `src`. The provider prefers companion `/settings` under `auto`/`companion` and falls back to native `wp/v2/settings` when the route is absent. The plugin artifact is `dist/nexuscontent-0.1.8.zip`.
 
-The recommended next focus is the directional `0.3.0` Strapi provider, followed by the remaining `0.2.x` consolidation if any.
+The recommended next focus is completing the `0.3.0` contract workflow CLI, followed by the deferred `0.3.1` Strapi provider milestone and the remaining `0.2.x` consolidation if any.
 
 ---
 

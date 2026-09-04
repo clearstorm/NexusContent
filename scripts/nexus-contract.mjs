@@ -5,13 +5,23 @@
  * schema; nothing is downloaded from the plugin or a website.
  *
  * Commands:
- *   generate — render a WordPress must-use plugin registering the custom
+ *   init       — scaffold the consumer project contract workflow: write a
+ *     starter `sections.custom.json` and a `nexus.contract.json` config
+ *     recording the declared paths, so later commands can run without
+ *     re-typing flags.
+ *   generate   — render a WordPress must-use plugin registering the custom
  *     sections a project contract references. Installed section types come
  *     from the site's live companion `/schema` route when a WordPress API root
  *     is configured, falling back to the bundled canonical vocabulary
  *     (scripts/sections.json) offline. The companion plugin auto-creates the
  *     ACF flexible layout (plus optional ACF block and fixed fields) for every
  *     registered custom section, exactly as it does for the built-in twelve.
+ *   regenerate — re-run `generate` using the paths recorded by `init`
+ *     (regenerate cascades over the config, keeping `--schema`, `--contract`,
+ *     `--custom`, `--write`, and `--api-root` overrides).
+ *   validate   — classify the same way `generate` does and print the drift
+ *     (installed/custom/missing/unused) without writing anything; exits
+ *     non-zero when the contract references sections with no definition.
  *   push     — POST the consumer's project contract
  *     ({ components, sectionTypes, componentTypeMap? }) to the companion
  *     plugin's read-only-drift `project-contract` route.
@@ -25,9 +35,16 @@
  * comparison.
  *
  * Usage:
+ *   nexus-contract init     [--config <file>] [--schema <file>] [--custom <file>] [--write <path>] [--api-root <url>] [--force]
  *   nexus-contract generate [--schema <file> | --contract <file>] --custom <file> [--write <path>] [--api-root <url>]
+ *   nexus-contract regenerate [--config <file>] [overrides as generate]
+ *   nexus-contract validate [--config <file>] [overrides as generate]
  *   nexus-contract push     [--schema <file> | --contract <file>] [--api-root <url>] [--username <user>] [--app-password <pass>]
  *
+ * Built-in commands default their paths to the `nexus.contract.json` config
+ * written by `init`: `schema` (consumer schema), `custom` (custom section
+ * definitions), `write` (generated mu-plugin path), and `apiRoot` (WordPress
+ * API root). Explicit flags always win over config values.
  * --schema points at the consumer's schema.ts; the contract is derived through
  * WordPressProvider.projectComponentContract(). --contract accepts the
  * serialized `{ components, sectionTypes, componentTypeMap? }` shape instead.
@@ -36,7 +53,7 @@
  * Credentials and roots default to WORDPRESS_API_URL / WORDPRESS_USERNAME /
  * WORDPRESS_APP_PASSWORD (as documented in the example .env).
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
@@ -49,6 +66,10 @@ export const BUNDLED_SECTIONS_PATH = path.join(
   "scripts",
   "sections.json"
 );
+
+export const CONFIG_FILE = "nexus.contract.json";
+
+const CONFIG_KEYS = ["schema", "custom", "write", "apiRoot"];
 
 export const ALLOWED_FIELD_TYPES = new Set([
   "string",
@@ -446,6 +467,134 @@ function report(state) {
   }
 }
 
+export function loadConfig(configPath) {
+  const data = loadJson(configPath, "--config");
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    throw new Error(`--config must be a JSON object: ${configPath}`);
+  }
+  const config = {};
+  for (const key of CONFIG_KEYS) {
+    if (data[key] === undefined) continue;
+    if (typeof data[key] !== "string" || data[key].trim() === "") {
+      throw new Error(
+        `--config "${key}" must be a non-empty string: ${JSON.stringify(data[key])}`
+      );
+    }
+    config[key] = data[key];
+  }
+  return config;
+}
+
+function configPathFor(options) {
+  return options.configPath ?? CONFIG_FILE;
+}
+
+export function resolveConfig(options) {
+  const configPath = configPathFor(options);
+  let config = {};
+  if (options.configPath !== undefined || existsSync(configPath)) {
+    config = loadConfig(configPath);
+    console.error(
+      `options read from ${configPath}: ${CONFIG_KEYS.filter((key) => config[key] !== undefined).join(", ") || "(none set)"}`
+    );
+  }
+  return {
+    schemaPath: options.schemaPath ?? config.schema,
+    contractPath: options.contractPath,
+    customPath: options.customPath ?? config.custom,
+    writePath: options.writePath ?? config.write,
+    apiRoot: options.apiRoot ?? config.apiRoot
+  };
+}
+
+const INIT_GUIDANCE = `Custom sections are added to the "sections" array of <custom>:
+
+  {
+    "sections": [
+      {
+        "type": "team_grid",
+        "label": "Team Grid",
+        "fixed": false,
+        "fields": [
+          { "name": "heading", "type": "string", "required": true }
+        ]
+      }
+    ]
+  }
+
+Field types: string, number, boolean, json, media.
+Type names are lowercase snake identifiers and must not use the reserved
+prefixes (nc-, nexus-, nc_, nexus_) or collide with an installed section.
+
+Next steps:
+  npx @nexuscontent/core nexus-contract generate     render the mu-plugin from the config
+  npx @nexuscontent/core nexus-contract regenerate   re-render after schema changes
+  npx @nexuscontent/core nexus-contract validate     check the contract without writing
+  npx @nexuscontent/core nexus-contract push --api-root <url> --username <user> --app-password <pass>
+`;
+
+export function initCommand(options) {
+  const configPath = configPathFor(options);
+  const customPath = options.customPath ?? "sections.custom.json";
+  for (const file of [configPath, customPath]) {
+    if (existsSync(file) && !options.force) {
+      throw new Error(
+        `${file} already exists; pass --force to overwrite it (custom sections are preserved, so only use --force to recreate the starter).`
+      );
+    }
+  }
+
+  const entry = {
+    schema: typeof options.schemaPath === "string" ? options.schemaPath : undefined,
+    custom: customPath,
+    write: typeof options.writePath === "string" ? options.writePath : undefined,
+    apiRoot: typeof options.apiRoot === "string" ? options.apiRoot : undefined
+  };
+  const config = {};
+  for (const key of CONFIG_KEYS) {
+    if (entry[key] !== undefined) config[key] = entry[key];
+  }
+
+  writeFileSync(customPath, JSON.stringify({ sections: [] }, null, 2) + "\n", {
+    flag: options.force ? "w" : "wx"
+  });
+  writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", {
+    flag: options.force ? "w" : "wx"
+  });
+  console.error(`Wrote ${customPath}`);
+  console.error(`Wrote ${configPath}`);
+  process.stdout.write(
+    `Initialized the NexusContent contract workflow.\n\n${INIT_GUIDANCE}`
+  );
+}
+
+export async function validateCommand(options) {
+  const merge = resolveConfig(options);
+  const installed = await resolveInstalled(merge.apiRoot);
+  const custom = normalizeCustomSections(
+    loadJson(merge.customPath, "--custom"),
+    installed
+  );
+  const contract = await resolveContract({
+    schemaPath: merge.schemaPath,
+    contractPath: merge.contractPath,
+    apiRoot: merge.apiRoot
+  });
+  const state = classify({ installed, custom, contract });
+  report(state);
+  if (state.missing.length > 0) {
+    throw new Error(
+      `contract references sections with no installed or declared definition: ${state.missing.join(", ")}`
+    );
+  }
+  console.error(
+    `validate: ${state.emitted.length} custom and ${state.installed.length} installed section(s) resolve; ` +
+      (state.unusedCustom.length > 0
+        ? `${state.unusedCustom.length} custom declaration(s) are not referenced: ${state.unusedCustom.join(", ")}`
+        : "no unused custom declarations.")
+  );
+}
+
 export async function generateCommand(options) {
   if (!options.customPath) {
     throw new Error("generate requires --custom <file>");
@@ -473,6 +622,23 @@ export async function generateCommand(options) {
   } else {
     process.stdout.write(php);
   }
+}
+
+export async function regenerateCommand(options) {
+  const resolved = resolveConfig(options);
+  if (resolved.customPath === undefined) {
+    throw new Error(
+      `regenerate needs a custom sections file: add "custom" to ${configPathFor(options)} ` +
+        "(run `nexus-contract init` to create it) or pass --custom <file>"
+    );
+  }
+  await generateCommand({
+    customPath: resolved.customPath,
+    writePath: resolved.writePath,
+    schemaPath: resolved.schemaPath,
+    contractPath: resolved.contractPath,
+    apiRoot: resolved.apiRoot
+  });
 }
 
 async function pushContract(contract, url, username, appPassword) {
@@ -535,7 +701,15 @@ export async function pushCommand(options) {
   );
 }
 
-export const USAGE = `usage: nexus-contract <generate|push> [options]
+export const USAGE = `usage: nexus-contract <init|generate|regenerate|validate|push> [options]
+
+init — scaffold the project contract workflow (config + starter custom file)
+  --schema <file>          record the consumer schema path in the config
+  --custom <file>          starter custom sections file (default sections.custom.json)
+  --write <path>           record the generated mu-plugin path in the config
+  --api-root <url>         record the WordPress API root in the config
+  --config <file>          config file to write (default nexus.contract.json)
+  --force                  overwrite the config and the starter custom file
 
 generate — render a WordPress must-use plugin registering custom sections
   --schema <file> | --contract <file>   contract source (consumer schema or
@@ -544,6 +718,19 @@ generate — render a WordPress must-use plugin registering custom sections
   --custom <file>          custom section definitions (required)
   --write <path>           write the generated PHP to <path> (default stdout)
   --api-root <url>         WordPress API root (default WORDPRESS_API_URL)
+
+regenerate — re-run generate using the paths recorded by init
+  --config <file>          config file to read (default nexus.contract.json)
+  --schema <file> | --contract <file>   override the recorded contract source
+  --custom <file>          override the recorded custom sections file
+  --write <path>           override the recorded output path
+  --api-root <url>         override the recorded WordPress API root
+
+validate — classify without writing; fails when sections are undefined
+  --config <file>          config file to read (default nexus.contract.json)
+  --schema <file> | --contract <file>   override the recorded contract source
+  --custom <file>          override the recorded custom sections file
+  --api-root <url>         override the recorded WordPress API root
 
 push — POST the consumer project contract to the companion plugin
   --schema <file> | --contract <file>   contract source (required)
@@ -558,6 +745,8 @@ export function parseArgs(argv) {
   const options = {
     command: undefined,
     help: false,
+    configPath: undefined,
+    force: false,
     customPath: undefined,
     writePath: undefined,
     schemaPath: undefined,
@@ -584,6 +773,12 @@ export function parseArgs(argv) {
       return next;
     };
     switch (token) {
+      case "--config":
+        options.configPath = value();
+        break;
+      case "--force":
+        options.force = true;
+        break;
       case "--custom":
         options.customPath = value();
         break;
@@ -622,8 +817,14 @@ export async function main(argv = process.argv.slice(2)) {
     process.stdout.write(USAGE);
     return;
   }
-  if (options.command === "generate") {
+  if (options.command === "init") {
+    initCommand(options);
+  } else if (options.command === "generate") {
     await generateCommand(options);
+  } else if (options.command === "regenerate") {
+    await regenerateCommand(options);
+  } else if (options.command === "validate") {
+    await validateCommand(options);
   } else if (options.command === "push") {
     await pushCommand(options);
   } else {

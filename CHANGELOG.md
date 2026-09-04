@@ -10,18 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The companion plugin admin is redesigned into seven pages following the NexusContent dashboard design language: Dashboard, Editor Modes, REST Routes, Components, Contract, Settings, and About. The redesign is purely presentational — every panel renders existing plugin data (capabilities, settings, the project-contract drift comparison, the canonical 12-section registry, and the registered routes mirror). No new features, no persisted request log, and no behavior change. The plugin version bumps to `0.2.0`; the artifact is `dist/nexuscontent-0.2.0.zip`.
-
-### Fixed
-
-- The WordPress companion now uses the active ACF edition's detected field capabilities when registering fixed sections. SCF and ACF Pro therefore retain the Hero and Call to Action button repeaters without showing false "repeater field type is unavailable" notices; ACF Free still omits only those unavailable fields with clearer capability wording.
-
-### Changed
-
+- The `0.3.0` milestone is now the contract workflow CLI (`0.3.0-cli`). `nexus-contract` gains `init` (scaffolds a `nexus.contract.json` config and a starter `sections.custom.json`), `regenerate` (re-derives the consumer contract and re-renders the ACF-layout mu-plugin from the recorded paths, with explicit flags overriding config values), and `validate` (classifies against the live companion `/schema` or the bundled offline vocabulary, prints the drift without writing, and fails when the contract references sections with no definition). The existing `generate` and `push` subcommands are unchanged. The Strapi provider milestone (formerly `0.3.0`) is deferred to `0.3.1`.
 - ACF editor fields are compacted with explicit rows: section ID (33%) and variant (50%) share the first line with a one-line helper; eyebrow (33%) and heading (67%) share the second line; body, description, FAQ answer, SEO, and embed-code text areas use two rows; feature items run title 33%, description 33%, points 23%, and thumbnail 10% on one row, while testimonial items run quote 66%, author 23%, and avatar 10% and FAQ items run question 33% and answer 67%; button label, URL, and style share a line at 33% each; SEO fields are laid out in paired rows (title/canonical, index/follow, side-by-side, OpenGraph title/image) with descriptions full width; the Rich Text section body uses the basic editor toolbar (bold/italic/link), matching the Gutenberg block's allowed formats.
 - The section vocabulary drops the `theme` setting entirely: it is removed from the canonical `sections.json` (and the regenerated TypeScript `sections.generated.ts`), the 12 Gutenberg blocks and their `block.json` attributes, the ACF field factory, the WordPress normalizer, and the schema fixture. The Gutenberg Section settings panel and ACF editors now expose only section ID and variant.
 - The companion SEO authoring is trimmed to the fields that most benefit a site: title, meta description, canonical URL, robots index/follow, and OpenGraph title/description/image. The OpenGraph type, robots noarchive/nosnippet, and all Twitter fields are no longer editable; the wire contract and normalizer still accept them for already-authored or Git-sourced content.
 - The Site Settings options page is split into General, Contact, and Social tabs with compact, half-width fields and a shorter address text area. Field names and the `GET /nexuscontent/v1/settings` contract are unchanged.
 - Gutenberg section blocks keep repeatable items and buttons collapsed by default, so newly added and existing items render as compact rows until opened. The NexusContent SEO and editor-mode panels start collapsed; only the Section settings panel opens by default.
+
+### Fixed
+
+- The WordPress companion now uses the active ACF edition's detected field capabilities when registering fixed sections. SCF and ACF Pro therefore retain the Hero and Call to Action button repeaters without showing false "repeater field type is unavailable" notices; ACF Free still omits only those unavailable fields with clearer capability wording.
 
 ## [0.2.9] - 2026-09-04
 

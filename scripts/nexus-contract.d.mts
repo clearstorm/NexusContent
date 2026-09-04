@@ -30,6 +30,8 @@ export interface ClassificationResult {
 export interface CommandOptions {
   command?: string;
   help?: boolean;
+  configPath?: string;
+  force?: boolean;
   customPath?: string;
   writePath?: string;
   schemaPath?: string;
@@ -39,7 +41,15 @@ export interface CommandOptions {
   appPassword?: string;
 }
 
+export interface ProjectConfig {
+  schema?: string;
+  custom?: string;
+  write?: string;
+  apiRoot?: string;
+}
+
 export declare const root: string;
+export declare const CONFIG_FILE: string;
 export declare const BUNDLED_SECTIONS_PATH: string;
 export declare const ALLOWED_FIELD_TYPES: Set<string>;
 export declare const RESERVED_PREFIXES: string[];
@@ -70,8 +80,21 @@ export declare function deriveContractFromSchema(
   schemaPath: string,
   apiRoot: string | undefined
 ): Promise<ProjectContract>;
+export interface ResolvedCommandOptions {
+  schemaPath?: string;
+  contractPath?: string;
+  customPath?: string;
+  writePath?: string;
+  apiRoot?: string;
+}
+
 export declare function renderPhp(emitted: CustomSection[]): string;
+export declare function loadConfig(configPath: string): ProjectConfig;
+export declare function resolveConfig(options: CommandOptions): ResolvedCommandOptions;
+export declare function initCommand(options: CommandOptions): void;
 export declare function generateCommand(options: CommandOptions): Promise<void>;
+export declare function regenerateCommand(options: CommandOptions): Promise<void>;
+export declare function validateCommand(options: CommandOptions): Promise<void>;
 export declare function pushCommand(options: CommandOptions): Promise<void>;
 export declare function parseArgs(argv: string[]): CommandOptions;
 export declare function main(argv?: string[]): Promise<void>;

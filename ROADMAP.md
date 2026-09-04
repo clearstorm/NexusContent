@@ -351,7 +351,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 ## 0.2.x - Localisation Continuation
 
-**State:** Directional. These items remain `planned` after the `0.2.0` WordPress milestone and do not block the recommended `0.3.0` Strapi work.
+**State:** Directional. These items remain `planned` after the `0.2.0` WordPress milestone and do not block the recommended `0.3.0` CLI milestone.
 
 **Goal:** Extend the localisation foundations from `0.1.3` into per-locale content, validation, and translation workflows as demonstrated needs require.
 
@@ -377,9 +377,35 @@ This was a pre-release contract repair because the earlier committed definitions
 - Each item ships with tests, documentation, and project state updates when implemented.
 - Existing retrieval semantics and flat-file backward compatibility remain intact.
 
-## 0.3.0 - Strapi Provider
+## 0.3.0 - NexusContent Contract CLI
 
-**State:** Directional; planned after `0.2.3`.
+**State:** Active. The consumer-facing `nexus-contract` bin (`generate`/`push`) shipped from `0.2.5`; this milestone widens it into the contract workflow CLI with `init`, `regenerate`, and `validate`, and is the current milestone.
+
+**Goal:** Give consumers a config-backed contract workflow on top of the existing `nexus-contract` bin, so the schema → custom sections → companion site loop is repeatable and CI-checkable.
+
+**Required capabilities:**
+
+- `nexus-contract init` scaffolds the workflow: a starter `sections.custom.json` and a `nexus.contract.json` config recording the declared paths (schema, custom, write, apiRoot), refusing overwrite without `--force`.
+- `nexus-contract regenerate` re-derives the consumer contract and re-renders the ACF-layout mu-plugin using the recorded config, with explicit flags overriding config values.
+- `nexus-contract validate` classifies the contract exactly like `generate` (live companion `/schema` or the bundled offline vocabulary) and prints the drift without writing; it fails when the contract references sections with no definition.
+- The existing `generate` and `push` subcommands are unchanged in behavior.
+- `tooling.cli` (the general-purpose 0.7.0 CLI) stays directional.
+
+**Explicit exclusions:**
+
+- No new approach to ACF layouts beyond the existing generated mu-plugin.
+- No authentication/config credential storage in the config file; push secrets remain environment variables.
+- No edits to `sections.json` or the section registry.
+
+**Exit criteria:**
+
+- CLI unit and packaging tests pass; a generated mu-plugin lints under `php -l`.
+- `npm run typecheck`, `npm test`, `npm run check:sections`, and `npm run validate:project-state` pass.
+- State files, CHANGELOG, and README reflect the CLI milestone and the Strapi deferral.
+
+## 0.3.1 - Strapi Provider (deferred from 0.3.0)
+
+**State:** Directional; deferred from `0.3.0` when the CLI became the current milestone. The `0.3.0-strapi` milestone was re-scoped to the contract CLI by user decision.
 
 **Goal:** Add structured Strapi REST content while preserving the Core contract proven by Git and WordPress.
 
