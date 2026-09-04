@@ -172,7 +172,6 @@ function extractAcfLayoutData(
               ]
             : [])
       );
-      data.theme = layout.theme;
       break;
 
     case "intro":
@@ -181,13 +180,11 @@ function extractAcfLayoutData(
       data.eyebrow = layout.eyebrow;
       data.image = normalizeAcfImageToMediaAsset(layout.image);
       data.image_position = layout.image_position;
-      data.theme = layout.theme;
       break;
 
     case "rich_text":
       data.heading = layout.heading ?? layout.title;
       data.body = layout.body ?? layout.content ?? layout.text;
-      data.theme = layout.theme;
       break;
 
     case "image_text":
@@ -208,7 +205,6 @@ function extractAcfLayoutData(
               ]
             : [])
       );
-      data.theme = layout.theme;
       break;
 
     case "features":
@@ -216,28 +212,24 @@ function extractAcfLayoutData(
       data.body = layout.body ?? layout.description;
       data.eyebrow = layout.eyebrow;
       data.items = layout.items ?? layout.features;
-      data.theme = layout.theme;
       break;
 
     case "statistics":
       data.heading = layout.heading ?? layout.title;
       data.eyebrow = layout.eyebrow;
       data.items = layout.items ?? layout.stats;
-      data.theme = layout.theme;
       break;
 
     case "testimonials":
       data.heading = layout.heading ?? layout.title;
       data.eyebrow = layout.eyebrow;
       data.items = layout.items ?? layout.testimonials;
-      data.theme = layout.theme;
       break;
 
     case "gallery":
       data.heading = layout.heading ?? layout.title;
       data.eyebrow = layout.eyebrow;
       data.images = layout.images ?? layout.gallery;
-      data.theme = layout.theme;
       break;
 
     case "cta":
@@ -257,21 +249,18 @@ function extractAcfLayoutData(
             : [])
       );
       data.background_image = normalizeAcfImageToMediaAsset(layout.background_image);
-      data.theme = layout.theme;
       break;
 
     case "faq":
       data.heading = layout.heading ?? layout.title;
       data.eyebrow = layout.eyebrow;
       data.items = layout.items ?? layout.faqs;
-      data.theme = layout.theme;
       break;
 
     case "logo_grid":
       data.heading = layout.heading ?? layout.title;
       data.eyebrow = layout.eyebrow;
       data.items = layout.items ?? layout.logos;
-      data.theme = layout.theme;
       break;
 
     case "form_embed":
@@ -279,7 +268,6 @@ function extractAcfLayoutData(
       data.provider = layout.provider;
       data.form_id = layout.form_id;
       data.embed_code = layout.embed_code ?? layout.embed;
-      data.theme = layout.theme;
       break;
   }
 

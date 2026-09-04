@@ -318,7 +318,7 @@ final class Normalizer {
 			$normalized['embed_code'] = $embed_code;
 		}
 		$settings = array();
-		foreach ( array( 'variant', 'theme' ) as $setting ) {
+		foreach ( array( 'variant' ) as $setting ) {
 			if ( isset( $normalized[ $setting ] ) && '' !== $normalized[ $setting ] ) {
 				$settings[ $setting ] = $normalized[ $setting ];
 			}
@@ -515,7 +515,7 @@ final class Normalizer {
 	/** @param array<string, mixed> $data */
 	private function has_section_content( array $data ): bool {
 		foreach ( $data as $key => $value ) {
-			if ( in_array( $key, array( 'section_id', 'variant', 'theme' ), true ) ) {
+			if ( in_array( $key, array( 'section_id', 'variant' ), true ) ) {
 				continue;
 			}
 			if ( is_array( $value ) && $this->has_section_content( $value ) ) {

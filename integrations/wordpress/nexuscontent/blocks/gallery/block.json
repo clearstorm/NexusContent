@@ -14,7 +14,6 @@
 		"eyebrow": { "type": "string", "default": "" },
 		"heading": { "type": "string", "default": "" },
 		"images": { "type": "array", "default": [] },
-		"theme": { "type": "string", "default": "" },
 		"preview": { "type": "boolean", "default": false }
 	},
 	"example": { "attributes": { "preview": true } },

@@ -32,8 +32,10 @@ final class ScfIntegrationTest extends IntegrationTestCase {
 		self::assertCount( 4, $group['location'] );
 		self::assertSame( array( 'acf_flexible', 'acf_flexible', 'acf_fixed', 'acf_fixed' ), array_column( array_column( $group['location'], 1 ), 'value' ) );
 		$names = array_column( acf_get_fields( $group ), 'name' );
-		self::assertContains( 'nexus_seo_og_type', $names );
-		self::assertContains( 'nexus_seo_tw_card', $names );
+		self::assertContains( 'nexus_seo_title', $names );
+		self::assertContains( 'nexus_seo_og_image', $names );
+		self::assertNotContains( 'nexus_seo_og_type', $names );
+		self::assertNotContains( 'nexus_seo_tw_card', $names );
 	}
 
 	public function test_scf_repeaters_are_available_in_fixed_sections(): void {

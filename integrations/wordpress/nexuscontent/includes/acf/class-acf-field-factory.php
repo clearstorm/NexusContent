@@ -82,35 +82,31 @@ final class ACF_Field_Factory {
 	 * @return array<string, array<string, mixed>>
 	 */
 	private static function definition( $type ) {
-		$section_id = array(
+		$section_id      = array(
 			'type'         => 'text',
 			'label'        => __( 'Section ID', 'nexuscontent' ),
 			'instructions' => __( 'Optional stable identifier used in normalized output.', 'nexuscontent' ),
-			'wrapper'      => array( 'width' => '50' ),
+			'wrapper'      => array( 'width' => '33' ),
 		);
-		$variant    = array(
+		$variant         = array(
 			'type'    => 'text',
 			'label'   => __( 'Variant', 'nexuscontent' ),
-			'wrapper' => array( 'width' => '50' ),
+			'wrapper' => array( 'width' => '33' ),
 		);
-		$theme      = array(
-			'type'    => 'text',
-			'label'   => __( 'Theme', 'nexuscontent' ),
-			'wrapper' => array( 'width' => '50' ),
-		);
-		$map        = array(
+		$section_id_half = array_merge( $section_id, array( 'wrapper' => array( 'width' => '50' ) ) );
+		$variant_half    = array_merge( $variant, array( 'wrapper' => array( 'width' => '50' ) ) );
+		$map             = array(
 			'hero'         => array(
 				'section_id' => $section_id,
 				'variant'    => $variant,
 				'eyebrow'    => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'body'       => array(
 					'type'  => 'textarea',
@@ -127,7 +123,6 @@ final class ACF_Field_Factory {
 					'label'      => __( 'Buttons', 'nexuscontent' ),
 					'sub_fields' => self::button_fields(),
 				),
-				'theme'      => $theme,
 			),
 			'intro'        => array(
 				'section_id'     => $section_id,
@@ -135,12 +130,11 @@ final class ACF_Field_Factory {
 				'eyebrow'        => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'        => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'body'           => array(
 					'type'  => 'textarea',
@@ -161,15 +155,13 @@ final class ACF_Field_Factory {
 						'right' => __( 'Right', 'nexuscontent' ),
 					),
 				),
-				'theme'          => $theme,
 			),
 			'rich_text'    => array(
-				'section_id' => $section_id,
-				'variant'    => $variant,
+				'section_id' => $section_id_half,
+				'variant'    => $variant_half,
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'body'       => array(
 					'type'         => 'wysiwyg',
@@ -177,7 +169,6 @@ final class ACF_Field_Factory {
 					'toolbar'      => 'basic',
 					'media_upload' => 0,
 				),
-				'theme'      => $theme,
 			),
 			'image_text'   => array(
 				'section_id'     => $section_id,
@@ -185,12 +176,11 @@ final class ACF_Field_Factory {
 				'eyebrow'        => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'        => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'body'           => array(
 					'type'  => 'textarea',
@@ -216,7 +206,6 @@ final class ACF_Field_Factory {
 					'label'      => __( 'Buttons', 'nexuscontent' ),
 					'sub_fields' => self::button_fields(),
 				),
-				'theme'          => $theme,
 			),
 			'features'     => array(
 				'section_id' => $section_id,
@@ -224,12 +213,11 @@ final class ACF_Field_Factory {
 				'eyebrow'    => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'body'       => array(
 					'type'  => 'textarea',
@@ -241,7 +229,6 @@ final class ACF_Field_Factory {
 					'label'      => __( 'Features', 'nexuscontent' ),
 					'sub_fields' => self::item_fields( 'feature' ),
 				),
-				'theme'      => $theme,
 			),
 			'statistics'   => array(
 				'section_id' => $section_id,
@@ -249,19 +236,17 @@ final class ACF_Field_Factory {
 				'eyebrow'    => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'items'      => array(
 					'type'       => 'repeater',
 					'label'      => __( 'Statistics', 'nexuscontent' ),
 					'sub_fields' => self::item_fields( 'statistic' ),
 				),
-				'theme'      => $theme,
 			),
 			'testimonials' => array(
 				'section_id' => $section_id,
@@ -269,19 +254,17 @@ final class ACF_Field_Factory {
 				'eyebrow'    => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'items'      => array(
 					'type'       => 'repeater',
 					'label'      => __( 'Testimonials', 'nexuscontent' ),
 					'sub_fields' => self::item_fields( 'testimonial' ),
 				),
-				'theme'      => $theme,
 			),
 			'gallery'      => array(
 				'section_id' => $section_id,
@@ -289,27 +272,24 @@ final class ACF_Field_Factory {
 				'eyebrow'    => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'images'     => array(
 					'type'          => 'gallery',
 					'label'         => __( 'Images', 'nexuscontent' ),
 					'return_format' => 'id',
 				),
-				'theme'      => $theme,
 			),
 			'cta'          => array(
-				'section_id'       => $section_id,
-				'variant'          => $variant,
+				'section_id'       => $section_id_half,
+				'variant'          => $variant_half,
 				'heading'          => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'body'             => array(
 					'type'  => 'textarea',
@@ -326,7 +306,6 @@ final class ACF_Field_Factory {
 					'label'   => __( 'Background image', 'nexuscontent' ),
 					'wrapper' => array( 'width' => '50' ),
 				),
-				'theme'            => $theme,
 			),
 			'faq'          => array(
 				'section_id' => $section_id,
@@ -334,19 +313,17 @@ final class ACF_Field_Factory {
 				'eyebrow'    => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'items'      => array(
 					'type'       => 'repeater',
 					'label'      => __( 'Questions', 'nexuscontent' ),
 					'sub_fields' => self::item_fields( 'faq' ),
 				),
-				'theme'      => $theme,
 			),
 			'logo_grid'    => array(
 				'section_id' => $section_id,
@@ -354,27 +331,24 @@ final class ACF_Field_Factory {
 				'eyebrow'    => array(
 					'type'    => 'text',
 					'label'   => __( 'Eyebrow', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'items'      => array(
 					'type'       => 'repeater',
 					'label'      => __( 'Logos', 'nexuscontent' ),
 					'sub_fields' => self::item_fields( 'logo' ),
 				),
-				'theme'      => $theme,
 			),
 			'form_embed'   => array(
-				'section_id' => $section_id,
-				'variant'    => $variant,
+				'section_id' => $section_id_half,
+				'variant'    => $variant_half,
 				'heading'    => array(
-					'type'    => 'text',
-					'label'   => __( 'Heading', 'nexuscontent' ),
-					'wrapper' => array( 'width' => '50' ),
+					'type'  => 'text',
+					'label' => __( 'Heading', 'nexuscontent' ),
 				),
 				'provider'   => array(
 					'type'    => 'text',
@@ -392,7 +366,6 @@ final class ACF_Field_Factory {
 					'instructions' => __( 'Only trusted embed markup should be used. WordPress capability and KSES rules apply.', 'nexuscontent' ),
 					'rows'         => 2,
 				),
-				'theme'      => $theme,
 			),
 		);
 
@@ -462,7 +435,7 @@ final class ACF_Field_Factory {
 				'name'    => 'label',
 				'label'   => __( 'Label', 'nexuscontent' ),
 				'type'    => 'text',
-				'wrapper' => array( 'width' => '50' ),
+				'wrapper' => array( 'width' => '33' ),
 			),
 			array(
 				'key'          => 'field_nc_buttons_url',
@@ -470,7 +443,7 @@ final class ACF_Field_Factory {
 				'label'        => __( 'URL', 'nexuscontent' ),
 				'type'         => 'text',
 				'instructions' => __( 'Absolute (https://…) or root-relative (/…) URLs are accepted.', 'nexuscontent' ),
-				'wrapper'      => array( 'width' => '50' ),
+				'wrapper'      => array( 'width' => '67' ),
 			),
 			array(
 				'key'     => 'field_nc_buttons_variant',
@@ -522,10 +495,22 @@ final class ACF_Field_Factory {
 		$fields = array();
 
 		$half = array(
-			'feature'     => array( 'title', 'thumbnail' ),
-			'statistic'   => array( 'value', 'label' ),
-			'testimonial' => array( 'author', 'avatar' ),
-			'logo'        => array( 'name', 'image' ),
+			'feature'     => array(
+				'title'     => '80',
+				'thumbnail' => '20',
+			),
+			'statistic'   => array(
+				'value' => '50',
+				'label' => '50',
+			),
+			'testimonial' => array(
+				'author' => '80',
+				'avatar' => '20',
+			),
+			'logo'        => array(
+				'name'  => '80',
+				'image' => '20',
+			),
 		);
 
 		foreach ( $map[ $kind ] as $name => $type ) {
@@ -538,8 +523,8 @@ final class ACF_Field_Factory {
 			if ( 'textarea' === $type ) {
 				$field['rows'] = 2;
 			}
-			if ( isset( $half[ $kind ] ) && in_array( $name, $half[ $kind ], true ) ) {
-				$field['wrapper'] = array( 'width' => '50' );
+			if ( isset( $half[ $kind ][ $name ] ) ) {
+				$field['wrapper'] = array( 'width' => $half[ $kind ][ $name ] );
 			}
 			if ( 'logo' === $kind && 'name' === $name ) {
 				$field['label']        = __( 'Label', 'nexuscontent' );

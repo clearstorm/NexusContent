@@ -16,5 +16,5 @@
 			}
 		]
 	},
-	"settings": { "variant": "cards", "theme": "light" }
+	"settings": { "variant": "cards" }
 }

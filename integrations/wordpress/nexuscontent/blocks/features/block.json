@@ -15,7 +15,6 @@
 		"heading": { "type": "string", "default": "" },
 		"body": { "type": "string", "default": "" },
 		"items": { "type": "array", "default": [] },
-		"theme": { "type": "string", "default": "" },
 		"preview": { "type": "boolean", "default": false }
 	},
 	"example": { "attributes": { "preview": true } },

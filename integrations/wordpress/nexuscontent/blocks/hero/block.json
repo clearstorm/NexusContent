@@ -19,7 +19,6 @@
 		"primary_action_url": { "type": "string", "default": "" },
 		"secondary_action_label": { "type": "string", "default": "" },
 		"secondary_action_url": { "type": "string", "default": "" },
-		"theme": { "type": "string", "default": "" },
 		"preview": { "type": "boolean", "default": false }
 	},
 	"example": { "attributes": { "preview": true } },

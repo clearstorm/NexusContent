@@ -6,5 +6,5 @@
 			{ "question": "Is output canonical?", "answer": "Yes." }
 		]
 	},
-	"settings": { "variant": "accordion", "theme": "light" }
+	"settings": { "variant": "accordion" }
 }

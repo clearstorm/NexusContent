@@ -32,10 +32,6 @@
 				{
 					"name": "buttons",
 					"type": "json"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -71,10 +67,6 @@
 				{
 					"name": "image_position",
 					"type": "string"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -96,10 +88,6 @@
 				},
 				{
 					"name": "body",
-					"type": "string"
-				},
-				{
-					"name": "theme",
 					"type": "string"
 				}
 			]
@@ -139,10 +127,6 @@
 				{
 					"name": "buttons",
 					"type": "json"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -173,10 +157,6 @@
 				{
 					"name": "items",
 					"type": "json"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -203,10 +183,6 @@
 				{
 					"name": "items",
 					"type": "json"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -233,10 +209,6 @@
 				{
 					"name": "items",
 					"type": "json"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -263,10 +235,6 @@
 				{
 					"name": "images",
 					"type": "json"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -298,10 +266,6 @@
 				{
 					"name": "background_image",
 					"type": "media"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -328,10 +292,6 @@
 				{
 					"name": "items",
 					"type": "json"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -358,10 +318,6 @@
 				{
 					"name": "items",
 					"type": "json"
-				},
-				{
-					"name": "theme",
-					"type": "string"
 				}
 			]
 		},
@@ -391,10 +347,6 @@
 				},
 				{
 					"name": "embed_code",
-					"type": "string"
-				},
-				{
-					"name": "theme",
 					"type": "string"
 				}
 			]

@@ -15,7 +15,6 @@
 		"provider": { "type": "string", "default": "" },
 		"form_id": { "type": "string", "default": "" },
 		"embed_code": { "type": "string", "default": "" },
-		"theme": { "type": "string", "default": "" },
 		"preview": { "type": "boolean", "default": false }
 	},
 	"example": { "attributes": { "preview": true } },

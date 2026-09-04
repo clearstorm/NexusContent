@@ -34,7 +34,7 @@ export interface WordPressComponentValidationOptions {
 
 /** Template-level keys the normalizer promotes to section settings; consumers
  * should not be expected to declare them. */
-const INTERNAL_SECTION_FIELDS = new Set(["section_id", "variant", "theme"]);
+const INTERNAL_SECTION_FIELDS = new Set(["section_id", "variant"]);
 
 /**
  * Validates declared consumer components against the canonical section

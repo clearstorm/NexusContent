@@ -13,7 +13,6 @@
 		"variant": { "type": "string", "default": "" },
 		"heading": { "type": "string", "default": "" },
 		"body": { "type": "string", "default": "" },
-		"theme": { "type": "string", "default": "" },
 		"preview": { "type": "boolean", "default": false }
 	},
 	"example": { "attributes": { "preview": true } },

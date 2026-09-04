@@ -29,7 +29,7 @@ Each page and post stores one `nexus_editor_mode`: `gutenberg`, `acf_fixed`, or 
 
 Gutenberg is available when the page or post type supports the block editor. Core rich-text, image, gallery, cover, and container blocks are normalized, alongside registered NexusContent blocks. Unsupported visible blocks are retained as flagged rich-text data with diagnostics where possible.
 
-NexusContent blocks edit headings and primary content in place. Eyebrow is edited inline above the heading. The inspector's Section settings panel exposes section ID, variant, and theme. Hero, Image and Text, and Call to Action blocks use a repeatable Buttons subcomponent with `label`, `url`, and `style`. Section IDs follow the heading until an editor enters a custom value. Every block includes a packaged static illustration in the inserter preview and Block preview panel.
+NexusContent blocks edit headings and primary content in place. Eyebrow is edited inline above the heading. The inspector's Section settings panel exposes section ID and variant. Hero, Image and Text, and Call to Action blocks use a repeatable Buttons subcomponent with `label`, `url`, and `style`. Section IDs follow the heading until an editor enters a custom value. Every block includes a packaged static illustration in the inserter preview and Block preview panel.
 
 ## ACF Free
 
@@ -129,8 +129,8 @@ Each normalized page or post carries `sections` plus `rawFields`, which always i
 
 Pages and posts may also carry optional `seo`. Gutenberg authors it through a
 document sidebar; ACF modes use an ACF/SCF field group. Both write shared
-`nexus_seo_*` post meta and expose title, description, canonical URL, robots,
-Open Graph, and Twitter card data.
+`nexus_seo_*` post meta and expose title, description, canonical URL, robots
+index/follow directives, and Open Graph metadata.
 
 ## Capabilities
 

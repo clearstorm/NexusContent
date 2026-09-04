@@ -45,7 +45,7 @@ final class NormalizationEquivalenceTest extends TestCase {
 			$GLOBALS['nc_test']['meta'][42][ Editor_Mode::META_KEY ] = Editor_Mode::ACF_FIXED;
 			$GLOBALS['nc_test']['fields'][42][ $type . '_enabled' ] = true;
 			foreach ( $expected['data'] as $field => $value ) {
-				if ( ! in_array( $field, array( 'variant', 'theme' ), true ) ) {
+				if ( ! in_array( $field, array( 'variant' ), true ) ) {
 					$GLOBALS['nc_test']['fields'][42][ $type . '_' . $field ] = $value;
 				}
 			}
@@ -53,7 +53,7 @@ final class NormalizationEquivalenceTest extends TestCase {
 			self::assertCount( 1, $sections, 'Flat fixed fields were not extracted for ' . $type );
 			$canonical = $this->canonical( $sections[0] );
 			self::assertSame( $type, $canonical['type'] );
-			self::assertSame( array_diff_key( $expected['data'], array( 'variant' => true, 'theme' => true ) ), $canonical['data'] );
+			self::assertSame( array_diff_key( $expected['data'], array( 'variant' => true ) ), $canonical['data'] );
 			\nc_test_reset();
 		}
 	}
@@ -94,13 +94,13 @@ final class NormalizationEquivalenceTest extends TestCase {
 		$GLOBALS['nc_test']['meta'][42][ Editor_Mode::META_KEY ] = Editor_Mode::ACF_FIXED;
 		$GLOBALS['nc_test']['fields'][42]['hero_enabled'] = true;
 		foreach ( $expected['data'] as $field => $value ) {
-			if ( ! in_array( $field, array( 'variant', 'theme' ), true ) ) {
+			if ( ! in_array( $field, array( 'variant' ), true ) ) {
 				$GLOBALS['nc_test']['fields'][42][ 'hero_' . $field ] = $value;
 			}
 		}
 		$sections = $this->normalizedPage( $post )['sections'];
 		self::assertCount( 1, $sections, 'Fixed post sections were not extracted' );
-		self::assertSame( array_diff_key( $expected['data'], array( 'variant' => true, 'theme' => true ) ), $this->canonical( $sections[0] )['data'] );
+		self::assertSame( array_diff_key( $expected['data'], array( 'variant' => true ) ), $this->canonical( $sections[0] )['data'] );
 	}
 
 	public function test_flexible_sections_read_formatted_values_so_names_reach_the_wire(): void {

@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- ACF editor fields are compacted: body, description, FAQ answer, SEO, and embed-code text areas use two rows; short text fields and images sit side-by-side at half width; the Rich Text section body uses the basic editor toolbar (bold/italic/link), matching the Gutenberg block's allowed formats.
+- ACF editor fields are compacted with explicit rows: section ID, variant, and eyebrow sit side-by-side at 33% on one line and headings run the full width; body, description, FAQ answer, SEO, and embed-code text areas use two rows; item thumbnails sit at 20% beside their title/author/name; button label and URL share a line at 33%/67%; the Rich Text section body uses the basic editor toolbar (bold/italic/link), matching the Gutenberg block's allowed formats.
+- The section vocabulary drops the `theme` setting entirely: it is removed from the canonical `sections.json` (and the regenerated TypeScript `sections.generated.ts`), the 12 Gutenberg blocks and their `block.json` attributes, the ACF field factory, the WordPress normalizer, and the schema fixture. The Gutenberg Section settings panel and ACF editors now expose only section ID and variant.
+- The companion SEO authoring is trimmed to the fields that most benefit a site: title, meta description, canonical URL, robots index/follow, and OpenGraph title/description/image. The OpenGraph type, robots noarchive/nosnippet, and all Twitter fields are no longer editable; the wire contract and normalizer still accept them for already-authored or Git-sourced content.
 - The Site Settings options page is split into General, Contact, and Social tabs with compact, half-width fields and a shorter address text area. Field names and the `GET /nexuscontent/v1/settings` contract are unchanged.
 - Gutenberg section blocks keep repeatable items and buttons collapsed by default, so newly added and existing items render as compact rows until opened. The NexusContent SEO and editor-mode panels start collapsed; only the Section settings panel opens by default.
 

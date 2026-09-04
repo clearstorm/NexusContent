@@ -40,7 +40,6 @@ import './editor.css';
 			'body',
 			'image',
 			'buttons',
-			'theme',
 		],
 		intro: [
 			'section_id',
@@ -50,9 +49,8 @@ import './editor.css';
 			'body',
 			'image',
 			'image_position',
-			'theme',
 		],
-		'rich-text': [ 'section_id', 'variant', 'heading', 'body', 'theme' ],
+		'rich-text': [ 'section_id', 'variant', 'heading', 'body' ],
 		'image-text': [
 			'section_id',
 			'variant',
@@ -62,7 +60,6 @@ import './editor.css';
 			'image',
 			'image_position',
 			'buttons',
-			'theme',
 		],
 		features: [
 			'section_id',
@@ -71,32 +68,16 @@ import './editor.css';
 			'heading',
 			'body',
 			'items',
-			'theme',
 		],
-		statistics: [
-			'section_id',
-			'variant',
-			'eyebrow',
-			'heading',
-			'items',
-			'theme',
-		],
+		statistics: [ 'section_id', 'variant', 'eyebrow', 'heading', 'items' ],
 		testimonials: [
 			'section_id',
 			'variant',
 			'eyebrow',
 			'heading',
 			'items',
-			'theme',
 		],
-		gallery: [
-			'section_id',
-			'variant',
-			'eyebrow',
-			'heading',
-			'images',
-			'theme',
-		],
+		gallery: [ 'section_id', 'variant', 'eyebrow', 'heading', 'images' ],
 		cta: [
 			'section_id',
 			'variant',
@@ -104,24 +85,9 @@ import './editor.css';
 			'body',
 			'buttons',
 			'background_image',
-			'theme',
 		],
-		faq: [
-			'section_id',
-			'variant',
-			'eyebrow',
-			'heading',
-			'items',
-			'theme',
-		],
-		'logo-grid': [
-			'section_id',
-			'variant',
-			'eyebrow',
-			'heading',
-			'items',
-			'theme',
-		],
+		faq: [ 'section_id', 'variant', 'eyebrow', 'heading', 'items' ],
+		'logo-grid': [ 'section_id', 'variant', 'eyebrow', 'heading', 'items' ],
 		'form-embed': [
 			'section_id',
 			'variant',
@@ -129,7 +95,6 @@ import './editor.css';
 			'provider',
 			'form_id',
 			'embed_code',
-			'theme',
 		],
 	};
 	const titles = {
@@ -156,7 +121,7 @@ import './editor.css';
 		'buttons',
 		'eyebrow',
 	];
-	const settingsFields = [ 'section_id', 'variant', 'theme' ];
+	const settingsFields = [ 'section_id', 'variant' ];
 
 	function attributesFor( fields ) {
 		const attributes = {};
@@ -1265,7 +1230,6 @@ import './editor.css';
 			const labels = {
 				section_id: 'Section ID',
 				variant: 'Variant',
-				theme: 'Theme',
 			};
 			const label = labels[ field ] || field.replace( /_/g, ' ' );
 			fieldControls.push(
@@ -1469,35 +1433,11 @@ import './editor.css';
 			label: 'OpenGraph description',
 			type: 'textarea',
 		},
-		{ key: 'og_type', label: 'OpenGraph type' },
 		{ key: 'og_image', label: 'OpenGraph image URL' },
-		{
-			key: 'tw_card',
-			label: 'Twitter card',
-			type: 'select',
-			options: [
-				{ label: 'Not set', value: '' },
-				{ label: 'Summary', value: 'summary' },
-				{
-					label: 'Summary with large image',
-					value: 'summary_large_image',
-				},
-			],
-		},
-		{ key: 'tw_title', label: 'Twitter title' },
-		{
-			key: 'tw_description',
-			label: 'Twitter description',
-			type: 'textarea',
-		},
-		{ key: 'tw_image', label: 'Twitter image URL' },
-		{ key: 'tw_site', label: 'Twitter site' },
 	];
 	const seoBool = [
 		{ key: 'robots_index', label: 'Index' },
 		{ key: 'robots_follow', label: 'Follow' },
-		{ key: 'robots_noarchive', label: 'Noarchive' },
-		{ key: 'robots_nosnippet', label: 'Nosnippet' },
 	];
 	const prefix = 'nexus_seo_';
 

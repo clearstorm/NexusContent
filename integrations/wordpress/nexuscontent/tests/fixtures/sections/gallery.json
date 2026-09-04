@@ -12,5 +12,5 @@
 			}
 		]
 	},
-	"settings": { "variant": "grid", "theme": "light" }
+	"settings": { "variant": "grid" }
 }

@@ -6,5 +6,5 @@
 		"form_id": "contact",
 		"embed_code": "<form action=\"https://example.test/submit\" method=\"post\"><input name=\"email\"></form>"
 	},
-	"settings": { "variant": "default", "theme": "light" }
+	"settings": { "variant": "default" }
 }

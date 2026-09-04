@@ -39,8 +39,7 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "heading", type: "string" },
     { name: "body", type: "string" },
     { name: "image", type: "media" },
-    { name: "buttons", type: "json" },
-    { name: "theme", type: "string" }
+    { name: "buttons", type: "json" }
   ],
   "intro": [
     { name: "section_id", type: "string" },
@@ -49,15 +48,13 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "heading", type: "string" },
     { name: "body", type: "string" },
     { name: "image", type: "media" },
-    { name: "image_position", type: "string" },
-    { name: "theme", type: "string" }
+    { name: "image_position", type: "string" }
   ],
   "rich_text": [
     { name: "section_id", type: "string" },
     { name: "variant", type: "string" },
     { name: "heading", type: "string" },
-    { name: "body", type: "string" },
-    { name: "theme", type: "string" }
+    { name: "body", type: "string" }
   ],
   "image_text": [
     { name: "section_id", type: "string" },
@@ -67,8 +64,7 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "body", type: "string" },
     { name: "image", type: "media" },
     { name: "image_position", type: "string" },
-    { name: "buttons", type: "json" },
-    { name: "theme", type: "string" }
+    { name: "buttons", type: "json" }
   ],
   "features": [
     { name: "section_id", type: "string" },
@@ -76,32 +72,28 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "eyebrow", type: "string" },
     { name: "heading", type: "string" },
     { name: "body", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
+    { name: "items", type: "json" }
   ],
   "statistics": [
     { name: "section_id", type: "string" },
     { name: "variant", type: "string" },
     { name: "eyebrow", type: "string" },
     { name: "heading", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
+    { name: "items", type: "json" }
   ],
   "testimonials": [
     { name: "section_id", type: "string" },
     { name: "variant", type: "string" },
     { name: "eyebrow", type: "string" },
     { name: "heading", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
+    { name: "items", type: "json" }
   ],
   "gallery": [
     { name: "section_id", type: "string" },
     { name: "variant", type: "string" },
     { name: "eyebrow", type: "string" },
     { name: "heading", type: "string" },
-    { name: "images", type: "json" },
-    { name: "theme", type: "string" }
+    { name: "images", type: "json" }
   ],
   "cta": [
     { name: "section_id", type: "string" },
@@ -109,24 +101,21 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "heading", type: "string" },
     { name: "body", type: "string" },
     { name: "buttons", type: "json" },
-    { name: "background_image", type: "media" },
-    { name: "theme", type: "string" }
+    { name: "background_image", type: "media" }
   ],
   "faq": [
     { name: "section_id", type: "string" },
     { name: "variant", type: "string" },
     { name: "eyebrow", type: "string" },
     { name: "heading", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
+    { name: "items", type: "json" }
   ],
   "logo_grid": [
     { name: "section_id", type: "string" },
     { name: "variant", type: "string" },
     { name: "eyebrow", type: "string" },
     { name: "heading", type: "string" },
-    { name: "items", type: "json" },
-    { name: "theme", type: "string" }
+    { name: "items", type: "json" }
   ],
   "form_embed": [
     { name: "section_id", type: "string" },
@@ -134,8 +123,7 @@ export const BUILTIN_SECTION_FIELDS: Readonly<
     { name: "heading", type: "string" },
     { name: "provider", type: "string" },
     { name: "form_id", type: "string" },
-    { name: "embed_code", type: "string" },
-    { name: "theme", type: "string" }
+    { name: "embed_code", type: "string" }
   ],
 };
 

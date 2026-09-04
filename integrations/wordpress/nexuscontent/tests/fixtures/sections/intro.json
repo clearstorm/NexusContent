@@ -6,5 +6,5 @@
 		"body": "A concise opening paragraph.",
 		"image_position": "right"
 	},
-	"settings": { "variant": "default", "theme": "light" }
+	"settings": { "variant": "default" }
 }

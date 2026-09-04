@@ -17,7 +17,7 @@ final class AcfFieldFactoryTest extends TestCase {
 			self::assertNotNull( $fields );
 			self::assertSame( array(), $limitations );
 			self::assertContains( 'variant', array_column( $fields, 'name' ) );
-			self::assertContains( 'theme', array_column( $fields, 'name' ) );
+			self::assertNotContains( 'theme', array_column( $fields, 'name' ) );
 			$keys = array_merge( $keys, array_column( $fields, 'key' ) );
 		}
 		self::assertSame( $keys, array_values( array_unique( $keys ) ) );
