@@ -424,10 +424,11 @@ final class ACF_Field_Factory {
 				'type'  => 'text',
 			),
 			array(
-				'key'   => 'field_nc_buttons_url',
-				'name'  => 'url',
-				'label' => __( 'URL', 'nexuscontent' ),
-				'type'  => 'url',
+				'key'          => 'field_nc_buttons_url',
+				'name'         => 'url',
+				'label'        => __( 'URL', 'nexuscontent' ),
+				'type'         => 'text',
+				'instructions' => __( 'Absolute (https://…) or root-relative (/…) URLs are accepted.', 'nexuscontent' ),
 			),
 			array(
 				'key'     => 'field_nc_buttons_variant',

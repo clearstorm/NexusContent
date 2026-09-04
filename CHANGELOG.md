@@ -30,6 +30,11 @@ Seamless provider switching for CMS-ordered sections (core `0.2.8`); singleton m
 - The WordPress provider `isWireMedia`/`toMediaAsset` wire boundary now also recognises the lowercased `mimetype` key the companion emits (section keys are lower-cased during wire serialization), mapping such URL-only media to `MediaAsset { src, alt, mimeType }` even without a dimension or attachment id.
 - Plugin artifact is now `dist/nexuscontent-0.1.4.zip`.
 
+### Companion plugin 0.1.5
+
+- The ACF flexible-content button `url` field is now a plain `text` field instead of the ACF `url` type. ACF's `url` type validates for an absolute, protocol-qualified URL, so a root-relative value such as `/contact` was rejected in the editor. A `text` field stores the value verbatim, so both fully-qualified URLs (`https://localhost:4321/contact`) and root-relative paths (`/contact`) are accepted and preserved through to consumers. The change applies to the shared Buttons subcomponent used by the Hero, Image and Text, and Call to Action flexible layouts. No wire-contract, schema, or TypeScript changes were required; the server's `esc_url`-based rendering already preserves root-relative paths.
+- Plugin artifact is now `dist/nexuscontent-0.1.5.zip`.
+
 ## [0.2.7] - 2026-08-31
 
 WordPress companion outbound webhooks release (plugin `0.1.2`).

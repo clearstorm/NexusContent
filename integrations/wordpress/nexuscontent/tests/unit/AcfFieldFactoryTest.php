@@ -56,6 +56,7 @@ final class AcfFieldFactoryTest extends TestCase {
 		$buttons = array_values( array_filter( $layout['sub_fields'], static fn( array $field ): bool => 'buttons' === $field['name'] ) )[0];
 		self::assertSame( 'repeater', $buttons['type'] );
 		self::assertSame( array( 'label', 'url', 'variant' ), array_column( $buttons['sub_fields'], 'name' ) );
+		self::assertSame( 'text', $buttons['sub_fields'][1]['type'] );
 		self::assertSame( 'select', $buttons['sub_fields'][2]['type'] );
 		self::assertSame( array( 'primary', 'secondary', 'light' ), array_keys( $buttons['sub_fields'][2]['choices'] ) );
 	}

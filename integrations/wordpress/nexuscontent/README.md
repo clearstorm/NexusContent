@@ -14,7 +14,7 @@ Activate **NexusContent Companion** in WordPress Admin or run `wp plugin activat
 
 ## Requirements
 
-- Plugin version `0.1.4`; companion contract `1` (`contract1`).
+- Plugin version `0.1.5`; companion contract `1` (`contract1`).
 - WordPress 6.6 or newer and PHP 8.1 or newer.
 - Gutenberg uses WordPress core. ACF is optional.
 - ACF Free 6.2 or newer supports fixed fields. A legally supplied ACF Pro 6.2 or newer enables Pro-only capabilities where available.
@@ -165,7 +165,7 @@ npm run format:check
 npm run package
 ```
 
-`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.4.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
+`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.5.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
 
 ## Tests
 
@@ -188,7 +188,7 @@ The default wp-env has no ACF. Run `npm run env:acf-free` for the development si
 
 ## Limitations
 
-Version 0.1.4 is page/post-focused, scoped to pages and standard posts. Published transport and single-use draft preview are provided, and opt-in outbound webhooks notify on page/post changes; it does not provide mutations, webhook-triggered rebuilds, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
+Version 0.1.5 is page/post-focused, scoped to pages and standard posts. Published transport and single-use draft preview are provided, and opt-in outbound webhooks notify on page/post changes; it does not provide mutations, webhook-triggered rebuilds, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
 
 ## Phase 3 Status
 

@@ -6,7 +6,7 @@ plugin is, why it exists, and the permanent boundaries around it.
 
 ## What It Is
 
-NexusContent Companion is an optional WordPress plugin (version `0.1.4`) that
+NexusContent Companion is an optional WordPress plugin (version `0.1.5`) that
 turns a standard WordPress install into a source of normalized, contract-
 versioned JSON for NexusContent consumers.
 
@@ -203,7 +203,7 @@ converts companion section media recursively (`wire image.url` →
 - WordPress 6.6+ and PHP 8.1+.
 - Gutenberg uses WordPress core. ACF Free 6.2+ and ACF Pro 6.2+ are optional.
 - Node.js and Composer are build-only; production servers need neither.
-- The release artifact is `dist/nexuscontent-0.1.4.zip`.
+- The release artifact is `dist/nexuscontent-0.1.5.zip`.
 
 ## Version History
 
@@ -214,3 +214,4 @@ converts companion section media recursively (`wire image.url` →
 | `0.1.2` | Single-use draft preview (preview-token / preview/{token}/{id}, Gutenberg button); opt-in signed outbound webhooks (create/update/trash/restore); provider capabilities report `previewSupport` and `webhookSupport` |
 | `0.1.3` | Section editor alignment: inline eyebrow, Section settings panel (replaces Additional fields), repeatable Buttons subcomponent on hero/image_text/cta, Features `points`/`thumbnail`, Testimonials `author`/`avatar`, Logo Grid `name`/`image`, and ACF editor fields aligned with the Gutenberg blocks and schema |
 | `0.1.4` | External/remote image authoring: single-image controls, Gallery items, and repeater media fields accept a pasted image URL beside the media-library picker; URL-only media is normalized with a default `image/*` mime type so the wire boundary treats it as media and external URLs flow through unchanged |
+| `0.1.5` | The ACF flexible-content button URL field is now a plain text field (instead of the ACF `url` type) so both fully-qualified URLs and root-relative paths (for example `/contact`) are accepted and preserved; applies to Hero, Image and Text, and Call to Action buttons |

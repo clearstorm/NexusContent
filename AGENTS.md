@@ -1427,6 +1427,8 @@ The `0.2.8` release was released as `v0.2.8` on 2026-09-04 (root package version
 
 The `0.1.4` companion plugin release (root package version stays `0.2.8`, plugin `0.1.4`) adds external/remote image authoring and wire-boundary support for URL-only media: single-image controls, Gallery items, and repeater media fields (Features thumbnails, Testimonials avatars, Logo Grid) offer a "paste image URL" text field beside the media-library picker; the editor writes `{ url, alt }` with no attachment id and the server normalizes such media with a default `image/*` mime type. The provider `isWireMedia`/`toMediaAsset` boundary now also recognises the lowercased `mimetype` key the companion wire emits, mapping URL-only media to `MediaAsset { src, alt, mimeType }`. The plugin artifact is `dist/nexuscontent-0.1.4.zip`.
 
+The `0.1.5` companion plugin release (root package version stays `0.2.8`, plugin `0.1.5`) makes the ACF flexible-content button `url` field a plain `text` field instead of the ACF `url` type, so both fully-qualified URLs and root-relative paths are accepted in the editor and preserved verbatim through to consumers. The ACF `url` type validated for an absolute, protocol-qualified URL, so a root-relative value such as `/contact` was rejected; a `text` field stores the value as-is. The change applies to the shared Buttons subcomponent used by the Hero, Image and Text, and Call to Action flexible layouts, with the server `esc_url`-based rendering already preserving root-relative paths. No wire-contract, schema, or TypeScript changes were required. The plugin artifact is `dist/nexuscontent-0.1.5.zip`.
+
 The recommended next focus is the directional `0.3.0` Strapi provider, followed by the remaining `0.2.x` consolidation if any.
 
 ---
