@@ -453,13 +453,14 @@ final class ACF_Field_Factory {
 				'label'        => __( 'URL', 'nexuscontent' ),
 				'type'         => 'text',
 				'instructions' => __( 'Absolute (https://…) or root-relative (/…) URLs are accepted.', 'nexuscontent' ),
-				'wrapper'      => array( 'width' => '67' ),
+				'wrapper'      => array( 'width' => '33' ),
 			),
 			array(
 				'key'     => 'field_nc_buttons_variant',
 				'name'    => 'variant',
 				'label'   => __( 'Style', 'nexuscontent' ),
 				'type'    => 'select',
+				'wrapper' => array( 'width' => '33' ),
 				'choices' => array(
 					'primary'   => __( 'Primary', 'nexuscontent' ),
 					'secondary' => __( 'Secondary', 'nexuscontent' ),

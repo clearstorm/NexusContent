@@ -59,6 +59,10 @@ final class AcfFieldFactoryTest extends TestCase {
 		self::assertSame( 'text', $buttons['sub_fields'][1]['type'] );
 		self::assertSame( 'select', $buttons['sub_fields'][2]['type'] );
 		self::assertSame( array( 'primary', 'secondary', 'light' ), array_keys( $buttons['sub_fields'][2]['choices'] ) );
+		self::assertSame(
+			array( '33', '33', '33' ),
+			array_map( static fn( array $field ): string => $field['wrapper']['width'], $buttons['sub_fields'] )
+		);
 	}
 
 	public function test_feature_items_use_title_description_points_and_thumbnail(): void {
