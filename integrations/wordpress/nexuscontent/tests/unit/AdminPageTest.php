@@ -50,22 +50,29 @@ final class AdminPageTest extends TestCase {
 		self::assertSame( 'manage_options', $menus['nexuscontent']['capability'] );
 	}
 
-	public function test_add_menu_creates_settings_submenu(): void {
-		$this->admin_page->add_menu();
-		$menus = $GLOBALS['nc_test']['menus'] ?? array();
-		self::assertArrayHasKey( 'nexuscontent-settings', $menus );
-		self::assertSame( 'Settings', $menus['nexuscontent-settings']['menu_title'] );
-		self::assertSame( 'edit_posts', $menus['nexuscontent-settings']['capability'] );
-		self::assertSame( 'nexuscontent', $menus['nexuscontent-settings']['parent_slug'] );
+	/**
+	 * @return array<string, array{0:string, 1:string}>
+	 */
+	public static function submenu_provider(): array {
+		return array(
+			'editor modes' => array( 'nexuscontent-editor-modes', 'manage_options' ),
+			'rest routes'  => array( 'nexuscontent-rest-routes', 'manage_options' ),
+			'components'   => array( 'nexuscontent-components', 'manage_options' ),
+			'contract'     => array( 'nexuscontent-contract', 'manage_options' ),
+			'settings'     => array( 'nexuscontent-settings', 'edit_posts' ),
+			'about'        => array( 'nexuscontent-about', 'manage_options' ),
+		);
 	}
 
-	public function test_add_menu_creates_about_submenu(): void {
+	/**
+	 * @dataProvider submenu_provider
+	 */
+	public function test_add_menu_creates_submenu( string $slug, string $capability ): void {
 		$this->admin_page->add_menu();
 		$menus = $GLOBALS['nc_test']['menus'] ?? array();
-		self::assertArrayHasKey( 'nexuscontent-about', $menus );
-		self::assertSame( 'About', $menus['nexuscontent-about']['menu_title'] );
-		self::assertSame( 'manage_options', $menus['nexuscontent-about']['capability'] );
-		self::assertSame( 'nexuscontent', $menus['nexuscontent-about']['parent_slug'] );
+		self::assertArrayHasKey( $slug, $menus );
+		self::assertSame( $capability, $menus[ $slug ]['capability'] );
+		self::assertSame( 'nexuscontent', $menus[ $slug ]['parent_slug'] );
 	}
 
 	/* ----------------------------------------------------------------
@@ -78,15 +85,31 @@ final class AdminPageTest extends TestCase {
 		self::assertContains( 'nexuscontent-admin', $GLOBALS['nc_test']['styles'] );
 	}
 
-	public function test_enqueue_styles_loads_on_settings_page(): void {
-		$GLOBALS['nc_test']['styles'] = array();
-		$this->admin_page->enqueue_styles( 'settings_page_nexuscontent-settings' );
-		self::assertContains( 'nexuscontent-admin', $GLOBALS['nc_test']['styles'] );
+	/**
+	 * @return array<string, array<int, string>>
+	 */
+	public static function submenu_slug_provider(): array {
+		$slugs = array();
+		foreach ( self::submenu_provider() as $key => $meta ) {
+			$slugs[ $key ] = array( $meta[0] );
+		}
+		return $slugs;
 	}
 
-	public function test_enqueue_styles_loads_on_about_page(): void {
+	/**
+	 * @dataProvider submenu_slug_provider
+	 */
+	public function test_enqueue_styles_loads_on_each_submenu_hook( string $slug ): void {
+		foreach ( array( 'nexuscontent_page_' . $slug, 'admin_page_' . $slug ) as $hook ) {
+			$GLOBALS['nc_test']['styles'] = array();
+			$this->admin_page->enqueue_styles( $hook );
+			self::assertContains( 'nexuscontent-admin', $GLOBALS['nc_test']['styles'], $hook );
+		}
+	}
+
+	public function test_enqueue_styles_accepts_legacy_settings_hook(): void {
 		$GLOBALS['nc_test']['styles'] = array();
-		$this->admin_page->enqueue_styles( 'admin_page_nexuscontent-about' );
+		$this->admin_page->enqueue_styles( 'settings_page_nexuscontent-settings' );
 		self::assertContains( 'nexuscontent-admin', $GLOBALS['nc_test']['styles'] );
 	}
 
@@ -208,10 +231,12 @@ final class AdminPageTest extends TestCase {
 		);
 
 		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( '1', $rendered );
 		self::assertStringContainsString( 'Block editor', $rendered );
 		self::assertStringContainsString( 'ACF flexible sections', $rendered );
 		self::assertStringContainsString( 'ACF fixed fields', $rendered );
+		self::assertStringContainsString( 'nc-bar-fill--gutenberg', $rendered );
+		self::assertStringContainsString( 'nc-bar-fill--acf_flexible', $rendered );
+		self::assertStringContainsString( 'nc-bar-fill--acf_fixed', $rendered );
 	}
 
 	public function test_breakdown_defaults_invalid_meta_to_gutenberg(): void {
@@ -233,37 +258,43 @@ final class AdminPageTest extends TestCase {
 	}
 
 	/* ----------------------------------------------------------------
-	 * Dashboard — cards
+	 * Dashboard — stat cards
 	 * --------------------------------------------------------------- */
 
-	public function test_dashboard_contains_status_card(): void {
+	public function test_dashboard_contains_stat_cards(): void {
 		$GLOBALS['nc_test']['query_posts'] = array();
 		$GLOBALS['nc_test']['meta']       = array();
 
 		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( 'Plugin Status', $rendered );
-		self::assertStringContainsString( 'Plugin version', $rendered );
-		self::assertStringContainsString( 'WordPress version', $rendered );
-		self::assertStringContainsString( 'PHP version', $rendered );
+		self::assertStringContainsString( 'System health', $rendered );
+		self::assertStringContainsString( 'Operational', $rendered );
+		self::assertStringContainsString( 'Contract drift', $rendered );
+		self::assertStringContainsString( 'Secured routes', $rendered );
 	}
 
-	public function test_dashboard_contains_breakdown_card(): void {
-		$GLOBALS['nc_test']['query_posts'] = array( 10 );
-		$GLOBALS['nc_test']['meta']        = array();
-
-		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( 'Content by editor mode', $rendered );
-	}
-
-	public function test_dashboard_contains_blocks_overview_card(): void {
+	public function test_dashboard_contains_quick_links_card(): void {
 		$GLOBALS['nc_test']['query_posts'] = array();
 		$GLOBALS['nc_test']['meta']       = array();
 
 		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( 'Blocks (', $rendered );
+		self::assertStringContainsString( 'Quick links', $rendered );
+		self::assertStringContainsString( 'Editor Modes', $rendered );
+		self::assertStringContainsString( 'REST Routes', $rendered );
+		self::assertStringContainsString( 'Components', $rendered );
+		self::assertStringContainsString( 'Contract', $rendered );
+		self::assertStringContainsString( 'Settings', $rendered );
+	}
+
+	public function test_dashboard_contains_sections_overview_card(): void {
+		$GLOBALS['nc_test']['query_posts'] = array();
+		$GLOBALS['nc_test']['meta']       = array();
+
+		$rendered = $this->render_dashboard();
+		self::assertStringContainsString( 'Sections (', $rendered );
 		self::assertStringContainsString( 'of', $rendered );
 		self::assertStringContainsString( 'enabled)', $rendered );
-		self::assertStringContainsString( 'Manage in Settings', $rendered );
+		self::assertStringContainsString( 'nc-chip--on', $rendered );
+		self::assertStringNotContainsString( 'nc-chip--off', $rendered );
 	}
 
 	public function test_dashboard_contains_recent_pages_card(): void {
@@ -274,12 +305,13 @@ final class AdminPageTest extends TestCase {
 		self::assertStringContainsString( 'Recent content', $rendered );
 	}
 
-	public function test_dashboard_contains_quick_links_card(): void {
+	public function test_dashboard_contains_routes_card(): void {
 		$GLOBALS['nc_test']['query_posts'] = array();
 		$GLOBALS['nc_test']['meta']       = array();
 
 		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( 'Quick links', $rendered );
+		self::assertStringContainsString( 'Routes', $rendered );
+		self::assertStringContainsString( 'nexuscontent/v1/pages', $rendered );
 	}
 
 	public function test_dashboard_project_contract_card_shows_empty_state_without_contract(): void {
@@ -321,29 +353,18 @@ final class AdminPageTest extends TestCase {
 	}
 
 	/* ----------------------------------------------------------------
-	 * Dashboard — blocks overview
+	 * Dashboard — recent content modes
 	 * --------------------------------------------------------------- */
 
-	public function test_blocks_overview_shows_all_section_types(): void {
-		$GLOBALS['nc_test']['query_posts'] = array();
-		$GLOBALS['nc_test']['meta']       = array();
+	public function test_recent_content_shows_mode_badge(): void {
+		$GLOBALS['nc_test']['query_posts'] = array( 10 );
+		$GLOBALS['nc_test']['meta']        = array(
+			10 => array( Editor_Mode::META_KEY => 'acf_fixed' ),
+		);
 
 		$rendered = $this->render_dashboard();
-		self::assertStringContainsString( 'nc-admin-block-item', $rendered );
-		self::assertStringContainsString( 'Hero', $rendered );
-		self::assertStringContainsString( 'Introduction', $rendered );
-		self::assertStringContainsString( 'Call to Action', $rendered );
-		self::assertStringContainsString( 'Form Embed', $rendered );
-	}
-
-	public function test_blocks_overview_shows_on_off_status(): void {
-		$GLOBALS['nc_test']['query_posts'] = array();
-		$GLOBALS['nc_test']['meta']       = array();
-
-		$rendered = $this->render_dashboard();
-		// All enabled by default.
-		self::assertStringContainsString( 'nc-admin-block-item--on', $rendered );
-		self::assertStringNotContainsString( 'nc-admin-block-item--off', $rendered );
+		self::assertStringContainsString( 'nc-badge--acf_fixed', $rendered );
+		self::assertStringContainsString( 'ACF fixed fields', $rendered );
 	}
 
 	/* ----------------------------------------------------------------
@@ -358,6 +379,8 @@ final class AdminPageTest extends TestCase {
 		self::assertStringContainsString( 'Default editor mode', $rendered );
 		self::assertStringContainsString( 'Section types', $rendered );
 		self::assertStringContainsString( 'Media resolution', $rendered );
+		self::assertStringContainsString( 'General configuration', $rendered );
+		self::assertStringContainsString( 'Integrations', $rendered );
 	}
 
 	public function test_settings_page_shows_toggle_switches(): void {
@@ -366,6 +389,142 @@ final class AdminPageTest extends TestCase {
 		self::assertStringContainsString( 'nc-admin-toggle', $rendered );
 		self::assertStringContainsString( 'nc-admin-toggle-track', $rendered );
 		self::assertStringContainsString( 'nc-admin-toggle-thumb', $rendered );
+	}
+
+	/* ----------------------------------------------------------------
+	 * Editor Modes page
+	 * --------------------------------------------------------------- */
+
+	public function test_editor_modes_page_shows_available_and_unavailable_modes(): void {
+		$rendered = $this->render_editor_modes_page();
+		self::assertStringContainsString( 'Available editor modes', $rendered );
+		self::assertStringContainsString( 'Block editor', $rendered );
+		self::assertStringContainsString( 'ACF flexible sections', $rendered );
+		self::assertStringContainsString( 'ACF fixed fields', $rendered );
+		// Gutenberg is supported in the stubbed environment; ACF is not.
+		self::assertStringContainsString( 'nc-mode--on', $rendered );
+		self::assertStringContainsString( 'nc-mode--off', $rendered );
+		self::assertStringContainsString( 'Available', $rendered );
+		self::assertStringContainsString( 'Unavailable', $rendered );
+	}
+
+	public function test_editor_modes_page_marks_global_default(): void {
+		$rendered = $this->render_editor_modes_page();
+		self::assertStringContainsString( 'Default', $rendered );
+	}
+
+	public function test_editor_modes_page_shows_distribution_and_acf_health(): void {
+		$GLOBALS['nc_test']['query_posts'] = array( 10 );
+		$GLOBALS['nc_test']['meta']        = array();
+		$rendered = $this->render_editor_modes_page();
+
+		self::assertStringContainsString( 'Published content distribution', $rendered );
+		self::assertStringContainsString( 'ACF health', $rendered );
+		self::assertStringContainsString( 'ACF detected', $rendered );
+		self::assertStringContainsString( 'Flexible content', $rendered );
+	}
+
+	/* ----------------------------------------------------------------
+	 * REST Routes page
+	 * --------------------------------------------------------------- */
+
+	public function test_rest_routes_page_lists_all_endpoints(): void {
+		$rendered = $this->render_rest_routes_page();
+		self::assertStringContainsString( 'Endpoints', $rendered );
+		self::assertStringContainsString( 'nexuscontent/v1/pages', $rendered );
+		self::assertStringContainsString( 'nexuscontent/v1/pages/slug/{slug}', $rendered );
+		self::assertStringContainsString( 'nexuscontent/v1/project-contract', $rendered );
+		self::assertStringContainsString( 'nexuscontent/v1/preview/{token}/{id}', $rendered );
+	}
+
+	public function test_rest_routes_page_shows_method_and_permission_badges(): void {
+		$rendered = $this->render_rest_routes_page();
+		self::assertStringContainsString( 'GET', $rendered );
+		self::assertStringContainsString( 'POST', $rendered );
+		self::assertStringContainsString( 'Public', $rendered );
+		self::assertStringContainsString( 'Privileged', $rendered );
+		self::assertStringContainsString( 'Admin only', $rendered );
+	}
+
+	public function test_rest_routes_page_shows_envelope_and_capabilities(): void {
+		$rendered = $this->render_rest_routes_page();
+		self::assertStringContainsString( 'Response envelope', $rendered );
+		self::assertStringContainsString( 'contractVersion', $rendered );
+		self::assertStringContainsString( 'Runtime capability report', $rendered );
+		self::assertStringContainsString( 'wordpressVersion', $rendered );
+	}
+
+	/* ----------------------------------------------------------------
+	 * Components page
+	 * --------------------------------------------------------------- */
+
+	public function test_components_page_shows_registry_rows(): void {
+		$rendered = $this->render_components_page();
+		self::assertStringContainsString( 'Section registry', $rendered );
+		self::assertStringContainsString( 'Hero', $rendered );
+		self::assertStringContainsString( 'Introduction', $rendered );
+		self::assertStringContainsString( 'Call to Action', $rendered );
+		self::assertStringContainsString( 'Form Embed', $rendered );
+	}
+
+	public function test_components_page_shows_kind_sources_and_status(): void {
+		$rendered = $this->render_components_page();
+		self::assertStringContainsString( 'Fixed', $rendered );
+		self::assertStringContainsString( 'Flexible', $rendered );
+		self::assertStringContainsString( 'Gutenberg', $rendered );
+		self::assertStringContainsString( 'ACF Free', $rendered );
+		self::assertStringContainsString( 'ACF Pro', $rendered );
+		self::assertStringContainsString( 'Enabled', $rendered );
+	}
+
+	public function test_components_page_shows_field_schemas(): void {
+		$rendered = $this->render_components_page();
+		self::assertStringContainsString( 'Field schemas', $rendered );
+		self::assertStringContainsString( 'heading', $rendered );
+		self::assertStringContainsString( 'buttons', $rendered );
+	}
+
+	/* ----------------------------------------------------------------
+	 * Contract page
+	 * --------------------------------------------------------------- */
+
+	public function test_contract_page_shows_empty_state_without_contract(): void {
+		unset( $GLOBALS['nc_test']['options']['nexuscontent_settings'] );
+		$rendered = $this->render_contract_page();
+		self::assertStringContainsString( 'Contract status', $rendered );
+		self::assertStringContainsString( 'No project contract received yet', $rendered );
+		self::assertStringContainsString( 'Counts', $rendered );
+	}
+
+	public function test_contract_page_shows_contract_counts(): void {
+		$GLOBALS['nc_test']['options']['nexuscontent_settings'] = array(
+			'enabled_sections'  => array( 'hero', 'cta' ),
+			'project_components' => array(
+				'components'   => array( 'hero', 'custom_thing' ),
+				'sectionTypes' => array( 'hero', 'image_text', 'copyright' ),
+			),
+		);
+		$rendered = $this->render_contract_page();
+		self::assertStringContainsString( 'Contract status', $rendered );
+		self::assertStringContainsString( '2', $rendered );
+		self::assertStringContainsString( '3', $rendered );
+	}
+
+	public function test_contract_page_shows_drift_table(): void {
+		$GLOBALS['nc_test']['options']['nexuscontent_settings'] = array(
+			'enabled_sections'  => array( 'hero', 'cta' ),
+			'project_components' => array(
+				'components'   => array( 'hero', 'custom_thing' ),
+				'sectionTypes' => array( 'hero', 'image_text', 'copyright' ),
+			),
+		);
+		$rendered = $this->render_contract_page();
+		self::assertStringContainsString( 'Drift analysis', $rendered );
+		self::assertStringContainsString( 'Valid', $rendered );
+		self::assertStringContainsString( 'Missing from install', $rendered );
+		self::assertStringContainsString( 'copyright', $rendered );
+		self::assertStringContainsString( 'Disabled in settings', $rendered );
+		self::assertStringContainsString( 'Available but unused', $rendered );
 	}
 
 	/* ----------------------------------------------------------------
@@ -434,6 +593,58 @@ final class AdminPageTest extends TestCase {
 		ob_start();
 		try {
 			$this->admin_page->render_settings_page();
+			$content = ob_get_clean();
+		} catch ( \Throwable $e ) {
+			ob_end_clean();
+			throw $e;
+		}
+		return $content;
+	}
+
+	private function render_editor_modes_page(): string {
+		$GLOBALS['nc_test']['caps']['manage_options'] = true;
+		ob_start();
+		try {
+			$this->admin_page->render_editor_modes_page();
+			$content = ob_get_clean();
+		} catch ( \Throwable $e ) {
+			ob_end_clean();
+			throw $e;
+		}
+		return $content;
+	}
+
+	private function render_rest_routes_page(): string {
+		$GLOBALS['nc_test']['caps']['manage_options'] = true;
+		ob_start();
+		try {
+			$this->admin_page->render_rest_routes_page();
+			$content = ob_get_clean();
+		} catch ( \Throwable $e ) {
+			ob_end_clean();
+			throw $e;
+		}
+		return $content;
+	}
+
+	private function render_components_page(): string {
+		$GLOBALS['nc_test']['caps']['manage_options'] = true;
+		ob_start();
+		try {
+			$this->admin_page->render_components_page();
+			$content = ob_get_clean();
+		} catch ( \Throwable $e ) {
+			ob_end_clean();
+			throw $e;
+		}
+		return $content;
+	}
+
+	private function render_contract_page(): string {
+		$GLOBALS['nc_test']['caps']['manage_options'] = true;
+		ob_start();
+		try {
+			$this->admin_page->render_contract_page();
 			$content = ob_get_clean();
 		} catch ( \Throwable $e ) {
 			ob_end_clean();

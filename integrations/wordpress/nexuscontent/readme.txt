@@ -4,7 +4,7 @@ Tags: headless, content, rest-api, gutenberg, acf
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.1.8
+Stable tag: 0.2.0
 License: MIT
 License URI: https://opensource.org/license/mit
 
@@ -14,7 +14,7 @@ Contract-versioned, normalized WordPress page and post content for future NexusC
 
 = Purpose =
 
-NexusContent Companion exposes normalized pages, posts, site settings, SEO, schema, capabilities, media, and diagnostics through WordPress REST routes. Content is read-only; the only write route is the admin-only project-contract push. Plugin 0.1.8 uses companion contract 1 and supports signed, outbound-only change webhooks.
+NexusContent Companion exposes normalized pages, posts, site settings, SEO, schema, capabilities, media, and diagnostics through WordPress REST routes. Content is read-only; the only write route is the admin-only project-contract push. Plugin 0.2.0 uses companion contract 1 and supports signed, outbound-only change webhooks.
 
 = Requirements =
 
@@ -73,13 +73,13 @@ nexuscontent_companion_loaded($registry) fires after registration. nexuscontent_
 
 = Build and tests =
 
-Run npm install, npm run build, npm run lint-js, npm run format:check, and npm run package. Packaging creates repository-root dist/nexuscontent-0.1.8.zip and excludes maps, source assets, tests, dependencies, local config, secrets, and dev configs.
+Run npm install, npm run build, npm run lint-js, npm run format:check, and npm run package. Packaging creates repository-root dist/nexuscontent-0.2.0.zip and excludes maps, source assets, tests, dependencies, local config, secrets, and dev configs.
 
 Run composer install, composer validate, composer lint, composer phpcs, composer phpstan, and composer test-unit. For integration work run npm run env:start and npm run test:integration. Separate ACF Free and Secure Custom Fields scripts verify both installed configurations. ACF Pro must be legally mounted by the developer and is never downloaded by this project.
 
 = Limitations and Phase 3 status =
 
-0.1.8 retrieval is read-only and page/post/settings-focused: no site-content mutations, rebuild triggering, synchronization, retries, third-party SEO/localisation plugin mapping, endpoint discovery, content conversion, or bundled ACF Pro. HTML remains untrusted. The provider discovers the companion, negotiates contract version 1, and falls back to standard REST settings when `/settings` is unavailable.
+0.2.0 retrieval is read-only and page/post/settings-focused: no site-content mutations, rebuild triggering, synchronization, retries, third-party SEO/localisation plugin mapping, endpoint discovery, content conversion, or bundled ACF Pro. HTML remains untrusted. The provider discovers the companion, negotiates contract version 1, and falls back to standard REST settings when `/settings` is unavailable.
 
 == Installation ==
 
@@ -103,6 +103,11 @@ No. ACF Pro is licensed software and must be legally supplied by the developer.
 Yes, when the provider runs with the companion strategy or auto-discovery. It discovers these routes, negotiates contract version 1, caches capabilities, and falls back to unmodified standard REST retrieval when the plugin is not reachable. Release status of the wrapping NexusContent milestone remains under repo control.
 
 == Changelog ==
+
+= 0.2.0 =
+
+* Redesigned the admin experience into seven pages matching the NexusContent dashboard design: Dashboard (system health, contract drift, secured-route counts, editor-mode distribution, recent content, and quick links), Editor Modes (available modes, global default, published-content distribution, and ACF health), REST Routes (endpoint catalog with method, access, purpose, response envelope, and runtime capability report), Components (the canonical 12-section registry with coverage and per-section field schemas), Contract (pushed project-contract status, drift analysis, and counts), Settings (General configuration and Integrations cards), and About.
+* The admin redesign is a presentation restyle only: no new features, no behavior change, and no persisted request log. All panels render existing plugin data.
 
 = 0.1.8 =
 

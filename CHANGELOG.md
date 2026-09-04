@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The companion plugin admin is redesigned into seven pages following the NexusContent dashboard design language: Dashboard, Editor Modes, REST Routes, Components, Contract, Settings, and About. The redesign is purely presentational — every panel renders existing plugin data (capabilities, settings, the project-contract drift comparison, the canonical 12-section registry, and the registered routes mirror). No new features, no persisted request log, and no behavior change. The plugin version bumps to `0.2.0`; the artifact is `dist/nexuscontent-0.2.0.zip`.
+
 ### Fixed
 
 - The WordPress companion now uses the active ACF edition's detected field capabilities when registering fixed sections. SCF and ACF Pro therefore retain the Hero and Call to Action button repeaters without showing false "repeater field type is unavailable" notices; ACF Free still omits only those unavailable fields with clearer capability wording.
