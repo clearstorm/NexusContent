@@ -256,10 +256,11 @@ final class ACF_Loader {
 				'title'        => __( 'NexusContent SEO', 'nexuscontent' ),
 				'fields'       => array(
 					array(
-						'key'   => 'field_nc_seo_title',
-						'name'  => 'nexus_seo_title',
-						'label' => __( 'SEO title', 'nexuscontent' ),
-						'type'  => 'text',
+						'key'     => 'field_nc_seo_title',
+						'name'    => 'nexus_seo_title',
+						'label'   => __( 'SEO title', 'nexuscontent' ),
+						'type'    => 'text',
+						'wrapper' => array( 'width' => '50' ),
 					),
 					array(
 						'key'   => 'field_nc_seo_description',
@@ -269,10 +270,11 @@ final class ACF_Loader {
 						'rows'  => 2,
 					),
 					array(
-						'key'   => 'field_nc_seo_canonical',
-						'name'  => 'nexus_seo_canonical',
-						'label' => __( 'Canonical URL', 'nexuscontent' ),
-						'type'  => 'url',
+						'key'     => 'field_nc_seo_canonical',
+						'name'    => 'nexus_seo_canonical',
+						'label'   => __( 'Canonical URL', 'nexuscontent' ),
+						'type'    => 'url',
+						'wrapper' => array( 'width' => '50' ),
 					),
 					array(
 						'key'           => 'field_nc_seo_robots_index',
@@ -280,6 +282,7 @@ final class ACF_Loader {
 						'label'         => __( 'Index', 'nexuscontent' ),
 						'type'          => 'true_false',
 						'default_value' => 1,
+						'wrapper'       => array( 'width' => '50' ),
 					),
 					array(
 						'key'           => 'field_nc_seo_robots_follow',
@@ -287,12 +290,14 @@ final class ACF_Loader {
 						'label'         => __( 'Follow', 'nexuscontent' ),
 						'type'          => 'true_false',
 						'default_value' => 1,
+						'wrapper'       => array( 'width' => '50' ),
 					),
 					array(
-						'key'   => 'field_nc_seo_og_title',
-						'name'  => 'nexus_seo_og_title',
-						'label' => __( 'OpenGraph title', 'nexuscontent' ),
-						'type'  => 'text',
+						'key'     => 'field_nc_seo_og_title',
+						'name'    => 'nexus_seo_og_title',
+						'label'   => __( 'OpenGraph title', 'nexuscontent' ),
+						'type'    => 'text',
+						'wrapper' => array( 'width' => '50' ),
 					),
 					array(
 						'key'   => 'field_nc_seo_og_description',
@@ -307,6 +312,7 @@ final class ACF_Loader {
 						'label'         => __( 'OpenGraph image', 'nexuscontent' ),
 						'type'          => 'image',
 						'return_format' => 'array',
+						'wrapper'       => array( 'width' => '50' ),
 					),
 				),
 				'location'     => array_merge( $this->section_mode_location( 'acf_flexible' ), $this->section_mode_location( 'acf_fixed' ) ),

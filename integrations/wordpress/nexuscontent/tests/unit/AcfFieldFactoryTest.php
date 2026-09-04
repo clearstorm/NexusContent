@@ -118,13 +118,20 @@ final class AcfFieldFactoryTest extends TestCase {
 			array( '80', '20' ),
 			array_map( static fn( array $field ): string => $field['wrapper']['width'], $logo_items['sub_fields'] )
 		);
+
+		$faq = ACF_Field_Factory::layout_for( 'faq', array( 'repeater' => true ), $limitations );
+		$faq_items = array_values( array_filter( $faq['sub_fields'], static fn( array $field ): bool => 'items' === $field['name'] ) )[0];
+		self::assertSame(
+			array( '33', '67' ),
+			array_map( static fn( array $field ): string => $field['wrapper']['width'], $faq_items['sub_fields'] )
+		);
 	}
 
 	public function test_section_level_fields_line_up_beside_the_eyebrow(): void {
 		$limitations = array();
 		$layout  = ACF_Field_Factory::layout_for( 'hero', array( 'repeater' => true ), $limitations );
 		$by_name = array_column( $layout['sub_fields'], null, 'name' );
-		self::assertSame( '50', $by_name['section_id']['wrapper']['width'] );
+		self::assertSame( '33', $by_name['section_id']['wrapper']['width'] );
 		self::assertSame( '50', $by_name['variant']['wrapper']['width'] );
 		self::assertStringContainsString( 'variant', $by_name['variant']['instructions'] );
 		self::assertSame( '33', $by_name['eyebrow']['wrapper']['width'] );

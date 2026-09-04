@@ -86,7 +86,7 @@ final class ACF_Field_Factory {
 			'type'         => 'text',
 			'label'        => __( 'Section ID', 'nexuscontent' ),
 			'instructions' => __( 'Optional stable identifier used in normalized output.', 'nexuscontent' ),
-			'wrapper'      => array( 'width' => '50' ),
+			'wrapper'      => array( 'width' => '33' ),
 		);
 		$variant    = array(
 			'type'         => 'text',
@@ -518,6 +518,10 @@ final class ACF_Field_Factory {
 				'quote'  => '66',
 				'author' => '23',
 				'avatar' => '10',
+			),
+			'faq'         => array(
+				'question' => '33',
+				'answer'   => '67',
 			),
 			'logo'        => array(
 				'name'  => '80',

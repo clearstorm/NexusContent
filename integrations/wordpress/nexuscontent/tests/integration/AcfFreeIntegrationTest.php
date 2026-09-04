@@ -21,4 +21,16 @@ final class AcfFreeIntegrationTest extends IntegrationTestCase {
 			self::assertContains( $name, $names );
 		}
 	}
+
+	public function test_seo_fields_are_laid_out_in_width_rows(): void {
+		$group = acf_get_local_field_group( 'group_nc_seo' );
+		self::assertIsArray( $group );
+		$fields = array_column( acf_get_fields( $group ), null, 'name' );
+		self::assertSame( '50', $fields['nexus_seo_title']['wrapper']['width'] );
+		self::assertSame( '50', $fields['nexus_seo_canonical']['wrapper']['width'] );
+		self::assertSame( '50', $fields['nexus_seo_robots_index']['wrapper']['width'] );
+		self::assertSame( '50', $fields['nexus_seo_robots_follow']['wrapper']['width'] );
+		self::assertSame( '50', $fields['nexus_seo_og_title']['wrapper']['width'] );
+		self::assertSame( '50', $fields['nexus_seo_og_image']['wrapper']['width'] );
+	}
 }
