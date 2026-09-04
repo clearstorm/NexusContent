@@ -208,7 +208,7 @@ export const models = {
   },
   services: {
     kind: "singleton",
-    source: { provider: "git", key: "services" },
+    source: { provider: "wordpress", key: "services" },
     fields: {
       hero: { type: "component", component: "hero", required: true },
       features: { type: "component", component: "features" },
