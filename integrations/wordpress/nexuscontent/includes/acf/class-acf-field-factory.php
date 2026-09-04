@@ -89,9 +89,10 @@ final class ACF_Field_Factory {
 			'wrapper'      => array( 'width' => '33' ),
 		);
 		$variant         = array(
-			'type'    => 'text',
-			'label'   => __( 'Variant', 'nexuscontent' ),
-			'wrapper' => array( 'width' => '33' ),
+			'type'         => 'text',
+			'label'        => __( 'Variant', 'nexuscontent' ),
+			'instructions' => __( 'Optional variant used in normalized output.', 'nexuscontent' ),
+			'wrapper'      => array( 'width' => '33' ),
 		);
 		$section_id_half = array_merge( $section_id, array( 'wrapper' => array( 'width' => '50' ) ) );
 		$variant_half    = array_merge( $variant, array( 'wrapper' => array( 'width' => '50' ) ) );
@@ -105,8 +106,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'body'       => array(
 					'type'  => 'textarea',
@@ -133,8 +135,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'        => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'body'           => array(
 					'type'  => 'textarea',
@@ -179,8 +182,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'        => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'body'           => array(
 					'type'  => 'textarea',
@@ -216,8 +220,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'body'       => array(
 					'type'  => 'textarea',
@@ -239,8 +244,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'items'      => array(
 					'type'       => 'repeater',
@@ -257,8 +263,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'items'      => array(
 					'type'       => 'repeater',
@@ -275,8 +282,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'images'     => array(
 					'type'          => 'gallery',
@@ -316,8 +324,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'items'      => array(
 					'type'       => 'repeater',
@@ -334,8 +343,9 @@ final class ACF_Field_Factory {
 					'wrapper' => array( 'width' => '33' ),
 				),
 				'heading'    => array(
-					'type'  => 'text',
-					'label' => __( 'Heading', 'nexuscontent' ),
+					'type'    => 'text',
+					'label'   => __( 'Heading', 'nexuscontent' ),
+					'wrapper' => array( 'width' => '67' ),
 				),
 				'items'      => array(
 					'type'       => 'repeater',
@@ -494,18 +504,21 @@ final class ACF_Field_Factory {
 		);
 		$fields = array();
 
-		$half = array(
+		$widths = array(
 			'feature'     => array(
-				'title'     => '80',
-				'thumbnail' => '20',
+				'title'       => '33',
+				'description' => '33',
+				'points'      => '23',
+				'thumbnail'   => '10',
 			),
 			'statistic'   => array(
 				'value' => '50',
 				'label' => '50',
 			),
 			'testimonial' => array(
-				'author' => '80',
-				'avatar' => '20',
+				'quote'  => '66',
+				'author' => '23',
+				'avatar' => '10',
 			),
 			'logo'        => array(
 				'name'  => '80',
@@ -523,8 +536,8 @@ final class ACF_Field_Factory {
 			if ( 'textarea' === $type ) {
 				$field['rows'] = 2;
 			}
-			if ( isset( $half[ $kind ][ $name ] ) ) {
-				$field['wrapper'] = array( 'width' => $half[ $kind ][ $name ] );
+			if ( isset( $widths[ $kind ][ $name ] ) ) {
+				$field['wrapper'] = array( 'width' => $widths[ $kind ][ $name ] );
 			}
 			if ( 'logo' === $kind && 'name' === $name ) {
 				$field['label']        = __( 'Label', 'nexuscontent' );

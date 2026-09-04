@@ -91,4 +91,44 @@ final class AcfFieldFactoryTest extends TestCase {
 		self::assertSame( array( 'question', 'answer' ), array_column( $items['sub_fields'], 'name' ) );
 		self::assertSame( 'textarea', $items['sub_fields'][1]['type'] );
 	}
+
+	public function test_item_row_widths_match_the_editor_layout(): void {
+		$limitations = array();
+		$features = ACF_Field_Factory::layout_for( 'features', array( 'repeater' => true ), $limitations );
+		$feature_items = array_values( array_filter( $features['sub_fields'], static fn( array $field ): bool => 'items' === $field['name'] ) )[0];
+		self::assertSame(
+			array( '33', '33', '23', '10' ),
+			array_map( static fn( array $field ): string => $field['wrapper']['width'], $feature_items['sub_fields'] )
+		);
+
+		$testimonials = ACF_Field_Factory::layout_for( 'testimonials', array( 'repeater' => true ), $limitations );
+		$testimonial_items = array_values( array_filter( $testimonials['sub_fields'], static fn( array $field ): bool => 'items' === $field['name'] ) )[0];
+		self::assertSame(
+			array( '66', '23', '10' ),
+			array_map( static fn( array $field ): string => $field['wrapper']['width'], $testimonial_items['sub_fields'] )
+		);
+
+		$logo = ACF_Field_Factory::layout_for( 'logo_grid', array( 'repeater' => true ), $limitations );
+		$logo_items = array_values( array_filter( $logo['sub_fields'], static fn( array $field ): bool => 'items' === $field['name'] ) )[0];
+		self::assertSame(
+			array( '80', '20' ),
+			array_map( static fn( array $field ): string => $field['wrapper']['width'], $logo_items['sub_fields'] )
+		);
+	}
+
+	public function test_section_level_fields_line_up_beside_the_eyebrow(): void {
+		$limitations = array();
+		$layout  = ACF_Field_Factory::layout_for( 'hero', array( 'repeater' => true ), $limitations );
+		$by_name = array_column( $layout['sub_fields'], null, 'name' );
+		self::assertSame( '33', $by_name['section_id']['wrapper']['width'] );
+		self::assertSame( '33', $by_name['variant']['wrapper']['width'] );
+		self::assertStringContainsString( 'variant', $by_name['variant']['instructions'] );
+		self::assertSame( '33', $by_name['eyebrow']['wrapper']['width'] );
+		self::assertSame( '67', $by_name['heading']['wrapper']['width'] );
+
+		$cta         = ACF_Field_Factory::layout_for( 'cta', array( 'repeater' => true ), $limitations );
+		$cta_by_name = array_column( $cta['sub_fields'], null, 'name' );
+		self::assertArrayNotHasKey( 'eyebrow', $cta_by_name );
+		self::assertArrayNotHasKey( 'wrapper', $cta_by_name['heading'] );
+	}
 }
