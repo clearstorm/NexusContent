@@ -43,7 +43,6 @@ export type {
   SeoTwitter,
   SectionSettings,
   SettingsContent,
-  SingletonContent,
   StringFieldSchema,
   TranslationState
 } from "./types.ts";
@@ -89,15 +88,13 @@ export type {
   NavigationModelNames,
   ResolvedData,
   SettingsModelNames,
-  SingletonModelNames,
-  SingletonServiceModelNames
+  SingletonModelNames
 } from "./inference.ts";
 
 export {
   normalizeCollectionItem,
   normalizeNavigation,
   normalizePage,
-  normalizeSettings,
-  normalizeSingleton
+  normalizeSettings
 } from "./normalize.ts";
 export { NexusContent } from "./service.ts";

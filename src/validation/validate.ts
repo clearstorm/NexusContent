@@ -3,16 +3,14 @@ import type {
   CollectionItem,
   NavigationContent,
   PageContent,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "../core/types.ts";
 import { ValidationError } from "../core/errors.ts";
 import {
   collectionItemSchema,
   navigationSchema,
   pageSchema,
-  settingsSchema,
-  singletonSchema
+  settingsSchema
 } from "./schemas.ts";
 
 export interface ValidationIssue {
@@ -38,16 +36,6 @@ export function validatePageContent(
   context: ValidationContext = {}
 ): void {
   const result = pageSchema.safeParse(value);
-  if (!result.success) {
-    throw buildValidationError(result.error, context, value.key);
-  }
-}
-
-export function validateSingletonContent(
-  value: SingletonContent,
-  context: ValidationContext = {}
-): void {
-  const result = singletonSchema.safeParse(value);
   if (!result.success) {
     throw buildValidationError(result.error, context, value.key);
   }

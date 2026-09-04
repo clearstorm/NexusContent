@@ -21,7 +21,7 @@ const config = {
     models: {
       home: {
         kind: "singleton",
-        source: { provider: "git", key: "home", mode: "page" },
+        source: { provider: "git", key: "home" },
         fields: {
           hero: { type: "object", fields: { heading: { type: "string" } } }
         }
@@ -60,28 +60,6 @@ test("rejects an undeclared provider reference", () => {
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
       assert.match(error.message, /strapi/);
-      return true;
-    }
-  );
-});
-
-test("rejects a source.mode on a non-singleton model", () => {
-  assert.throws(
-    () =>
-      defineNexusConfig({
-        providers: { git: { type: "git" } },
-        schema: {
-          models: {
-            posts: {
-              kind: "collection",
-              source: { provider: "git", key: "posts", mode: "page" }
-            }
-          }
-        }
-      }),
-    (error: unknown) => {
-      assert.ok(error instanceof ConfigError);
-      assert.match(error.message, /source.mode/);
       return true;
     }
   );

@@ -8,8 +8,7 @@ import type {
   NavigationContent,
   NexusConfig,
   PageContent,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "../../src/core/index.ts";
 import {
   defineNexusConfig,
@@ -27,7 +26,7 @@ import type { InferModel } from "../../src/core/index.ts";
 const models = {
   home: {
     kind: "singleton",
-    source: { provider: "git", key: "home", mode: "page" },
+    source: { provider: "git", key: "home" },
     fields: {
       hero: {
         type: "object",
@@ -124,10 +123,6 @@ class StubProvider implements ContentProvider {
       } as TData,
       meta: { source: this.name }
     };
-  }
-
-  async getSingleton<TData = Record<string, unknown>>(): Promise<SingletonContent<TData> | null> {
-    return null;
   }
 
   async getNavigation(): Promise<NavigationContent | null> {
@@ -274,11 +269,6 @@ test("type inference rejects invalid model usage at compile time", () => {
   function wrongKindForSettings(): void {
     // @ts-expect-error "primary" is navigation, not settings
     nexus.getSettings("primary");
-  }
-
-  function pageModeExcludedFromSingleton(): void {
-    // @ts-expect-error "home" routes through getPage
-    nexus.getSingleton("home");
   }
 
   function invalidStringOption(): void {

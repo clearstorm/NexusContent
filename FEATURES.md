@@ -30,8 +30,9 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `core.errors` Structured errors | implemented | 0.1.0 | - | Contextual configuration, registry, provider, validation, and missing-content errors. |
 | `core.provenance` Content provenance | implemented | 0.1.0 | - | Normalized source, source identifier, and optional update timestamp. |
 | `core.public-api` Public exports | implemented | 0.1.0 | - | Small package entry point for supported consumer APIs. |
-| `core.schema.models` Model schema contract | implemented | 0.2.2 | - | `schema.models` maps logical models to `kind`, provider `source`, and optional field schemas; retrieval routes through the declared kind and `source.mode`. Replaces root `content` / `navigation` / `settings` configuration. |
+| `core.schema.models` Model schema contract | implemented | 0.2.2 | - | `schema.models` maps logical models to `kind`, provider `source`, and optional field schemas; retrieval routes through the declared kind, with singleton models served through `getPage`. Replaces root `content` / `navigation` / `settings` configuration. |
 | `core.schema.fields` Declarative field schemas | implemented | 0.2.2 | - | String, number, boolean, datetime, object, reference, media, richText, component, and blocks fields with `required`, `list`, `options`, nested `object.fields`, `reference.collection`, `media` overrides, `component` references into `schema.components`, and `blocks` validation of a discriminated `_type` list against `allowedComponents`; validated at retrieval time with a `SchemaError`. |
+| `core.schema.sections-expansion` Sections-to-component-fields expansion | implemented | 0.2.8 | - | When a provider returns a page as CMS-ordered sections (`data.sections` of `{ type, data }`) and a model declares component fields, `getPage` expands each section whose `type` matches a declared component onto that field (matched by component type, not field name), so the same schema and consumer templates work across Git (component fields), WordPress/Strapi (sections), and other providers. Models that declare their own `sections` field, or no component fields, are untouched. Unmatched sections stay in `data.sections` by default; a model sets `strictSections: true` to throw a `SchemaError` instead. |
 
 ## Providers
 
@@ -112,8 +113,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
-| `core.page` Page retrieval | implemented | 0.1.0 | - | Returns normalized page content or `null` when absent. |
-| `core.singleton` Singleton retrieval | implemented | 0.1.2 | - | Provider-neutral `getSingleton` returns arbitrary normalized singleton content or `null` when absent. |
+| `core.page` Page retrieval | implemented | 0.1.0 | - | Returns normalized page content or `null` when absent; singleton models route through `getPage`. |
 | `core.collection` Collection retrieval | implemented | 0.1.0 | - | Returns normalized collection items or an empty collection when absent. |
 | `core.item` Individual item retrieval | implemented | 0.1.0 | - | Returns a normalized item or `null` when absent. |
 | `content.navigation` Dedicated navigation retrieval | implemented | 0.1.2 | - | `getNavigation` resolves a dedicated navigation configuration section and Git reads `navigation/<key>.json` into validated recursive `NavigationContent`. |
@@ -126,7 +126,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
 | `localisation.foundations` Locale-aware core | implemented | 0.1.3 | - | Optional `locales` configuration, central `LocaleResolver` with fallback chains and strict mode, structured locale errors, optional `meta.locale` provenance, and per-request `locale` / `fallback` options on every retrieval method. |
-| `localisation.git-variants` Git locale variant directories | implemented | 0.1.3 | - | Reads `pages/<locale>/<key>.json` and equivalent variant directories for pages, singletons, navigation, settings, collections, and items, with legacy flat-file fallback; strict mode throws `MissingLocaleVariantError` when a variant is absent. |
+| `localisation.git-variants` Git locale variant directories | implemented | 0.1.3 | - | Reads `pages/<locale>/<key>.json` and equivalent variant directories for pages, navigation, settings, collections, and items, with legacy flat-file fallback; strict mode throws `MissingLocaleVariantError` when a variant is absent. |
 | `localisation.file-level` Full file-level multilingual content | planned | - | 0.2.x | Per-item variant merging and locale publishing for one file per language. |
 | `localisation.validation-policies` Per-locale validation policies | planned | - | 0.2.x | Locale-specific consumer schemas and validation context. |
 | `translation.state-model` Translation state workflow | planned | - | 0.2.x | `TranslationState` and `LocaleVariantInfo` extension points are established in 0.1.3; the workflow is not implemented. |

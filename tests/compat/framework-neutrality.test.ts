@@ -159,11 +159,7 @@ test("the public API works from plain Node code without Astro installed", async 
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "git", key: "home", mode: "page" }
-        },
-        singleton: {
-          kind: "singleton",
-          source: { provider: "git", key: "navigation" }
+          source: { provider: "git", key: "home" }
         },
         posts: {
           kind: "collection",
@@ -191,10 +187,10 @@ test("the public API works from plain Node code without Astro installed", async 
   assert.equal(page.key, "home");
   assert.equal(page.meta.source, "git");
 
-  const singleton = await nexus.getSingleton("singleton");
+  const singleton = await nexus.getPage("home");
   assert.ok(singleton);
-  assert.equal(singleton.key, "navigation");
-  assert.equal(singleton.meta.sourceId, "singletons/navigation.json");
+  assert.equal(singleton.key, "home");
+  assert.equal(singleton.meta.sourceId, "pages/home.json");
 
   const navigation = await nexus.getNavigation("primary");
   assert.ok(navigation);

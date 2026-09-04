@@ -2,8 +2,7 @@ import type {
   CollectionItem,
   NavigationContent,
   PageContent,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "./types.ts";
 
 /**
@@ -30,11 +29,6 @@ export interface ContentProvider {
     key: string,
     options?: ProviderRetrievalOptions
   ): Promise<PageContent<TData> | null>;
-
-  getSingleton<TData = Record<string, unknown>>(
-    key: string,
-    options?: ProviderRetrievalOptions
-  ): Promise<SingletonContent<TData> | null>;
 
   getNavigation(
     key: string,

@@ -2,8 +2,7 @@ import type {
   CollectionItem,
   NavigationContent,
   PageContent,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "../../core/types.ts";
 import type {
   ContentProvider,
@@ -15,15 +14,13 @@ import {
   loadItemFile,
   loadNavigationFile,
   loadPageFile,
-  loadSettingsFile,
-  loadSingletonFile
+  loadSettingsFile
 } from "./loader.ts";
 import {
   normalizeRawItem,
   normalizeRawNavigation,
   normalizeRawPage,
-  normalizeRawSettings,
-  normalizeRawSingleton
+  normalizeRawSettings
 } from "./normalize.ts";
 
 export interface GitProviderOptions {
@@ -68,25 +65,6 @@ export class GitProvider implements ContentProvider {
     });
 
     return page as unknown as PageContent<TData>;
-  }
-
-  async getSingleton<TData = Record<string, unknown>>(
-    key: string,
-    options: ProviderRetrievalOptions = {}
-  ): Promise<SingletonContent<TData> | null> {
-    const file = await loadSingletonFile(this.contentPath, key, options);
-    if (file === null) {
-      return null;
-    }
-
-    const singleton = normalizeRawSingleton(file.data, {
-      key,
-      sourceId: file.relativePath,
-      updatedAt: file.updatedAt,
-      locale: file.locale
-    });
-
-    return singleton as unknown as SingletonContent<TData>;
   }
 
   async getNavigation(

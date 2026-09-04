@@ -6,7 +6,6 @@ import {
   validateNavigationContent,
   validatePageContent,
   validateSettingsContent,
-  validateSingletonContent,
   validateWithSchema
 } from "../../src/validation/index.ts";
 import { ValidationError } from "../../src/core/index.ts";
@@ -14,8 +13,7 @@ import type {
   CollectionItem,
   NavigationContent,
   PageContent,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "../../src/index.ts";
 
 const validPage: PageContent = {
@@ -26,19 +24,6 @@ const validPage: PageContent = {
   seo: { title: "Home", description: "The homepage." },
   data: { hero: { heading: "Welcome" } },
   meta: { source: "git", sourceId: "pages/home.json", updatedAt: "2026-08-14T10:00:00Z" }
-};
-
-const validSingleton: SingletonContent = {
-  id: "navigation",
-  key: "navigation",
-  data: {
-    items: [{ label: "Home", href: "/" }]
-  },
-  meta: {
-    source: "git",
-    sourceId: "singletons/navigation.json",
-    updatedAt: "2026-08-14T10:00:00Z"
-  }
 };
 
 const validNavigation: NavigationContent = {
@@ -244,64 +229,6 @@ test("validation errors carry structured details", () => {
       assert.equal(error.operation, "validate");
       assert.ok(error.issues.length > 0);
       assert.ok(error.issues.every((issue) => issue.path !== "" && issue.message));
-      return true;
-    }
-  );
-});
-
-test("accepts valid singleton content", () => {
-  assert.doesNotThrow(() => validateSingletonContent(validSingleton));
-});
-
-test("rejects singleton content missing required fields", () => {
-  const broken = {
-    ...validSingleton,
-    key: undefined,
-    meta: undefined
-  } as unknown as SingletonContent;
-
-  assert.throws(
-    () => validateSingletonContent(broken),
-    (error: unknown) => {
-      assert.ok(error instanceof ValidationError);
-      assert.ok(error.issues.some((issue) => issue.path === "key"));
-      assert.ok(error.issues.some((issue) => issue.path === "meta"));
-      return true;
-    }
-  );
-});
-
-test("rejects singleton content with invalid data", () => {
-  const broken = {
-    ...validSingleton,
-    data: ["not", "an", "object"]
-  } as unknown as SingletonContent;
-
-  assert.throws(
-    () => validateSingletonContent(broken),
-    (error: unknown) => {
-      assert.ok(error instanceof ValidationError);
-      assert.ok(error.issues.some((issue) => issue.path === "data"));
-      return true;
-    }
-  );
-});
-
-test("singleton validation errors carry structured details", () => {
-  const broken = { ...validSingleton, id: 42 } as unknown as SingletonContent;
-
-  assert.throws(
-    () =>
-      validateSingletonContent(broken, {
-        provider: "git",
-        content: "mainNavigation"
-      }),
-    (error: unknown) => {
-      assert.ok(error instanceof ValidationError);
-      assert.equal(error.provider, "git");
-      assert.equal(error.content, "mainNavigation");
-      assert.equal(error.operation, "validate");
-      assert.ok(error.issues.some((issue) => issue.path === "id" && issue.message));
       return true;
     }
   );

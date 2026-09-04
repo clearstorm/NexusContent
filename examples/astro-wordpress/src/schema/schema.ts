@@ -169,6 +169,14 @@ export const components = {
  * field shapes, pages, and components stay identical. The same content can be
  * served by either provider without touching website code.
  *
+ * For pages declared with component fields (like `home`), Core expands the
+ * CMS provider's `data.sections` into those component fields: each section
+ * whose `type` matches a declared component becomes that component field, so
+ * Git (`home` authored as `hero`, `intro`, ...) and WordPress (which emits
+ * `data.sections`) render through the same page template. A model with no
+ * matching component field for a section keeps it in `data.sections`, or
+ * throws a `SchemaError` when `strictSections: true` is set.
+ *
  * To keep a model on WordPress, the WordPress provider options in
  * `src/nexus.config` need an editor mode the install can actually produce
  * sections from (e.g. `acf_flexible` for the plugin's flexible layouts, or
@@ -178,7 +186,7 @@ export const components = {
 export const models = {
   home: {
     kind: "singleton",
-    source: { provider: "git", key: "home", mode: "page" },
+    source: { provider: "wordpress", key: "home" },
     fields: {
       hero: { type: "component", component: "hero", required: true },
       intro: { type: "component", component: "intro" },
@@ -190,7 +198,7 @@ export const models = {
   },
   about: {
     kind: "singleton",
-    source: { provider: "git", key: "about", mode: "page" },
+    source: { provider: "git", key: "about" },
     fields: {
       hero: { type: "component", component: "hero", required: true },
       rich_text: { type: "component", component: "rich_text" },
@@ -200,7 +208,7 @@ export const models = {
   },
   services: {
     kind: "singleton",
-    source: { provider: "git", key: "services", mode: "page" },
+    source: { provider: "git", key: "services" },
     fields: {
       hero: { type: "component", component: "hero", required: true },
       features: { type: "component", component: "features" },
@@ -210,7 +218,7 @@ export const models = {
   },
   contact: {
     kind: "singleton",
-    source: { provider: "git", key: "contact", mode: "page" },
+    source: { provider: "git", key: "contact" },
     fields: {
       image_text: { type: "component", component: "image_text" },
       logo_grid: { type: "component", component: "logo_grid" },

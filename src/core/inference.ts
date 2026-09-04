@@ -57,21 +57,6 @@ export type SingletonModelNames<TConfig> = ModelNamesByKind<
   "singleton"
 >;
 
-/**
- * Singleton names that route through `getSingleton` (page-mode singletons
- * route through `getPage` instead).
- */
-export type SingletonServiceModelNames<TConfig> =
-  string extends keyof ModelsOf<TConfig>
-    ? string
-    : {
-        [TName in keyof ModelsOf<TConfig> & string]: ModelOf<TConfig, TName> extends {
-          source: { mode: "page" };
-        }
-          ? never
-          : TName;
-      }[keyof ModelsOf<TConfig> & string];
-
 export type CollectionModelNames<TConfig> = ModelNamesByKind<
   TConfig,
   "collection"

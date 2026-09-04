@@ -2,8 +2,7 @@ import type {
   CollectionItem,
   NavigationContent,
   PageContent,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "./types.ts";
 
 export function normalizePage<TData = Record<string, unknown>>(
@@ -21,25 +20,6 @@ export function normalizePage<TData = Record<string, unknown>>(
     meta: {
       ...(page.meta ?? {}),
       source: page.meta?.source ?? fallbackSource
-    }
-  };
-}
-
-export function normalizeSingleton<TData = Record<string, unknown>>(
-  singleton: SingletonContent<TData>,
-  fallbackSource: string
-): SingletonContent<TData> {
-  const key = singleton.key ?? singleton.id;
-  const id = singleton.id ?? key;
-
-  return {
-    ...singleton,
-    id,
-    key,
-    data: singleton.data,
-    meta: {
-      ...(singleton.meta ?? {}),
-      source: singleton.meta?.source ?? fallbackSource
     }
   };
 }

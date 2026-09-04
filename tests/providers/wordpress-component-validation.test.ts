@@ -123,7 +123,7 @@ test("projectComponentContract derives component usage from a consumer schema", 
     models: {
       home: {
         kind: "singleton",
-        source: { provider: "wordpress", key: "home", mode: "page" },
+        source: { provider: "wordpress", key: "home" },
         fields: {
           hero: { type: "component", component: "hero" },
           services: { type: "component", component: "servicesList" },

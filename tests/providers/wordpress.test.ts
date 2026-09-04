@@ -471,9 +471,8 @@ test("reports invalid JSON, timeout, and invalid WordPress entries", async (t) =
   });
 });
 
-test("returns null for unsupported singleton, navigation, and settings operations", async () => {
+test("returns null for unsupported navigation and settings operations", async () => {
   const wordpress = provider("https://example.test/wp-json/wp/v2");
-  assert.equal(await wordpress.getSingleton("site"), null);
   assert.equal(await wordpress.getNavigation("main"), null);
   assert.equal(await wordpress.getSettings("site"), null);
 });
@@ -490,7 +489,7 @@ test("normalized WordPress output passes through the NexusContent service", asyn
         models: {
           about: {
             kind: "singleton",
-            source: { provider: "cms", key: "about-us", mode: "page" }
+            source: { provider: "cms", key: "about-us" }
           },
           blog: {
             kind: "collection",

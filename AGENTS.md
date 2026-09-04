@@ -725,11 +725,6 @@ export interface ContentProvider {
     options?: ProviderRetrievalOptions
   ): Promise<PageContent<TData> | null>;
 
-  getSingleton<TData = Record<string, unknown>>(
-    key: string,
-    options?: ProviderRetrievalOptions
-  ): Promise<SingletonContent<TData> | null>;
-
   getNavigation(
     key: string,
     options?: ProviderRetrievalOptions
@@ -1428,6 +1423,8 @@ The `0.2.7` WordPress companion webhooks release was released as `v0.2.7` on 202
 
 The companion plugin `0.1.3` release (root package version stays `0.2.7`) aligns the section editor with the Gutenberg blocks and the canonical section schema: eyebrow is edited inline above the heading, the "Additional fields" inspector panel is merged into a Section settings panel (section ID, variant, theme), and Hero / Image and Text / Call to Action use a repeatable Buttons subcomponent (`label`, `url`, `style`) instead of the legacy action label/url pairs. Features items expose `title`, `description`, `points`, and `thumbnail`; Testimonials items expose `quote`, `author`, and `avatar`; Logo Grid items expose `name` and `image`. The TypeScript `sections.generated.ts`, the companion `/schema` schema fixture, the component-validation schema, and the consumer fixtures move together with `sections.json`. ACF editor fields align with the new shapes, and ACF Free fixed fields now skip an unavailable repeater (for example the hero/cta `buttons`) with a limitation instead of dropping the whole section.
 
+The `0.2.8` release was released as `v0.2.8` on 2026-09-04 (root package version `0.2.8`). It unifies singleton models onto `getPage`: `getSingleton` is removed from the `ContentProvider` contract and the `NexusContent` service, along with `SingletonContent`, `singletonSchema`, `validateSingletonContent`, `normalizeSingleton`/`normalizeRawSingleton`, and the Git `singletons/<key>.json` loader; `kind: "singleton"` models now route exclusively through `getPage` (Git reads `pages/<key>.json`) and the `source.mode` field is gone. It also adds seamless provider switching: when a provider returns a page as CMS-ordered sections and the model's `fields` declare `type: "component"` entries, `getPage` expands each section whose `type` matches a declared component onto that field (matched by component type, not field name, and reading either `data.sections` or page-level `PageContent.sections`), so the same schema and consumer templates work identically whether content comes from Git (component fields) or a CMS provider such as WordPress/Strapi (sections). Models that declare their own `sections` field or no component fields are untouched; unmatched sections stay in `data.sections` by default, and a model sets `strictSections: true` to throw a `SchemaError` instead.
+
 The recommended next focus is the directional `0.3.0` Strapi provider, followed by the remaining `0.2.x` consolidation if any.
 
 ---
@@ -1447,7 +1444,7 @@ The released milestone includes:
 - Sequential pagination with required, consistent `X-WP-Total` and `X-WP-TotalPages` headers and no silent `maxPages` truncation.
 - Normalized rendered title, content, excerpt, dates, URL, provenance, ACF fields, relationship IDs, and embedded featured media.
 - Actionable configuration, HTTP, network, timeout, JSON, payload, and pagination errors without secret leakage.
-- Unsupported singleton, navigation, and settings operations return `null`; locale retrieval options are ignored by the plugin-neutral base provider.
+- Unsupported navigation and settings operations return `null`; singleton models route through `getPage`, and locale retrieval options are ignored by the plugin-neutral base provider.
 - Public `WordPressProvider`, `WordPressProviderOptions`, `WordPressCollectionConfig`, and `WordPressContentData` exports.
 
 ## Consumers and Verification
@@ -1549,7 +1546,7 @@ The established foundation includes:
 ## Git Provider
 
 - External content directory support
-- JSON page loading
+- JSON page loading (pages and singleton models route through `getPage` reading `pages/<key>.json`)
 - JSON singleton loading from `singletons/<key>.json`
 - JSON navigation loading from `navigation/<key>.json`
 - JSON settings loading from `settings/<key>.json`

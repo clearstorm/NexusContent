@@ -51,7 +51,7 @@ test("WordPress public API works in plain Node without Astro", async () => {
         models: {
           home: {
             kind: "singleton",
-            source: { provider: "wordpressNode", key: "home", mode: "page" }
+            source: { provider: "wordpressNode", key: "home" }
           },
           posts: {
             kind: "collection",

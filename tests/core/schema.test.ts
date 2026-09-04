@@ -18,7 +18,7 @@ function buildConfig(): NexusConfig {
       models: {
         about: {
           kind: "singleton",
-          source: { provider: "mock", key: "about", mode: "page" },
+          source: { provider: "mock", key: "about" },
           fields: {
             headline: { type: "string" },
             headlineRequired: { type: "string", required: true },
@@ -331,4 +331,157 @@ test("validates data matching component and blocks schemas", () => {
 
   assert.equal((valid as any).header.heading, "Welcome");
   assert.equal((valid as any).layout[0]._type, "hero");
+});
+
+test("expandSectionsToComponents maps sections to declared component fields by type", () => {
+  const registry = new ModelRegistry(
+    {
+      components: {
+        hero: { fields: { heading: { type: "string", required: true } } }
+      },
+      models: {
+        page: {
+          kind: "singleton",
+          source: { provider: "mock", key: "page" },
+          fields: {
+            mainHero: { type: "component", component: "hero" }
+          }
+        }
+      }
+    },
+    ["mock"],
+    []
+  );
+
+  const expanded = registry.expandSectionsToComponents("page", {
+    sections: [{ type: "hero", data: { heading: "Hello" } }]
+  }) as Record<string, unknown>;
+
+  assert.deepEqual(expanded.mainHero, { heading: "Hello" });
+  assert.equal("sections" in expanded, false);
+});
+
+test("expandSectionsToComponents keeps unmatched sections by default", () => {
+  const registry = new ModelRegistry(
+    {
+      components: {
+        hero: { fields: { heading: { type: "string", required: true } } }
+      },
+      models: {
+        page: {
+          kind: "singleton",
+          source: { provider: "mock", key: "page" },
+          fields: {
+            hero: { type: "component", component: "hero" }
+          }
+        }
+      }
+    },
+    ["mock"],
+    []
+  );
+
+  const expanded = registry.expandSectionsToComponents("page", {
+    sections: [
+      { type: "hero", data: { heading: "Hello" } },
+      { type: "gallery", data: { images: [] } }
+    ]
+  }) as Record<string, unknown>;
+
+  assert.deepEqual(expanded.hero, { heading: "Hello" });
+  assert.deepEqual(expanded.sections, [{ type: "gallery", data: { images: [] } }]);
+});
+
+test("expandSectionsToComponents throws for unmatched sections when strictSections is set", () => {
+  const registry = new ModelRegistry(
+    {
+      components: {
+        hero: { fields: { heading: { type: "string", required: true } } }
+      },
+      models: {
+        page: {
+          kind: "singleton",
+          source: { provider: "mock", key: "page" },
+          strictSections: true,
+          fields: {
+            hero: { type: "component", component: "hero" }
+          }
+        }
+      }
+    },
+    ["mock"],
+    []
+  );
+
+  assert.throws(
+    () =>
+      registry.expandSectionsToComponents("page", {
+        sections: [
+          { type: "hero", data: { heading: "Hello" } },
+          { type: "gallery", data: {} }
+        ]
+      }),
+    (error: unknown) => {
+      assert.ok(error instanceof SchemaError);
+      assert.equal((error as SchemaErrorType).model, "page");
+      assert.match((error as SchemaErrorType).reason ?? "", /gallery/);
+      return true;
+    }
+  );
+});
+
+test("expandSectionsToComponents leaves models with no component fields untouched", () => {
+  const registry = new ModelRegistry(
+    {
+      models: {
+        page: {
+          kind: "singleton",
+          source: { provider: "mock", key: "page" },
+          fields: {
+            title: { type: "string" }
+          }
+        }
+      }
+    },
+    ["mock"],
+    []
+  );
+
+  const input = { sections: [{ type: "hero", data: {} }] };
+  const expanded = registry.expandSectionsToComponents("page", input);
+
+  assert.equal(expanded, input);
+});
+
+test("expandSectionsToComponents leaves models that declare their own sections field untouched", () => {
+  const registry = new ModelRegistry(
+    {
+      components: {
+        hero: { fields: { heading: { type: "string", required: true } } }
+      },
+      models: {
+        page: {
+          kind: "singleton",
+          source: { provider: "mock", key: "page" },
+          fields: {
+            hero: { type: "component", component: "hero" },
+            sections: {
+              type: "object",
+              list: true,
+              fields: { type: { type: "string" }, data: { type: "object" } }
+            }
+          }
+        }
+      }
+    },
+    ["mock"],
+    []
+  );
+
+  const input = {
+    sections: [{ type: "hero", data: { heading: "Hello" } }]
+  };
+  const expanded = registry.expandSectionsToComponents("page", input);
+
+  assert.equal(expanded, input);
 });

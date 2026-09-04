@@ -100,68 +100,6 @@ test("throws a ProviderError when the file is not a JSON object", async () => {
   );
 });
 
-test("loads and normalizes navigation singleton content", async () => {
-  const singleton = await buildProvider().getSingleton("navigation");
-
-  assert.ok(singleton);
-  assert.equal(singleton.id, "navigation");
-  assert.equal(singleton.key, "navigation");
-  assert.deepEqual(singleton.data.items, [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" }
-  ]);
-});
-
-test("loads settings as provider-neutral singleton content", async () => {
-  const singleton = await buildProvider().getSingleton("settings");
-
-  assert.ok(singleton);
-  assert.equal(singleton.id, "settings");
-  assert.equal(singleton.key, "settings");
-  assert.equal(singleton.data.siteName, "NexusContent Example");
-  assert.equal(singleton.data.locale, "en-ZA");
-});
-
-test("records content provenance for singletons", async () => {
-  const singleton = await buildProvider().getSingleton("navigation");
-
-  assert.ok(singleton);
-  assert.equal(singleton.meta.source, "git");
-  assert.equal(singleton.meta.sourceId, "singletons/navigation.json");
-  assert.equal(typeof singleton.meta.updatedAt, "string");
-});
-
-test("returns null for a missing singleton", async () => {
-  assert.equal(await buildProvider().getSingleton("missing"), null);
-});
-
-test("throws a ProviderError for malformed singleton JSON", async () => {
-  await assert.rejects(
-    () => buildProvider().getSingleton("malformed"),
-    (error: unknown) => {
-      assert.ok(error instanceof ProviderError);
-      assert.equal(error.provider, "git");
-      assert.equal(error.operation, "load");
-      assert.equal(error.content, "singletons/malformed.json");
-      assert.match(error.reason ?? "", /JSON/i);
-      return true;
-    }
-  );
-});
-
-test("throws a ProviderError when a singleton file is not a JSON object", async () => {
-  await assert.rejects(
-    () => buildProvider().getSingleton("array"),
-    (error: unknown) => {
-      assert.ok(error instanceof ProviderError);
-      assert.equal(error.operation, "normalize");
-      assert.equal(error.content, "singletons/array.json");
-      assert.match(error.reason ?? "", /object/i);
-      return true;
-    }
-  );
-});
-
 test("loads navigation from the dedicated navigation directory", async () => {
   const navigation = await buildProvider().getNavigation("primary");
 
@@ -348,20 +286,6 @@ test("rejects a page key that escapes the content root", async () => {
   );
 });
 
-test("rejects a singleton key that escapes the content root", async () => {
-  await assert.rejects(
-    () => buildProvider().getSingleton("../../secret"),
-    (error: unknown) => {
-      assert.ok(error instanceof ProviderError);
-      assert.ok(error instanceof NexusContentError);
-      assert.equal(error.provider, "git");
-      assert.equal(error.operation, "load");
-      assert.match(error.message, /escapes the configured content root/);
-      return true;
-    }
-  );
-});
-
 test("rejects a navigation key that escapes the content root", async () => {
   await assert.rejects(
     () => buildProvider().getNavigation("../../secret"),
@@ -443,31 +367,6 @@ test("rejects a page file symlink that escapes the content root", async () => {
       (error: unknown) => {
         assert.ok(error instanceof ProviderError);
         assert.equal(error.content, "pages/outside.json");
-        assert.match(error.message, /escapes the configured content root/);
-        return true;
-      }
-    );
-  } finally {
-    await rm(fixtureRoot, { recursive: true, force: true });
-  }
-});
-
-test("rejects a singleton file symlink that escapes the content root", async () => {
-  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-symlink-singleton-"));
-  const root = join(fixtureRoot, "content");
-  const outside = join(fixtureRoot, "outside.json");
-
-  try {
-    await mkdir(join(root, "singletons"), { recursive: true });
-    await writeFile(outside, JSON.stringify({ siteName: "Outside" }), "utf8");
-    await symlink(outside, join(root, "singletons", "outside.json"));
-
-    const provider = new GitProvider({ contentPath: root });
-    await assert.rejects(
-      () => provider.getSingleton("outside"),
-      (error: unknown) => {
-        assert.ok(error instanceof ProviderError);
-        assert.equal(error.content, "singletons/outside.json");
         assert.match(error.message, /escapes the configured content root/);
         return true;
       }

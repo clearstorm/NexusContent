@@ -14,14 +14,12 @@ import type {
   NavigationContent,
   NexusConfig,
   PageContent,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "../../src/core/index.ts";
 
 class MockProvider implements ContentProvider {
   readonly name: string;
   private pageResult: Record<string, unknown> | null = null;
-  private singletonResult: Record<string, unknown> | null = null;
   private navigationResult: Record<string, unknown> | null = null;
   private settingsResult: Record<string, unknown> | null = null;
   private collectionResult: Record<string, unknown>[] = [];
@@ -34,11 +32,6 @@ class MockProvider implements ContentProvider {
 
   setPage(value: Record<string, unknown> | null) {
     this.pageResult = value;
-    return this;
-  }
-
-  setSingleton(value: Record<string, unknown> | null) {
-    this.singletonResult = value;
     return this;
   }
 
@@ -72,11 +65,6 @@ class MockProvider implements ContentProvider {
     return this.pageResult as unknown as PageContent<TData> | null;
   }
 
-  async getSingleton<TData = Record<string, unknown>>(): Promise<SingletonContent<TData> | null> {
-    if (this.failure) throw this.failure;
-    return this.singletonResult as unknown as SingletonContent<TData> | null;
-  }
-
   async getNavigation(): Promise<NavigationContent | null> {
     if (this.failure) throw this.failure;
     return this.navigationResult as unknown as NavigationContent | null;
@@ -105,12 +93,29 @@ function buildConfig(): NexusConfig {
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "mock", key: "home", mode: "page" },
+          source: { provider: "mock", key: "home" },
           fields: {
             hero: {
               type: "object",
               fields: { heading: { type: "string", required: true } }
             }
+          }
+        },
+        cms_page: {
+          kind: "singleton",
+          source: { provider: "mock", key: "cms-page" },
+          strictSections: true,
+          fields: {
+            hero: { type: "component", component: "hero", required: true },
+            features: { type: "component", component: "features" }
+          }
+        },
+        cms_page_lax: {
+          kind: "singleton",
+          source: { provider: "mock", key: "cms-page" },
+          fields: {
+            hero: { type: "component", component: "hero", required: true },
+            features: { type: "component", component: "features" }
           }
         },
         singleton: {
@@ -128,6 +133,17 @@ function buildConfig(): NexusConfig {
         site: {
           kind: "settings",
           source: { provider: "mock", key: "site" }
+        }
+      },
+      components: {
+        hero: {
+          fields: { heading: { type: "string", required: true } }
+        },
+        features: {
+          fields: {
+            heading: { type: "string", required: true },
+            items: { type: "string", list: true }
+          }
         }
       }
     }
@@ -254,6 +270,81 @@ test("getPage throws a SchemaError before returning invalid model data", async (
   );
 });
 
+test("getPage expands CMS sections into declared component fields", async () => {
+  const { service, mock } = buildService();
+  mock.setPage({
+    id: "cms-page",
+    key: "cms-page",
+    title: "CMS page",
+    data: {
+      sections: [
+        { type: "hero", data: { heading: "Hello" } },
+        { type: "features", data: { heading: "List", items: ["a", "b"] } }
+      ]
+    },
+    meta: { source: "mock" }
+  });
+
+  const page = await service.getPage("cms_page_lax");
+
+  assert.ok(page);
+  assert.deepEqual(page.data, {
+    hero: { heading: "Hello" },
+    features: { heading: "List", items: ["a", "b"] }
+  });
+});
+
+test("getPage expands page-level sections into declared component fields", async () => {
+  const { service, mock } = buildService();
+  mock.setPage({
+    id: "cms-page",
+    key: "cms-page",
+    title: "CMS page",
+    sections: [
+      { type: "hero", data: { heading: "Greetings" } },
+      { type: "features", data: { heading: "Wins", items: ["x"] } }
+    ],
+    data: { editorMode: "gutenberg", content: "<p>raw</p>" },
+    meta: { source: "mock" }
+  });
+
+  const page = await service.getPage("cms_page_lax");
+
+  assert.ok(page);
+  assert.deepEqual(page.data, {
+    editorMode: "gutenberg",
+    content: "<p>raw</p>",
+    hero: { heading: "Greetings" },
+    features: { heading: "Wins", items: ["x"] }
+  });
+});
+
+test("getPage throws a SchemaError for unmatched sections when strictSections is set", async () => {
+  const { service, mock } = buildService();
+  mock.setPage({
+    id: "cms-page",
+    key: "cms-page",
+    title: "CMS page",
+    data: {
+      sections: [
+        { type: "hero", data: { heading: "Hello" } },
+        { type: "gallery", data: {} }
+      ]
+    },
+    meta: { source: "mock" }
+  });
+
+  await assert.rejects(
+    () => service.getPage("cms_page"),
+    (error: unknown) => {
+      assert.ok(error instanceof SchemaError);
+      assert.equal(error.model, "cms_page");
+      assert.match(error.reason ?? "", /gallery/);
+      return true;
+    }
+  );
+});
+
 test("getPage does not coerce null provider data into an empty object", async () => {
   const { service, mock } = buildService();
   mock.setPage({ id: "home", key: "home", data: null, meta: { source: "mock" } });
@@ -263,105 +354,6 @@ test("getPage does not coerce null provider data into an empty object", async ()
     (error: unknown) => {
       assert.ok(error instanceof ValidationError);
       assert.ok(error.issues.some((issue) => issue.path === "data"));
-      return true;
-    }
-  );
-});
-
-test("getSingleton returns normalized content from the provider", async () => {
-  const { service, mock } = buildService();
-  mock.setSingleton({
-    id: "navigation",
-    key: "navigation",
-    data: { items: [{ label: "Home", href: "/" }] },
-    meta: { source: "mock" }
-  });
-
-  const singleton = await service.getSingleton("singleton");
-
-  assert.ok(singleton);
-  assert.equal(singleton.key, "navigation");
-  assert.deepEqual(singleton.data, {
-    items: [{ label: "Home", href: "/" }]
-  });
-  assert.equal(singleton.meta.source, "mock");
-});
-
-test("getSingleton normalizes a missing meta source to the provider name", async () => {
-  const { service, mock } = buildService();
-  mock.setSingleton({ id: "singleton", key: "singleton", data: {} });
-
-  const singleton = await service.getSingleton("singleton");
-
-  assert.ok(singleton);
-  assert.equal(singleton.meta.source, "mock");
-});
-
-test("getSingleton returns null when the provider has no content", async () => {
-  const { service, mock } = buildService();
-  mock.setSingleton(null);
-
-  assert.equal(await service.getSingleton("singleton"), null);
-});
-
-test("getSingleton rejects invalid provider content", async () => {
-  const { service, mock } = buildService();
-  mock.setSingleton({
-    id: "singleton",
-    key: "singleton",
-    data: null,
-    meta: { source: "mock" }
-  });
-
-  await assert.rejects(
-    () => service.getSingleton("singleton"),
-    (error: unknown) => {
-      assert.ok(error instanceof ValidationError);
-      assert.ok(error.issues.some((issue) => issue.path === "data"));
-      return true;
-    }
-  );
-});
-
-test("getSingleton wraps a provider failure in a ProviderError", async () => {
-  const { service, mock } = buildService();
-  mock.setError(new Error("Singleton API unavailable"));
-
-  await assert.rejects(
-    () => service.getSingleton("singleton"),
-    (error: unknown) => {
-      assert.ok(error instanceof ProviderError);
-      assert.equal(error.provider, "mock");
-      assert.equal(error.operation, "getSingleton");
-      assert.equal(error.content, "singleton");
-      assert.match(error.reason ?? "", /Singleton API unavailable/);
-      return true;
-    }
-  );
-});
-
-test("getSingleton throws a RegistryError for an unregistered provider", async () => {
-  const service = new NexusContent(buildConfig());
-  service.register("other", new MockProvider("other"));
-
-  await assert.rejects(
-    () => service.getSingleton("singleton"),
-    (error: unknown) => {
-      assert.ok(error instanceof RegistryError);
-      assert.equal(error.provider, "mock");
-      return true;
-    }
-  );
-});
-
-test("getSingleton throws a ConfigError for unconfigured content", async () => {
-  const { service } = buildService();
-
-  await assert.rejects(
-    () => service.getSingleton("missing"),
-    (error: unknown) => {
-      assert.ok(error instanceof NexusContentError);
-      assert.match(error.message, /Model "missing"/);
       return true;
     }
   );

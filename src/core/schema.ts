@@ -244,6 +244,124 @@ export class ModelRegistry {
 
     return result.data;
   }
+
+  /**
+   * Expand a provider's CMS-ordered `data.sections` into the model's declared
+   * component fields when the model declares any `type: "component"` fields.
+   *
+   * Providers that deliver pages as an ordered section list (WordPress,
+   * Strapi, and similar) surface the page body as `data.sections`, each entry
+   * `{ type, data }`. This maps each section whose `type` matches a declared
+   * component onto the corresponding component field (`data[field] =
+   * section.data`), so the same schema and consumer templates work whether
+   * the content came from Git (already authored as component fields) or a
+   * CMS that emits sections.
+   *
+   * Matching is by component type name, not field name, so a field declared
+   * as `mainHero: { type: "component", component: "hero" }` is satisfied by a
+   * section with `type: "hero"`. A model that declares its own `sections`
+   * field, or declares no component fields, is left untouched.
+   *
+   * Unmatched sections are kept in `data.sections` by default so no content
+   * is dropped. When the model sets `strictSections: true`, an unmatched
+   * section throws a SchemaError instead.
+   */
+  expandSectionsToComponents(
+    modelName: string,
+    data: unknown,
+    details: {
+      provider?: string;
+      sourceKey?: string;
+      locale?: string;
+      operation?: string;
+      sections?: unknown;
+    } = {}
+  ): unknown {
+    const compiled = this.models.get(modelName);
+    const model = compiled?.schema;
+    if (!model || !model.fields) {
+      return data;
+    }
+
+    const componentFields = Object.entries(model.fields).filter(
+      ([, field]) => field.type === "component"
+    );
+    if (componentFields.length === 0 || model.fields.sections) {
+      return data;
+    }
+
+    // Sections may arrive either on the page body (`data.sections`, as
+    // collection items do) or at the page level (`PageContent.sections`, as
+    // the WordPress page path does). Expand whichever is present.
+    const hasInlineSections =
+      isPlainObject(data) && Array.isArray(data.sections);
+    const sections: unknown[] = hasInlineSections
+      ? (data.sections as unknown[])
+      : Array.isArray(details.sections)
+        ? (details.sections as unknown[])
+        : [];
+    if (sections.length === 0 || !isPlainObject(data)) {
+      return data;
+    }
+
+    const remaining: unknown[] = [];
+    const matched = new Set<number>();
+
+    for (const [name, field] of componentFields) {
+      if (field.type !== "component") continue;
+      const target = field.component;
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
+        if (
+          !matched.has(i) &&
+          isPlainObject(section) &&
+          section.type === target
+        ) {
+          data[name] = section.data;
+          matched.add(i);
+          break;
+        }
+      }
+    }
+
+    const unmatchedTypes: string[] = [];
+    for (let i = 0; i < sections.length; i++) {
+      if (!matched.has(i)) {
+        const section = sections[i];
+        const type = isPlainObject(section) ? section.type : undefined;
+        remaining.push(section);
+        if (model.strictSections) {
+          unmatchedTypes.push(typeof type === "string" ? type : "<unknown>");
+        }
+      }
+    }
+
+    if (model.strictSections && unmatchedTypes.length > 0) {
+      throw new SchemaError(
+        `Content for model "${modelName}" has sections with no matching declared component field.`,
+        {
+          model: modelName,
+          provider: details.provider ?? model.source.provider,
+          operation: details.operation,
+          content: details.sourceKey ?? model.source.key,
+          locale: details.locale,
+          reason: `Unmatched section types: ${unmatchedTypes.join(", ")}.`
+        }
+      );
+    }
+
+    // Inline (`data.sections`) arrays are updated to the leftovers; page-level
+    // sections stay untouched so their provider-shaped array is preserved.
+    if (hasInlineSections) {
+      if (remaining.length > 0) {
+        data.sections = remaining;
+      } else {
+        delete data.sections;
+      }
+    }
+
+    return data;
+  }
 }
 
 function validateFields(
@@ -314,18 +432,12 @@ export function validateModelRelations(
         }
       );
     }
-    if (model.source.mode && model.kind !== "singleton") {
-      throw new ConfigError(
-        `Model "${name}" declares source.mode but kind is "${model.kind}".`,
-        {
-          model: name,
-          operation: "config",
-          reason: "source.mode is valid only for singleton models."
-        }
-      );
-    }
     if (model.fields) {
       validateFields(name, model.fields, models, mediaProviderNames);
     }
   }
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }

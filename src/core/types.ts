@@ -89,13 +89,6 @@ export interface ContentMeta {
   locale?: string;
 }
 
-export interface SingletonContent<TData = Record<string, unknown>> {
-  id: string;
-  key: string;
-  data: TData;
-  meta: ContentMeta;
-}
-
 export interface NavigationItem {
   label: string;
   href: string;
@@ -330,21 +323,37 @@ export interface ContentReference {
 }
 
 /**
- * Declares where a model's content is retrieved. `mode` is valid only for
- * `singleton` models: `"page"` routes to the provider's `getPage` operation
- * (Git `pages/<key>.json`, WordPress pages), `"singleton"` (the default)
- * routes to `getSingleton` (Git `singletons/<key>.json`).
+ * Declares where a model's content is retrieved. Singleton models always
+ * route through the provider's `getPage` operation; the provider is
+ * responsible for mapping that to whatever single-instance retrieval its
+ * runtime requires.
  */
 export interface ModelSource {
   readonly provider: string;
   readonly key: string;
-  readonly mode?: "page" | "singleton";
 }
 
+/**
+ * How CMS-ordered page content (`data.sections`) is treated when a model
+ * declares component fields.
+ *
+ * Providers that deliver pages as an ordered section list (WordPress,
+ * Strapi, and future CMS providers) surface the page body as
+ * `data.sections`, each entry `{ type, data }`. When this model declares
+ * component fields (`fields` entries with `type: "component"`), NexusContent
+ * expands those sections into the matching declared component fields so the
+ * schema and the consumer's page templates stay identical regardless of
+ * which provider serves the model.
+ *
+ * Set to `true` to make an unmatched section (a section `type` with no
+ * matching declared component field) throw a SchemaError instead of being
+ * silently kept in `data.sections`.
+ */
 export interface ModelSchema {
   readonly kind: ModelKind;
   readonly source: ModelSource;
   readonly fields?: FieldMap;
+  readonly strictSections?: boolean;
 }
 
 export interface SchemaConfig {

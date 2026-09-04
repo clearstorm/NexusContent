@@ -5,9 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.8] - 2026-09-04
 
-WordPress companion plugin `0.1.3` (section-editor alignment; core `0.2.7` unchanged).
+Seamless provider switching for CMS-ordered sections (core `0.2.8`); singleton models unified onto `getPage` (breaking pre-1.0). The companion plugin `0.1.3` section-editor alignment ships alongside.
+
+### Removed (breaking)
+
+- Removed `getSingleton` from the `ContentProvider` contract and the `NexusContent` service, along with the `SingletonContent` type, `singletonSchema`, `validateSingletonContent`, `normalizeSingleton`/`normalizeRawSingleton`, and the Git `singletons/<key>.json` loader. `kind: "singleton"` models now route exclusively through `getPage` (Git reads `pages/<key>.json`), and the `source.mode` field (`"page"` / `"singleton"`) is gone. This is a breaking pre-1.0 change; consumers should retrieve singleton models via `getPage`.
+
+### Added
+
+- Seamless provider switching for page models that declare component fields. When a provider returns a page as CMS-ordered sections (`data.sections` of `{ type, data }`) and the model's `fields` declare `type: "component"` entries, `getPage` now expands each section whose `type` matches a declared component onto that field (matched by component type, not field name), so the schema and consumer page templates stay identical whether content comes from Git (component fields) or a CMS provider such as WordPress/Strapi (sections). Sections may arrive either on the page body (`data.sections`, as collection items do) or at the page level (`PageContent.sections`, as the WordPress page path does); both are expanded. Models that declare their own `sections` field, or no component fields, are untouched; unmatched sections are kept in `data.sections` by default, and a model can set `strictSections: true` on its `ModelSchema` to throw a `SchemaError` for unmatched sections instead.
 
 ### Changed
 

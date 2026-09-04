@@ -4,8 +4,7 @@ import type {
   NexusConfig,
   PageContent,
   RetrievalOptions,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "./types.ts";
 import type { ContentProvider, ProviderRetrievalOptions } from "./provider.ts";
 import type {
@@ -13,8 +12,7 @@ import type {
   NavigationModelNames,
   ResolvedData,
   SettingsModelNames,
-  SingletonModelNames,
-  SingletonServiceModelNames
+  SingletonModelNames
 } from "./inference.ts";
 import { ProviderRegistry } from "./registry.ts";
 import { LocaleResolver } from "./locale.ts";
@@ -31,15 +29,13 @@ import {
   normalizeCollectionItem,
   normalizeNavigation,
   normalizePage,
-  normalizeSettings,
-  normalizeSingleton
+  normalizeSettings
 } from "./normalize.ts";
 import {
   validateCollectionItem,
   validateNavigationContent,
   validatePageContent,
-  validateSettingsContent,
-  validateSingletonContent
+  validateSettingsContent
 } from "../validation/validate.ts";
 import { LocaleError, NexusContentError, ProviderError } from "./errors.ts";
 
@@ -127,135 +123,45 @@ export class NexusContent<const TConfig extends NexusConfig = NexusConfig> {
     const provider = this.registry.get(model.source.provider);
     const providerOptions = this.resolveLocaleOptions(options);
 
-    if (model.source.mode === "page") {
-      let page: PageContent | null;
-      try {
-        page = await provider.getPage(model.source.key, providerOptions);
-      } catch (error) {
-        throw this.wrapProviderError(
-          error,
-          provider.name,
-          "getPage",
-          modelName
-        );
-      }
+    let page: PageContent | null;
+    try {
+      page = await provider.getPage(model.source.key, providerOptions);
+    } catch (error) {
+      throw this.wrapProviderError(
+        error,
+        provider.name,
+        "getPage",
+        modelName
+      );
+    }
 
-      if (page === null) {
-        return null;
-      }
+    if (page === null) {
+      return null;
+    }
 
-      const normalized = normalizePage(page, provider.name);
-      validatePageContent(normalized, {
+    const normalized = normalizePage(page, provider.name);
+    validatePageContent(normalized, {
+      provider: provider.name,
+      content: modelName,
+      locale: providerOptions?.locale
+    });
+    const shaped = this.models.expandSectionsToComponents(
+      modelName,
+      normalized.data,
+      {
         provider: provider.name,
-        content: modelName,
-        locale: providerOptions?.locale
-      });
-      const data = this.models.validateData(modelName, normalized.data, {
-        provider: provider.name,
-        content: modelName,
         sourceKey: model.source.key,
         locale: providerOptions?.locale,
-        operation: "getPage"
-      }) as ResolvedData<TConfig, TName, TData>;
-
-      return { ...normalized, data };
-    }
-
-    let singleton: SingletonContent | null;
-    try {
-      singleton = await provider.getSingleton(
-        model.source.key,
-        providerOptions
-      );
-    } catch (error) {
-      throw this.wrapProviderError(
-        error,
-        provider.name,
-        "getSingleton",
-        modelName
-      );
-    }
-
-    if (singleton === null) {
-      return null;
-    }
-
-    const normalized = normalizeSingleton(singleton, provider.name);
-    validateSingletonContent(normalized, {
-      provider: provider.name,
-      content: modelName,
-      locale: providerOptions?.locale
-    });
-    const data = this.models.validateData(modelName, normalized.data, {
+        operation: "getPage",
+        sections: normalized.sections
+      }
+    );
+    const data = this.models.validateData(modelName, shaped, {
       provider: provider.name,
       content: modelName,
       sourceKey: model.source.key,
       locale: providerOptions?.locale,
-      operation: "getSingleton"
-    }) as ResolvedData<TConfig, TName, TData>;
-
-    return {
-      id: normalized.id,
-      key: normalized.key,
-      data,
-      meta: normalized.meta
-    };
-  }
-
-  async getSingleton<
-    TData extends Record<string, unknown> | undefined = undefined,
-    const TName extends SingletonServiceModelNames<TConfig> = SingletonServiceModelNames<TConfig>
-  >(
-    modelName: TName,
-    options: RetrievalOptions = {}
-  ): Promise<SingletonContent<ResolvedData<TConfig, TName, TData>> | null> {
-    const model = this.models.assertKind(modelName, "singleton");
-    if (model.source.mode === "page") {
-      throw new ProviderError(
-        `Model "${modelName}" routes through the page content operation. Use getPage instead of getSingleton.`,
-        {
-          provider: model.source.provider,
-          model: modelName,
-          operation: "getSingleton",
-          reason: `source.mode is "page" for the "${model.source.key}" provider key.`
-        }
-      );
-    }
-
-    const provider = this.registry.get(model.source.provider);
-    const providerOptions = this.resolveLocaleOptions(options);
-
-    let singleton: SingletonContent | null;
-    try {
-      singleton = await provider.getSingleton(
-        model.source.key,
-        providerOptions
-      );
-    } catch (error) {
-      throw this.wrapProviderError(
-        error,
-        provider.name,
-        "getSingleton",
-        modelName
-      );
-    }
-
-    if (singleton === null) {
-      return null;
-    }
-
-    const normalized = normalizeSingleton(singleton, provider.name);
-    validateSingletonContent(normalized, {
-      provider: provider.name,
-      content: modelName,
-      locale: providerOptions?.locale
-    });
-    const data = this.models.validateData(modelName, normalized.data, {
-      provider: provider.name,
-      content: modelName,
-      sourceKey: model.source.key,
-      locale: providerOptions?.locale,
-      operation: "getSingleton"
+      operation: "getPage"
     }) as ResolvedData<TConfig, TName, TData>;
 
     return { ...normalized, data };

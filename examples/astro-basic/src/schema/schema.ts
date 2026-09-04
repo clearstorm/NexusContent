@@ -82,7 +82,7 @@ export const components = {
 export const models = {
   home: {
     kind: "singleton",
-    source: { provider: "git", key: "home", mode: "page" },
+    source: { provider: "git", key: "home" },
     fields: {
       hero: { type: "component", component: "hero", required: true },
       servicesList: { type: "component", component: "servicesList" },
@@ -92,7 +92,7 @@ export const models = {
   },
   about: {
     kind: "singleton",
-    source: { provider: "git", key: "about", mode: "page" },
+    source: { provider: "git", key: "about" },
     fields: {
       hero: { type: "component", component: "hero", required: true },
       mission: { type: "component", component: "richTextContent" },
@@ -102,7 +102,7 @@ export const models = {
   },
   services: {
     kind: "singleton",
-    source: { provider: "git", key: "services", mode: "page" },
+    source: { provider: "git", key: "services" },
     fields: {
       hero: { type: "component", component: "hero", required: true },
       servicesList: { type: "component", component: "servicesList" },
@@ -111,7 +111,7 @@ export const models = {
   },
   contact: {
     kind: "singleton",
-    source: { provider: "git", key: "contact", mode: "page" },
+    source: { provider: "git", key: "contact" },
     fields: {
       hero: { type: "component", component: "hero", required: true },
       introduction: { type: "component", component: "richTextContent" }

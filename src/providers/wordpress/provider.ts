@@ -10,8 +10,7 @@ import type {
   NavigationContent,
   PageContent,
   SchemaConfig,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "../../core/types.ts";
 import { WordPressClient } from "./client.ts";
 import {
@@ -456,13 +455,6 @@ export class WordPressProvider implements ContentProvider {
     }
 
     return this.coreGetPage(key, context) as Promise<PageContent<TData> | null>;
-  }
-
-  getSingleton<TData = Record<string, unknown>>(
-    _key: string,
-    _options: ProviderRetrievalOptions = {}
-  ): Promise<SingletonContent<TData> | null> {
-    return Promise.resolve(null);
   }
 
   getNavigation(

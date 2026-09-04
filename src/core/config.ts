@@ -77,12 +77,12 @@ const modelSchema: z.ZodType<ModelSchema> = z.object({
   ]),
   source: z.object({
     provider: z.string().min(1),
-    key: z.string().min(1),
-    mode: z.enum(["page", "singleton"]).optional()
+    key: z.string().min(1)
   }),
   fields: z
     .record(z.string(), z.lazy(() => fieldSchema))
-    .optional()
+    .optional(),
+  strictSections: z.boolean().optional()
 });
 
 const nexusConfigShape = z.object({
@@ -246,16 +246,6 @@ export function validateNexusConfig(config: NexusConfig): void {
   }
 
   for (const [modelName, model] of Object.entries(config.schema.models)) {
-    if (model.source.mode && model.kind !== "singleton") {
-      throw new ConfigError(
-        `Model "${modelName}" declares source.mode but kind is "${model.kind}".`,
-        {
-          operation: "defineNexusConfig",
-          reason: `source.mode is valid only for singleton models.`
-        }
-      );
-    }
-
     if (!providerNames.includes(model.source.provider)) {
       throw new ConfigError(
         `Model "${modelName}" references provider "${model.source.provider}" which is not declared.`,

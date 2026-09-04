@@ -14,7 +14,7 @@ const nexus = new NexusContent(
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "git", key: "home", mode: "page" },
+          source: { provider: "git", key: "home" },
           fields: {
             hero: {
               type: "object",

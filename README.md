@@ -63,7 +63,7 @@ const nexus = new NexusContent(
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "content", key: "home", mode: "page" },
+          source: { provider: "content", key: "home" },
           fields: {
             hero: {
               type: "object",
@@ -76,7 +76,7 @@ const nexus = new NexusContent(
         },
         about: {
           kind: "singleton",
-          source: { provider: "content", key: "about", mode: "page" }
+          source: { provider: "content", key: "about" }
         }
       }
     }
@@ -125,7 +125,7 @@ const nexus = new NexusContent(
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "wordpress", key: "home", mode: "page" }
+          source: { provider: "wordpress", key: "home" }
         },
         posts: {
           kind: "collection",
@@ -146,11 +146,9 @@ const posts = await nexus.getCollection("posts");
 
 The `schema.models` contract declares where each logical model's content comes
 from and what its data should look like. Model `kind` selects the retrieval
-operation: `singleton` (via `getPage` or `getSingleton`), `collection`,
-`navigation`, or `settings`. For singletons, `source.mode` selects the
-provider operation: `"page"` routes to `getPage` (Git `pages/<key>.json`),
-`"singleton"` (the default) routes to `getSingleton` (Git
-`singletons/<key>.json`).
+operation: `singleton` models route through `getPage` (Git
+`pages/<key>.json`), `collection` through `getCollection`, `navigation`
+through `getNavigation`, and `settings` through `getSettings`.
 
 Field types are `string`, `number`, `boolean`, `datetime`, `object`,
 `reference`, `media`, `richText`, `component`, and `blocks`. Fields support

@@ -147,8 +147,6 @@ export const settingsSchema = z.object({
   meta: contentMetaSchema
 });
 
-export const singletonSchema = settingsSchema;
-
 export const pageSchema = z.object({
   id: z.string(),
   key: z.string(),

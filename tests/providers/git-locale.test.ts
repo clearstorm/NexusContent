@@ -129,19 +129,6 @@ test("throws a MissingLocaleVariantError in strict mode when no content exists",
   );
 });
 
-test("loads a singleton variant", async () => {
-  const singleton = await buildProvider().getSingleton("banner", {
-    locale: "en-ZA",
-    fallbackLocales: ["en-ZA"]
-  });
-
-  assert.ok(singleton);
-  assert.equal(singleton.key, "banner");
-  assert.equal(singleton.data.message, "Banner (en-ZA)");
-  assert.equal(singleton.meta.locale, "en-ZA");
-  assert.equal(singleton.meta.sourceId, "singletons/en-ZA/banner.json");
-});
-
 test("loads navigation variants", async () => {
   const navigation = await buildProvider().getNavigation("primary", {
     locale: "zu-ZA",

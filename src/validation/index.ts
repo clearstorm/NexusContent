@@ -14,8 +14,7 @@ export {
   seoRobotsSchema,
   seoSchema,
   seoTwitterSchema,
-  settingsSchema,
-  singletonSchema
+  settingsSchema
 } from "./schemas.ts";
 
 export {
@@ -24,7 +23,6 @@ export {
   validateNavigationContent,
   validatePageContent,
   validateSettingsContent,
-  validateSingletonContent,
   validateWithSchema
 } from "./validate.ts";
 export type { ValidationContext, ValidationIssue } from "./validate.ts";

@@ -305,14 +305,6 @@ export async function loadPageFile(
   return loadSingleContentFile(contentPath, "pages", key, "load", options);
 }
 
-export async function loadSingletonFile(
-  contentPath: string,
-  key: string,
-  options: LoadOptions = {}
-): Promise<RawFile | null> {
-  return loadSingleContentFile(contentPath, "singletons", key, "loadSingleton", options);
-}
-
 export async function loadNavigationFile(
   contentPath: string,
   key: string,

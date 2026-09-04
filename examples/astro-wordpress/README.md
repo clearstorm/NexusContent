@@ -13,7 +13,7 @@ Every model in `src/schema/schema.ts` declares its own source:
 ```ts
 home: {
   kind: "singleton",
-  source: { provider: "git", key: "home", mode: "page" },
+  source: { provider: "git", key: "home" },
   fields: { ... }
 }
 ```

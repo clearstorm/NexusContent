@@ -13,8 +13,7 @@ import type {
   NexusConfig,
   PageContent,
   ProviderRetrievalOptions,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "../../src/core/index.ts";
 
 class RecordingProvider implements ContentProvider {
@@ -38,14 +37,6 @@ class RecordingProvider implements ContentProvider {
   ): Promise<PageContent<TData> | null> {
     this.lastOptions = options;
     return this.page as unknown as PageContent<TData>;
-  }
-
-  async getSingleton<TData = Record<string, unknown>>(
-    key: string,
-    options?: ProviderRetrievalOptions
-  ): Promise<SingletonContent<TData> | null> {
-    this.lastOptions = options;
-    return { id: key, key, data: {}, meta: { source: "recording" } } as unknown as SingletonContent<TData>;
   }
 
   async getNavigation(
@@ -89,7 +80,7 @@ function buildConfig(): NexusConfig {
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "recording", key: "home", mode: "page" }
+          source: { provider: "recording", key: "home" }
         },
         blog: {
           kind: "collection",
@@ -206,7 +197,7 @@ test("does not forward provider options when locales are not configured", async 
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "recording", key: "home", mode: "page" }
+          source: { provider: "recording", key: "home" }
         }
       }
     }
@@ -226,7 +217,7 @@ test("rejects a locale request when no locales are configured", async () => {
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "recording", key: "home", mode: "page" }
+          source: { provider: "recording", key: "home" }
         }
       }
     }
@@ -252,7 +243,7 @@ test("ignores a fallback-only request when no locales are configured", async () 
       models: {
         home: {
           kind: "singleton",
-          source: { provider: "recording", key: "home", mode: "page" }
+          source: { provider: "recording", key: "home" }
         }
       }
     }

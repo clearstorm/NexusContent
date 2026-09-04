@@ -14,10 +14,10 @@ Versions after `0.2.0` are directional targets. Scope and ordering may change as
 
 - Normalized content types and shared provider contract.
 - Provider registry, configuration resolution, and content service.
-- Page, generic singleton, dedicated navigation, settings, collection, and item retrieval.
+- Page (including singleton models), dedicated navigation, settings, collection, and item retrieval.
 - Structured errors, normalization, provenance, and validation.
 - Normalized SEO data, deterministic fallback resolution, provider mapping, and consumer-owned Astro rendering.
-- External Git content directories with JSON pages, arbitrary singletons, navigation, settings, and collections.
+- External Git content directories with JSON pages, navigation, settings, and collections.
 - Path containment and editor-independent Git-based CMS compatibility.
 - Astro reference example and plain Node compatibility proof.
 - Type checking, tests, package build, examples, and CI.
@@ -175,7 +175,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 **Required capabilities:**
 
-- `schema.models` with model kinds (`singleton`, `collection`, `navigation`, `settings`) and provider sources carrying `mode: "page"` or `"singleton"`.
+- `schema.models` with model kinds (`singleton`, `collection`, `navigation`, `settings`) and provider sources; singleton models route through `getPage`.
 - Declarative field schemas (`string`, `number`, `boolean`, `datetime`, `object`, `reference`, `media`, `richText`) with `required`, `list`, `options`, nested objects, reference targets, and media overrides; retrieval-time `SchemaError` validation with pass-through for undeclared fields.
 - `defineNexusConfig()` validation of shape, provider/source relationships, and media declarations.
 - Provider-neutral media: `MediaAsset.src` (with `provider` / `sourceId`), `MediaReference`, `MediaProviderRegistry`, `ResolveMediaService`, and the `nexus.media` entry point. `MediaSize` and `sizes` keep `url`.
@@ -268,6 +268,27 @@ This was a pre-release contract repair because the earlier committed definitions
 
 - Companion PHP unit tests (Preview_Token mint/validate/expiry/revoke, preview-token permissions, `preview/{token}/{id}` normalized/draft, invalid/mismatched tokens) pass; astro-wordpress consumer test covers the static preview page; `npm run typecheck`, `npm test`, `npm run test:astro`, plugin unit/phpcs/phpstan, and `npm run validate:project-state` all pass; WordPress integration passes in CI.
 - State files, CHANGELOG, README, and companion docs reflect preview and its `0.2.7` webhooks follow-up.
+
+## 0.2.8 - Seamless Provider Switching and Singleton Unification
+
+**State:** Released on 2026-09-04 (root package `0.2.8`; tag `v0.2.8`).
+
+**Goal:** Allow a model declared with component fields to be served by a CMS provider that returns sections without any schema or consumer-template change, and unify singleton models onto `getPage`.
+
+**Required capabilities:**
+
+- `getSingleton` is removed from the `ContentProvider` contract and the `NexusContent` service; `kind: "singleton"` models route exclusively through `getPage` (Git reads `pages/<key>.json`), and `source.mode` is removed.
+- When a provider returns a page as CMS-ordered sections (`data.sections` of `{ type, data }`) and the model's `fields` declare `type: "component"` entries, `getPage` expands each section whose `type` matches a declared component onto that field (matched by component type, not field name), reading either `data.sections` or page-level `PageContent.sections`.
+- Models that declare their own `sections` field, or no component fields, are untouched; unmatched sections stay in `data.sections` by default, and a model sets `strictSections: true` on its `ModelSchema` to throw a `SchemaError` for unmatched sections.
+
+**Explicit exclusions:**
+
+- No per-section mapping configuration beyond component-fields-by-type; no universal section renderer.
+- No changes to contract v1, released standard REST retrieval, or editor modes.
+
+**Exit criteria:**
+
+- `npm run typecheck`, `npm test`, `npm run build`, `npm run validate:project-state` (103 feature IDs), `npm run check:sections`, the `astro-basic`, `astro-wordpress`, and `node-basic` examples all pass; the astro-wordpress `home` page validates via sections expansion against the live companion.
 
 ## 0.2.7 - WordPress Companion Webhooks
 

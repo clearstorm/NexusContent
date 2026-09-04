@@ -5,12 +5,12 @@
 | Field | Value |
 |---|---|
 | Project name | NexusContent |
-| Current version | `0.2.7` |
+| Current version | `0.2.8` |
 | Current milestone | `0.3.0-strapi` |
 | Project status | Active, early development; internal private package |
-| Current focus | `0.2.7` WordPress companion outbound webhooks released; directional `0.3.0` Strapi provider next |
+| Current focus | `0.2.8` seamless provider switching (sections-to-components expansion, singleton unification) released; directional `0.3.0` Strapi provider next |
 
-The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.3` companion consumer milestone shipped V1 companion section parity, and `0.2.4` fixed the companion posts routing (dedicated posts routes, `companionRoute`, recursive media normalization). The `0.2.5` release adds the `nexus-contract` CLI: `generate` derives a consumer contract from the developer's own field schema and scaffolds ACF layouts for consumer custom sections (offline via the bundled `scripts/sections.json` vocabulary or against the live companion `/schema`), while `push` stores the contract through the admin-only project-contract route with an Application Password. The example's section/push scripts now drive the shipped CLI instead of example-owned scripts. The `0.2.6` release adds WordPress companion preview: the plugin mints short-lived post-scoped preview tokens, serves draft/scheduled content through the public `preview/{token}/{id}` route (the token is the auth), a Gutenberg "Open frontend preview" button opens the configured `preview_frontend_url`, and the astro-wordpress reference consumer fetches the tokenized route from a static `preview.astro` page. The `0.2.7` release adds WordPress companion outbound webhooks: an opt-in `webhook_url` (plus an optional shared secret stored in a separate, never-echoed option) makes the plugin POST compact HMAC-signed change metadata on page/post create, update, trash, and restore, without triggering rebuilds or other site mutations.
+The `0.2.0` WordPress provider milestone was released internally on 2026-08-18. The `0.2.1` WordPress companion milestone (Phases 1-3, admin page, and post section support) and the `0.2.2` core content contract milestone (`schema.models`, declarative field schemas, provider-neutral media, section single-source, component validation, and the dual-provider reference example) were released together on 2026-08-29. The `0.2.3` companion consumer milestone shipped V1 companion section parity, and `0.2.4` fixed the companion posts routing (dedicated posts routes, `companionRoute`, recursive media normalization). The `0.2.5` release adds the `nexus-contract` CLI: `generate` derives a consumer contract from the developer's own field schema and scaffolds ACF layouts for consumer custom sections (offline via the bundled `scripts/sections.json` vocabulary or against the live companion `/schema`), while `push` stores the contract through the admin-only project-contract route with an Application Password. The example's section/push scripts now drive the shipped CLI instead of example-owned scripts. The `0.2.6` release adds WordPress companion preview: the plugin mints short-lived post-scoped preview tokens, serves draft/scheduled content through the public `preview/{token}/{id}` route (the token is the auth), a Gutenberg "Open frontend preview" button opens the configured `preview_frontend_url`, and the astro-wordpress reference consumer fetches the tokenized route from a static `preview.astro` page. The `0.2.7` release adds WordPress companion outbound webhooks: an opt-in `webhook_url` (plus an optional shared secret stored in a separate, never-echoed option) makes the plugin POST compact HMAC-signed change metadata on page/post create, update, trash, and restore, without triggering rebuilds or other site mutations. The `0.2.8` release unifies singleton models onto `getPage` (the `getSingleton` contract, `SingletonContent`, the Git `singletons/` loader, and `source.mode` are removed) and adds seamless provider switching: when a provider returns a page as CMS-ordered sections and the model declares component fields, `getPage` expands each section onto its matching component field, so the same schema and consumer templates work across Git (component fields) and WordPress/Strapi (sections) with zero schema or template change.
 
 ## Current Architecture
 
@@ -39,7 +39,7 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Shared `ContentProvider` interface.
 - Provider registration, duplicate detection, and resolution.
 - Explicit content-to-provider configuration.
-- Page, generic singleton, dedicated navigation, dedicated settings, collection, and individual item retrieval through `NexusContent`.
+- Page (including singleton models), dedicated navigation, dedicated settings, collection, and individual item retrieval through `NexusContent`.
 - Normalization, content provenance, and structured errors.
 - Zod-based normalized content validation and consumer schema validation support.
 - Normalized SEO contract for robots, canonical URLs, Open Graph, Twitter, media, and JSON-compatible structured data.
@@ -58,7 +58,7 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - WordPress Phase 1 structured diagnostics with severity, code, message, and optional path.
 - Expanded WordPress typed error codes covering provider, companion, editor, block, ACF, section, and media failures.
 - Missing-content behavior, malformed JSON errors, path traversal protection, and symlink escape protection.
-- Provider-neutral singleton retrieval from `singletons/<key>.json` for arbitrary singleton content.
+- Provider-neutral singleton retrieval: singleton models route through `getPage` and Git reads them from `pages/<key>.json`.
 - Dedicated navigation and settings retrieval from `navigation/<key>.json` and `settings/<key>.json`, with recursive navigation validation and generic settings data.
 - Git-based CMS compatibility through editor-independent repository files.
 - Localisation foundations: optional `locales` configuration, central fallback-chain resolution, strict mode, structured locale errors, and per-request retrieval options.
@@ -69,7 +69,7 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 - Fixed admin page "Content by editor mode" to count all published pages and posts, including those without an explicit `nexus_editor_mode` meta row.
 - Companion plugin WordPress integration tests passing in CI (104 unit tests, 498 assertions; 22 integration tests, 184 assertions, plus 20 ACF-free integration tests, 170 assertions).
 - Type checking, tests, package build, Astro example build, and Node example execution in CI.
-- Unified `schema.models` configuration with model kinds and provider sources; `source.mode: "page"` vs `"singleton"` selects the provider operation.
+- Unified `schema.models` configuration with model kinds and provider sources; singleton models route through `getPage`.
 - Declarative field schemas with required/list/options/nested-object/reference/media/richText/component/blocks support, `schema.components` references, and retrieval-time `SchemaError` validation.
 - Provider-neutral media: `MediaAsset.src`, `MediaReference`, `MediaProviderRegistry`, `ResolveMediaService`, declared-and-auto-built local/remote providers, and a `WordPressMediaProvider` for id lookup.
 - Migrated astro-basic, astro-basic-localised, astro-wordpress, and node-basic consumers to `defineNexusConfig` with `schema.models`.
@@ -91,11 +91,11 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 - The example's `sections:contract` and `push:project-contract` scripts drive the shipped CLI (`--schema src/schema/schema.ts`, env via `.env`); the example-owned push script was removed.
 - The `0.2.6` release adds WordPress companion preview: `POST /nexuscontent/v1/preview-token` (requires `edit_posts`) mints a short-lived, post-scoped token stored in a transient with a filterable TTL; the public `GET /nexuscontent/v1/preview/{token}/{id}` route serves the draft/scheduled normalized content where the token is the auth (invalid/expired/mismatched tokens return 401 and are revoked on use). A Gutenberg "Open frontend preview" button (`assets/src/preview.js`) mints a token and opens the configured `preview_frontend_url` with `?token=...&id=...`. The astro-wordpress reference consumer adds a static `preview.astro` route that resolves the companion namespace from `WORDPRESS_API_URL`, fetches the tokenized route, and renders through the shared `PostSections` components (or the raw-HTML fallback).
 - The `0.2.7` release adds WordPress companion outbound webhooks: `Webhook_Dispatcher` hooks page/post create (`created`), update (`updated`), `trashed`, and `restored`, and POSTs a compact JSON payload (`event`, `id`, `type`, `slug`, `status`, `title`, `modifiedAt`, `source`) to the configured `webhook_url`, signed with `X-NexusContent-Signature: sha256=<HMAC>` when the `nexuscontent_webhook_secret` option is set. Dispatch is opt-in, outbound-only, best-effort, non-blocking, and never triggers rebuilds. The admin Settings page gains `webhook_url` and a never-echoed secret field; the provider `capabilities()` reports `webhookSupport` (and the missed `previewSupport`).
-- The directional `0.3.0` Strapi provider is the recommended next focus after `0.2.7`.
+- The directional `0.3.0` Strapi provider is the recommended next focus after `0.2.8`.
 
 ## Next
 
-1. The `0.2.7` WordPress companion webhooks release is complete and released (WordPress integration verified in CI).
+1. The `0.2.8` release (seamless provider switching via sections-to-components expansion, plus the singleton-to-`getPage` unification) is complete and released.
 2. Begin the directional `0.3.0` Strapi provider; confirm its minimum REST API scope and contract test strategy.
 
 ## Not Implementing Yet
@@ -123,8 +123,7 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 - Astro is a reference consumer, not a Core dependency.
 - Provider-specific response structures stop at the provider boundary.
 - Multiple instances of the same provider type must remain possible.
-- Generic singleton retrieval is provider-neutral; Git stores arbitrary singleton content under `singletons/<key>.json`.
-- Navigation and settings remain dedicated provider operations and Git directories, declared as distinct model kinds under `schema.models`.
+- Singleton models route through `getPage`; Git reads them from `pages/<key>.json`, while navigation and settings remain dedicated provider operations and Git directories declared as distinct model kinds under `schema.models`.
 - Locale resolution is centralized in Core; providers implement variant file resolution; format adapters and validators implement no locale logic.
 - Locale requests fall back through an explicit chain to the configured default; projects without locale configuration keep the legacy flat retrieval path unchanged.
 - Core owns normalized SEO data, validation, and deterministic fallback resolution; providers map source-specific fields and consumers render metadata.
@@ -139,7 +138,7 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 
 - The Git provider requires Node filesystem APIs.
 - Git content supports JSON only.
-- Generic singleton content remains separate from dedicated navigation and settings content and APIs.
+- Singleton models route through page retrieval; navigation and settings use dedicated APIs and Git directories.
 - Localisation covers locale configuration, fallback resolution, and Git variant directories; translation workflows are not implemented.
 - WordPress support is published-content-only and read-only; the base provider performs no mutations, retries, or caching. Preview transport and outbound webhooks live in the companion plugin, not the base provider.
 - The companion plugin normalizes supported Gutenberg content; the released base provider still does not render Gutenberg blocks or call the plugin.

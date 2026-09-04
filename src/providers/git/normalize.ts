@@ -5,8 +5,7 @@ import type {
   NavigationItem,
   PageContent,
   SeoData,
-  SettingsContent,
-  SingletonContent
+  SettingsContent
 } from "../../core/types.ts";
 import { ProviderError } from "../../core/errors.ts";
 
@@ -92,28 +91,6 @@ export function normalizeRawPage(
     slug: object.slug as string | undefined,
     title: object.title as string | undefined,
     seo,
-    data,
-    meta: buildMeta(source)
-  };
-}
-
-export function normalizeRawSingleton(
-  raw: unknown,
-  source: NormalizeSource
-): SingletonContent {
-  const object = asObject(raw, source.sourceId);
-
-  const data: Record<string, unknown> = {};
-  for (const [field, value] of Object.entries(object)) {
-    if (field === "id" || field === "key") {
-      continue;
-    }
-    data[field] = normalizeGitValue(value);
-  }
-
-  return {
-    id: (object.id as string | undefined) ?? source.key,
-    key: source.key,
     data,
     meta: buildMeta(source)
   };
