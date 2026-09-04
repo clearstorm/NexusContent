@@ -18,7 +18,7 @@
     "id": "provider.strapi",
     "label": "Strapi provider",
     "status": "planned",
-    "target": "0.3.1"
+    "target": "0.4.0"
   },
   "features": {
     "implemented": [
@@ -159,8 +159,8 @@
     "Model field validation produces SchemaError with model, issues, provider, content, locale, and operation context; relational checks also run for direct NexusContent construction.",
     "The companion wire contract and plugin keep featuredImage.url; the TypeScript boundary converts it to MediaAsset.src.",
     "The WordPress project-contract push is a secured admin-only write route (manage_options only; WordPress core enforces the REST nonce for cookie-authenticated requests while Application Passwords work without one) that stores only sanitized components/sectionTypes inside nexuscontent_settings; it lives outside the content wire contract and never reconfigures editor settings automatically.",
-    "The nexus-contract CLI is a user-approved scope exception to the planned 0.7.0 CLI: a single bin with generate (scaffold ACF layouts for consumer custom sections) and push (post the consumer contract to the project-contract route with an Application Password) subcommands. The bundled scripts/sections.json offline vocabulary is generated from the canonical sections.json and keeps classification working without network access.",
-    "The 0.3.0 milestone is the NexusContent contract CLI: nexus-contract gains init (scaffold the nexus.contract.json config and a starter sections.custom.json), regenerate (re-derive the contract and re-render the mu-plugin from the recorded paths), and validate (classify without writing and fail on undefined sections). The Strapi provider milestone (formerly 0.3.0) is deferred to 0.3.1 by user decision; the general-purpose tooling.cli stays directional at 0.7.0.",
+    "The nexus-contract CLI is a user-approved scope exception to the planned 0.8.0 CLI: a single bin with generate (scaffold ACF layouts for consumer custom sections) and push (post the consumer contract to the project-contract route with an Application Password) subcommands. The bundled scripts/sections.json offline vocabulary is generated from the canonical sections.json and keeps classification working without network access.",
+    "The 0.3.0 milestone is the NexusContent contract CLI: nexus-contract gains init (scaffold the nexus.contract.json config and a starter sections.custom.json), regenerate (re-derive the contract and re-render the mu-plugin from the recorded paths), and validate (classify without writing and fail on undefined sections). The Strapi provider milestone (formerly 0.3.0) is deferred to 0.4.0 by user decision, re-timelining synchronization to 0.5.0, webhooks to 0.6.0, preview to 0.7.0, and the general-purpose tooling.cli to 0.8.0.",
     "The companion plugin 0.1.3 aligns the section editor with the Gutenberg blocks and schema: eyebrow inline, a Section settings panel replacing the Additional fields panel, a repeatable Buttons subcomponent on Hero/Image and Text/Call to Action (button shape label/url/style), Features items of title/description/points/thumbnail, Testimonials items of quote/author/avatar, and Logo Grid items of name/image. ACF Free fixed fields skip an unavailable repeater with a limitation instead of dropping the whole section.",
     "The companion plugin 0.1.4 supports remote/external images: single-image controls, gallery items, and repeater media fields (Features thumbnails, Testimonials avatars, Logo Grid) accept a pasted image URL in the editor. URL-only media is normalized with a default image/* mime type on the server and recognized by the provider wire boundary (via the lowercased mimetype key), so such media maps to MediaAsset src and flows through unchanged; the plugin artifact is nexuscontent-0.1.4.zip.",
     "The companion plugin 0.1.5 makes the ACF flexible-content button url field a plain text field instead of the ACF url type, so both fully-qualified URLs (https://localhost:4321/contact) and root-relative paths (/contact) are accepted in the Hero, Image and Text, and Call to Action buttons subcomponent and preserved verbatim to consumers. No wire-contract, schema, or TypeScript changes were required; the plugin artifact is nexuscontent-0.1.5.zip.",
@@ -227,11 +227,11 @@
     "provider.wordpress.webhook": "0.2.7",
     "provider.wordpress.navigation": "0.2.9",
     "provider.wordpress.settings": "0.2.9",
-    "provider.strapi": "0.3.1",
+    "provider.strapi": "0.4.0",
     "tooling.nexus-contract-workflow": "0.3.0",
-    "content.sync": "0.4.0",
-    "content.webhooks": "0.5.0",
-    "content.preview": "0.6.0",
+    "content.sync": "0.5.0",
+    "content.webhooks": "0.6.0",
+    "content.preview": "0.7.0",
     "content.references": "0.2.x",
     "localisation.file-level": "0.2.x",
     "localisation.validation-policies": "0.2.x",
@@ -240,7 +240,7 @@
     "translation.completeness": "0.2.x",
     "translation.source-change-detection": "0.2.x",
     "translation.outdated-tracking": "0.2.x",
-    "tooling.cli": "0.7.0"
+    "tooling.cli": "0.8.0"
   },
   "sources": {
     "identity": "README.md",

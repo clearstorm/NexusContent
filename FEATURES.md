@@ -71,7 +71,7 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `media.provider.local` Local media provider | implemented | 0.2.2 | - | `defineLocalMediaProvider` maps root-relative `src` references to `publicPath` web URLs with path traversal protection. |
 | `media.provider.remote` Remote media provider | implemented | 0.2.2 | - | `defineRemoteMediaProvider` validates absolute http(s) URLs and passes them through without fetching (no SSRF). |
 | `core.error-code` Generic error code field | implemented | 0.2.1 | - | Optional `code` field on `NexusContentErrorDetails` and `NexusContentError` for typed error classification. |
-| `provider.strapi` Strapi provider | planned | - | 0.3.1 | The `0.3.0-strapi` milestone was re-scoped to `0.3.0-cli` by user decision; Strapi was deferred out of `0.3.0` into the next planned provider milestone. Directional target after WordPress validates the provider contract. |
+| `provider.strapi` Strapi provider | planned | - | 0.4.0 | The `0.3.0-strapi` milestone was re-scoped to `0.3.0-cli` by user decision; Strapi was deferred out of `0.3.0` into `0.4.0`, re-timelining synchronization to `0.5.0`, webhooks to `0.6.0`, preview to `0.7.0`, and the general-purpose CLI to `0.8.0`. Directional target after WordPress validates the provider contract. |
 | `provider.additional` Additional CMS and API providers | deferred | - | TBD | Directus, Sanity, Contentful, Payload, Storyblok, DatoCMS, and custom APIs require separate scope. |
 
 ## Content Formats
@@ -142,9 +142,9 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
 | `workflow.git-cms` Git-based CMS compatibility | implemented | 0.1.1 | - | Editing layers are compatible when they write the supported repository structure and JSON format. |
-| `content.sync` Content synchronization and change detection | planned | - | 0.4.0 | Directional target; must remain separate from provider retrieval. |
-| `content.webhooks` Authenticated webhook workflows | planned | - | 0.5.0 | Directional target; webhook handling stays outside provider read logic. |
-| `content.preview` Draft preview | planned | - | 0.6.0 | Directional target; draft access and production isolation require explicit design. |
+| `content.sync` Content synchronization and change detection | planned | - | 0.5.0 | Directional target; must remain separate from provider retrieval. |
+| `content.webhooks` Authenticated webhook workflows | planned | - | 0.6.0 | Directional target; webhook handling stays outside provider read logic. |
+| `content.preview` Draft preview | planned | - | 0.7.0 | Directional target; draft access and production isolation require explicit design. |
 | `cms.admin` CMS administration UI | deferred | - | TBD | NexusContent is not a CMS. |
 
 ## Developer Tooling
@@ -155,9 +155,9 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | `tooling.build` Package build | implemented | 0.1.0 | - | Emits the package distribution with TypeScript. |
 | `tooling.project-state` Coordinated project tracking | implemented | 0.1.2 | - | Human and machine-readable state files with synchronized stable feature IDs. |
 | `tooling.project-state-validation` Project state validation | implemented | 0.1.2 | - | Dependency-free structural, version, feature-ID, and status consistency check. |
-| `tooling.nexus-contract-cli` Nexus contract CLI | implemented | 0.2.5 | - | The `nexus-contract` bin ships with `@nexuscontent/core`: `generate` derives a `{ components, sectionTypes }` contract from the consumer's field schema (`--schema`) and scaffolds an ACF-layout mu-plugin for consumer custom sections, classifying against the live companion `/schema` or the bundled `scripts/sections.json` offline vocabulary; `push` posts the contract to the admin-only project-contract route with an Application Password. This is a user-approved scope exception to `tooling.cli` (still planned for `0.7.0`) because the WordPress companion contract is the first capability that genuinely needs one; the general-purpose CLI remains directional. |
+| `tooling.nexus-contract-cli` Nexus contract CLI | implemented | 0.2.5 | - | The `nexus-contract` bin ships with `@nexuscontent/core`: `generate` derives a `{ components, sectionTypes }` contract from the consumer's field schema (`--schema`) and scaffolds an ACF-layout mu-plugin for consumer custom sections, classifying against the live companion `/schema` or the bundled `scripts/sections.json` offline vocabulary; `push` posts the contract to the admin-only project-contract route with an Application Password. This is a user-approved scope exception to `tooling.cli` (still planned for `0.8.0`) because the WordPress companion contract is the first capability that genuinely needs one; the general-purpose CLI remains directional. |
 | `tooling.nexus-contract-workflow` Contract workflow CLI | in_progress | - | 0.3.0 | The `0.3.0` milestone (re-scoped from Strapi by user decision): `nexus-contract` gains `init` (scaffold a `nexus.contract.json` config and a starter `sections.custom.json`), `regenerate` (re-derive the contract and re-render the ACF-layout mu-plugin from the recorded paths, with explicit flags overriding config), and `validate` (classify against the live `/schema` or the bundled vocabulary, print the drift without writing, and fail on undefined sections). The existing `generate`/`push` subcommands are unchanged and the config file never stores credentials. |
-| `tooling.cli` NexusContent CLI | planned | - | 0.7.0 | Directional full CLI after programmatic APIs stabilize; the scoped `nexus-contract` bin (`tooling.nexus-contract-cli`) ships from 0.2.5. |
+| `tooling.cli` NexusContent CLI | planned | - | 0.8.0 | Directional full CLI after programmatic APIs stabilize; the scoped `nexus-contract` bin (`tooling.nexus-contract-cli`) ships from 0.2.5. |
 | `tooling.package-extraction` Multi-package extraction | deferred | - | TBD | Requires proven boundaries and a concrete versioning or dependency-isolation need. |
 
 ## Testing and CI

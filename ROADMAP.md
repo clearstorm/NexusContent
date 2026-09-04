@@ -226,7 +226,7 @@ This was a pre-release contract repair because the earlier committed definitions
 
 **State:** Released on 2026-08-29 (root package `0.2.5`).
 
-**Goal:** Ship the first NexusContent CLI capability as `nexus-contract` inside `@nexuscontent/core`, turning the consumer's project contract into WordPress-side custom sections. This is a deliberate, user-approved scope exception to the directional `0.7.0` CLI milestone (AGENTS §68) because the WordPress companion contract is the first capability that genuinely needs a CLI.
+**Goal:** Ship the first NexusContent CLI capability as `nexus-contract` inside `@nexuscontent/core`, turning the consumer's project contract into WordPress-side custom sections. This is a deliberate, user-approved scope exception to the directional `0.8.0` CLI milestone (AGENTS §68) because the WordPress companion contract is the first capability that genuinely needs a CLI.
 
 **Required capabilities:**
 
@@ -237,19 +237,19 @@ This was a pre-release contract repair because the earlier committed definitions
 
 **Explicit exclusions:**
 
-- No expansion of the CLI beyond the `generate`/`push` pair; the general-purpose CLI stays directional at `0.7.0`.
+- No expansion of the CLI beyond the `generate`/`push` pair; the general-purpose CLI stays directional at `0.8.0`.
 - No changes to contract v1, provider retrieval, editor modes, or the project-contract route's read-only drift semantics.
 
 **Exit criteria:**
 
 - CLI unit and packaging tests pass; a generated mu-plugin lints under `php -l`; `npm run typecheck`, `npm test`, `npm run check:sections`, `npm run test:astro`, and `npm run validate:project-state` all pass.
-- State files, CHANGELOG, README, and companion docs reflect the CLI and its `0.7.0` scoped exception.
+- State files, CHANGELOG, README, and companion docs reflect the CLI and its `0.8.0` scoped exception.
 
 ## 0.2.6 - WordPress Companion Preview (Released)
 
 **State:** Released on 2026-08-31 (root package `0.2.6`, plugin `0.1.1`).
 
-**Goal:** Bring WordPress draft/scheduled preview forward into the `0.2.x` consolidation (preview was previously a `0.6.0` directional target). The companion plugin mints short-lived, post-scoped preview tokens and serves draft content through a public tokenized route, with a Gutenberg button and a static consumer preview route.
+**Goal:** Bring WordPress draft/scheduled preview forward into the `0.2.x` consolidation (preview was previously a `0.7.0` directional target). The companion plugin mints short-lived, post-scoped preview tokens and serves draft content through a public tokenized route, with a Gutenberg button and a static consumer preview route.
 
 **Required capabilities:**
 
@@ -389,7 +389,7 @@ This was a pre-release contract repair because the earlier committed definitions
 - `nexus-contract regenerate` re-derives the consumer contract and re-renders the ACF-layout mu-plugin using the recorded config, with explicit flags overriding config values.
 - `nexus-contract validate` classifies the contract exactly like `generate` (live companion `/schema` or the bundled offline vocabulary) and prints the drift without writing; it fails when the contract references sections with no definition.
 - The existing `generate` and `push` subcommands are unchanged in behavior.
-- `tooling.cli` (the general-purpose 0.7.0 CLI) stays directional.
+- `tooling.cli` (the general-purpose 0.8.0 CLI) stays directional.
 
 **Explicit exclusions:**
 
@@ -403,7 +403,7 @@ This was a pre-release contract repair because the earlier committed definitions
 - `npm run typecheck`, `npm test`, `npm run check:sections`, and `npm run validate:project-state` pass.
 - State files, CHANGELOG, and README reflect the CLI milestone and the Strapi deferral.
 
-## 0.3.1 - Strapi Provider (deferred from 0.3.0)
+## 0.4.0 - Strapi Provider (deferred from 0.3.0)
 
 **State:** Directional; deferred from `0.3.0` when the CLI became the current milestone. The `0.3.0-strapi` milestone was re-scoped to the contract CLI by user decision.
 
@@ -429,7 +429,7 @@ This was a pre-release contract repair because the earlier committed definitions
 - Git and WordPress behavior remains compatible.
 - Framework-neutrality and all required CI gates pass.
 
-## 0.4.0 - Synchronization and Change Detection
+## 0.5.0 - Synchronization and Change Detection
 
 **Goal:** Design content synchronization as a capability separate from ordinary provider retrieval.
 
@@ -453,7 +453,7 @@ This was a pre-release contract repair because the earlier committed definitions
 - Existing retrieval APIs retain their behavior.
 - No synchronization commands run during ordinary content reads.
 
-## 0.5.0 - Webhooks and Rebuild Workflows
+## 0.6.0 - Webhooks and Rebuild Workflows
 
 **Goal:** Support authenticated content-change triggers while keeping deployment ownership outside Core.
 
@@ -476,7 +476,7 @@ This was a pre-release contract repair because the earlier committed definitions
 - Deployment remains replaceable and outside Core.
 - Required CI and compatibility gates pass.
 
-## 0.6.0 - Draft Preview
+## 0.7.0 - Draft Preview
 
 **Goal:** Enable explicit, authenticated draft content access rendered through the real consumer frontend.
 
@@ -499,7 +499,7 @@ This was a pre-release contract repair because the earlier committed definitions
 - Normal published-content behavior remains unchanged.
 - Security assumptions are documented.
 
-## 0.7.0 - CLI and Developer Tooling
+## 0.8.0 - CLI and Developer Tooling
 
 **Goal:** Wrap stable programmatic APIs with focused developer commands.
 
