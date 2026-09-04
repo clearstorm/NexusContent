@@ -35,4 +35,12 @@ final class ScfIntegrationTest extends IntegrationTestCase {
 		self::assertContains( 'nexus_seo_og_type', $names );
 		self::assertContains( 'nexus_seo_tw_card', $names );
 	}
+
+	public function test_scf_repeaters_are_available_in_fixed_sections(): void {
+		$group = acf_get_local_field_group( 'group_nc_fixed_page_sections' );
+		self::assertIsArray( $group );
+		$names = array_column( acf_get_fields( $group ), 'name' );
+		self::assertContains( 'hero_buttons', $names );
+		self::assertContains( 'cta_buttons', $names );
+	}
 }

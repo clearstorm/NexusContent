@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- The WordPress companion now uses the active ACF edition's detected field capabilities when registering fixed sections. SCF and ACF Pro therefore retain the Hero and Call to Action button repeaters without showing false "repeater field type is unavailable" notices; ACF Free still omits only those unavailable fields with clearer capability wording.
+
+### Changed
+
+- ACF editor fields are compacted: body, description, FAQ answer, SEO, and embed-code text areas use two rows; short text fields and images sit side-by-side at half width; the Rich Text section body uses the basic editor toolbar (bold/italic/link), matching the Gutenberg block's allowed formats.
+- The Site Settings options page is split into General, Contact, and Social tabs with compact, half-width fields and a shorter address text area. Field names and the `GET /nexuscontent/v1/settings` contract are unchanged.
+- Gutenberg section blocks keep repeatable items and buttons collapsed by default, so newly added and existing items render as compact rows until opened. The NexusContent SEO and editor-mode panels start collapsed; only the Section settings panel opens by default.
+
 ## [0.2.9] - 2026-09-04
 
 WordPress provider parity for navigation and settings, plus an additive extension of the core SEO contract.

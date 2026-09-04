@@ -48,7 +48,7 @@ final class ACF_Loader {
 
 		$this->register_site_settings();
 		$this->register_seo_fields();
-		$this->register_fixed_fields();
+		$this->register_fixed_fields( $field_types );
 
 		if ( $field_types['flexible_content'] ) {
 			$this->register_flexible_content( $field_types );
@@ -64,13 +64,12 @@ final class ACF_Loader {
 		do_action( 'nexuscontent_acf_limitations', $this->limitations );
 	}
 
-	/** Register the ACF Free-compatible fixed section fields. */
-	private function register_fixed_fields() {
-		$field_types = array(
-			'repeater'         => false,
-			'gallery'          => false,
-			'flexible_content' => false,
-		);
+	/**
+	 * Register fixed section fields supported by the active ACF edition.
+	 *
+	 * @param array<string, bool> $field_types Available optional field types.
+	 */
+	private function register_fixed_fields( $field_types ) {
 		$definitions = array();
 		foreach ( $this->registry->fixed_types() as $type ) {
 			$fields        = ACF_Field_Factory::fields_for( $type, $field_types, $this->limitations, 'fixed' );
@@ -134,56 +133,101 @@ final class ACF_Loader {
 			)
 		);
 
-		$fields = array();
-
-		$text_fields = array(
-			'nexus_site_name'     => __( 'Site name', 'nexuscontent' ),
-			'nexus_site_tagline'  => __( 'Tagline', 'nexuscontent' ),
-			'nexus_site_url'      => __( 'Site URL', 'nexuscontent' ),
-			'nexus_site_email'    => __( 'Contact email', 'nexuscontent' ),
-			'nexus_site_phone'    => __( 'Phone', 'nexuscontent' ),
-			'nexus_site_language' => __( 'Language', 'nexuscontent' ),
-		);
-		$index       = 0;
-		foreach ( $text_fields as $name => $label ) {
-			$fields[] = array(
-				'key'   => 'field_nc_site_' . ( ++$index ) . '_' . sanitize_key( $name ),
-				'name'  => $name,
-				'label' => $label,
-				'type'  => 'text',
-			);
-		}
-
-		$fields[] = array(
-			'key'   => 'field_nc_site_address',
-			'name'  => 'nexus_site_address',
-			'label' => __( 'Address', 'nexuscontent' ),
-			'type'  => 'textarea',
-		);
-		$fields[] = array(
-			'key'           => 'field_nc_site_logo',
-			'name'          => 'nexus_site_logo',
-			'label'         => __( 'Logo', 'nexuscontent' ),
-			'type'          => 'image',
-			'return_format' => 'array',
-		);
-
 		$sub_fields = array();
 		foreach ( array( 'facebook', 'twitter', 'instagram', 'linkedin' ) as $network ) {
 			$sub_fields[] = array(
-				'key'   => 'field_nc_site_social_' . $network,
-				'name'  => $network,
-				'label' => ucfirst( $network ),
-				'type'  => 'url',
+				'key'     => 'field_nc_site_social_' . $network,
+				'name'    => $network,
+				'label'   => ucfirst( $network ),
+				'type'    => 'url',
+				'wrapper' => array( 'width' => '50' ),
 			);
 		}
-		$fields[] = array(
-			'key'        => 'field_nc_site_social',
-			'name'       => 'nexus_site_social',
-			'label'      => __( 'Social links', 'nexuscontent' ),
-			'type'       => 'group',
-			'layout'     => 'block',
-			'sub_fields' => $sub_fields,
+
+		$fields = array(
+			array(
+				'key'   => 'field_nc_site_tab_general',
+				'name'  => 'tab_general',
+				'label' => __( 'General', 'nexuscontent' ),
+				'type'  => 'tab',
+			),
+			array(
+				'key'     => 'field_nc_site_1_nexus_site_name',
+				'name'    => 'nexus_site_name',
+				'label'   => __( 'Site name', 'nexuscontent' ),
+				'type'    => 'text',
+				'wrapper' => array( 'width' => '50' ),
+			),
+			array(
+				'key'     => 'field_nc_site_2_nexus_site_tagline',
+				'name'    => 'nexus_site_tagline',
+				'label'   => __( 'Tagline', 'nexuscontent' ),
+				'type'    => 'text',
+				'wrapper' => array( 'width' => '50' ),
+			),
+			array(
+				'key'     => 'field_nc_site_3_nexus_site_url',
+				'name'    => 'nexus_site_url',
+				'label'   => __( 'Site URL', 'nexuscontent' ),
+				'type'    => 'text',
+				'wrapper' => array( 'width' => '50' ),
+			),
+			array(
+				'key'     => 'field_nc_site_4_nexus_site_language',
+				'name'    => 'nexus_site_language',
+				'label'   => __( 'Language', 'nexuscontent' ),
+				'type'    => 'text',
+				'wrapper' => array( 'width' => '50' ),
+			),
+			array(
+				'key'           => 'field_nc_site_logo',
+				'name'          => 'nexus_site_logo',
+				'label'         => __( 'Logo', 'nexuscontent' ),
+				'type'          => 'image',
+				'return_format' => 'array',
+				'preview_size'  => 'medium',
+			),
+			array(
+				'key'   => 'field_nc_site_tab_contact',
+				'name'  => 'tab_contact',
+				'label' => __( 'Contact', 'nexuscontent' ),
+				'type'  => 'tab',
+			),
+			array(
+				'key'     => 'field_nc_site_5_nexus_site_email',
+				'name'    => 'nexus_site_email',
+				'label'   => __( 'Contact email', 'nexuscontent' ),
+				'type'    => 'text',
+				'wrapper' => array( 'width' => '50' ),
+			),
+			array(
+				'key'     => 'field_nc_site_6_nexus_site_phone',
+				'name'    => 'nexus_site_phone',
+				'label'   => __( 'Phone', 'nexuscontent' ),
+				'type'    => 'text',
+				'wrapper' => array( 'width' => '50' ),
+			),
+			array(
+				'key'   => 'field_nc_site_address',
+				'name'  => 'nexus_site_address',
+				'label' => __( 'Address', 'nexuscontent' ),
+				'type'  => 'textarea',
+				'rows'  => 2,
+			),
+			array(
+				'key'   => 'field_nc_site_tab_social',
+				'name'  => 'tab_social',
+				'label' => __( 'Social', 'nexuscontent' ),
+				'type'  => 'tab',
+			),
+			array(
+				'key'        => 'field_nc_site_social',
+				'name'       => 'nexus_site_social',
+				'label'      => __( 'Social links', 'nexuscontent' ),
+				'type'       => 'group',
+				'layout'     => 'block',
+				'sub_fields' => $sub_fields,
+			),
 		);
 
 		acf_add_local_field_group(
@@ -222,6 +266,7 @@ final class ACF_Loader {
 						'name'  => 'nexus_seo_description',
 						'label' => __( 'Meta description', 'nexuscontent' ),
 						'type'  => 'textarea',
+						'rows'  => 2,
 					),
 					array(
 						'key'   => 'field_nc_seo_canonical',
@@ -266,6 +311,7 @@ final class ACF_Loader {
 						'name'  => 'nexus_seo_og_description',
 						'label' => __( 'OpenGraph description', 'nexuscontent' ),
 						'type'  => 'textarea',
+						'rows'  => 2,
 					),
 					array(
 						'key'   => 'field_nc_seo_og_type',
@@ -303,6 +349,7 @@ final class ACF_Loader {
 						'name'  => 'nexus_seo_tw_description',
 						'label' => __( 'Twitter description', 'nexuscontent' ),
 						'type'  => 'textarea',
+						'rows'  => 2,
 					),
 					array(
 						'key'           => 'field_nc_seo_tw_image',

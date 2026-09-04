@@ -339,12 +339,10 @@ import './editor.css';
 	function RepeatControl( props ) {
 		const items = Array.isArray( props.value ) ? props.value : [];
 		const fieldDefs = props.fieldDefs || [];
-		const [ collapsed, setCollapsed ] = useState( {} );
+		const [ expanded, setExpanded ] = useState( {} );
 
 		function addItem() {
-			const next = items.concat( [ {} ] );
-			props.onChange( next );
-			setCollapsed( {} );
+			props.onChange( items.concat( [ {} ] ) );
 		}
 
 		function removeItem( index ) {
@@ -379,7 +377,7 @@ import './editor.css';
 		}
 
 		function toggleCollapse( index ) {
-			setCollapsed( function ( prev ) {
+			setExpanded( function ( prev ) {
 				const next = Object.assign( {}, prev );
 				next[ index ] = ! prev[ index ];
 				return next;
@@ -404,7 +402,7 @@ import './editor.css';
 		}
 
 		const rows = items.map( function ( item, index ) {
-			const isCollapsed = !! collapsed[ index ];
+			const isCollapsed = ! expanded[ index ];
 			const fields = fieldDefs.map( function ( def ) {
 				if ( 'image' === def.type ) {
 					const img = item[ def.key ] || {};
@@ -1416,7 +1414,11 @@ import './editor.css';
 		}
 		return el(
 			wp.editPost.PluginDocumentSettingPanel,
-			{ name: 'nexuscontent-editor-mode', title: settings.labels.panel },
+			{
+				name: 'nexuscontent-editor-mode',
+				title: settings.labels.panel,
+				initialOpen: false,
+			},
 			el( 'p', {}, settings.labels.description ),
 			el( wp.components.RadioControl, {
 				label: 'Editor mode',
@@ -1548,7 +1550,7 @@ import './editor.css';
 			{
 				name: 'nexuscontent-seo',
 				title: 'NexusContent SEO',
-				initialOpen: true,
+				initialOpen: false,
 			},
 			el(
 				'p',

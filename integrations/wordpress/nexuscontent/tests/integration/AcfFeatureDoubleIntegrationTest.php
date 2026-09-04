@@ -38,6 +38,10 @@ final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
 			$this->markTestSkipped( 'A real ACF installation is active.' );
 		}
 		eval( 'function acf_add_local_field_group($group) { $GLOBALS["nc_acf_groups"][] = $group; } function acf_get_field_type($type) { return false; }' );
+		$limitations = array();
+		\add_action( 'nexuscontent_acf_limitations', static function ( array $found ) use ( &$limitations ): void {
+			$limitations = $found;
+		} );
 		$loader = new ACF_Loader( new Section_Registry() );
 		$loader->initialize();
 		self::assertNotEmpty( $GLOBALS['nc_acf_groups'] );
@@ -47,6 +51,7 @@ final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
 		foreach ( array( 'hero_enabled', 'hero_heading', 'intro_enabled', 'intro_heading', 'cta_enabled', 'cta_heading' ) as $name ) {
 			self::assertContains( $name, $names );
 		}
+		self::assertContains( 'The "buttons" field in the Hero section was skipped because the repeater field type is unavailable in the active ACF edition.', $limitations );
 		self::assertSame( array( 'page', 'post' ), $this->location_post_types( $fixed[0]['location'] ) );
 	}
 
@@ -67,6 +72,8 @@ final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
 		self::assertSame( array( 'page', 'post' ), $this->location_post_types( $flexible[0]['location'] ) );
 		$fixed = array_values( array_filter( $GLOBALS['nc_acf_groups'], static fn( array $group ): bool => 'group_nc_fixed_page_sections' === $group['key'] ) );
 		self::assertSame( array( 'page', 'post' ), $this->location_post_types( $fixed[0]['location'] ) );
+		self::assertContains( 'hero_buttons', array_column( $fixed[0]['fields'], 'name' ) );
+		self::assertContains( 'cta_buttons', array_column( $fixed[0]['fields'], 'name' ) );
 	}
 
 	/**
