@@ -124,7 +124,7 @@ if ( ! function_exists( 'nc_test_reset' ) ) {
 			'posts' => array(), 'blocks' => array(), 'caps' => array(), 'attachment_calls' => array(),
 			'styles' => array(), 'options' => array(), 'menus' => array(), 'query_posts' => array(),
 			'query_args' => array(), 'registered_meta' => array(), 'transients' => array(),
-			'webhooks' => array(), 'settings' => array(), 'settings_fields' => array(), 'settings_sections' => array(),
+			'theme_support' => array(), 'webhooks' => array(), 'settings' => array(), 'settings_fields' => array(), 'settings_sections' => array(),
 			'get_field_formats' => array(), 'home_url' => 'https://example.test',
 			'bloginfo' => array( 'name' => 'Example site', 'description' => 'Example tagline', 'language' => 'en-US' ),
 		);
@@ -134,6 +134,9 @@ if ( ! function_exists( 'nc_test_reset' ) ) {
 nc_test_reset();
 
 if ( ! function_exists( 'add_action' ) ) { function add_action( $hook, $callback, $priority = 10, $args = 1 ) { $GLOBALS['nc_test']['actions'][ $hook ][] = $callback; return true; } }
+if ( ! function_exists( 'add_theme_support' ) ) { function add_theme_support( $feature, ...$args ) { $GLOBALS['nc_test']['theme_support'][ $feature ] = $args; return true; } }
+if ( ! function_exists( 'current_theme_supports' ) ) { function current_theme_supports( $feature ) { return array_key_exists( $feature, $GLOBALS['nc_test']['theme_support'] ?? array() ); } }
+if ( ! function_exists( 'get_theme_supports' ) ) { function get_theme_supports( $feature ) { return $GLOBALS['nc_test']['theme_support'][ $feature ] ?? array(); } }
 if ( ! function_exists( 'add_filter' ) ) { function add_filter( $hook, $callback, $priority = 10, $args = 1 ) { $GLOBALS['nc_test']['filters'][ $hook ][] = $callback; return true; } }
 if ( ! function_exists( 'apply_filters' ) ) { function apply_filters( $hook, $value, ...$args ) { foreach ( $GLOBALS['nc_test']['filters'][ $hook ] ?? array() as $callback ) { $value = $callback( $value, ...$args ); } return $value; } }
 if ( ! function_exists( 'do_action' ) ) { function do_action( $hook, ...$args ) { foreach ( $GLOBALS['nc_test']['actions'][ $hook ] ?? array() as $callback ) { $callback( ...$args ); } } }

@@ -21,6 +21,7 @@ final class Plugin {
 		self::$booted = true;
 
 		add_action( 'init', array( self::class, 'load_textdomain' ), 1 );
+		add_action( 'after_setup_theme', array( self::class, 'register_menu_support' ) );
 
 		$registry     = new Section_Registry();
 		$capabilities = new Capabilities( $registry );
@@ -55,6 +56,18 @@ final class Plugin {
 
 	public static function load_textdomain(): void {
 		load_plugin_textdomain( 'nexuscontent', false, dirname( plugin_basename( NEXUSCONTENT_COMPANION_FILE ) ) . '/languages' );
+	}
+
+	/**
+	 * Enable classic menu management.
+	 *
+	 * Block themes do not declare menu support by default, so the Appearance >
+	 * Menus admin screen is missing even though WordPress registers the
+	 * wp/v2/menus and wp/v2/menu-items REST endpoints the navigation provider
+	 * consumes. Registering support here exposes that screen regardless of theme.
+	 */
+	public static function register_menu_support(): void {
+		add_theme_support( 'menus' );
 	}
 
 	private static function boot_optional_integrations( Section_Registry $registry ): void {
