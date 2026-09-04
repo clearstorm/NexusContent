@@ -14,10 +14,11 @@ Activate **NexusContent Companion** in WordPress Admin or run `wp plugin activat
 
 ## Requirements
 
-- Plugin version `0.1.6`; companion contract `1` (`contract1`).
+- Plugin version `0.1.8`; companion contract `1` (`contract1`).
 - WordPress 6.6 or newer and PHP 8.1 or newer.
 - Gutenberg uses WordPress core. ACF is optional.
 - ACF Free 6.2 or newer supports fixed fields. A legally supplied ACF Pro 6.2 or newer enables Pro-only capabilities where available.
+- Secure Custom Fields is supported as a free option-page and flexible-field implementation.
 - Node.js 24 is build-only. Composer 2 and all Composer packages are development-only. There are no production Composer dependencies.
 
 ## Editor Modes
@@ -47,6 +48,12 @@ npm exec wp-env run cli wp plugin install wp-content/plugins/nexuscontent/.local
 
 Never commit the ZIP, credentials, or license data. Remove `.local/` when finished.
 
+## Secure Custom Fields
+
+Secure Custom Fields can provide the option page, flexible content, repeater,
+and gallery APIs without a commercial plugin. CI installs it from WordPress.org
+and runs the integration suite separately from the ACF Free gate.
+
 ## Blocks
 
 The plugin defines Hero, Introduction, Rich Text, Image and Text, Features, Statistics, Testimonials, Gallery, Call to Action, FAQ, Logo Grid, and Form Embed blocks. Native blocks are the default implementation. Logo Grid items accept a label, a logo image, or both. `nexuscontent_block_implementations` can select `native`, `acf`, `both`, or a per-type selection when ACF block APIs are available.
@@ -73,6 +80,7 @@ The `GET` routes below are public or capability-gated as documented. The single 
 | `/posts/slug/{slug}` | One standard post by slug. |
 | `/schema` | Supported editor modes, section definitions, and source mappings. |
 | `/capabilities` | Runtime WordPress, Gutenberg, and ACF capability report. |
+| `/settings` | Site settings from ACF Pro/SCF option fields, with WordPress core fallback. |
 
 Collection responses also expose `X-WP-Total` and `X-WP-TotalPages`.
 
@@ -111,13 +119,18 @@ When a shared secret is set, the request carries `X-NexusContent-Signature: sha2
 
 ## Authentication
 
-Published, passwordless pages and posts, schema, and capabilities are public. Non-published collection queries require `edit_posts`; a non-public individual entry requires `edit_post` for that entry. Use normal WordPress REST authentication, such as an authenticated admin cookie plus nonce or an Application Password over HTTPS. The plugin adds no credentials and never accepts secrets in URLs.
+Published, passwordless pages and posts, schema, capabilities, and settings are public. Non-published collection queries require `edit_posts`; a non-public individual entry requires `edit_post` for that entry. Use normal WordPress REST authentication, such as an authenticated admin cookie plus nonce or an Application Password over HTTPS. The plugin adds no credentials and never accepts secrets in URLs.
 
 ## Contract
 
 Contract 1 responses use `{ "contractVersion": 1, "data": ..., "diagnostics"?: [...] }`. Diagnostics contain `severity`, `code`, `message`, and optional `path`. Endpoint-owned output is validated before sending; invalid output becomes a structured 500 error. Contract changes require an explicit version rather than silent shape drift.
 
 Each normalized page or post carries `sections` plus `rawFields`, which always includes the active `editorMode` and the post's rendered `content` (the same HTML the WordPress core REST API exposes as `content.rendered`). Rendered HTML remains untrusted external content; consumers own sanitization and trust decisions.
+
+Pages and posts may also carry optional `seo`. Gutenberg authors it through a
+document sidebar; ACF modes use an ACF/SCF field group. Both write shared
+`nexus_seo_*` post meta and expose title, description, canonical URL, robots,
+Open Graph, and Twitter card data.
 
 ## Capabilities
 
@@ -143,6 +156,8 @@ Filters must return the documented value type; malformed values may be discarded
 | `nexuscontent_media` | `$media`, `$original_value` | Media array or `null` | Immediately before normalized media enters page data. |
 | `nexuscontent_schema` | `$schema` | Schema data array | Immediately before schema contract validation. |
 | `nexuscontent_capabilities` | `$capabilities` | Capability array | After detection, before sanitization and REST output. |
+| `nexuscontent_site_settings` | `$settings` | Settings data array | After option/core normalization. |
+| `nexuscontent_settings_data` | `$settings` | Settings data array | Immediately before contract validation and REST output. |
 | `nexuscontent_supported_editor_modes` | `$modes` | Array of valid mode strings | During runtime mode capability detection. |
 | `nexuscontent_block_implementations` | `$selection`, `$type` | `native`, `acf`, `both`, or selection array | During native and ACF block registration; may run more than once. |
 | `nexuscontent_fixed_field_definitions` | `$definitions` | ACF field definition array | Before the ACF Free-compatible fixed group is registered. |
@@ -165,7 +180,7 @@ npm run format:check
 npm run package
 ```
 
-`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.6.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
+`@wordpress/scripts` compiles `assets/src/editor.js` and its `assets/src/editor.css` import into `assets/build/editor.js`, `editor.css`, and `editor.asset.php`. `npm run package` writes `dist/nexuscontent-0.1.8.zip` at the repository root and verifies its bootstrap and contents. Source maps, source assets, tests, dependencies, local configuration, and secrets are excluded.
 
 ## Tests
 
@@ -181,14 +196,16 @@ npm run env:start
 npm run test:integration
 npm run env:acf-free:test
 npm run test:integration:acf-free
+npm run env:scf:test
+npm run test:integration:scf
 npm run env:stop
 ```
 
-The default wp-env has no ACF. Run `npm run env:acf-free` for the development site or `npm run env:acf-free:test` followed by `npm run test:integration:acf-free` for the integration-test site. `npm run env:no-acf` returns the development site to the no-ACF case. Docker is required by wp-env.
+The default wp-env has no ACF. The ACF Free and SCF scripts install each plugin from WordPress.org and run separate integration gates. `npm run env:no-acf` returns the development site to the no-ACF case. Docker is required by wp-env.
 
 ## Limitations
 
-Version 0.1.6 is page/post-focused, scoped to pages and standard posts. Published transport and single-use draft preview are provided, and opt-in outbound webhooks notify on page/post changes; it does not provide mutations, webhook-triggered rebuilds, synchronization, retries, caching, SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
+Version 0.1.8 is page/post-focused, scoped to pages, standard posts, and site settings. Published transport, single-use draft preview, normalized SEO authoring, and opt-in outbound webhooks are provided; it does not provide content mutations, webhook-triggered rebuilds, synchronization, retries, caching, third-party SEO-plugin mapping, localisation-plugin behavior, endpoint discovery, or an ACF Pro distribution. Rendered and editor-provided HTML remains untrusted consumer input. Mode switching does not convert content.
 
 ## Phase 3 Status
 

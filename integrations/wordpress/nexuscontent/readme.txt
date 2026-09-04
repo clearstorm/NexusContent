@@ -4,7 +4,7 @@ Tags: headless, content, rest-api, gutenberg, acf
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.1.7
+Stable tag: 0.1.8
 License: MIT
 License URI: https://opensource.org/license/mit
 
@@ -14,11 +14,11 @@ Contract-versioned, normalized WordPress page and post content for future NexusC
 
 = Purpose =
 
-NexusContent Companion exposes normalized page and post sections, schema, capabilities, media, and diagnostics through WordPress REST routes. Content is read-only; the only write route is the admin-only project-contract push. Plugin 0.1.7 uses companion contract 1, serves posts through dedicated `posts` routes alongside the `pages` routes, and (when configured) dispatches signed, outbound-only change webhooks.
+NexusContent Companion exposes normalized pages, posts, site settings, SEO, schema, capabilities, media, and diagnostics through WordPress REST routes. Content is read-only; the only write route is the admin-only project-contract push. Plugin 0.1.8 uses companion contract 1 and supports signed, outbound-only change webhooks.
 
 = Requirements =
 
-WordPress 6.6+ and PHP 8.1+ are required. Gutenberg is supplied by WordPress. ACF is optional: ACF Free 6.2+ supports fixed fields, while legally supplied ACF Pro 6.2+ can add Flexible Content, repeater/gallery fields, and ACF blocks. Production needs neither Node nor Composer and has no Composer dependencies; Node 24 and Composer 2 are development-only.
+WordPress 6.6+ and PHP 8.1+ are required. Gutenberg is supplied by WordPress. ACF is optional: ACF Free 6.2+ supports fixed fields, while legally supplied ACF Pro 6.2+ or Secure Custom Fields can add option pages and flexible/repeater/gallery fields. Production needs neither Node nor Composer and has no Composer dependencies; Node 24 and Composer 2 are development-only.
 
 = Modes, Gutenberg, and ACF =
 
@@ -30,7 +30,7 @@ Supported blocks are Hero, Introduction, Rich Text, Image and Text, Features, St
 
 = Routes and authentication =
 
-GET routes under /wp-json/nexuscontent/v1 are /pages, /pages/{id}, /pages/slug/{slug}, /posts, /posts/{id}, /posts/slug/{slug}, /schema, and /capabilities. /pages and /posts each support pagination, search, slug, status, order, and orderby. Published passwordless pages and posts, schema, and capabilities are public. Draft collection access requires edit_posts; non-public individual entries require edit_post. Use standard WordPress REST cookies/nonces or Application Passwords over HTTPS.
+GET routes under /wp-json/nexuscontent/v1 are /pages, /pages/{id}, /pages/slug/{slug}, /posts, /posts/{id}, /posts/slug/{slug}, /schema, /capabilities, and /settings. /settings uses ACF Pro/SCF option values when available and otherwise falls back to WordPress core values. Published passwordless content and public metadata routes are anonymous; non-public content uses normal WordPress capabilities.
 
 POST /project-contract stores the consumer's expected components and section types for the admin dashboard. It requires manage_options; WordPress core enforces the REST nonce for cookie-authenticated requests, while non-cookie authentication (such as an Application Password over HTTPS) works without one. It accepts only sanitized string arrays and stores nothing but those arrays inside the plugin settings option.
 
@@ -73,19 +73,19 @@ nexuscontent_companion_loaded($registry) fires after registration. nexuscontent_
 
 = Build and tests =
 
-Run npm install, npm run build, npm run lint-js, npm run format:check, and npm run package. @wordpress/scripts compiles assets/src/editor.js and editor.css into assets/build/editor.js, editor.css, and editor.asset.php. Packaging creates repository-root dist/nexuscontent-0.1.7.zip and excludes maps, assets/src, tests, vendor, node_modules, local config, secrets, and dev configs.
+Run npm install, npm run build, npm run lint-js, npm run format:check, and npm run package. Packaging creates repository-root dist/nexuscontent-0.1.8.zip and excludes maps, source assets, tests, dependencies, local config, secrets, and dev configs.
 
-Run composer install, composer validate, composer lint, composer phpcs, composer phpstan, and composer test-unit. For integration work run npm run env:start and npm run test:integration. wp-env starts without ACF; npm run env:acf-free:test followed by npm run test:integration:acf-free verifies a real ACF Free installation. ACF Pro must be legally mounted by the developer and is never downloaded by this project.
+Run composer install, composer validate, composer lint, composer phpcs, composer phpstan, and composer test-unit. For integration work run npm run env:start and npm run test:integration. Separate ACF Free and Secure Custom Fields scripts verify both installed configurations. ACF Pro must be legally mounted by the developer and is never downloaded by this project.
 
 = Limitations and Phase 3 status =
 
-0.1.7 content retrieval is read-only and page/post-focused: no mutations of site content, webhooks trigger no rebuilds, and synchronization, retries, caching of site content, SEO/localisation plugin mapping, endpoint discovery, content conversion, or bundled ACF Pro remain out of scope. HTML remains untrusted. The companion integration (Phase 3) is implemented: the NexusContent WordPress provider discovers these routes, negotiates contract version 1, caches capabilities, and falls back to standard REST retrieval when the plugin is unavailable. WordPress integration is verified in CI. The sole write route is the manage_options-only project-contract push, which stores consumer expectation metadata.
+0.1.8 retrieval is read-only and page/post/settings-focused: no site-content mutations, rebuild triggering, synchronization, retries, third-party SEO/localisation plugin mapping, endpoint discovery, content conversion, or bundled ACF Pro. HTML remains untrusted. The provider discovers the companion, negotiates contract version 1, and falls back to standard REST settings when `/settings` is unavailable.
 
 == Installation ==
 
 1. Upload the release ZIP or extract it to wp-content/plugins/nexuscontent.
 2. Activate NexusContent Companion in Plugins or with wp plugin activate nexuscontent.
-3. Optionally install ACF Free 6.2+ or a legally obtained ACF Pro 6.2+.
+3. Optionally install ACF Free 6.2+, Secure Custom Fields, or a legally obtained ACF Pro 6.2+.
 4. Choose a NexusContent editor mode on each page or post. Activation does not migrate or alter content.
 
 == Frequently Asked Questions ==
@@ -103,6 +103,12 @@ No. ACF Pro is licensed software and must be legally supplied by the developer.
 Yes, when the provider runs with the companion strategy or auto-discovery. It discovers these routes, negotiates contract version 1, caches capabilities, and falls back to unmodified standard REST retrieval when the plugin is not reachable. Release status of the wrapping NexusContent milestone remains under repo control.
 
 == Changelog ==
+
+= 0.1.8 =
+
+* Added public contract-v1 site settings with ACF Pro/SCF option-page authoring and WordPress core fallback.
+* Added Gutenberg-sidebar and ACF-mode SEO authoring normalized into optional page/post `seo` data.
+* Added Secure Custom Fields integration coverage alongside plugin-free and ACF Free gates.
 
 = 0.1.7 =
 

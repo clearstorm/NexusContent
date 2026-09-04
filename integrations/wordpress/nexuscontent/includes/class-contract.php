@@ -55,6 +55,7 @@ final class Contract {
 			'pages'          => isset( $data['items'], $data['pagination'] ) && is_array( $data['items'] ) && is_array( $data['pagination'] ) && $this->valid_pages( $data['items'] ) && $this->valid_pagination( $data['pagination'] ),
 			'schema'         => $this->valid_schema( $data ),
 			'capabilities'   => $this->valid_capabilities( $data ),
+			'settings'       => $this->is_json_value( $data ),
 			'preview_token'  => $this->valid_preview_token( $data ),
 			default          => false,
 		};
@@ -94,6 +95,9 @@ final class Contract {
 		if ( isset( $page['featuredImage'] ) && ( ! is_array( $page['featuredImage'] ) || ! is_string( $page['featuredImage']['url'] ?? null ) ) ) {
 			return false;
 		}
+		if ( array_key_exists( 'seo', $page ) && ! $this->valid_seo( $page['seo'] ) ) {
+			return false;
+		}
 
 		foreach ( $page['sections'] as $section ) {
 			if ( ! is_array( $section ) || ! is_string( $section['id'] ?? null ) || ! is_string( $section['type'] ?? null ) || ! is_array( $section['data'] ?? null ) ) {
@@ -104,6 +108,71 @@ final class Contract {
 			}
 		}
 
+		return true;
+	}
+
+	/** @param mixed $seo */
+	private function valid_seo( $seo ): bool {
+		if ( ! is_array( $seo ) || ! $this->optional_strings( $seo, array( 'title', 'description', 'canonicalUrl' ) ) ) {
+			return false;
+		}
+		if ( array_key_exists( 'robots', $seo ) ) {
+			if ( ! is_array( $seo['robots'] ) ) {
+				return false;
+			}
+			foreach ( array( 'index', 'follow', 'noarchive', 'nosnippet' ) as $key ) {
+				if ( array_key_exists( $key, $seo['robots'] ) && ! is_bool( $seo['robots'][ $key ] ) ) {
+					return false;
+				}
+			}
+		}
+		if ( array_key_exists( 'openGraph', $seo ) && ! $this->valid_social_seo( $seo['openGraph'], array( 'title', 'description', 'type', 'siteName', 'url', 'locale' ) ) ) {
+			return false;
+		}
+		if ( array_key_exists( 'twitter', $seo ) ) {
+			if ( ! $this->valid_social_seo( $seo['twitter'], array( 'title', 'description', 'url', 'site' ) ) ) {
+				return false;
+			}
+			if ( array_key_exists( 'card', $seo['twitter'] ) && ! in_array( $seo['twitter']['card'], array( 'summary', 'summary_large_image' ), true ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * @param mixed              $value       Social SEO value.
+	 * @param array<int, string> $string_keys Optional string keys.
+	 */
+	private function valid_social_seo( $value, array $string_keys ): bool {
+		if ( ! is_array( $value ) || ! $this->optional_strings( $value, $string_keys ) ) {
+			return false;
+		}
+		if ( ! array_key_exists( 'image', $value ) ) {
+			return true;
+		}
+		if ( ! is_array( $value['image'] ) || ! is_string( $value['image']['url'] ?? null ) || ! $this->optional_strings( $value['image'], array( 'alt' ) ) ) {
+			return false;
+		}
+		foreach ( array( 'width', 'height' ) as $key ) {
+			if ( array_key_exists( $key, $value['image'] ) && ! is_int( $value['image'][ $key ] ) && ! is_float( $value['image'][ $key ] ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * @param array<string, mixed> $value Values to inspect.
+	 * @param array<int, string>   $keys  Optional string keys.
+	 */
+	private function optional_strings( array $value, array $keys ): bool {
+		foreach ( $keys as $key ) {
+			if ( array_key_exists( $key, $value ) && ! is_string( $value[ $key ] ) ) {
+				return false;
+			}
+		}
 		return true;
 	}
 

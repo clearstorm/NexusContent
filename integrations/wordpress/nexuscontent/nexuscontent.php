@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       NexusContent Companion
  * Description:       Exposes normalized WordPress content for NexusContent consumers.
- * Version:           0.1.7
+ * Version:           0.1.8
  * Requires at least: 6.6
  * Requires PHP:      8.1
  * Author:            NexusContent
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'NEXUSCONTENT_COMPANION_VERSION', '0.1.7' );
+define( 'NEXUSCONTENT_COMPANION_VERSION', '0.1.8' );
 define( 'NEXUSCONTENT_COMPANION_CONTRACT_VERSION', 1 );
 define( 'NEXUSCONTENT_COMPANION_REST_NAMESPACE', 'nexuscontent/v1' );
 define( 'NEXUSCONTENT_COMPANION_FILE', __FILE__ );
@@ -28,6 +28,8 @@ $nexuscontent_companion_files = array(
 	'includes/class-editor-mode.php',
 	'includes/class-section-registry.php',
 	'includes/class-media-normalizer.php',
+	'includes/class-seo-fields.php',
+	'includes/class-site-settings.php',
 	'includes/class-normalizer.php',
 	'includes/class-preview-token.php',
 	'includes/class-webhook-dispatcher.php',

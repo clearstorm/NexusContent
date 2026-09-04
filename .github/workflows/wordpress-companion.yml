@@ -122,8 +122,8 @@ jobs:
       - run: npm run package
       - uses: actions/upload-artifact@v4
         with:
-          name: nexuscontent-0.1.7
-          path: dist/nexuscontent-0.1.7.zip
+          name: nexuscontent-0.1.8
+          path: dist/nexuscontent-0.1.8.zip
           if-no-files-found: error
 
   integration-tests:
@@ -144,6 +144,8 @@ jobs:
       - run: npm run test:integration
       - run: npm run env:acf-free:test
       - run: npm run test:integration:acf-free
+      - run: npm run env:scf:test
+      - run: npm run test:integration:scf
       - if: always()
         run: npm run env:stop
 

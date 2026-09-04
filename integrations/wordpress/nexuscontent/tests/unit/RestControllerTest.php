@@ -12,6 +12,7 @@ use NexusContent\Companion\Media_Normalizer;
 use NexusContent\Companion\Normalizer;
 use NexusContent\Companion\REST_Controller;
 use NexusContent\Companion\Section_Registry;
+use NexusContent\Companion\Seo_Fields;
 use NexusContent\Companion\Tests\TestCase;
 use WP_Error;
 use WP_REST_Request;
@@ -21,13 +22,13 @@ final class RestControllerTest extends TestCase {
 	private function controller(): REST_Controller {
 		$registry     = new Section_Registry();
 		$capabilities = new Capabilities( $registry );
-		return new REST_Controller( new Contract(), new Normalizer( new Editor_Mode( $capabilities ), $registry, new Media_Normalizer() ), $registry, $capabilities );
+		return new REST_Controller( new Contract(), new Normalizer( new Editor_Mode( $capabilities ), $registry, new Media_Normalizer(), new Seo_Fields() ), $registry, $capabilities );
 	}
 
 	public function test_routes_register_expected_public_and_content_endpoints(): void {
 		$this->controller()->register_routes();
 		self::assertSame(
-			array( 'nexuscontent/v1/pages', 'nexuscontent/v1/pages/(?P<id>\d+)', 'nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/posts', 'nexuscontent/v1/posts/(?P<id>\d+)', 'nexuscontent/v1/posts/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/schema', 'nexuscontent/v1/capabilities', 'nexuscontent/v1/project-contract', 'nexuscontent/v1/preview-token', 'nexuscontent/v1/preview/(?P<token>[0-9a-f]+)/(?P<id>\d+)' ),
+			array( 'nexuscontent/v1/pages', 'nexuscontent/v1/pages/(?P<id>\d+)', 'nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/posts', 'nexuscontent/v1/posts/(?P<id>\d+)', 'nexuscontent/v1/posts/slug/(?P<slug>[^/]+)', 'nexuscontent/v1/schema', 'nexuscontent/v1/capabilities', 'nexuscontent/v1/settings', 'nexuscontent/v1/project-contract', 'nexuscontent/v1/preview-token', 'nexuscontent/v1/preview/(?P<token>[0-9a-f]+)/(?P<id>\d+)' ),
 			array_keys( $GLOBALS['nc_test']['routes'] )
 		);
 	}
@@ -87,6 +88,15 @@ final class RestControllerTest extends TestCase {
 			self::assertTrue( ( new Contract() )->validate( $response->get_data(), $shape ) );
 		}
 		self::assertCount( 12, $controller->get_schema()->get_data()['data']['sectionDefinitions'] );
+	}
+
+	public function test_settings_are_returned_in_a_valid_public_contract_envelope(): void {
+		$GLOBALS['nc_test']['options']['admin_email'] = 'admin@example.test';
+		$GLOBALS['nc_test']['fields']['option']['nexus_site_name'] = 'Companion site';
+		$response = $this->controller()->get_settings();
+		self::assertInstanceOf( WP_REST_Response::class, $response );
+		self::assertTrue( ( new Contract() )->validate( $response->get_data(), 'settings' ) );
+		self::assertSame( 'Companion site', $response->get_data()['data']['name'] );
 	}
 
 	public function test_published_unprotected_page_is_public_but_draft_and_password_pages_require_edit_access(): void {

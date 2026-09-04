@@ -39,7 +39,7 @@ if [[ ! -x vendor/bin/phpunit ]]; then
 fi
 
 if [[ "$suite" == "integration" ]]; then
-  exec vendor/bin/phpunit --configuration "$config" --testsuite "$suite" --exclude-group acf-real
+	exec vendor/bin/phpunit --configuration "$config" --testsuite "$suite" --exclude-group acf-real,scf-real
 fi
 
 exec vendor/bin/phpunit --configuration "$config" --testsuite "$suite"

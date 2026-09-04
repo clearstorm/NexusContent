@@ -6,7 +6,7 @@ plugin is, why it exists, and the permanent boundaries around it.
 
 ## What It Is
 
-NexusContent Companion is an optional WordPress plugin (version `0.1.7`) that
+NexusContent Companion is an optional WordPress plugin (version `0.1.8`) that
 turns a standard WordPress install into a source of normalized, contract-
 versioned JSON for NexusContent consumers.
 
@@ -72,6 +72,14 @@ Core Gutenberg blocks (rich-text, image, gallery, cover, container) and native
 NexusContent blocks are converted. Unsupported visible blocks degrade to
 flagged rich-text data with diagnostics rather than being dropped silently.
 
+### Site Settings and SEO
+
+`GET /nexuscontent/v1/settings` returns normalized site settings. ACF Pro or
+Secure Custom Fields supplies an option-page editor; ACF Free and plugin-free
+installs fall back to WordPress core values. Gutenberg pages/posts author SEO in
+a document sidebar, while ACF modes use an ACF/SCF field group. Both surfaces
+write the same `nexus_seo_*` meta and emit additive optional `seo` data.
+
 ### Auto-Creating ACF Layouts for Custom Sections
 
 Custom section types flow through the same registry and automatically get the
@@ -121,6 +129,7 @@ Content routes:
 
 - `GET /nexuscontent/v1/schema`
 - `GET /nexuscontent/v1/capabilities`
+- `GET /nexuscontent/v1/settings`
 - `GET /nexuscontent/v1/pages`
 - `GET /nexuscontent/v1/pages/{id}`
 - `GET /nexuscontent/v1/pages/slug/{slug}`
@@ -173,8 +182,8 @@ signature and decides what to do.
 The TypeScript provider talks to the plugin only under the companion API
 strategies:
 
-- `apiStrategy: "companion"` — companion routes required; missing plugin or
-  shape mismatch throws an actionable error.
+- `apiStrategy: "companion"` — companion content routes are required; settings
+  alone fall back to native `wp/v2/settings` when companion `/settings` is absent.
 - `apiStrategy: "auto"` — uses the plugin when present and healthy, falls back
   to standard REST otherwise.
 - `apiStrategy: "core"` — standard REST only; the plugin is never called.
@@ -189,11 +198,12 @@ converts companion section media recursively (`wire image.url` →
 
 - Released base REST retrieval remains plugin-neutral and must not require or
   call the companion plugin.
-- ACF is optional. ACF Free supports the fixed fields; ACF Pro (only with a
-  legally supplied license) enables flexible layouts and opt-in ACF Blocks.
+- ACF is optional. ACF Free supports fixed fields; ACF Pro or Secure Custom
+  Fields enables the options page and flexible layouts. ACF Pro is never
+  downloaded or distributed by this project.
 - No mutations, synchronization, or rebuild-triggering webhooks. Opt-in
   outbound webhooks are signed, best-effort, and consumer-driven.
-- No plugin SEO mapping, localisation-plugin contracts, or multi-site logic.
+- No third-party SEO-plugin mapping, localisation-plugin contracts, or multi-site logic.
 - WordPress stays the content system; consumers own routes and rendering.
 - Plugin code stays under `integrations/wordpress/nexuscontent/`. It is never
   Core and never provider code.
@@ -201,9 +211,9 @@ converts companion section media recursively (`wire image.url` →
 ## Requirements and Artifact
 
 - WordPress 6.6+ and PHP 8.1+.
-- Gutenberg uses WordPress core. ACF Free 6.2+ and ACF Pro 6.2+ are optional.
+- Gutenberg uses WordPress core. ACF Free 6.2+, ACF Pro 6.2+, and Secure Custom Fields are optional.
 - Node.js and Composer are build-only; production servers need neither.
-- The release artifact is `dist/nexuscontent-0.1.7.zip`.
+- The release artifact is `dist/nexuscontent-0.1.8.zip`.
 
 ## Version History
 
@@ -217,3 +227,4 @@ converts companion section media recursively (`wire image.url` →
 | `0.1.5` | The ACF flexible-content button URL field is now a plain text field (instead of the ACF `url` type) so both fully-qualified URLs and root-relative paths (for example `/contact`) are accepted and preserved; applies to Hero, Image and Text, and Call to Action buttons |
 | `0.1.6` | ACF flexible sections now emit canonical field names (the normalizer reads the formatted ACF value instead of the raw `field_nc_*` keys), and Features `points` are flattened from the ACF `[{ text }]` repeater shape to the canonical flat `points: string[]` |
 | `0.1.7` | The ACF Flexible FAQ `answer` field is now a plain Text Area instead of a WYSIWYG editor, matching the Gutenberg FAQ block and Git content; the server-side fallback block renderer `esc_html`es the plain-text answer so consumers no longer see stray `<p>`/`<div>` wrappers |
+| `0.1.8` | Public site settings with ACF Pro/SCF option-page authoring and core fallback; Gutenberg/ACF page SEO authoring normalized through optional companion `seo`; SCF integration coverage |

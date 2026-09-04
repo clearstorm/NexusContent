@@ -65,6 +65,51 @@ export const pageSectionWireSchema = z.object({
   data: z.record(z.string(), jsonValueSchema)
 });
 
+// The companion wire carries `seo` in the same additive optional `SeoData`
+// shape the plugin normalizes from editor-authored fields. Media values keep
+// the wire `url` key and are converted to MediaAsset `src` at the boundary.
+export const companionSeoImageWireSchema = z.object({
+  url: z.string(),
+  alt: z.string().optional(),
+  width: z.number().optional(),
+  height: z.number().optional()
+});
+
+export const companionSeoWireSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  canonicalUrl: z.string().optional(),
+  robots: z
+    .object({
+      index: z.boolean().optional(),
+      follow: z.boolean().optional(),
+      noarchive: z.boolean().optional(),
+      nosnippet: z.boolean().optional()
+    })
+    .optional(),
+  openGraph: z
+    .object({
+      title: z.string().optional(),
+      description: z.string().optional(),
+      type: z.string().optional(),
+      siteName: z.string().optional(),
+      url: z.string().optional(),
+      locale: z.string().optional(),
+      image: companionSeoImageWireSchema.optional()
+    })
+    .optional(),
+  twitter: z
+    .object({
+      card: z.enum(["summary", "summary_large_image"]).optional(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      url: z.string().optional(),
+      site: z.string().optional(),
+      image: companionSeoImageWireSchema.optional()
+    })
+    .optional()
+});
+
 export const pageDataSchema = z.object({
   id: z.string(),
   key: z.string(),
@@ -74,6 +119,7 @@ export const pageDataSchema = z.object({
   excerpt: z.string().optional(),
   featuredImage: companionMediaSchema.optional(),
   modifiedAt: z.string().optional(),
+  seo: companionSeoWireSchema.optional(),
   sections: z.array(pageSectionWireSchema),
   rawFields: z.record(z.string(), jsonValueSchema)
 });
@@ -127,3 +173,6 @@ export const companionPagesResponseSchema = companionEnvelopeSchema(pagesDataSch
 export const companionSchemaResponseSchema = companionEnvelopeSchema(schemaDataSchema);
 export const companionCapabilitiesResponseSchema =
   companionEnvelopeSchema(capabilitiesSchema);
+export const companionSettingsResponseSchema = companionEnvelopeSchema(
+  z.record(z.string(), jsonValueSchema)
+);

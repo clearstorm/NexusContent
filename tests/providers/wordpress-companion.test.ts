@@ -432,12 +432,67 @@ test("normalizeCompanionPage maps companion data to PageContent", () => {
   assert.deepEqual(result.meta, { source: "wordpress", sourceId: "42" });
 });
 
+test("normalizeCompanionPage maps wire seo to PageContent.seo and converts media url to src", () => {
+  const result = normalizeCompanionPage(
+    {
+      id: "42",
+      key: "about",
+      slug: "about",
+      title: "About",
+      status: "published" as const,
+      seo: {
+        title: "About Us",
+        description: "Learn about us",
+        canonicalUrl: "https://example.com/about",
+        robots: { index: true, follow: true, noarchive: true, nosnippet: false },
+        openGraph: {
+          title: "About OG",
+          type: "website",
+          siteName: "Example",
+          url: "https://example.com/about",
+          locale: "en_US",
+          image: { url: "https://example.com/og.jpg", alt: "OG", width: 1200, height: 630 }
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: "About Tw",
+          site: "@example",
+          image: { url: "https://example.com/tw.jpg", alt: "Twitter" }
+        }
+      },
+      sections: [],
+      rawFields: {}
+    },
+    "about"
+  );
+
+  assert.equal(result.seo?.title, "About Us");
+  assert.equal(result.seo?.canonicalUrl, "https://example.com/about");
+  assert.deepEqual(result.seo?.robots, { index: true, follow: true, noarchive: true, nosnippet: false });
+  assert.equal(result.seo?.openGraph?.siteName, "Example");
+  assert.equal(result.seo?.openGraph?.locale, "en_US");
+  assert.equal(result.seo?.openGraph?.image?.src, "https://example.com/og.jpg");
+  assert.equal(result.seo?.openGraph?.image?.width, 1200);
+  assert.equal(result.seo?.twitter?.site, "@example");
+  assert.equal(result.seo?.twitter?.image?.src, "https://example.com/tw.jpg");
+  assert.equal(result.seo?.twitter?.image?.id, undefined);
+});
+
+test("normalizeCompanionPage leaves seo undefined when the wire omits it", () => {
+  const result = normalizeCompanionPage(
+    { id: "1", key: "home", slug: "home", title: "Home", sections: [], rawFields: {} },
+    "home"
+  );
+  assert.equal(result.seo, undefined);
+});
+
 test("normalizeCompanionPageItem maps companion data to CollectionItem", () => {
   const input = {
     id: "5",
     key: "services",
     slug: "services",
     title: "Services",
+    seo: { title: "Services SEO", twitter: { card: "summary" as const } },
     sections: [
       { id: "intro-1", type: "intro", data: { heading: "What we do" } },
       { id: "cta-1", type: "cta", settings: { align: "center" }, data: { heading: "Get started" } }
@@ -461,6 +516,7 @@ test("normalizeCompanionPageItem maps companion data to CollectionItem", () => {
   assert.equal(sections[1]?.type, "cta");
   assert.deepEqual(sections[1]?.settings, { align: "center" });
   assert.equal(result.data.custom, "value");
+  assert.deepEqual(result.data.seo, { title: "Services SEO", twitter: { card: "summary" } });
   assert.deepEqual(result.meta, { source: "wordpress", sourceId: "5" });
 });
 
@@ -864,4 +920,71 @@ test("applyUnknownContentPolicy returns raw for html policy", () => {
     unknownContentPolicy: "html"
   });
   assert.equal(wp.applyUnknownContentPolicy("unknown_block"), "raw");
+});
+
+// ─── Companion settings ────────────────────────────────────────────
+
+test("strategy companion returns settings from the companion /settings route", async () => {
+  const capabilities = await readFixture("companion-capabilities.json");
+  const paths: string[] = [];
+  const settingsData = {
+    contractVersion: 1,
+    data: {
+      name: "Example",
+      tagline: "A site",
+      url: "https://example.com",
+      social: { twitter: "https://twitter.com/example" }
+    }
+  };
+
+  await withServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://local.test");
+    paths.push(url.pathname);
+    if (url.pathname.includes("nexuscontent/v1/capabilities")) {
+      sendJson(response, capabilities);
+    } else if (url.pathname.includes("nexuscontent/v1/settings")) {
+      sendJson(response, settingsData);
+    } else {
+      sendJson(response, { code: "not_found" }, { status: 404 });
+    }
+  }, async (baseUrl) => {
+    const result = await provider(baseUrl, { apiStrategy: "companion" }).getSettings<{
+      name: string;
+      social: { twitter: string };
+    }>("site");
+    assert.equal(result?.key, "site");
+    assert.equal(result?.id, "wp-settings-site");
+    assert.equal(result?.data?.name, "Example");
+    assert.equal(result?.data?.social?.twitter, "https://twitter.com/example");
+    assert.equal(result?.meta?.source, "wordpress");
+    assert.ok(paths.some((p) => p.includes("nexuscontent/v1/settings")));
+    assert.ok(!paths.some((p) => p.includes("/wp/v2/settings")));
+  });
+});
+
+test("strategy companion falls back to /wp/v2/settings when the companion lacks a settings route", async () => {
+  const capabilities = await readFixture("companion-capabilities.json");
+  const paths: string[] = [];
+
+  await withServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://local.test");
+    paths.push(url.pathname);
+    if (url.pathname.includes("nexuscontent/v1/capabilities")) {
+      sendJson(response, capabilities);
+    } else if (url.pathname.includes("nexuscontent/v1/settings")) {
+      sendJson(response, { code: "not_found" }, { status: 404 });
+    } else if (url.pathname.includes("/wp/v2/settings")) {
+      sendJson(response, { title: "Example", description: "A site" });
+    } else {
+      sendJson(response, { code: "not_found" }, { status: 404 });
+    }
+  }, async (baseUrl) => {
+    const result = await provider(baseUrl, { apiStrategy: "companion" }).getSettings<{
+      title: string;
+    }>("site");
+    assert.equal(result?.key, "site");
+    assert.equal(result?.data?.title, "Example");
+    assert.ok(paths.some((p) => p.includes("nexuscontent/v1/settings")));
+    assert.ok(paths.some((p) => p.includes("/wp/v2/settings")));
+  });
 });

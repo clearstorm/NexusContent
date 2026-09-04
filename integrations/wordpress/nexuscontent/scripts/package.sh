@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-readonly version="0.1.7"
+readonly version="0.1.8"
 readonly plugin_slug="nexuscontent"
 plugin_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 repo_root="$(cd "$plugin_root/../../.." && pwd)"
@@ -36,6 +36,8 @@ required_files=(
   "includes/class-editor-mode.php"
   "includes/class-section-registry.php"
   "includes/class-media-normalizer.php"
+  "includes/class-seo-fields.php"
+  "includes/class-site-settings.php"
   "includes/class-normalizer.php"
   "includes/class-rest-controller.php"
   "includes/class-admin-page.php"

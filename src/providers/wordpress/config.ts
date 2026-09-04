@@ -59,7 +59,8 @@ export const COMPANION_WIRE_ENDPOINTS = [
   "posts/{id}",
   "posts/slug/{slug}",
   "schema",
-  "capabilities"
+  "capabilities",
+  "settings"
 ] as const;
 
 export function isFixedSectionType(value: string): value is FixedSectionType {

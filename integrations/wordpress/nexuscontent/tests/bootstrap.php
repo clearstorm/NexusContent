@@ -125,7 +125,8 @@ if ( ! function_exists( 'nc_test_reset' ) ) {
 			'styles' => array(), 'options' => array(), 'menus' => array(), 'query_posts' => array(),
 			'query_args' => array(), 'registered_meta' => array(), 'transients' => array(),
 			'webhooks' => array(), 'settings' => array(), 'settings_fields' => array(), 'settings_sections' => array(),
-			'get_field_formats' => array(),
+			'get_field_formats' => array(), 'home_url' => 'https://example.test',
+			'bloginfo' => array( 'name' => 'Example site', 'description' => 'Example tagline', 'language' => 'en-US' ),
 		);
 		$GLOBALS['wp_version'] = '6.6-test';
 	}
@@ -182,6 +183,8 @@ if ( ! function_exists( 'register_post_meta' ) ) { function register_post_meta( 
 if ( ! function_exists( 'register_rest_route' ) ) { function register_rest_route( $namespace, $route, $args ) { $GLOBALS['nc_test']['routes'][ $namespace . $route ] = $args; return true; } }
 if ( ! function_exists( 'get_option' ) ) { function get_option( $option, $default = false ) { return $GLOBALS['nc_test']['options'][ $option ] ?? $default; } }
 if ( ! function_exists( 'update_option' ) ) { function update_option( $option, $value, $autoload = null ) { $GLOBALS['nc_test']['options'][ $option ] = $value; return true; } }
+if ( ! function_exists( 'get_bloginfo' ) ) { function get_bloginfo( $show = '' ) { return $GLOBALS['nc_test']['bloginfo'][ $show ] ?? ''; } }
+if ( ! function_exists( 'home_url' ) ) { function home_url( $path = '' ) { return rtrim( $GLOBALS['nc_test']['home_url'], '/' ) . '/' . ltrim( $path, '/' ); } }
 if ( ! function_exists( 'wp_verify_nonce' ) ) { function wp_verify_nonce( $nonce, $action = -1 ) { return ( $GLOBALS['nc_test']['nonces'][ $action ] ?? null ) === $nonce ? 1 : false; } }
 if ( ! function_exists( 'rest_ensure_response' ) ) { function rest_ensure_response( $response ) { return $response instanceof WP_REST_Response ? $response : new WP_REST_Response( $response ); } }
 if ( ! function_exists( 'add_menu_page' ) ) { function add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function = '', $icon_url = '', $position = null ) { $GLOBALS['nc_test']['menus'][ $menu_slug ] = compact( 'page_title', 'menu_title', 'capability', 'function' ); return $menu_slug; } }
@@ -213,7 +216,7 @@ if ( ! function_exists( 'wp_remote_post' ) ) { function wp_remote_post( $url, $a
 $root = dirname( __DIR__ );
 foreach ( array(
 	'includes/class-contract.php', 'includes/class-diagnostics.php', 'includes/class-capabilities.php',
-	'includes/class-editor-mode.php', 'includes/class-section-registry.php', 'includes/class-media-normalizer.php',
+	'includes/class-editor-mode.php', 'includes/class-section-registry.php', 'includes/class-media-normalizer.php', 'includes/class-seo-fields.php', 'includes/class-site-settings.php',
 	'includes/class-normalizer.php', 'includes/class-preview-token.php', 'includes/class-webhook-dispatcher.php', 'includes/class-rest-controller.php', 'includes/class-admin-page.php',
 	'includes/blocks/class-block-normalizer.php', 'includes/blocks/class-block-loader.php',
 	'includes/acf/class-acf-field-factory.php', 'includes/acf/class-acf-loader.php',

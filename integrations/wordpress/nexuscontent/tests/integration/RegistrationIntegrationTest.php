@@ -5,6 +5,7 @@ namespace NexusContent\Companion\Tests\Integration;
 require_once __DIR__ . '/IntegrationTestCase.php';
 
 use NexusContent\Companion\Editor_Mode;
+use NexusContent\Companion\Seo_Fields;
 
 final class RegistrationIntegrationTest extends IntegrationTestCase {
 	public function test_companion_loads_and_registers_without_acf(): void {
@@ -23,6 +24,9 @@ final class RegistrationIntegrationTest extends IntegrationTestCase {
 			$registered = get_registered_meta_keys( 'post', $post_type );
 			self::assertArrayHasKey( Editor_Mode::META_KEY, $registered, $post_type . ' editor meta was not registered' );
 			self::assertSame( array( 'gutenberg', 'acf_flexible', 'acf_fixed' ), $registered[ Editor_Mode::META_KEY ]['show_in_rest']['schema']['enum'] );
+			foreach ( array( 'title', 'description', 'canonical', 'robots_index', 'robots_follow', 'robots_noarchive', 'robots_nosnippet', 'og_title', 'og_description', 'og_type', 'og_image', 'tw_card', 'tw_title', 'tw_description', 'tw_image', 'tw_site' ) as $key ) {
+				self::assertArrayHasKey( Seo_Fields::META_PREFIX . $key, $registered, $post_type . ' SEO meta was not registered' );
+			}
 		}
 
 		$block_registry = \WP_Block_Type_Registry::get_instance();
@@ -34,7 +38,7 @@ final class RegistrationIntegrationTest extends IntegrationTestCase {
 		}
 
 		$routes = rest_get_server()->get_routes();
-		foreach ( array( '/nexuscontent/v1/pages', '/nexuscontent/v1/pages/(?P<id>\d+)', '/nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', '/nexuscontent/v1/posts', '/nexuscontent/v1/posts/(?P<id>\d+)', '/nexuscontent/v1/posts/slug/(?P<slug>[^/]+)', '/nexuscontent/v1/schema', '/nexuscontent/v1/capabilities', '/nexuscontent/v1/project-contract' ) as $route ) {
+		foreach ( array( '/nexuscontent/v1/pages', '/nexuscontent/v1/pages/(?P<id>\d+)', '/nexuscontent/v1/pages/slug/(?P<slug>[^/]+)', '/nexuscontent/v1/posts', '/nexuscontent/v1/posts/(?P<id>\d+)', '/nexuscontent/v1/posts/slug/(?P<slug>[^/]+)', '/nexuscontent/v1/schema', '/nexuscontent/v1/capabilities', '/nexuscontent/v1/settings', '/nexuscontent/v1/project-contract' ) as $route ) {
 			self::assertArrayHasKey( $route, $routes );
 		}
 	}
@@ -74,5 +78,17 @@ $admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$capabilities = $this->request( '/nexuscontent/v1/capabilities' );
 		self::assertSame( 200, $capabilities->get_status() );
 		self::assertContains( 'gutenberg', $this->envelope( $capabilities )['data']['editorModes'] );
+	}
+
+	public function test_public_settings_route_falls_back_to_wordpress_core_values(): void {
+		update_option( 'blogname', 'Integration site' );
+		update_option( 'blogdescription', 'Integration tagline' );
+
+		$response = $this->request( '/nexuscontent/v1/settings' );
+		self::assertSame( 200, $response->get_status() );
+		$data = $this->envelope( $response )['data'];
+		self::assertSame( 'Integration site', $data['name'] );
+		self::assertSame( 'Integration tagline', $data['tagline'] );
+		self::assertSame( '', $data['email'] );
 	}
 }

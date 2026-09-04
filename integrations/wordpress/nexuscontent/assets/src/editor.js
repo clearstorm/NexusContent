@@ -1437,3 +1437,135 @@ import './editor.css';
 		icon: 'layout',
 	} );
 } )( window.wp, window.NexusContentEditorSettings );
+
+( function ( wp, settings ) {
+	'use strict';
+	if (
+		! wp ||
+		! settings ||
+		! wp.plugins ||
+		! wp.editPost ||
+		! wp.data ||
+		! wp.components ||
+		! wp.element
+	) {
+		return;
+	}
+	const el = wp.element.createElement;
+	const ToggleControl = wp.components.ToggleControl;
+	const SelectControl = wp.components.SelectControl;
+	const TextControl = wp.components.TextControl;
+	const TextareaControl = wp.components.TextareaControl;
+
+	const seoString = [
+		{ key: 'title', label: 'SEO title' },
+		{ key: 'description', label: 'Meta description', type: 'textarea' },
+		{ key: 'canonical', label: 'Canonical URL' },
+		{ key: 'og_title', label: 'OpenGraph title' },
+		{
+			key: 'og_description',
+			label: 'OpenGraph description',
+			type: 'textarea',
+		},
+		{ key: 'og_type', label: 'OpenGraph type' },
+		{ key: 'og_image', label: 'OpenGraph image URL' },
+		{
+			key: 'tw_card',
+			label: 'Twitter card',
+			type: 'select',
+			options: [
+				{ label: 'Not set', value: '' },
+				{ label: 'Summary', value: 'summary' },
+				{
+					label: 'Summary with large image',
+					value: 'summary_large_image',
+				},
+			],
+		},
+		{ key: 'tw_title', label: 'Twitter title' },
+		{
+			key: 'tw_description',
+			label: 'Twitter description',
+			type: 'textarea',
+		},
+		{ key: 'tw_image', label: 'Twitter image URL' },
+		{ key: 'tw_site', label: 'Twitter site' },
+	];
+	const seoBool = [
+		{ key: 'robots_index', label: 'Index' },
+		{ key: 'robots_follow', label: 'Follow' },
+		{ key: 'robots_noarchive', label: 'Noarchive' },
+		{ key: 'robots_nosnippet', label: 'Nosnippet' },
+	];
+	const prefix = 'nexus_seo_';
+
+	function SeoPanel() {
+		const meta = wp.data.useSelect( function ( select ) {
+			return (
+				select( 'core/editor' ).getEditedPostAttribute( 'meta' ) || {}
+			);
+		}, [] );
+		const editPost = wp.data.useDispatch( 'core/editor' ).editPost;
+		// The SEO panel is only shown in the block editor mode; ACF modes use a
+		// paired ACF metabox that writes the same meta keys.
+		if ( ( meta[ settings.metaKey ] || 'gutenberg' ) !== 'gutenberg' ) {
+			return null;
+		}
+		function update( key, value ) {
+			const nextMeta = Object.assign( {}, meta );
+			nextMeta[ prefix + key ] = value;
+			editPost( { meta: nextMeta } );
+		}
+		const fields = seoString.map( function ( field ) {
+			let Control = TextControl;
+			if ( field.type === 'textarea' ) {
+				Control = TextareaControl;
+			} else if ( field.type === 'select' ) {
+				Control = SelectControl;
+			}
+			return el( Control, {
+				key: field.key,
+				label: field.label,
+				value: meta[ prefix + field.key ] || '',
+				options: field.options,
+				onChange( value ) {
+					update( field.key, value );
+				},
+			} );
+		} );
+		const toggles = seoBool.map( function ( field ) {
+			return el( ToggleControl, {
+				key: field.key,
+				label: field.label,
+				checked: !! meta[ prefix + field.key ],
+				onChange( value ) {
+					update( field.key, value );
+				},
+			} );
+		} );
+		return el(
+			wp.editPost.PluginDocumentSettingPanel,
+			{
+				name: 'nexuscontent-seo',
+				title: 'NexusContent SEO',
+				initialOpen: true,
+			},
+			el(
+				'p',
+				{},
+				'Primary meta tags, robots directives, and social metadata are exported as page SEO data.'
+			),
+			fields,
+			el(
+				wp.components.PanelRow,
+				{ key: 'robots-header' },
+				el( 'strong', {}, 'Robots' )
+			),
+			toggles
+		);
+	}
+	wp.plugins.registerPlugin( 'nexuscontent-seo', {
+		render: SeoPanel,
+		icon: 'search',
+	} );
+} )( window.wp, window.NexusContentEditorSettings );

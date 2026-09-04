@@ -13,7 +13,7 @@ function acf_register_block_type( array $block ): void {}
 function acf_get_field_type( string $type ) {}
 
 /** @return mixed */
-function get_field( string $selector, int|false $post_id = false, bool $format_value = true ) {}
+function get_field( string $selector, int|string|false $post_id = false, bool $format_value = true ) {}
 
 /** @return array<string, mixed>|false */
 function get_fields( int|false $post_id = false, bool $format_value = true ) {}

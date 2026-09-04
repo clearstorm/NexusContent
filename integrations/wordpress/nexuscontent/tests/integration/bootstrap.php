@@ -24,6 +24,13 @@ if ( is_readable( $wp_tests_dir . '/includes/functions.php' ) && is_readable( $w
 				}
 				require_once $acf_file;
 			}
+			if ( '1' === getenv( 'NEXUSCONTENT_TEST_SCF' ) ) {
+				$scf_file = WP_PLUGIN_DIR . '/secure-custom-fields/secure-custom-fields.php';
+				if ( ! is_readable( $scf_file ) ) {
+					throw new RuntimeException( 'SCF test plugin is unavailable.' );
+				}
+				require_once $scf_file;
+			}
 			require dirname( __DIR__, 2 ) . '/nexuscontent.php';
 		}
 	);

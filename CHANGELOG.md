@@ -17,7 +17,13 @@ WordPress provider parity for navigation and settings, plus an additive extensio
 
 ### Changed
 
-- The WordPress provider is no longer documented or treated as returning `null` for navigation and settings; the base native REST path is implemented. (A companion `/settings` route and per-page SEO authoring are deferred to the next release.)
+- The WordPress provider is no longer documented or treated as returning `null` for navigation and settings; the base native REST path is implemented.
+
+### Companion plugin 0.1.8
+
+- Added public `GET /nexuscontent/v1/settings`, returning contract-v1 site settings. ACF Pro or Secure Custom Fields supplies an option-page authoring surface; ACF Free and plugin-free installs fall back to WordPress core site values. Under `auto` or `companion` strategy, the TypeScript provider prefers this route and falls back to native `wp/v2/settings` when it is unavailable.
+- Added editor-mode-aware page/post SEO authoring. Gutenberg uses a document sidebar; ACF modes use an ACF/SCF field group. Both write the same `nexus_seo_*` meta and emit additive optional `seo` on companion page responses, including title, description, canonical URL, robots, Open Graph, and Twitter card fields. Wire image `url` values become normalized `MediaAsset.src` at the provider boundary.
+- Added an SCF integration gate alongside the existing plugin-free and ACF Free gates. The release artifact is `dist/nexuscontent-0.1.8.zip`.
 
 ## [0.2.8] - 2026-09-04
 

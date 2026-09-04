@@ -71,11 +71,15 @@ export type {
   WordPressProviderFacingCapabilities,
   WordPressSchemaData,
   WordPressSchemaResponse,
+  WordPressSeoData,
+  WordPressSeoImage,
   WordPressSectionSchema,
   WordPressSectionSchemaField,
   WordPressSectionSyncConflict,
   WordPressSectionSyncResult,
-  WordPressSectionSyncStatus
+  WordPressSectionSyncStatus,
+  WordPressSettingsData,
+  WordPressSettingsResponse
 } from "./responses.ts";
 export {
   buildCompanionContractVersion,
@@ -104,6 +108,7 @@ export {
   companionPageResponseSchema,
   companionPagesResponseSchema,
   companionSchemaResponseSchema,
+  companionSettingsResponseSchema,
   diagnosticSchema,
   diagnosticSeveritySchema,
   jsonValueSchema,

@@ -46,6 +46,8 @@ final class ACF_Loader {
 			'flexible_content' => $this->field_type_available( 'flexible_content' ),
 		);
 
+		$this->register_site_settings();
+		$this->register_seo_fields();
 		$this->register_fixed_fields();
 
 		if ( $field_types['flexible_content'] ) {
@@ -110,6 +112,214 @@ final class ACF_Loader {
 				'instruction_placement' => 'label',
 				'description'           => __( 'Fixed fields provide a predictable Hero, Introduction, and Call to Action structure. Existing block or flexible content is not removed when modes change.', 'nexuscontent' ),
 				'show_in_rest'          => 1,
+			)
+		);
+	}
+
+	private function register_site_settings() {
+		// Option pages require ACF Pro or SCF (an ACF-Pro-compatible fork); ACF
+		// Free lacks acf_add_options_page. Both expose the same API so the
+		// registration is identical whichever is installed.
+		if ( ! function_exists( 'acf_add_options_page' ) ) {
+			return;
+		}
+
+		$option_page = acf_add_options_page(
+			array(
+				'page_title' => __( 'NexusContent settings', 'nexuscontent' ),
+				'menu_title' => __( 'Site settings', 'nexuscontent' ),
+				'menu_slug'  => 'nexus-site-settings',
+				'capability' => 'manage_options',
+				'position'   => 81,
+			)
+		);
+
+		$fields = array();
+
+		$text_fields = array(
+			'nexus_site_name'     => __( 'Site name', 'nexuscontent' ),
+			'nexus_site_tagline'  => __( 'Tagline', 'nexuscontent' ),
+			'nexus_site_url'      => __( 'Site URL', 'nexuscontent' ),
+			'nexus_site_email'    => __( 'Contact email', 'nexuscontent' ),
+			'nexus_site_phone'    => __( 'Phone', 'nexuscontent' ),
+			'nexus_site_language' => __( 'Language', 'nexuscontent' ),
+		);
+		$index       = 0;
+		foreach ( $text_fields as $name => $label ) {
+			$fields[] = array(
+				'key'   => 'field_nc_site_' . ( ++$index ) . '_' . sanitize_key( $name ),
+				'name'  => $name,
+				'label' => $label,
+				'type'  => 'text',
+			);
+		}
+
+		$fields[] = array(
+			'key'   => 'field_nc_site_address',
+			'name'  => 'nexus_site_address',
+			'label' => __( 'Address', 'nexuscontent' ),
+			'type'  => 'textarea',
+		);
+		$fields[] = array(
+			'key'           => 'field_nc_site_logo',
+			'name'          => 'nexus_site_logo',
+			'label'         => __( 'Logo', 'nexuscontent' ),
+			'type'          => 'image',
+			'return_format' => 'array',
+		);
+
+		$sub_fields = array();
+		foreach ( array( 'facebook', 'twitter', 'instagram', 'linkedin' ) as $network ) {
+			$sub_fields[] = array(
+				'key'   => 'field_nc_site_social_' . $network,
+				'name'  => $network,
+				'label' => ucfirst( $network ),
+				'type'  => 'url',
+			);
+		}
+		$fields[] = array(
+			'key'        => 'field_nc_site_social',
+			'name'       => 'nexus_site_social',
+			'label'      => __( 'Social links', 'nexuscontent' ),
+			'type'       => 'group',
+			'layout'     => 'block',
+			'sub_fields' => $sub_fields,
+		);
+
+		acf_add_local_field_group(
+			array(
+				'key'          => Site_Settings::OPTION_GROUP_KEY,
+				'title'        => __( 'NexusContent site settings', 'nexuscontent' ),
+				'fields'       => $fields,
+				'location'     => array(
+					array(
+						array(
+							'param'    => 'options_page',
+							'operator' => '==',
+							'value'    => 'nexus-site-settings',
+						),
+					),
+				),
+				'show_in_rest' => 1,
+			)
+		);
+	}
+
+	private function register_seo_fields() {
+		acf_add_local_field_group(
+			array(
+				'key'          => 'group_nc_seo',
+				'title'        => __( 'NexusContent SEO', 'nexuscontent' ),
+				'fields'       => array(
+					array(
+						'key'   => 'field_nc_seo_title',
+						'name'  => 'nexus_seo_title',
+						'label' => __( 'SEO title', 'nexuscontent' ),
+						'type'  => 'text',
+					),
+					array(
+						'key'   => 'field_nc_seo_description',
+						'name'  => 'nexus_seo_description',
+						'label' => __( 'Meta description', 'nexuscontent' ),
+						'type'  => 'textarea',
+					),
+					array(
+						'key'   => 'field_nc_seo_canonical',
+						'name'  => 'nexus_seo_canonical',
+						'label' => __( 'Canonical URL', 'nexuscontent' ),
+						'type'  => 'url',
+					),
+					array(
+						'key'           => 'field_nc_seo_robots_index',
+						'name'          => 'nexus_seo_robots_index',
+						'label'         => __( 'Index', 'nexuscontent' ),
+						'type'          => 'true_false',
+						'default_value' => 1,
+					),
+					array(
+						'key'           => 'field_nc_seo_robots_follow',
+						'name'          => 'nexus_seo_robots_follow',
+						'label'         => __( 'Follow', 'nexuscontent' ),
+						'type'          => 'true_false',
+						'default_value' => 1,
+					),
+					array(
+						'key'   => 'field_nc_seo_robots_noarchive',
+						'name'  => 'nexus_seo_robots_noarchive',
+						'label' => __( 'Noarchive', 'nexuscontent' ),
+						'type'  => 'true_false',
+					),
+					array(
+						'key'   => 'field_nc_seo_robots_nosnippet',
+						'name'  => 'nexus_seo_robots_nosnippet',
+						'label' => __( 'Nosnippet', 'nexuscontent' ),
+						'type'  => 'true_false',
+					),
+					array(
+						'key'   => 'field_nc_seo_og_title',
+						'name'  => 'nexus_seo_og_title',
+						'label' => __( 'OpenGraph title', 'nexuscontent' ),
+						'type'  => 'text',
+					),
+					array(
+						'key'   => 'field_nc_seo_og_description',
+						'name'  => 'nexus_seo_og_description',
+						'label' => __( 'OpenGraph description', 'nexuscontent' ),
+						'type'  => 'textarea',
+					),
+					array(
+						'key'   => 'field_nc_seo_og_type',
+						'name'  => 'nexus_seo_og_type',
+						'label' => __( 'OpenGraph type', 'nexuscontent' ),
+						'type'  => 'text',
+					),
+					array(
+						'key'           => 'field_nc_seo_og_image',
+						'name'          => 'nexus_seo_og_image',
+						'label'         => __( 'OpenGraph image', 'nexuscontent' ),
+						'type'          => 'image',
+						'return_format' => 'array',
+					),
+					array(
+						'key'           => 'field_nc_seo_tw_card',
+						'name'          => 'nexus_seo_tw_card',
+						'label'         => __( 'Twitter card', 'nexuscontent' ),
+						'type'          => 'select',
+						'choices'       => array(
+							'summary'             => 'summary',
+							'summary_large_image' => 'summary_large_image',
+						),
+						'allow_null'    => 1,
+						'return_format' => 'value',
+					),
+					array(
+						'key'   => 'field_nc_seo_tw_title',
+						'name'  => 'nexus_seo_tw_title',
+						'label' => __( 'Twitter title', 'nexuscontent' ),
+						'type'  => 'text',
+					),
+					array(
+						'key'   => 'field_nc_seo_tw_description',
+						'name'  => 'nexus_seo_tw_description',
+						'label' => __( 'Twitter description', 'nexuscontent' ),
+						'type'  => 'textarea',
+					),
+					array(
+						'key'           => 'field_nc_seo_tw_image',
+						'name'          => 'nexus_seo_tw_image',
+						'label'         => __( 'Twitter image', 'nexuscontent' ),
+						'type'          => 'image',
+						'return_format' => 'array',
+					),
+					array(
+						'key'   => 'field_nc_seo_tw_site',
+						'name'  => 'nexus_seo_tw_site',
+						'label' => __( 'Twitter site', 'nexuscontent' ),
+						'type'  => 'text',
+					),
+				),
+				'location'     => array_merge( $this->section_mode_location( 'acf_flexible' ), $this->section_mode_location( 'acf_fixed' ) ),
+				'show_in_rest' => 1,
 			)
 		);
 	}

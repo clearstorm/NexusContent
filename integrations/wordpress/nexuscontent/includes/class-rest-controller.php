@@ -105,6 +105,15 @@ final class REST_Controller extends WP_REST_Controller {
 		);
 		register_rest_route(
 			$this->namespace,
+			'/settings',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_settings' ),
+				'permission_callback' => array( $this, 'public_permissions_check' ),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
 			'/project-contract',
 			array(
 				'methods'             => 'POST',
@@ -281,6 +290,28 @@ final class REST_Controller extends WP_REST_Controller {
 	/** @return WP_REST_Response|WP_Error */
 	public function get_capabilities() {
 		return $this->respond( $this->capabilities->get(), new Diagnostics(), 'capabilities' );
+	}
+
+	/**
+	 * Return normalized site-wide settings.
+	 *
+	 * The response carries the same data map a consumer's `settings` model
+	 * expects. Values prefer ACF/SCF option-page entries when available and
+	 * fall back to WordPress core settings otherwise.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_settings() {
+		$data = ( new Site_Settings() )->read();
+
+		/**
+		 * Filters the normalized settings envelope before contract validation.
+		 *
+		 * @param array<string, mixed> $data Settings data.
+		 */
+		$filtered = apply_filters( 'nexuscontent_settings_data', $data );
+
+		return $this->respond( is_array( $filtered ) ? $filtered : $data, new Diagnostics(), 'settings' );
 	}
 
 	/**

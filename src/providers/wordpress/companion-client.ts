@@ -8,7 +8,8 @@ import {
 import {
   companionCapabilitiesResponseSchema,
   companionPageResponseSchema,
-  companionPagesResponseSchema
+  companionPagesResponseSchema,
+  companionSettingsResponseSchema
 } from "./companion-schemas.ts";
 import { COMPANION_CONTRACT_VERSION, COMPANION_WIRE_NAMESPACE } from "./config.ts";
 import type { WordPressNormalizeContext } from "./normalize.ts";
@@ -127,6 +128,32 @@ export class WordPressCompanionClient {
       );
     }
     return normalizeCompanionPageItem(result.data.data);
+  }
+
+  async getSettings(
+    context: WordPressNormalizeContext
+  ): Promise<Record<string, unknown> | null> {
+    let response;
+    try {
+      response = await this.client.request(
+        "settings",
+        {},
+        context,
+        { skipStatus: true }
+      );
+    } catch (error: unknown) {
+      if (isCompanionNotFound(error)) return null;
+      throw error;
+    }
+    const result = companionSettingsResponseSchema.safeParse(response.data);
+    if (!result.success) {
+      throw this.error(
+        "Companion returned an invalid settings response.",
+        context,
+        "Settings response did not match the expected contract."
+      );
+    }
+    return result.data.data;
   }
 
   async getSchema(

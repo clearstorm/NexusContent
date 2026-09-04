@@ -28,6 +28,42 @@ export interface WordPressPageSection {
   readonly data: Record<string, JsonValue>;
 }
 
+export interface WordPressSeoImage {
+  readonly url: string;
+  readonly alt?: string;
+  readonly width?: number;
+  readonly height?: number;
+}
+
+export interface WordPressSeoData {
+  readonly title?: string;
+  readonly description?: string;
+  readonly canonicalUrl?: string;
+  readonly robots?: {
+    readonly index?: boolean;
+    readonly follow?: boolean;
+    readonly noarchive?: boolean;
+    readonly nosnippet?: boolean;
+  };
+  readonly openGraph?: {
+    readonly title?: string;
+    readonly description?: string;
+    readonly type?: string;
+    readonly siteName?: string;
+    readonly url?: string;
+    readonly locale?: string;
+    readonly image?: WordPressSeoImage;
+  };
+  readonly twitter?: {
+    readonly card?: "summary" | "summary_large_image";
+    readonly title?: string;
+    readonly description?: string;
+    readonly url?: string;
+    readonly site?: string;
+    readonly image?: WordPressSeoImage;
+  };
+}
+
 export interface WordPressPageData {
   readonly id: string;
   readonly key: string;
@@ -37,6 +73,7 @@ export interface WordPressPageData {
   readonly excerpt?: string;
   readonly featuredImage?: MediaAsset;
   readonly modifiedAt?: string;
+  readonly seo?: WordPressSeoData;
   readonly sections: ReadonlyArray<WordPressPageSection>;
   readonly rawFields: Record<string, JsonValue>;
 }
@@ -56,6 +93,9 @@ export interface WordPressPagesData {
 }
 
 export type WordPressPagesResponse = WordPressCompanionEnvelope<WordPressPagesData>;
+
+export type WordPressSettingsData = Record<string, JsonValue>;
+export type WordPressSettingsResponse = WordPressCompanionEnvelope<WordPressSettingsData>;
 
 export interface WordPressSectionSchemaField {
   readonly name: string;

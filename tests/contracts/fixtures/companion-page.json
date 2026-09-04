@@ -25,6 +25,28 @@
       }
     },
     "modifiedAt": "2026-08-18T10:00:00Z",
+    "seo": {
+      "title": "Home",
+      "description": "The homepage",
+      "canonicalUrl": "https://example.com/",
+      "robots": { "index": true, "follow": true, "noarchive": true },
+      "openGraph": {
+        "title": "Home",
+        "description": "The homepage",
+        "type": "website",
+        "siteName": "Example",
+        "url": "https://example.com/",
+        "locale": "en_US",
+        "image": { "url": "https://example.com/og.jpg", "alt": "OG", "width": 1200, "height": 630 }
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "title": "Home",
+        "description": "The homepage",
+        "site": "@example",
+        "image": { "url": "https://example.com/tw.jpg", "alt": "Twitter" }
+      }
+    },
     "sections": [
       {
         "id": "hero-main",

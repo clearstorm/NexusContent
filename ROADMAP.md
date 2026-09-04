@@ -290,6 +290,18 @@ This was a pre-release contract repair because the earlier committed definitions
 
 - `npm run typecheck`, `npm test`, `npm run build`, `npm run validate:project-state` (103 feature IDs), `npm run check:sections`, the `astro-basic`, `astro-wordpress`, and `node-basic` examples all pass; the astro-wordpress `home` page validates via sections expansion against the live companion.
 
+## Companion plugin 0.1.8 - Site Settings and SEO Authoring
+
+**State:** Released on 2026-09-04 (root package remains `0.2.9`; tag `v0.1.8`).
+
+**Goal:** Complete WordPress settings and normalized SEO authoring without adding provider-specific behavior to Core.
+
+**Delivered:**
+
+- Public contract-v1 `/settings` with ACF Pro/SCF option-page values and WordPress core fallback; `auto`/`companion` provider strategies prefer it and fall back to native `wp/v2/settings` when absent.
+- Gutenberg sidebar and ACF-mode field-group SEO authoring using shared `nexus_seo_*` meta, emitted as optional page `seo` and normalized by the provider.
+- Plugin-free, ACF Free, and SCF WordPress integration gates; packaged `dist/nexuscontent-0.1.8.zip`.
+
 ## 0.2.7 - WordPress Companion Webhooks
 
 **State:** Released on 2026-08-31 (root package `0.2.7`, plugin `0.1.2`; tag `v0.2.7`).

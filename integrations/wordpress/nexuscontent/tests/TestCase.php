@@ -8,6 +8,7 @@ use NexusContent\Companion\Editor_Mode;
 use NexusContent\Companion\Media_Normalizer;
 use NexusContent\Companion\Normalizer;
 use NexusContent\Companion\Section_Registry;
+use NexusContent\Companion\Seo_Fields;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use WP_Post;
 
@@ -18,7 +19,7 @@ abstract class TestCase extends PHPUnitTestCase {
 	}
 
 	protected function normalizer(): Normalizer {
-		return new Normalizer( new Editor_Mode( new Capabilities() ), new Section_Registry(), new Media_Normalizer() );
+		return new Normalizer( new Editor_Mode( new Capabilities() ), new Section_Registry(), new Media_Normalizer(), new Seo_Fields() );
 	}
 
 	/** @param array<string, mixed> $overrides */

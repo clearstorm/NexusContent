@@ -45,6 +45,20 @@ final class RestPagesIntegrationTest extends IntegrationTestCase {
 		self::assertSame( array( 'editorMode' => 'gutenberg', 'content' => '' ), $page['rawFields'] );
 	}
 
+	public function test_page_exposes_additive_authored_seo(): void {
+		$id = $this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_name' => 'seo-page' ) );
+		update_post_meta( $id, 'nexus_seo_title', 'Search title' );
+		update_post_meta( $id, 'nexus_seo_robots_index', false );
+		update_post_meta( $id, 'nexus_seo_robots_follow', true );
+		update_post_meta( $id, 'nexus_seo_tw_card', 'summary_large_image' );
+
+		$page = $this->envelope( $this->request( '/nexuscontent/v1/pages/' . $id ) )['data'];
+		self::assertSame( 'Search title', $page['seo']['title'] );
+		self::assertFalse( $page['seo']['robots']['index'] );
+		self::assertTrue( $page['seo']['robots']['follow'] );
+		self::assertSame( 'summary_large_image', $page['seo']['twitter']['card'] );
+	}
+
 	public function test_collection_paginates_and_emits_consistent_headers(): void {
 		foreach ( range( 1, 5 ) as $number ) {
 			$this->factory->post->create( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Page ' . $number ) );

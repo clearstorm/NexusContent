@@ -211,6 +211,16 @@ new WordPressProvider({
 });
 ```
 
+With `apiStrategy: "auto"` or `"companion"`, `getSettings()` prefers the
+companion plugin's public contract-v1 `/settings` route and falls back to native
+`wp/v2/settings` when that route is unavailable. Companion plugin `0.1.8`
+provides an ACF Pro/Secure Custom Fields option page for site settings; ACF Free
+and plugin-free installs use WordPress core values.
+
+The same plugin release adds page/post SEO authoring. Gutenberg uses a document
+sidebar and ACF modes use a field group; both emit optional normalized `seo` on
+page responses. The provider maps companion image `url` values to `MediaAsset.src`.
+
 ### WordPress Components and Synchronisation
 
 Section vocabulary lives in one monorepo canonical file,

@@ -26,10 +26,12 @@ final class Plugin {
 		$capabilities = new Capabilities( $registry );
 		$editor_mode  = new Editor_Mode( $capabilities );
 		$media        = new Media_Normalizer();
-		$normalizer   = new Normalizer( $editor_mode, $registry, $media );
+		$seo          = new Seo_Fields();
+		$normalizer   = new Normalizer( $editor_mode, $registry, $media, $seo );
 		$controller   = new REST_Controller( new Contract(), $normalizer, $registry, $capabilities );
 
 		$editor_mode->register();
+		$seo->register();
 		add_action( 'rest_api_init', array( $controller, 'register_routes' ) );
 
 		$admin_page = new Admin_Page( $capabilities, $registry );

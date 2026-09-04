@@ -41,12 +41,13 @@ final class AcfFeatureDoubleIntegrationTest extends IntegrationTestCase {
 		$loader = new ACF_Loader( new Section_Registry() );
 		$loader->initialize();
 		self::assertNotEmpty( $GLOBALS['nc_acf_groups'] );
-		self::assertSame( 'group_nc_fixed_page_sections', $GLOBALS['nc_acf_groups'][0]['key'] );
-		$names = array_column( $GLOBALS['nc_acf_groups'][0]['fields'], 'name' );
+		$fixed = array_values( array_filter( $GLOBALS['nc_acf_groups'], static fn( array $group ): bool => 'group_nc_fixed_page_sections' === $group['key'] ) );
+		self::assertCount( 1, $fixed );
+		$names = array_column( $fixed[0]['fields'], 'name' );
 		foreach ( array( 'hero_enabled', 'hero_heading', 'intro_enabled', 'intro_heading', 'cta_enabled', 'cta_heading' ) as $name ) {
 			self::assertContains( $name, $names );
 		}
-		self::assertSame( array( 'page', 'post' ), $this->location_post_types( $GLOBALS['nc_acf_groups'][0]['location'] ) );
+		self::assertSame( array( 'page', 'post' ), $this->location_post_types( $fixed[0]['location'] ) );
 	}
 
 	/**

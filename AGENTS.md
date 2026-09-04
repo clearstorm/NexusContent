@@ -1245,7 +1245,7 @@ Preserve these rules:
 
 - Released `0.2.0` standard REST retrieval remains plugin-neutral and must not require or call the companion plugin.
 - Plugin PHP, JavaScript, WordPress tooling, and packaging stay under the integration directory; do not move them into `src/core/`, `src/providers/`, or consumer examples.
-- Contract v1 responses use `{ contractVersion: 1, data, diagnostics? }` under `nexuscontent/v1` routes for pages, page by ID, page by slug, posts, post by ID, post by slug, schema, and capabilities.
+- Contract v1 responses use `{ contractVersion: 1, data, diagnostics? }` under `nexuscontent/v1` routes for pages, page by ID, page by slug, posts, post by ID, post by slug, schema, capabilities, and settings.
 - Canonical editor modes are exactly `gutenberg`, `acf_flexible`, and `acf_fixed`.
 - Canonical section names are exactly `hero`, `intro`, `rich_text`, `image_text`, `features`, `statistics`, `testimonials`, `gallery`, `cta`, `faq`, `logo_grid`, and `form_embed`. Do not restore `content/*` names or a thirteenth section.
 - ACF is optional. ACF Free supports fixed Hero, Introduction, and Call to Action fields; legally supplied ACF Pro may enable flexible layouts and opt-in ACF Blocks. Never download or distribute ACF Pro.
@@ -1433,6 +1433,8 @@ The `0.1.6` companion plugin release (root package version stays `0.2.8`, plugin
 
 The `0.1.7` companion plugin release (root package version stays `0.2.8`, plugin `0.1.7`) makes the ACF Flexible FAQ `answer` field a plain Text Area instead of a WYSIWYG editor, matching the Gutenberg FAQ block and Git-authored content, and the server-side fallback block renderer `esc_html`es the plain-text answer (instead of `wp_kses_post( wpautop(...) )`) so consumers no longer see stray `<p>`/`<div>` wrappers from previously rich-WYSIWYG answers. No wire-contract, schema, or TypeScript changes were required; the consumer's `<p>{answer}</p>` already renders plain escaped text. Each FAQ item authored as rich WYSIWYG HTML must be re-saved in the editor to clear any legacy HTML. The plugin artifact is `dist/nexuscontent-0.1.7.zip`.
 
+The `0.1.8` companion plugin release (root package version stays `0.2.9`, plugin `0.1.8`) adds public contract-v1 site settings and editor-mode-aware page/post SEO authoring. ACF Pro or Secure Custom Fields registers the site option page; ACF Free and plugin-free installs fall back to WordPress core site values. Gutenberg uses a document sidebar and ACF modes use a field group, both writing shared `nexus_seo_*` meta that the companion emits as optional `seo`; the TypeScript provider converts wire media `url` to normalized `src`. The provider prefers companion `/settings` under `auto`/`companion` and falls back to native `wp/v2/settings` when the route is absent. The plugin artifact is `dist/nexuscontent-0.1.8.zip`.
+
 The recommended next focus is the directional `0.3.0` Strapi provider, followed by the remaining `0.2.x` consolidation if any.
 
 ---
@@ -1488,7 +1490,7 @@ The released milestone includes:
 ### Companion Wire Contracts
 
 - Contract v1 envelopes shaped as `{ contractVersion: 1, data, diagnostics? }`.
-- TypeScript interfaces and Zod schemas for pages, page by ID, page by slug, posts, post by ID, post by slug, schema, and capabilities responses.
+- TypeScript interfaces and Zod schemas for pages, page by ID, page by slug, posts, post by ID, post by slug, schema, capabilities, and settings responses.
 - `COMPANION_CONTRACT_VERSION`, `COMPANION_WIRE_NAMESPACE`, `COMPANION_WIRE_ENDPOINTS` constants.
 - `buildCompanionContractVersion()` and `isValidCompanionContractVersion()` helpers.
 - Reserved `nc-` and `nexus-` companion prefixes.

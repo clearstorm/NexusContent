@@ -21,11 +21,13 @@ final class Normalizer {
 	private Editor_Mode $editor_mode;
 	private Section_Registry $registry;
 	private Media_Normalizer $media;
+	private Seo_Fields $seo;
 
-	public function __construct( Editor_Mode $editor_mode, Section_Registry $registry, Media_Normalizer $media ) {
+	public function __construct( Editor_Mode $editor_mode, Section_Registry $registry, Media_Normalizer $media, Seo_Fields $seo ) {
 		$this->editor_mode = $editor_mode;
 		$this->registry    = $registry;
 		$this->media       = $media;
+		$this->seo         = $seo;
 	}
 
 	/** @return array<string, mixed> */
@@ -41,8 +43,8 @@ final class Normalizer {
 			default                   => $this->block_sections( $post, $diagnostics ),
 		};
 
-		$modified       = get_post_modified_time( DATE_ATOM, true, $post );
-		$page           = array(
+		$modified = get_post_modified_time( DATE_ATOM, true, $post );
+		$page     = array(
 			'id'         => (string) $post->ID,
 			'key'        => '' !== $post->post_name ? $post->post_name : (string) $post->ID,
 			'slug'       => $post->post_name,
@@ -61,6 +63,14 @@ final class Normalizer {
 				'content'    => wp_kses_post( apply_filters( 'the_content', $post->post_content ) ),
 			),
 		);
+
+		// Editor-authored SEO is exposed additively. An empty object is omitted so
+		// the wire stays compact when no SEO has been authored for a page.
+		$seo = $this->seo->read( $post->ID );
+		if ( $seo ) {
+			$page['seo'] = $seo;
+		}
+
 		$featured_image = $this->media->normalize( get_post_thumbnail_id( $post ), $diagnostics, 'featuredImage' );
 		if ( $featured_image ) {
 			$page['featuredImage'] = $featured_image;

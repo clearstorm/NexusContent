@@ -496,6 +496,26 @@ export class WordPressProvider implements ContentProvider {
     _options: ProviderRetrievalOptions = {}
   ): Promise<SettingsContent<TData> | null> {
     const context = this.context("getSettings", key);
+
+    // A companion install can surface richer site settings (for example ACF/SCF
+    // option-page values). Prefer it under companion strategies and fall back
+    // to native /wp/v2/settings when no companion is available or when the
+    // companion lacks a settings route.
+    if (this.apiStrategy === "companion" || this.apiStrategy === "auto") {
+      const available = await this.companion?.isAvailable() ?? false;
+      if (available && this.companion) {
+        const companionData = await this.companion.getSettings(context);
+        if (companionData !== null) {
+          return {
+            id: `wp-settings-${key}`,
+            key,
+            data: companionData as TData,
+            meta: { source: "wordpress", sourceId: `settings/${key}` }
+          };
+        }
+      }
+    }
+
     const response = await this.client.request("settings", {}, context, {
       skipStatus: true
     });

@@ -1,4 +1,12 @@
-import type { CollectionItem, ContentSection, MediaAsset, PageContent } from "../../core/types.ts";
+import type {
+  CollectionItem,
+  ContentSection,
+  MediaAsset,
+  PageContent,
+  SeoData,
+  SeoOpenGraph,
+  SeoTwitter
+} from "../../core/types.ts";
 
 interface CompanionPageInput {
   id: string;
@@ -17,6 +25,29 @@ interface CompanionPageInput {
     height?: number;
   };
   modifiedAt?: string;
+  seo?: {
+    title?: string;
+    description?: string;
+    canonicalUrl?: string;
+    robots?: { index?: boolean; follow?: boolean; noarchive?: boolean; nosnippet?: boolean };
+    openGraph?: {
+      title?: string;
+      description?: string;
+      type?: string;
+      siteName?: string;
+      url?: string;
+      locale?: string;
+      image?: { url: string; alt?: string; width?: number; height?: number };
+    };
+    twitter?: {
+      card?: "summary" | "summary_large_image";
+      title?: string;
+      description?: string;
+      url?: string;
+      site?: string;
+      image?: { url: string; alt?: string; width?: number; height?: number };
+    };
+  };
   sections: Array<{
     id: string;
     type: string;
@@ -59,6 +90,7 @@ export function normalizeCompanionPage(
     excerpt: page.excerpt,
     featuredImage: convertFeaturedImage(page.featuredImage),
     modifiedAt: page.modifiedAt,
+    seo: convertSeo(page.seo),
     sections: page.sections.map(normalizeSection),
     data: page.rawFields,
     meta: { source: "wordpress", sourceId: page.id }
@@ -69,6 +101,7 @@ export function normalizeCompanionPageItem(
   page: CompanionPageInput
 ): CollectionItem {
   const featuredImage = convertFeaturedImage(page.featuredImage);
+  const seo = convertSeo(page.seo);
   return {
     id: page.id,
     key: page.key,
@@ -84,6 +117,7 @@ export function normalizeCompanionPageItem(
       ...page.rawFields,
       ...(page.excerpt !== undefined ? { excerpt: page.excerpt } : {}),
       ...(featuredImage !== undefined ? { featuredImage } : {}),
+      ...(seo !== undefined ? { seo } : {}),
       sections: page.sections.map(normalizeSection)
     },
     meta: { source: "wordpress", sourceId: page.id }
@@ -164,4 +198,66 @@ function isWireMedia(value: Record<string, unknown>): value is Record<string, un
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function convertSeo(wire: CompanionPageInput["seo"]): SeoData | undefined {
+  if (!wire) {
+    return undefined;
+  }
+  const seo: SeoData = {};
+  if (wire.title !== undefined) seo.title = wire.title;
+  if (wire.description !== undefined) seo.description = wire.description;
+  if (wire.canonicalUrl !== undefined) seo.canonicalUrl = wire.canonicalUrl;
+  if (wire.robots !== undefined) seo.robots = { ...wire.robots };
+
+  const og = convertSeoOpenGraph(wire.openGraph);
+  if (og) seo.openGraph = og;
+  const twitter = convertSeoTwitter(wire.twitter);
+  if (twitter) seo.twitter = twitter;
+
+  return seo;
+}
+
+function convertSeoOpenGraph(wire: NonNullable<CompanionPageInput["seo"]>["openGraph"]): SeoOpenGraph | undefined {
+  if (!wire) {
+    return undefined;
+  }
+  const og: SeoOpenGraph = {};
+  if (wire.title !== undefined) og.title = wire.title;
+  if (wire.description !== undefined) og.description = wire.description;
+  if (wire.type !== undefined) og.type = wire.type;
+  if (wire.siteName !== undefined) og.siteName = wire.siteName;
+  if (wire.url !== undefined) og.url = wire.url;
+  if (wire.locale !== undefined) og.locale = wire.locale;
+  const image = convertSeoImage(wire.image);
+  if (image) og.image = image;
+  return og;
+}
+
+function convertSeoTwitter(wire: NonNullable<CompanionPageInput["seo"]>["twitter"]): SeoTwitter | undefined {
+  if (!wire) {
+    return undefined;
+  }
+  const twitter: SeoTwitter = {};
+  if (wire.card !== undefined) twitter.card = wire.card;
+  if (wire.title !== undefined) twitter.title = wire.title;
+  if (wire.description !== undefined) twitter.description = wire.description;
+  if (wire.url !== undefined) twitter.url = wire.url;
+  if (wire.site !== undefined) twitter.site = wire.site;
+  const image = convertSeoImage(wire.image);
+  if (image) twitter.image = image;
+  return twitter;
+}
+
+function convertSeoImage(
+  wire: NonNullable<NonNullable<CompanionPageInput["seo"]>["openGraph"]>["image"]
+): MediaAsset | undefined {
+  if (!wire || typeof wire.url !== "string" || wire.url.length === 0) {
+    return undefined;
+  }
+  const asset: MediaAsset = { src: wire.url };
+  if (wire.alt !== undefined) asset.alt = wire.alt;
+  if (wire.width !== undefined) asset.width = wire.width;
+  if (wire.height !== undefined) asset.height = wire.height;
+  return asset;
 }

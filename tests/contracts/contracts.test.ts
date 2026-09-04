@@ -569,9 +569,10 @@ test("companion wire endpoints are reserved paths", () => {
     "posts/{id}",
     "posts/slug/{slug}",
     "schema",
-    "capabilities"
+    "capabilities",
+    "settings"
   ]);
-  assert.equal(COMPANION_WIRE_ENDPOINTS.length, 8);
+  assert.equal(COMPANION_WIRE_ENDPOINTS.length, 9);
 });
 
 test("companion wire namespace is defined", () => {
@@ -598,6 +599,29 @@ test("companion page response Zod schema validates valid fixture", () => {
   const fixture = readJsonFixture("companion-page.json");
   const result = companionPageResponseSchema.safeParse(fixture);
   assert.ok(result.success, `expected success, got: ${JSON.stringify(result.error?.issues)}`);
+});
+
+test("companion page wire seo is additive and optional", () => {
+  const fixture = readJsonFixture("companion-page.json") as {
+    data: { seo?: { robots?: { noarchive?: boolean }; openGraph?: { locale?: string } } };
+  };
+  assert.equal(fixture.data.seo?.robots?.noarchive, true);
+  assert.equal(fixture.data.seo?.openGraph?.locale, "en_US");
+  assert.equal(companionPageResponseSchema.safeParse(fixture).success, true);
+
+  const without = structuredClone(fixture);
+  delete (without as { data: Record<string, unknown> }).data.seo;
+  const result = companionPageResponseSchema.safeParse(without);
+  assert.ok(result.success, "seo must be optional on the wire");
+});
+
+test("companion page wire rejects malformed seo", () => {
+  const fixture = readJsonFixture("companion-page.json") as { data: Record<string, unknown> };
+  fixture.data.seo = { robots: { index: "yes" } };
+  assert.equal(companionPageResponseSchema.safeParse(fixture).success, false);
+
+  fixture.data.seo = { openGraph: { image: { alt: "Missing URL" } } };
+  assert.equal(companionPageResponseSchema.safeParse(fixture).success, false);
 });
 
 test("companion pages response Zod schema validates valid fixture", () => {
@@ -859,6 +883,7 @@ test("all new types and values are exported from the package root", async () => 
     "DEFAULT_WORDPRESS_MEDIA_RESOLUTION",
     "DEFAULT_WORDPRESS_ACF_ENABLED",
     "companionCapabilitiesResponseSchema",
+    "companionSettingsResponseSchema",
     "companionEnvelopeSchema"
   ];
   for (const name of expectedExports) {
