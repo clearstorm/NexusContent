@@ -35,6 +35,12 @@ Seamless provider switching for CMS-ordered sections (core `0.2.8`); singleton m
 - The ACF flexible-content button `url` field is now a plain `text` field instead of the ACF `url` type. ACF's `url` type validates for an absolute, protocol-qualified URL, so a root-relative value such as `/contact` was rejected in the editor. A `text` field stores the value verbatim, so both fully-qualified URLs (`https://localhost:4321/contact`) and root-relative paths (`/contact`) are accepted and preserved through to consumers. The change applies to the shared Buttons subcomponent used by the Hero, Image and Text, and Call to Action flexible layouts. No wire-contract, schema, or TypeScript changes were required; the server's `esc_url`-based rendering already preserves root-relative paths.
 - Plugin artifact is now `dist/nexuscontent-0.1.5.zip`.
 
+### Companion plugin 0.1.7
+
+- The ACF Flexible FAQ `answer` field is now a plain Text Area instead of a WYSIWYG editor, matching the Gutenberg FAQ block and Git-authored content. WYSIWYG output previously shipped HTML (`<p>`/`<div>` wrappers) that surfaced as stray tags in consumers, which render `answer` as escaped text via `<p>{answer}</p>`. The server-side fallback block renderer now `esc_html`es the answer instead of running it through `wpautop`, so plain-text answers stay plain.
+- Existing FAQ items authored with rich WYSIWYG HTML must be re-saved in the editor to clear any legacy HTML; new and re-saved items emit clean plain text.
+- Plugin artifact is now `dist/nexuscontent-0.1.7.zip`.
+
 ### Companion plugin 0.1.6
 
 - ACF flexible sections now reach consumers with canonical field names. The server normalizer reads the *formatted* ACF value (`get_field(..., $post->ID)` instead of the unformatted `get_field(..., $post->ID, false)`), so flexible rows are keyed by their field *names* (`heading`, `body`, ...) rather than their raw ACF field *keys* (`field_nc_flexible_hero_heading`, ...). Previously the prefixed keys leaked into the wire, leaving every declared component field undefined against the consumer schema and producing a `SchemaError` on retrieval.

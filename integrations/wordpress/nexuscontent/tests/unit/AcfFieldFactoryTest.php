@@ -81,4 +81,14 @@ final class AcfFieldFactoryTest extends TestCase {
 		self::assertSame( array( 'quote', 'author', 'avatar' ), array_column( $items['sub_fields'], 'name' ) );
 		self::assertSame( 'image', $items['sub_fields'][2]['type'] );
 	}
+
+	public function test_faq_items_use_a_text_area_answer(): void {
+		$limitations = array();
+		$layout      = ACF_Field_Factory::layout_for( 'faq', array( 'repeater' => true ), $limitations );
+		self::assertNotNull( $layout );
+
+		$items = array_values( array_filter( $layout['sub_fields'], static fn( array $field ): bool => 'items' === $field['name'] ) )[0];
+		self::assertSame( array( 'question', 'answer' ), array_column( $items['sub_fields'], 'name' ) );
+		self::assertSame( 'textarea', $items['sub_fields'][1]['type'] );
+	}
 }

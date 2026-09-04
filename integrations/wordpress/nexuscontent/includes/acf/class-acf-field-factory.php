@@ -468,7 +468,9 @@ final class ACF_Field_Factory {
 			),
 			'faq'         => array(
 				'question' => 'text',
-				'answer'   => 'wysiwyg',
+				// 'answer' is a plain text area (matching the Gutenberg block and Git
+				// content) so consumer templates render it as escaped text, not HTML.
+				'answer'   => 'textarea',
 			),
 			'logo'        => array(
 				'name'  => 'text',

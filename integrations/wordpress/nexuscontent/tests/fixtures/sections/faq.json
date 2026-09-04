@@ -3,7 +3,7 @@
 	"data": {
 		"heading": "Frequently asked questions",
 		"items": [
-			{ "question": "Is output canonical?", "answer": "<p>Yes.</p>" }
+			{ "question": "Is output canonical?", "answer": "Yes." }
 		]
 	},
 	"settings": { "variant": "accordion", "theme": "light" }

@@ -218,7 +218,7 @@ final class Block_Normalizer {
 
 			if ( 'faq' === $type ) {
 				$question = isset( $item['question'] ) ? esc_html( (string) $item['question'] ) : '';
-				$answer   = isset( $item['answer'] ) ? wp_kses_post( wpautop( (string) $item['answer'] ) ) : '';
+				$answer   = isset( $item['answer'] ) ? esc_html( (string) $item['answer'] ) : '';
 				$output  .= '<div class="nexuscontent-section__item"><dt>' . $question . '</dt><dd>' . $answer . '</dd></div>';
 				continue;
 			}
