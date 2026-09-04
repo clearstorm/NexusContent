@@ -74,6 +74,31 @@ const companionPosts = {
   }
 };
 
+const companionPages = {
+  home: {
+    id: "10",
+    key: "home",
+    slug: "home",
+    title: "Home - NexusContent",
+    sections: [
+      { id: "home-hero", type: "hero", data: { heading: "Content abstraction, done right." } },
+      { id: "home-intro", type: "intro", data: { heading: "One interface, every content source." } }
+    ],
+    rawFields: {}
+  },
+  services: {
+    id: "11",
+    key: "services",
+    slug: "services",
+    title: "Services - NexusContent",
+    sections: [
+      { id: "services-hero", type: "hero", data: { heading: "What we deliver" } },
+      { id: "services-faq", type: "faq", data: { heading: "Frequently asked questions" } }
+    ],
+    rawFields: {}
+  }
+};
+
 function collectionItems() {
   return Object.values(companionPosts).map(({ id, key, slug, title, sections, rawFields }) => ({
     id,
@@ -116,6 +141,17 @@ test("WordPress Astro examples build against a local companion API", async (t) =
     }
     if (path === "/wp-json/nexuscontent/v1/posts") {
       response.end(JSON.stringify(pageEnvelope({ items: collectionItems(), pagination: { total: 2, totalPages: 1, page: 1, perPage: 20 } })));
+      return;
+    }
+    const pageSlugMatch = path.match(/^\/wp-json\/nexuscontent\/v1\/pages\/slug\/(.+)$/);
+    if (pageSlugMatch) {
+      const page = companionPages[decodeURIComponent(pageSlugMatch[1])];
+      if (page) {
+        response.end(JSON.stringify(pageEnvelope(page)));
+        return;
+      }
+      response.writeHead(404);
+      response.end();
       return;
     }
     const tokenMatch = path.match(/^\/nexuscontent\/v1\/preview\/([0-9a-f]{64})\/(\d+)$/);
