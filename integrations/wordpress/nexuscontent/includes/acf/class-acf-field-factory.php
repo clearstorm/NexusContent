@@ -82,21 +82,19 @@ final class ACF_Field_Factory {
 	 * @return array<string, array<string, mixed>>
 	 */
 	private static function definition( $type ) {
-		$section_id      = array(
+		$section_id = array(
 			'type'         => 'text',
 			'label'        => __( 'Section ID', 'nexuscontent' ),
 			'instructions' => __( 'Optional stable identifier used in normalized output.', 'nexuscontent' ),
-			'wrapper'      => array( 'width' => '33' ),
+			'wrapper'      => array( 'width' => '50' ),
 		);
-		$variant         = array(
+		$variant    = array(
 			'type'         => 'text',
 			'label'        => __( 'Variant', 'nexuscontent' ),
 			'instructions' => __( 'Optional variant used in normalized output.', 'nexuscontent' ),
-			'wrapper'      => array( 'width' => '33' ),
+			'wrapper'      => array( 'width' => '50' ),
 		);
-		$section_id_half = array_merge( $section_id, array( 'wrapper' => array( 'width' => '50' ) ) );
-		$variant_half    = array_merge( $variant, array( 'wrapper' => array( 'width' => '50' ) ) );
-		$map             = array(
+		$map        = array(
 			'hero'         => array(
 				'section_id' => $section_id,
 				'variant'    => $variant,
@@ -160,8 +158,8 @@ final class ACF_Field_Factory {
 				),
 			),
 			'rich_text'    => array(
-				'section_id' => $section_id_half,
-				'variant'    => $variant_half,
+				'section_id' => $section_id,
+				'variant'    => $variant,
 				'heading'    => array(
 					'type'  => 'text',
 					'label' => __( 'Heading', 'nexuscontent' ),
@@ -293,8 +291,8 @@ final class ACF_Field_Factory {
 				),
 			),
 			'cta'          => array(
-				'section_id'       => $section_id_half,
-				'variant'          => $variant_half,
+				'section_id'       => $section_id,
+				'variant'          => $variant,
 				'heading'          => array(
 					'type'  => 'text',
 					'label' => __( 'Heading', 'nexuscontent' ),
@@ -354,8 +352,8 @@ final class ACF_Field_Factory {
 				),
 			),
 			'form_embed'   => array(
-				'section_id' => $section_id_half,
-				'variant'    => $variant_half,
+				'section_id' => $section_id,
+				'variant'    => $variant,
 				'heading'    => array(
 					'type'  => 'text',
 					'label' => __( 'Heading', 'nexuscontent' ),

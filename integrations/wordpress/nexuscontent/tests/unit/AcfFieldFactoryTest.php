@@ -124,8 +124,8 @@ final class AcfFieldFactoryTest extends TestCase {
 		$limitations = array();
 		$layout  = ACF_Field_Factory::layout_for( 'hero', array( 'repeater' => true ), $limitations );
 		$by_name = array_column( $layout['sub_fields'], null, 'name' );
-		self::assertSame( '33', $by_name['section_id']['wrapper']['width'] );
-		self::assertSame( '33', $by_name['variant']['wrapper']['width'] );
+		self::assertSame( '50', $by_name['section_id']['wrapper']['width'] );
+		self::assertSame( '50', $by_name['variant']['wrapper']['width'] );
 		self::assertStringContainsString( 'variant', $by_name['variant']['instructions'] );
 		self::assertSame( '33', $by_name['eyebrow']['wrapper']['width'] );
 		self::assertSame( '67', $by_name['heading']['wrapper']['width'] );
