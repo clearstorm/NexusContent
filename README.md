@@ -486,8 +486,10 @@ escapes `<`, `>`, `&`, U+2028, and U+2029 so authored strings cannot break out o
 a `<script type="application/ld+json">` tag. Rendering remains consumer-owned:
 the Astro examples keep their own `NexusSeo` component. For content-driven site
 identity (`siteName`, `defaultImage`) authored in a settings model, use the
-service method `nexus.resolvePageSeo(input, options?)`; only the canonical
-base URL stays per-project (see below).
+service method `nexus.resolvePageSeo(input, options?)`. Canonical URLs are joined
+by Core's `makeCanonicalUrl(baseUrl, pathname)`; the base URL itself stays
+deployment-owned per project (loaded from `PUBLIC_SITE_URL` in the examples) —
+Core never infers deployment URLs.
 
 ## Key Concepts
 

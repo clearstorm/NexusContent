@@ -63,6 +63,10 @@ test("each Astro example owns and integrates its SEO component", async () => {
     assert.match(component, /set:html=\{serializeJsonLd\(value\)\}/);
     assert.match(layout, /<NexusSeo seo=\{seo\} \/>/);
 
+    const seoHelper = await readFile(`${base}/app/seo.ts`, "utf8");
+    assert.match(seoHelper, /import \{ makeCanonicalUrl \} from "@nexuscontent\/core"/);
+    assert.doesNotMatch(seoHelper, /new URL\(/);
+
     for (const route of routeFiles[example]) {
       const source = await readFile(`${base}/pages/${route}`, "utf8");
       assert.match(source, /import \{ canonicalUrl \} from "[^"]*app\/seo"/);

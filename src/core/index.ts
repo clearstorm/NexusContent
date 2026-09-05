@@ -47,7 +47,11 @@ export type {
   TranslationState
 } from "./types.ts";
 
-export { resolveSeo, serializeJsonLd } from "./seo.ts";
+export {
+  makeCanonicalUrl,
+  resolveSeo,
+  serializeJsonLd
+} from "./seo.ts";
 export type {
   ResolvePageSeoOptions,
   ResolveSeoInput,

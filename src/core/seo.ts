@@ -4,6 +4,7 @@ import type {
   SeoOpenGraph,
   SeoTwitter
 } from "./types.ts";
+import { ConfigError } from "./errors.ts";
 
 export interface SeoDefaults {
   siteTitle?: string;
@@ -133,6 +134,36 @@ function toMediaAsset(value: unknown): MediaAsset | undefined {
     return value as MediaAsset;
   }
   return undefined;
+}
+
+/**
+ * Join a canonical base URL and a pathname into an absolute canonical URL.
+ *
+ * Core never infers deployment URLs; the consumer supplies the explicit base.
+ * A pathname that is already absolute (or carries a query/fragment) is kept.
+ */
+export function makeCanonicalUrl(baseUrl: string, pathname: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(baseUrl);
+  } catch {
+    throw new ConfigError("A canonical base URL must be an absolute URL.", {
+      operation: "makeCanonicalUrl",
+      reason: "The supplied base URL could not be parsed as an absolute URL."
+    });
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new ConfigError(
+      "A canonical base URL must use the http or https protocol.",
+      {
+        operation: "makeCanonicalUrl",
+        reason: `The supplied protocol "${parsed.protocol}" is not supported.`
+      }
+    );
+  }
+
+  return new URL(pathname, parsed).href;
 }
 
 /**

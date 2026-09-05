@@ -1677,7 +1677,7 @@ During `0.1.x`, unless the user explicitly changed scope, agents did not impleme
 - Plugin marketplace
 - Complex caching infrastructure
 - Translation workflows, per-locale publishing, completeness reporting, and outdated tracking
-- Automatic canonical URL construction or deployment URL inference
+- Automatic canonical URL construction (Core holding or inferring the deployment base URL) or deployment URL inference
 - Sitemap, robots.txt, redirect, keyword-analysis, metadata-scraping, or analytics systems
 - Provider-specific SEO plugin logic in Core
 - Framework SEO rendering components in the public package

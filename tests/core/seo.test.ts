@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolveSeo, serializeJsonLd } from "../../src/index.ts";
+import {
+  ConfigError,
+  makeCanonicalUrl,
+  resolveSeo,
+  serializeJsonLd
+} from "../../src/index.ts";
 import { settingsIdentityToDefaults } from "../../src/core/seo.ts";
 import type { ResolveSeoInput } from "../../src/index.ts";
 
@@ -231,4 +236,32 @@ test("settingsIdentityToDefaults ignores malformed identity fields", () => {
     }),
     {}
   );
+});
+
+test("makeCanonicalUrl joins a path onto an absolute http(s) base", () => {
+  assert.equal(
+    makeCanonicalUrl("https://nexuscontent.dev", "/blog/"),
+    "https://nexuscontent.dev/blog/"
+  );
+  assert.equal(
+    makeCanonicalUrl("https://nexuscontent.dev/", "about"),
+    "https://nexuscontent.dev/about"
+  );
+  assert.equal(
+    makeCanonicalUrl("https://nexuscontent.dev", "/search?q=a&x=1#top"),
+    "https://nexuscontent.dev/search?q=a&x=1#top"
+  );
+});
+
+test("makeCanonicalUrl keeps an already absolute pathname", () => {
+  assert.equal(
+    makeCanonicalUrl("https://nexuscontent.dev", "https://other.dev/x"),
+    "https://other.dev/x"
+  );
+});
+
+test("makeCanonicalUrl rejects non-absolute or non-http(s) bases", () => {
+  assert.throws(() => makeCanonicalUrl("not a url", "/x"), ConfigError);
+  assert.throws(() => makeCanonicalUrl("example.com", "/x"), ConfigError);
+  assert.throws(() => makeCanonicalUrl("ftp://example.com", "/x"), ConfigError);
 });

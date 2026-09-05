@@ -81,7 +81,7 @@ The exit criteria are satisfied by `0.1.4`.
 
 **Explicit exclusions:**
 
-- Automatic canonical URL construction, sitemaps, robots.txt, redirects, metadata scraping, keyword analysis, and analytics.
+- Automatic canonical URL construction (Core holding or inferring the deployment base), sitemaps, robots.txt, redirects, metadata scraping, keyword analysis, and analytics.
 - Provider-specific SEO plugin behavior in Core.
 - Framework rendering components in the NexusContent public package.
 

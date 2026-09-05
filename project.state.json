@@ -146,7 +146,7 @@
     "The WordPress provider is read-only, retrieves published content, and requires a complete WordPress REST API v2 root.",
     "No generic synchronization workflow is implemented; the WordPress companion plugin provides post-scoped draft preview tokens, a consumer preview route, and opt-in signed outbound webhooks for page/post changes (0.2.7).",
     "Localisation covers locale configuration, fallback resolution, and Git variant directories; translation workflows are not implemented.",
-    "SEO canonical URLs are supplied by content or consumers; Core does not infer deployment URLs.",
+    "SEO canonical URLs are supplied by content or consumers; Core does not infer deployment URLs. The framework-neutral makeCanonicalUrl join primitive requires an explicit consumer base URL.",
     "The package remains private while the pre-1.0 architecture is proven.",
     "The WordPress companion contract uses version 1 envelopes with data and optional diagnostics, three editor modes, 12 canonical short section names, and nine nexuscontent/v1 route contracts (pages, page by ID, page by slug, posts, post by ID, post by slug, schema, capabilities, and settings).",
     "The companion plugin WordPress integration suite passes in CI; Phase 2 is implemented. Editor-mode sections and SEO authoring cover standard pages and posts. Content routes register for pages, posts, schema, capabilities, and site settings; the plugin artifact is nexuscontent-0.1.8.zip.",

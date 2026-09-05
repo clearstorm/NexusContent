@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Core now ships a small `serializeJsonLd(value)` helper that escapes `<`, `>`, `&`, U+2028, and U+2029 before a JSON-LD script is inlined, replacing the three identical example-owned copies in `astro-basic`, `astro-basic-localised`, and `astro-wordpress` (their `NexusSeo` components now import it from `@nexuscontent/core`).
+- Core now exports `makeCanonicalUrl(baseUrl, pathname)`, a framework-neutral join primitive (`new URL(pathname, baseUrl)`) that requires an explicit consumer base URL and rejects non-absolute/non-http(s) bases with a `ConfigError`. Core still never infers deployment URLs: each consumer keeps only the per-project base value — the Astro examples load it from `PUBLIC_SITE_URL` (falling back to `https://nexuscontent.dev` in CI) and expose a one-line `canonicalUrl(pathname)` alias, so the join is no longer redefined per project.
 - SEO now resolves through a single service method: `nexus.resolvePageSeo(input, options?)` reads the site settings model (default `"site"`, overridable via `options.settingsKey`), derives `resolveSeo` defaults from the documented `siteName` / `defaultImage` convention, and forwards `{ locale, fallback }` to `getSettings`. The three Astro reference consumers dropped their per-project `resolvePageSeo` boilerplate, leaving only the deployment-owned `canonicalUrl` base-URL helper in each `app/seo.ts` (pages call `await nexus.resolvePageSeo({...}, { locale })`).
 - The three Astro reference consumers source site identity from the `site` settings content model instead of a hardcoded per-example constant: each `site.json` authors `siteName` (was `siteTitle`) and a new `defaultImage` media field. Hardcoded "- NexusContent Example / - NexusContent WordPress Example" title suffixes are gone; page and blog titles now fall back to the authored site name.
 - `getPage` results now surface sections as a **named map**: `PageContent.sections` becomes `Record<string, unknown>` keyed by section type (`<Hero {...page.sections.hero} />`), alongside the authoritative ordered list at the new `PageContent.sectionsList`. Repeated section types are suffixed `_2`, `_3`, ... in order. The projection replaces the 0.2.8 sections-to-component-fields expansion: it applies to any page with sections regardless of declared `fields` field, so page models no longer enumerate sections (`strictSections` and `expandSectionsToComponents` are removed). Git pages author the map directly (`pages/<key>.json` → `sections: { "hero": {...}, ... }`, JSON key order = section order; an ordered `[{ type, data }]` array is also accepted), the WordPress page path emits the same ordered list (moved from `data.sections` to page-level), and collection items keep `data.sections` as the ordered `{ type, data }` list. `examples/astro-wordpress` was reworked to prove it: its singleton models are now field-less and its templates compose from `page.sections`, with `PostSections` accepting either the map or the list. This is a breaking change for consumers reading `page.sections` as an array or relying on component-field expansion.
@@ -288,11 +289,11 @@ SEO foundations release.
 ### Changed
 
 - Deprecated `SeoData.canonical` in favor of `canonicalUrl`; `resolveSeo` continues to read `canonical` as a migration fallback without returning it.
-- Clarified the SEO responsibility boundary: Core owns normalized data, validation, and resolution; providers map source fields; consumers own rendering and canonical URL construction.
+- Clarified the SEO responsibility boundary: Core owns normalized data, validation, and resolution; providers map source fields; consumers own rendering and the canonical base URL (from `0.2.9` Core also supplies the framework-neutral `makeCanonicalUrl` join primitive, which still requires the explicit consumer base).
 
 ### Excluded
 
-- Automatic canonical URL inference, sitemap and robots.txt generation, keyword analysis, redirects, metadata scraping, analytics, and provider-specific SEO plugin integrations remain out of scope.
+- Automatic canonical URL inference (Core holding or inferring the deployment base), sitemap and robots.txt generation, keyword analysis, redirects, metadata scraping, analytics, and provider-specific SEO plugin integrations remain out of scope.
 
 ## [0.1.3] - 2026-08-16
 
