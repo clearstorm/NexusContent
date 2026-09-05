@@ -174,8 +174,10 @@ export const components = {
  * WordPress emits the same consumer map.
  *
  * Collection models (`blog`) keep their items at `data.sections`, the ordered
- * `{ type, data }` list rendered through `PostSections`. Navigation and
- * settings models are declared with their flat field schemas.
+ * `{ type, data }` list rendered through PostSections; item models declare no
+ * `fields`, so their runtime shape is unvalidated and the templates type it
+ * with local interfaces. Navigation and settings models are declared with
+ * their flat field schemas (validated at retrieval).
  */
 export const models = {
   home: {
@@ -196,27 +198,7 @@ export const models = {
   },
   blog: {
     kind: "collection",
-    source: { provider: "wordpress", key: "posts" },
-    fields: {
-      content: { type: "richText" },
-      excerpt: { type: "string" },
-      publishedAt: { type: "datetime" },
-      modifiedAt: { type: "datetime" },
-      url: { type: "string" },
-      featuredImage: { type: "media" },
-      // Post bodies are CMS-ordered sections, rendered through PostSections.
-      // The shape matches the canonical wire shape providers emit
-      // (`{ type, data }`), so the same sections array serves both the Git
-      // content files and WordPress flexible/Gutenberg posts.
-      sections: {
-        type: "object",
-        list: true,
-        fields: {
-          type: { type: "string", required: true },
-          data: { type: "object" }
-        }
-      }
-    }
+    source: { provider: "wordpress", key: "posts" }
   },
   primary: {
     kind: "navigation",

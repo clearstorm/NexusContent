@@ -8,10 +8,18 @@ import { resolveImage } from "../../app/media";
 
 const posts = await nexus.getCollection("blog");
 
+// The blog model declares no `fields`, so item data is typed as unknown;
+// the canonical published-post shape is typed locally.
+interface PostIndexData {
+  publishedAt?: string;
+  excerpt?: string;
+}
+
 const cards = await Promise.all(
   posts.map(async (post) => {
+    const data = post.data as PostIndexData;
     const image = await resolveImage(nexus, post.data.featuredImage as never);
-    return { ...post, image };
+    return { ...post, data, image };
   })
 );
 
