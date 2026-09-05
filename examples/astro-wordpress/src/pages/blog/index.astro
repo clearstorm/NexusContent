@@ -4,7 +4,6 @@ import PostCard from "../../components/PostCard.astro";
 import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
-import { resolveImage } from "../../app/media";
 
 const posts = await nexus.getCollection("blog");
 
@@ -18,7 +17,9 @@ interface PostIndexData {
 const cards = await Promise.all(
   posts.map(async (post) => {
     const data = post.data as PostIndexData;
-    const image = await resolveImage(nexus, post.data.featuredImage as never);
+    const image = (await nexus.media.resolveFields(post.data.featuredImage)) as
+      | { src: string; alt?: string }
+      | undefined;
     return { ...post, data, image };
   })
 );

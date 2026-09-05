@@ -11,7 +11,7 @@ import type { Props as LogoGridProps } from "../components/LogoGrid.astro";
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import { resolveMediaFields } from "../app/media";
+
 
 export interface ContactData {
    hero?: HeroProps;
@@ -26,7 +26,7 @@ if (!page) {
   throw new Error(`Required content "contact" was not found.`);
 }
 
-const contact = (await resolveMediaFields(nexus, page.sections)) as ContactData;
+const contact = (await nexus.media.resolveFields(page.sections)) as ContactData;
 
 const seo = resolveSeo({
   title: page.title ?? "Contact",

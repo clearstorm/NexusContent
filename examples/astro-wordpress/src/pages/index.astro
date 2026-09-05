@@ -15,7 +15,6 @@ import type { Props as TestimonialsProps } from "../components/Testimonials.astr
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import { resolveMediaFields } from "../app/media";
 
 export interface HomeData {
   hero?: HeroProps;
@@ -35,7 +34,7 @@ if (!page) {
 // Projected sections arrive as a named map (`page.sections.<type>`), so the
 // template composes sections declaratively the same way for Git and
 // WordPress content.
-const home = (await resolveMediaFields(nexus, page.sections)) as HomeData;
+const home = (await nexus.media.resolveFields(page.sections)) as HomeData;
 
 const seo = resolveSeo({
   title: page.title ?? "Home",

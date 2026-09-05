@@ -11,7 +11,7 @@ import type { Props as HeroProps } from "../components/Hero.astro";
 import { nexus } from "../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import { resolveMediaFields } from "../app/media";
+
 
 export interface ServicesData {
   hero?: HeroProps;
@@ -26,7 +26,7 @@ if (!page) {
   throw new Error(`Required content "services" was not found.`);
 }
 
-const services = (await resolveMediaFields(nexus, page.sections)) as ServicesData;
+const services = (await nexus.media.resolveFields(page.sections)) as ServicesData;
 
 const seo = resolveSeo({
   title: page.title ?? "Services",

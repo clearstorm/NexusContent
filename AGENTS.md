@@ -1201,6 +1201,12 @@ Do not put Strapi media URL logic inside Astro components.
 
 Media CDN decisions should remain configurable.
 
+Consumers resolve whole content structures (section maps, collection item
+data) through Core's `nexus.media.resolveFields(value)`, which recursively
+resolves every object carrying a `src` string to a plain `{ src, alt }` and
+keeps the authored reference when the provider yields no asset. Provider
+specific value-level interceptors do not belong in Core.
+
 ---
 
 # 25. WordPress

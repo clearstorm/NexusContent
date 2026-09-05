@@ -10,7 +10,11 @@ import {
   defineLocalMediaProvider,
   defineRemoteMediaProvider
 } from "../../src/index.ts";
-import type { MediaProvider } from "../../src/index.ts";
+import type {
+  MediaAsset,
+  MediaProvider,
+  MediaReference
+} from "../../src/index.ts";
 
 test("local provider maps root-relative src to the public path", async () => {
   const provider = defineLocalMediaProvider({
@@ -276,6 +280,144 @@ test("rejects a declared default media provider that is not registered", () => {
     (error: unknown) => {
       assert.ok(error instanceof ConfigError);
       assert.match((error as ConfigError).message, /cdn/);
+      return true;
+    }
+  );
+});
+
+class TrackingMediaProvider implements MediaProvider {
+  readonly name: string;
+  private readonly resolved: (reference: MediaReference & { alt?: string }) => MediaAsset | null;
+  public calls: number;
+
+  constructor(
+    name: string,
+    resolved: (reference: MediaReference & { alt?: string }) => MediaAsset | null
+  ) {
+    this.name = name;
+    this.resolved = resolved;
+    this.calls = 0;
+  }
+
+  async resolve(reference: MediaReference) {
+    this.calls += 1;
+    return this.resolved(reference);
+  }
+}
+
+test("resolveFields recursively resolves every src-reference in section data", async () => {
+  const registry = new MediaProviderRegistry();
+  registry.register(
+    "remote",
+    new TrackingMediaProvider("remote", (ref) => ({
+      src: `https://cdn.test/${ref.src}`,
+      alt: ref.alt,
+      provider: "remote"
+    }))
+  );
+  const service = new ResolveMediaService(registry, "remote");
+
+  const resolved = await service.resolveFields({
+    hero: { image: { src: "hero.jpg", alt: "Hero" } },
+    gallery: {
+      images: [
+        { src: "one.jpg", alt: "One" },
+        { src: "two.jpg", alt: "Two" }
+      ]
+    },
+    features: {
+      items: [{ title: "A", thumbnail: { src: "t.jpg", alt: "T" } }]
+    },
+    heading: "Untouched"
+  });
+
+  assert.deepEqual(resolved, {
+    hero: { image: { src: "https://cdn.test/hero.jpg", alt: "Hero" } },
+    gallery: {
+      images: [
+        { src: "https://cdn.test/one.jpg", alt: "One" },
+        { src: "https://cdn.test/two.jpg", alt: "Two" }
+      ]
+    },
+    features: {
+      items: [{ title: "A", thumbnail: { src: "https://cdn.test/t.jpg", alt: "T" } }]
+    },
+    heading: "Untouched"
+  });
+});
+
+test("resolveFields keeps the authored src and alt when the provider yields no asset", async () => {
+  const registry = new MediaProviderRegistry();
+  registry.register("remote", new TrackingMediaProvider("remote", () => null));
+  const service = new ResolveMediaService(registry, "remote");
+
+  const resolved = await service.resolveFields({
+    cta: { background_image: { src: "bg.jpg", alt: "Backdrop" } }
+  } as Record<string, unknown>);
+
+  assert.deepEqual(resolved, {
+    cta: { background_image: { src: "bg.jpg", alt: "Backdrop" } }
+  });
+});
+
+test("resolveFields falls back to the authored alt when the asset has none", async () => {
+  const registry = new MediaProviderRegistry();
+  registry.register(
+    "remote",
+    new TrackingMediaProvider("remote", (ref) => ({
+      src: `https://cdn.test/${ref.src}`
+    }))
+  );
+  const service = new ResolveMediaService(registry, "remote");
+
+  const resolved = await service.resolveFields({ image: { src: "x.jpg", alt: "Kept" } });
+
+  assert.deepEqual(resolved, { image: { src: "https://cdn.test/x.jpg", alt: "Kept" } });
+});
+
+test("resolveFields passes non-media data, arrays, and nulls through unchanged", async () => {
+  const registry = new MediaProviderRegistry();
+  registry.register("remote", new TrackingMediaProvider("remote", () => null));
+  const service = new ResolveMediaService(registry, "remote");
+
+  const value = {
+    heading: "Hi",
+    points: ["a", "b"],
+    id: "a-b-c",
+    nested: { count: 2, flag: true },
+    empty: null,
+    list: null
+  };
+  assert.deepEqual(await service.resolveFields(value), value);
+  assert.equal(await service.resolveFields(undefined), undefined);
+  assert.equal(await service.resolveFields(null), null);
+  assert.equal(await service.resolveFields("plain"), "plain");
+  assert.deepEqual(await service.resolveFields(["x", 2, false]), ["x", 2, false]);
+});
+
+test("resolveFields honors the field-level defaultProvider override", async () => {
+  const registry = new MediaProviderRegistry();
+  registry.register("a", new TrackingMediaProvider("a", (ref) => ({ src: `a/${ref.src}` })));
+  registry.register("b", new TrackingMediaProvider("b", (ref) => ({ src: `b/${ref.src}` })));
+  const service = new ResolveMediaService(registry, "a");
+
+  const resolved = await service.resolveFields(
+    { image: { src: "x.jpg" } },
+    { defaultProvider: "b" }
+  );
+  const image = resolved as { image: { src: string } };
+
+  assert.equal(image.image.src, "b/x.jpg");
+});
+
+test("resolveFields propagates provider resolution errors", async () => {
+  const service = new ResolveMediaService(new MediaProviderRegistry());
+
+  await assert.rejects(
+    () => service.resolveFields({ image: { src: "x.jpg" } }),
+    (error: unknown) => {
+      assert.ok(error instanceof ConfigError);
+      assert.match((error as ConfigError).message, /No media provider is configured/);
       return true;
     }
   );

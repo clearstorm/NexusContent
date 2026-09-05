@@ -227,6 +227,18 @@ nexus.registerMedia("wordpress", new WordPressMediaProvider({ baseUrl }));
 const asset = await nexus.media.resolve({ id: "9" }); // or { src: "..." }
 ```
 
+For whole content structures (page sections maps, collection item data),
+`nexus.media.resolveFields(value)` recursively resolves every object that
+carries a `src` string into a plain `{ src, alt }`, leaving everything else
+untouched — so pages resolve all section media before rendering:
+
+```ts
+const home = (await nexus.media.resolveFields(page.sections)) as HomeData;
+```
+
+When the provider yields no asset, the authored `{ src, alt }` reference is
+kept; id-only references are not generically detectable and pass through.
+
 ### WordPress Options
 
 ```ts

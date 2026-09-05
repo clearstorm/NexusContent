@@ -11,7 +11,6 @@ import {
 } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
 import { gutenbergStyleSheets } from "../app/gutenberg";
-import { resolveMediaFields } from "../app/media";
 import { nexus } from "../nexus";
 
 // Draft/scheduled preview route. The WordPress companion plugin mints a
@@ -89,7 +88,7 @@ if (apiBase && token && id) {
   error = "WORDPRESS_API_URL is required to load a preview.";
 }
 
-const data = (await resolveMediaFields(nexus, preview ?? {})) as {
+const data = (await nexus.media.resolveFields(preview ?? {})) as {
   sections?: { type?: string; _type?: string; data?: Record<string, unknown> }[];
   content?: string;
   excerpt?: string;

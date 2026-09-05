@@ -71,9 +71,10 @@ post produces.
 
 ## Media
 
-`src/app/media.ts` is the consumer-owned resolver. Section data may carry
-`{ src, alt }` references; `resolveImage` / `resolveMediaFields` resolve them
-through `nexus.media.resolve` before pages render. `media.default` is
+Media resolution is Core-provided. Section data may carry `{ src, alt }`
+references; `nexus.media.resolveFields(value)` (in `@nexuscontent/core`)
+recursively resolves every reference before pages render, so a component just
+receives a plain `{ src, alt }` to drop into an `<img>`. `media.default` is
 `"remote"`, so absolute http(s) URLs pass through validated — the committed Git
 content uses absolute image URLs and normalized WordPress media resolves the
 same way.

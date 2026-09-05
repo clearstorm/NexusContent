@@ -154,7 +154,7 @@
     "Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the ts-integration CI job runs a live integration test against a fresh Docker wp-env companion install and passes.",
     "Released 0.2.0 standard WordPress REST provider retrieval remains unchanged and does not call the companion plugin.",
     "The 0.2.2 core contract replaces the previous content/navigation/settings root configuration with a unified schema.models contract; each model declares its kind, provider source, and optional field schema.",
-    "Media is provider-neutral: local and remote media providers are declared in media.providers (Core auto-builds them), WordPress media is registered manually, and value-level media resolution stays with the consumer-facing nexus.media entry point.",
+    "Media is provider-neutral: local and remote media providers are declared in media.providers (Core auto-builds them), WordPress media is registered manually, and nexus.media.resolve is the reference-level entry point while nexus.media.resolveFields recursively resolves whole content structures (objects carrying a src string become { src, alt }).",
     "Named media providers are required at configuration time; a missing default or unknown media provider is rejected early.",
     "Model field validation produces SchemaError with model, issues, provider, content, locale, and operation context; relational checks also run for direct NexusContent construction.",
     "The companion wire contract and plugin keep featuredImage.url; the TypeScript boundary converts it to MediaAsset.src.",

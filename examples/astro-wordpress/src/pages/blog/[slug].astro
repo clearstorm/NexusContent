@@ -6,7 +6,6 @@ import { nexus } from "../../nexus";
 import { resolveSeo } from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
 import { gutenbergStyleSheets } from "../../app/gutenberg";
-import { resolveMediaFields } from "../../app/media";
 
 export async function getStaticPaths() {
   const posts = await nexus.getCollection("blog");
@@ -32,7 +31,7 @@ interface PostData {
   sections?: { type?: string; _type?: string; data?: Record<string, unknown> }[];
 }
 
-const data = (await resolveMediaFields(nexus, post.data)) as PostData;
+const data = (await nexus.media.resolveFields(post.data)) as PostData;
 
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
