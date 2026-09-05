@@ -13,6 +13,7 @@
     "sections:contract": "node --env-file-if-exists=.env ../../scripts/nexus-contract.mjs generate --schema src/schema/schema.ts --custom sections.custom.json"
   },
   "dependencies": {
+    "@astrojs/node": "^11.1.5",
     "@nexuscontent/core": "file:../.."
   },
   "devDependencies": {

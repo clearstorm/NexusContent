@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { createServer } from "node:http";
 import { readFile, rm } from "node:fs/promises";
 import { test } from "node:test";
@@ -195,7 +195,11 @@ test("WordPress Astro examples build against a local companion API", async (t) =
     server.listen(0, "127.0.0.1", resolve);
   });
 
+  let previewChild;
   t.after(async () => {
+    if (previewChild) {
+      previewChild.kill();
+    }
     await rm(`${singleRoot}dist`, { recursive: true, force: true });
     server.closeAllConnections();
     await new Promise((resolve, reject) => {
@@ -217,13 +221,13 @@ test("WordPress Astro examples build against a local companion API", async (t) =
   });
   assert.equal(result.stderr.includes("ERROR"), false, result.stderr);
 
-  const singleHome = await readFile(`${singleRoot}dist/index.html`, "utf8");
-  const singleAbout = await readFile(`${singleRoot}dist/about/index.html`, "utf8");
-  const singleServices = await readFile(`${singleRoot}dist/services/index.html`, "utf8");
-  const singleContact = await readFile(`${singleRoot}dist/contact/index.html`, "utf8");
-  const singleBlog = await readFile(`${singleRoot}dist/blog/index.html`, "utf8");
-  const singlePost = await readFile(`${singleRoot}dist/blog/first-post/index.html`, "utf8");
-  const secondPost = await readFile(`${singleRoot}dist/blog/second-post/index.html`, "utf8");
+  const singleHome = await readFile(`${singleRoot}dist/client/index.html`, "utf8");
+  const singleAbout = await readFile(`${singleRoot}dist/client/about/index.html`, "utf8");
+  const singleServices = await readFile(`${singleRoot}dist/client/services/index.html`, "utf8");
+  const singleContact = await readFile(`${singleRoot}dist/client/contact/index.html`, "utf8");
+  const singleBlog = await readFile(`${singleRoot}dist/client/blog/index.html`, "utf8");
+  const singlePost = await readFile(`${singleRoot}dist/client/blog/first-post/index.html`, "utf8");
+  const secondPost = await readFile(`${singleRoot}dist/client/blog/second-post/index.html`, "utf8");
   assert.match(singleHome, /Content abstraction, done right/);
   assert.match(singleHome, /One interface, every content source/);
   assert.match(singleHome, /property="og:image" content="https:\/\/nexuscontent\.dev\/social-default\.jpg"/);
@@ -251,16 +255,51 @@ test("WordPress Astro examples build against a local companion API", async (t) =
 
   // Gutenberg block styles are vendored at build time into dist/gutenberg/ and
   // linked from fallback post pages, keeping the static dist self-contained.
-  const gutenbergCss = await readFile(`${singleRoot}dist/gutenberg/wp-block-library.css`, "utf8");
-  const gutenbergThemeCss = await readFile(`${singleRoot}dist/gutenberg/wp-block-library-theme.css`, "utf8");
+  const gutenbergCss = await readFile(`${singleRoot}dist/client/gutenberg/wp-block-library.css`, "utf8");
+  const gutenbergThemeCss = await readFile(`${singleRoot}dist/client/gutenberg/wp-block-library-theme.css`, "utf8");
   assert.match(gutenbergCss, /wp-block-image img/);
   assert.match(gutenbergThemeCss, /wp-block-table/);
   assert.match(secondPost, /href="\/gutenberg\/wp-block-library\.css"/);
   assert.match(secondPost, /href="\/gutenberg\/wp-block-library-theme\.css"/);
 
-  // The consumer-owned preview route builds as a static page. It has no
-  // session or persisted state: it only ever renders content when given a
-  // valid `?token=...&id=...`, and otherwise shows a placeholder.
-  const previewPage = await readFile(`${singleRoot}dist/preview/index.html`, "utf8");
-  assert.match(previewPage, /Missing preview token or content id/);
+  // The consumer-owned preview route is on-demand (`prerender = false` under
+  // the Node adapter): it is not emitted as a static file — query parameters
+  // must be read per request. Boot the built server and exercise the flow
+  // against the local companion API: a valid token renders the draft, and an
+  // invalid token renders the expired message.
+  await assert.rejects(readFile(`${singleRoot}dist/client/preview/index.html`));
+
+  const validToken = "a".repeat(64);
+  const previewEntry = `${singleRoot}dist/server/entry.mjs`;
+  previewChild = spawn(process.execPath, [previewEntry], {
+    cwd: singleRoot,
+    env: { ...env, HOST: "127.0.0.1", PORT: "4531" },
+    stdio: "ignore"
+  });
+
+  const base = "http://127.0.0.1:4531";
+  let ready = false;
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    try {
+      const probe = await fetch(`${base}/preview?token=${validToken}&id=2`, { signal: AbortSignal.timeout(1000) });
+      if (probe.ok) {
+        ready = true;
+        break;
+      }
+    } catch {
+      // Not listening yet; retry.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  assert.equal(ready, true, "preview server did not start");
+
+  const draftHtml = await (await fetch(`${base}/preview?token=${validToken}&id=2`)).text();
+  assert.match(draftHtml, /draft/);
+  assert.match(draftHtml, /First Post/);
+  assert.match(draftHtml, /First excerpt/);
+  assert.match(draftHtml, /Companion sections, same shape/);
+
+  const expiredHtml = await (await fetch(`${base}/preview?token=${"b".repeat(64)}&id=2`)).text();
+  assert.match(expiredHtml, /token present: yes/);
+  assert.match(expiredHtml, /This preview link has expired or is invalid/);
 });

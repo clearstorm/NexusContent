@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostSections from "../components/PostSections.astro";
 import { resolveSeo } from "@nexuscontent/core";
@@ -11,7 +13,9 @@ import { nexus } from "../nexus";
 // short-lived token bound to a single post ID; the Gutenberg "Open frontend
 // preview" button opens this route with `?token=...&id=...`. The token is the
 // auth — no session is required — and it expires within minutes, so it never
-// leaks into production builds or indexes.
+// leaks into production builds or indexes. The route is on-demand
+// (`prerender = false` under hybrid output): reading the query string requires
+// per-request rendering, which a static page cannot do.
 const token = Astro.url.searchParams.get("token") ?? "";
 const id = Astro.url.searchParams.get("id") ?? "";
 

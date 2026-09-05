@@ -144,10 +144,15 @@ is the auth and expires within minutes; the route fetches the tokenized
 companion endpoint server-side and renders the draft through the same section
 components as published content.
 
-The example is `output: "static"`, so this route only renders per request under
-`astro dev` (`npm run dev`). A static `astro build` prerenders it without query
-parameters. If the page shows a failure notice, open its collapsed "Preview
-diagnostics" block: it states whether a token and id reached the renderer and
-which API base was detected, so a misconfigured `WORDPRESS_API_URL` (which must
-end in `/wp-json/wp/v2`) is distinguishable from a missing or stripped query
-string.
+The preview route must read the token query string per request, so it is
+on-demand (`export const prerender = false`). The example uses the
+`@astrojs/node` standalone adapter: every other route remains a static build
+under `dist/client/`, while `dist/server/entry.mjs` serves the preview route
+(and, in `standalone` mode, the whole site) from `node dist/server/entry.mjs`.
+`astro dev` renders it per request too. A pure static host cannot serve draft
+preview because no static page can read a visitor's query string.
+
+If the page shows a failure notice, open its collapsed "Preview diagnostics"
+block: it states whether a token and id reached the renderer and which API base
+was detected, so a misconfigured `WORDPRESS_API_URL` (which must end in
+`/wp-json/wp/v2`) is distinguishable from a missing or stripped query string.
