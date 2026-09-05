@@ -45,7 +45,7 @@ let preview:
 let error: string | undefined = undefined;
 
 if (apiBase && token && id) {
-  const url = `${apiBase}/nexuscontent/v1/preview/${encodeURIComponent(token)}/${encodeURIComponent(id)}`;
+  const url = `${apiBase}/wp-json/nexuscontent/v1/preview/${encodeURIComponent(token)}/${encodeURIComponent(id)}`;
   try {
     const res = await fetch(url);
     if (res.ok) {

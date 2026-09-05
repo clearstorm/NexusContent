@@ -154,7 +154,7 @@ test("WordPress Astro examples build against a local companion API", async (t) =
       response.end();
       return;
     }
-    const tokenMatch = path.match(/^\/nexuscontent\/v1\/preview\/([0-9a-f]{64})\/(\d+)$/);
+    const tokenMatch = path.match(/^\/wp-json\/nexuscontent\/v1\/preview\/([0-9a-f]{64})\/(\d+)$/);
     if (tokenMatch) {
       // The preview token is short-lived and bound to a single post id. A
       // valid token serves the matching post's draft content; anything else is
@@ -171,7 +171,7 @@ test("WordPress Astro examples build against a local companion API", async (t) =
       response.end(JSON.stringify(pageEnvelope({ ...post, id, status: "draft" })));
       return;
     }
-    if (path === "/nexuscontent/v1/preview-token") {
+    if (path === "/wp-json/nexuscontent/v1/preview-token") {
       response.end(JSON.stringify(pageEnvelope({ token: "a".repeat(64), expiresAt: "2026-08-31T12:00:00Z" })));
       return;
     }
