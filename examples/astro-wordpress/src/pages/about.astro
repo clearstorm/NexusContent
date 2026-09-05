@@ -9,9 +9,8 @@ import type { Props as ImageTextProps } from "../components/ImageText.astro";
 import type { Props as RichTextProps } from "../components/RichText.astro";
 import type { Props as StatisticsProps } from "../components/Statistics.astro";
 import { nexus } from "../nexus";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import { resolveMediaFields } from "../app/media";
+import { canonicalUrl, resolvePageSeo } from "../app/seo";
+
 
 export interface AboutData {
   hero?: HeroProps;
@@ -26,12 +25,12 @@ if (!page) {
   throw new Error(`Required content "about" was not found.`);
 }
 
-const about = (await resolveMediaFields(nexus, page.data)) as AboutData;
+const about = (await nexus.media.resolveFields(page.sections)) as AboutData;
 
-const seo = resolveSeo({
+const seo = await resolvePageSeo(nexus, {
   title: page.title ?? "About",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/about/") }
-}, siteSeoDefaults);
+});
 ---
 
 <BaseLayout seo={seo}>

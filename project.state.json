@@ -72,7 +72,7 @@
       "core.item",
       "core.schema.fields",
       "core.schema.models",
-      "core.schema.sections-expansion",
+      "core.schema.sections-map",
       "content.media",
       "media.provider.local",
       "media.provider.remote",
@@ -154,7 +154,7 @@
     "Phase 3 provider discovery, calls, version negotiation, caching, and fallback are implemented with tests; the ts-integration CI job runs a live integration test against a fresh Docker wp-env companion install and passes.",
     "Released 0.2.0 standard WordPress REST provider retrieval remains unchanged and does not call the companion plugin.",
     "The 0.2.2 core contract replaces the previous content/navigation/settings root configuration with a unified schema.models contract; each model declares its kind, provider source, and optional field schema.",
-    "Media is provider-neutral: local and remote media providers are declared in media.providers (Core auto-builds them), WordPress media is registered manually, and value-level media resolution stays with the consumer-facing nexus.media entry point.",
+    "Media is provider-neutral: local and remote media providers are declared in media.providers (Core auto-builds them), WordPress media is registered manually, and nexus.media.resolve is the reference-level entry point while nexus.media.resolveFields recursively resolves whole content structures (objects carrying a src string become { src, alt }).",
     "Named media providers are required at configuration time; a missing default or unknown media provider is rejected early.",
     "Model field validation produces SchemaError with model, issues, provider, content, locale, and operation context; relational checks also run for direct NexusContent construction.",
     "The companion wire contract and plugin keep featuredImage.url; the TypeScript boundary converts it to MediaAsset.src.",
@@ -166,7 +166,8 @@
     "The companion plugin 0.1.5 makes the ACF flexible-content button url field a plain text field instead of the ACF url type, so both fully-qualified URLs (https://localhost:4321/contact) and root-relative paths (/contact) are accepted in the Hero, Image and Text, and Call to Action buttons subcomponent and preserved verbatim to consumers. No wire-contract, schema, or TypeScript changes were required; the plugin artifact is nexuscontent-0.1.5.zip.",
     "The companion plugin 0.1.6 fixes two ACF flexible-content wire problems that produced consumer SchemaErrors: the section normalizer reads the formatted ACF value so flexible rows are keyed by canonical field names (heading, body, ...) instead of raw ACF field keys (field_nc_*), and the Features section's points are flattened from the ACF repeater shape ([{ text }]) to the canonical flat points: string[] (already-flat lists stay unchanged). The plugin artifact is nexuscontent-0.1.6.zip.",
     "The companion plugin 0.1.7 makes the ACF Flexible FAQ answer field a plain Text Area instead of a WYSIWYG editor, matching the Gutenberg FAQ block and Git-authored content, and the server-side fallback block renderer esc_htmls the plain-text answer (instead of wpautop-as-HTML) so consumers no longer see stray <p>/<div> wrappers from previously rich-WYSIWYG answers. Existing FAQ items authored with rich HTML must be re-saved to clear legacy HTML. The plugin artifact is nexuscontent-0.1.7.zip.",
-    "The WordPress provider resolves dedicated navigation models from native wp/v2/menus + wp/v2/menu-items into a nested NavigationContent tree and settings into generic SettingsContent (0.2.9). Companion plugin 0.1.8 adds public contract-v1 /settings with ACF Pro/SCF option-page values and WordPress-core fallback, plus editor-mode-aware page/post SEO authoring mapped by the provider into normalized PageContent.seo."
+    "The WordPress provider resolves dedicated navigation models from native wp/v2/menus + wp/v2/menu-items into a nested NavigationContent tree and settings into generic SettingsContent (0.2.9). Companion plugin 0.1.8 adds public contract-v1 /settings with ACF Pro/SCF option-page values and WordPress-core fallback, plus editor-mode-aware page/post SEO authoring mapped by the provider into normalized PageContent.seo.",
+    "Pages project the provider's ordered sections onto PageContent.sections (a named map keyed by section type, repeated types suffixed _2/_3 in order) and PageContent.sectionsList (the authoritative ordered list). Git pages author the map directly as sections:{...} (JSON key order = section order; an array form is also accepted), WordPress flexible/Gutenberg page content is normalized to the same list, and the projection is not gated on declared model fields (strictSections from 0.2.8 is removed). Collection items keep data.sections as the ordered { type, data } list."
   ],
   "architecturalDecisions": [
     "Core is framework neutral.",
@@ -214,7 +215,7 @@
     "consumer.astro-wordpress-companion": "0.2.3",
     "core.schema.models": "0.2.2",
     "core.schema.fields": "0.2.2",
-    "core.schema.sections-expansion": "0.2.8",
+    "core.schema.sections-map": "0.2.9",
     "content.media": "0.2.2",
     "media.provider.local": "0.2.2",
     "media.provider.remote": "0.2.2",

@@ -5,17 +5,6 @@ import NexusSeo from "../components/NexusSeo.astro";
 import { nexus } from "../nexus";
 import type { SeoData } from "@nexuscontent/core";
 
-interface FooterData {
-  description?: string;
-  credit?: string;
-}
-
-interface SiteData {
-  siteName?: string;
-  tagline?: string;
-  footer?: FooterData;
-}
-
 interface Props {
   seo: SeoData;
   styles?: string[];
@@ -39,14 +28,14 @@ const navItems = (nav?.items ??
   ]) as { label: string; href: string }[];
 
 const sites = await nexus.getSettings("site");
-const siteData: SiteData = {
+const siteData = {
   siteName: "NexusContent",
   tagline: "Content abstraction for the modern web",
   footer: {
     description: "A reference consumer proving Astro and NexusContent share a clean boundary.",
     credit: "Powered by NexusContent with Git and WordPress content sources."
   },
-  ...(sites?.data as SiteData | undefined)
+  ...(sites?.data ?? {})
 };
 ---
 

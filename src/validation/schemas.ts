@@ -163,7 +163,8 @@ export const pageSchema = z.object({
   excerpt: z.string().optional(),
   featuredImage: mediaAssetSchema.optional(),
   modifiedAt: z.string().optional(),
-  sections: z.array(contentSectionSchema).optional(),
+  sections: z.record(z.string(), z.unknown()).optional(),
+  sectionsList: z.array(contentSectionSchema).optional(),
   seo: seoSchema.optional(),
   data: dataSchema,
   meta: contentMetaSchema

@@ -47,7 +47,7 @@ export type {
   TranslationState
 } from "./types.ts";
 
-export { resolveSeo } from "./seo.ts";
+export { resolveSeo, serializeJsonLd } from "./seo.ts";
 export type { ResolveSeoInput, SeoDefaults } from "./seo.ts";
 
 export type { ContentProvider, ProviderRetrievalOptions } from "./provider.ts";
@@ -74,6 +74,8 @@ export { defineNexusConfig } from "./config.ts";
 export type { ResolvedBuiltinMediaConfig } from "./config.ts";
 
 export { ModelRegistry, validateModelRelations } from "./schema.ts";
+
+export { namedSections, projectSections } from "./sections.ts";
 
 export type {
   CollectionModelNames,

@@ -95,3 +95,26 @@ function omitUndefined<T extends object>(value: T): T {
     Object.entries(value).filter(([, field]) => field !== undefined)
   ) as T;
 }
+
+/**
+ * Serialize JSON-LD structured data for inlining in a
+ * `<script type="application/ld+json">` element.
+ *
+ * `JSON.stringify` alone is unsafe for inline scripts: a `</script>` sequence
+ * or ambiguous line terminators inside authored structured data would break
+ * or skew the script tag. This escapes `<`, `>`, `&`, and U+2028/U+2029 while
+ * otherwise preserving the JSON exactly.
+ */
+export function serializeJsonLd(value: Record<string, unknown>): string {
+  const escaped: Record<string, string> = {
+    "<": "\\u003c",
+    ">": "\\u003e",
+    "&": "\\u0026",
+    "\u2028": "\\u2028",
+    "\u2029": "\\u2029"
+  };
+  return JSON.stringify(value).replace(
+    /[<>&\u2028\u2029]/g,
+    (character) => escaped[character] ?? character
+  );
+}

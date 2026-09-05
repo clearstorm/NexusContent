@@ -5,8 +5,7 @@ import Services from "../components/Services.astro";
 import Testimonials from "../components/Testimonials.astro";
 import RichTextContent from "../components/RichTextContent.astro";
 import { nexus } from "../nexus";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { canonicalUrl, resolvePageSeo } from "../app/seo";
 import { resolveHero, resolveServices, resolveTestimonials } from "../app/media";
 
 const page = await nexus.getPage("home");
@@ -23,10 +22,10 @@ const services = await resolveServices(nexus, page.data.servicesList);
 const testimonials = await resolveTestimonials(nexus, page.data.testimonialsList);
 const { richTextContent } = page.data;
 
-const seo = resolveSeo({
-  title: page.title ?? "NexusContent Example",
+const seo = await resolvePageSeo(nexus, {
+  title: page.title ?? "Home",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/") }
-}, siteSeoDefaults);
+});
 ---
 
 <BaseLayout seo={seo}>

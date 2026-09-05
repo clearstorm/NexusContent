@@ -348,7 +348,7 @@ test("normalizeWordPressPage emits data.sections from Gutenberg content", () => 
 
   assert.equal(page.id, "7");
   assert.equal(page.data.content, raw.content.rendered);
-  const sections = page.data.sections as Array<{ type: string; data: Record<string, unknown> }>;
+  const sections = page.sectionsList as Array<{ type: string; data: Record<string, unknown> }>;
   assert.ok(Array.isArray(sections));
   const section = sections[0]!;
   assert.equal(section.type, "image_text");
@@ -356,6 +356,7 @@ test("normalizeWordPressPage emits data.sections from Gutenberg content", () => 
   assert.equal(image.src, "https://example.com/block.jpg");
   assert.equal(image.id, "123");
   assert.equal((image as Record<string, unknown>).url, undefined);
+  assert.equal(page.data.sections, undefined);
 });
 
 test("normalizeWordPressPage keeps no sections when editor mode is unset", () => {

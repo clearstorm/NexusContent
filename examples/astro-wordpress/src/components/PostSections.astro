@@ -30,6 +30,11 @@ import type { Props as TestimonialsProps } from "./Testimonials.astro";
 // Unsupported section types are skipped with a build-time warning rather than
 // failing the whole page. Each case casts the data to its component's Props;
 // schema validation has already guaranteed the declared fields.
+//
+// The component also accepts the projected page map (`page.sections`,
+// keyed by type), so a template can render a whole page with
+// `<PostSections sections={page.sections} />`. Map keys carry a `_2`, `_3`
+// suffix for repeated types, which is stripped back to the section type.
 export interface Section {
   type?: string;
   _type?: string;
@@ -37,11 +42,18 @@ export interface Section {
 }
 
 interface Props {
-  sections?: Section[];
+  sections?: Section[] | Record<string, unknown>;
 }
 
 const { sections } = Astro.props;
-const entries = sections ?? [];
+const entries: Section[] = Array.isArray(sections)
+  ? sections
+  : Object.entries(sections ?? {}).map(([key, data]) => ({
+      type: key.replace(/_\d+$/, ""),
+      data: (typeof data === "object" && data !== null && !Array.isArray(data)
+        ? data
+        : {}) as Record<string, unknown>
+    }));
 ---
 
 {

@@ -91,7 +91,9 @@ export function normalizeCompanionPage(
     featuredImage: convertFeaturedImage(page.featuredImage),
     modifiedAt: page.modifiedAt,
     seo: convertSeo(page.seo),
-    sections: page.sections.map(normalizeSection),
+    // Providers emit the ordered section list at the page level; Core
+    // projects it onto the consumer's `page.sections` map + `page.sectionsList`.
+    sectionsList: page.sections.map(normalizeSection),
     data: page.rawFields,
     meta: { source: "wordpress", sourceId: page.id }
   };

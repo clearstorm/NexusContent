@@ -163,91 +163,42 @@ export const components = {
 /**
  * Model schemas for the dual-provider reference consumer.
  *
- * Every model points at the **Git** provider by default so the repository
- * ships a deterministic, buildable site (`source.provider: "git"`). To use
- * WordPress for a model, change only `source.provider` to `"wordpress"`; the
- * field shapes, pages, and components stay identical. The same content can be
- * served by either provider without touching website code.
+ * Page models point at either provider (`home` and `services` at WordPress,
+ * `about` and `contact` at Git) so the same content can be served by either
+ * source with no website-code changes. Page models declare **no `fields`**:
+ * NexusContent projects every provider's ordered sections onto
+ * `page.sections` (a named map keyed by section type your templates compose
+ * against) plus `page.sectionsList` (the authoritative order), so a model
+ * never needs to enumerate the sections a page uses. Git authoring mirrors
+ * the map (`content/pages/about.json` → `sections: { hero, ... }`), and
+ * WordPress emits the same consumer map.
  *
- * For pages declared with component fields (like `home`), Core expands the
- * CMS provider's `data.sections` into those component fields: each section
- * whose `type` matches a declared component becomes that component field, so
- * Git (`home` authored as `hero`, `intro`, ...) and WordPress (which emits
- * `data.sections`) render through the same page template. A model with no
- * matching component field for a section keeps it in `data.sections`, or
- * throws a `SchemaError` when `strictSections: true` is set.
- *
- * To keep a model on WordPress, the WordPress provider options in
- * `src/nexus.config` need an editor mode the install can actually produce
- * sections from (e.g. `acf_flexible` for the plugin's flexible layouts, or
- * `gutenberg`). Fixed-field (`acf_fixed`) pages flatten their ACF groups as
- * named fields instead and need no section extraction.
+ * Collection models (`blog`) keep their items at `data.sections`, the ordered
+ * `{ type, data }` list rendered through PostSections; item models declare no
+ * `fields`, so their runtime shape is unvalidated and the templates type it
+ * with local interfaces. Navigation and settings models are declared with
+ * their flat field schemas (validated at retrieval).
  */
 export const models = {
   home: {
     kind: "singleton",
-    source: { provider: "wordpress", key: "home" },
-    fields: {
-      hero: { type: "component", component: "hero", required: true },
-      intro: { type: "component", component: "intro" },
-      features: { type: "component", component: "features" },
-      gallery: { type: "component", component: "gallery" },
-      testimonials: { type: "component", component: "testimonials" },
-      cta: { type: "component", component: "cta" }
-    }
+    source: { provider: "wordpress", key: "home" }
   },
   about: {
     kind: "singleton",
-    source: { provider: "git", key: "about" },
-    fields: {
-      hero: { type: "component", component: "hero", required: true },
-      rich_text: { type: "component", component: "rich_text" },
-      image_text: { type: "component", component: "image_text" },
-      statistics: { type: "component", component: "statistics" }
-    }
+    source: { provider: "git", key: "about" }
   },
   services: {
     kind: "singleton",
-    source: { provider: "wordpress", key: "services" },
-    fields: {
-      hero: { type: "component", component: "hero", required: true },
-      features: { type: "component", component: "features" },
-      faq: { type: "component", component: "faq" },
-      cta: { type: "component", component: "cta" }
-    }
+    source: { provider: "wordpress", key: "services" }
   },
   contact: {
     kind: "singleton",
-    source: { provider: "git", key: "contact" },
-    fields: {
-      image_text: { type: "component", component: "image_text" },
-      logo_grid: { type: "component", component: "logo_grid" },
-      form_embed: { type: "component", component: "form_embed" }
-    }
+    source: { provider: "git", key: "contact" }
   },
   blog: {
     kind: "collection",
-    source: { provider: "wordpress", key: "posts" },
-    fields: {
-      content: { type: "richText" },
-      excerpt: { type: "string" },
-      publishedAt: { type: "datetime" },
-      modifiedAt: { type: "datetime" },
-      url: { type: "string" },
-      featuredImage: { type: "media" },
-      // Post bodies are CMS-ordered sections, rendered through PostSections.
-      // The shape matches the canonical wire shape providers emit
-      // (`{ type, data }`), so the same sections array serves both the Git
-      // content files and WordPress flexible/Gutenberg posts.
-      sections: {
-        type: "object",
-        list: true,
-        fields: {
-          type: { type: "string", required: true },
-          data: { type: "object" }
-        }
-      }
-    }
+    source: { provider: "wordpress", key: "posts" }
   },
   primary: {
     kind: "navigation",
@@ -258,28 +209,13 @@ export const models = {
     source: { provider: "git", key: "site" },
     fields: {
       siteName: { type: "string" },
+      defaultImage: { type: "media" },
       tagline: { type: "string" },
       footer: {
         type: "object",
         fields: {
           description: { type: "string" },
           credit: { type: "string" }
-        }
-      },
-      contactDetails: {
-        type: "object",
-        fields: {
-          heading: { type: "string", required: true },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              label: { type: "string", required: true },
-              value: { type: "string", required: true },
-              href: { type: "string" }
-            }
-          }
         }
       }
     }

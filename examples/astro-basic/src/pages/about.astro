@@ -3,8 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
 import RichTextContent from "../components/RichTextContent.astro";
 import { nexus } from "../nexus";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { canonicalUrl, resolvePageSeo } from "../app/seo";
 import { resolveHero } from "../app/media";
 
 const page = await nexus.getPage("about");
@@ -18,10 +17,10 @@ if (!page) {
 const hero = await resolveHero(nexus, page.data.hero);
 const { mission, story, principles } = page.data;
 
-const seo = resolveSeo({
+const seo = await resolvePageSeo(nexus, {
   title: page.title ?? "About",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/about/") }
-}, siteSeoDefaults);
+});
 ---
 
 <BaseLayout seo={seo}>

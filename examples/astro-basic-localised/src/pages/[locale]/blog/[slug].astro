@@ -3,8 +3,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import ContentBlocks from "../../../components/ContentBlocks.astro";
 import { nexus } from "../../../nexus";
 import { supportedLocales, localizeHref } from "../../../app/locale";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../../../app/seo";
+import { canonicalUrl, resolvePageSeo } from "../../../app/seo";
 import { resolveBlocks } from "../../../app/media";
 
 export async function getStaticPaths() {
@@ -44,8 +43,8 @@ const { body, date, excerpt } = post.data;
 const blocks = await resolveBlocks(nexus, body);
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/${locale}/blog/${post.slug ?? post.key}/`);
-const seo = resolveSeo({
-  title: `${postTitle} - NexusContent Example`,
+const seo = await resolvePageSeo(nexus, {
+  title: postTitle,
   seo: {
     description: excerpt,
     canonicalUrl: postUrl,
@@ -61,7 +60,7 @@ const seo = resolveSeo({
       }
     ]
   }
-}, siteSeoDefaults());
+}, { locale });
 ---
 
 <BaseLayout

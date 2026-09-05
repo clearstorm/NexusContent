@@ -18,6 +18,7 @@ import { ProviderRegistry } from "./registry.ts";
 import { LocaleResolver } from "./locale.ts";
 import { resolveBuiltinMediaProviders } from "./config.ts";
 import { ModelRegistry } from "./schema.ts";
+import { projectSections } from "./sections.ts";
 import {
   MediaProviderRegistry,
   ResolveMediaService,
@@ -145,18 +146,12 @@ export class NexusContent<const TConfig extends NexusConfig = NexusConfig> {
       content: modelName,
       locale: providerOptions?.locale
     });
-    const shaped = this.models.expandSectionsToComponents(
-      modelName,
-      normalized.data,
-      {
-        provider: provider.name,
-        sourceKey: model.source.key,
-        locale: providerOptions?.locale,
-        operation: "getPage",
-        sections: normalized.sections
-      }
-    );
-    const data = this.models.validateData(modelName, shaped, {
+    // Project the provider's ordered section list onto the canonical
+    // consumer shape (`page.sections` map + `page.sectionsList`). This runs
+    // for every page regardless of the model's declared fields, so a
+    // field-less model still exposes `page.sections.<type>`.
+    const projected = projectSections(normalized.sectionsList);
+    const data = this.models.validateData(modelName, normalized.data, {
       provider: provider.name,
       content: modelName,
       sourceKey: model.source.key,
@@ -164,7 +159,7 @@ export class NexusContent<const TConfig extends NexusConfig = NexusConfig> {
       operation: "getPage"
     }) as ResolvedData<TConfig, TName, TData>;
 
-    return { ...normalized, data };
+    return { ...normalized, ...projected, data };
   }
 
   async getNavigation<

@@ -13,9 +13,7 @@ import type { Props as HeroProps } from "../components/Hero.astro";
 import type { Props as IntroProps } from "../components/Intro.astro";
 import type { Props as TestimonialsProps } from "../components/Testimonials.astro";
 import { nexus } from "../nexus";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import { resolveMediaFields } from "../app/media";
+import { canonicalUrl, resolvePageSeo } from "../app/seo";
 
 export interface HomeData {
   hero?: HeroProps;
@@ -32,12 +30,15 @@ if (!page) {
   throw new Error(`Required content "home" was not found.`);
 }
 
-const home = (await resolveMediaFields(nexus, page.data)) as HomeData;
+// Projected sections arrive as a named map (`page.sections.<type>`), so the
+// template composes sections declaratively the same way for Git and
+// WordPress content.
+const home = (await nexus.media.resolveFields(page.sections)) as HomeData;
 
-const seo = resolveSeo({
+const seo = await resolvePageSeo(nexus, {
   title: page.title ?? "Home",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/") }
-}, siteSeoDefaults);
+});
 ---
 
 <BaseLayout seo={seo}>

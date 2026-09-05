@@ -5,8 +5,7 @@ import Services from "../../components/Services.astro";
 import Testimonials from "../../components/Testimonials.astro";
 import { nexus } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { canonicalUrl, resolvePageSeo } from "../../app/seo";
 import { resolveHero, resolveServices, resolveTestimonials } from "../../app/media";
 
 export function getStaticPaths() {
@@ -28,10 +27,10 @@ const hero = await resolveHero(nexus, page.data.hero);
 const services = await resolveServices(nexus, page.data.servicesList);
 const testimonials = await resolveTestimonials(nexus, page.data.testimonialsList);
 
-const seo = resolveSeo({
-  title: page.title ?? "NexusContent Example",
+const seo = await resolvePageSeo(nexus, {
+  title: page.title ?? "Home",
   seo: { ...page.seo, canonicalUrl: canonicalUrl(`/${locale}/`) }
-}, siteSeoDefaults());
+}, { locale });
 ---
 
 <BaseLayout

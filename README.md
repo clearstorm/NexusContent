@@ -172,6 +172,35 @@ fields: {
 }
 ```
 
+### Page sections
+
+Pages returned by `getPage()` carry the provider's ordered sections in two
+forms:
+
+- `page.sections` — a named map keyed by section type, for declarative
+  template composition: `<Hero {...page.sections.hero} />`. Repeated section
+  types are suffixed in order (`hero`, `hero_2`, `hero_3`).
+- `page.sectionsList` — the authoritative ordered `{ type, data }` array,
+  for renderers that iterate sections (`<PostSections sections={page.sectionsList} />`).
+
+Both arrive identically whether the content comes from Git or a CMS provider.
+Git pages author the map directly as `sections:{...}` in `pages/<key>.json`
+(JSON key order is the section order); WordPress flexible/Gutenberg content is
+normalized to the same ordered list and projected to the map. A page model
+therefore never needs to declare the sections it uses — leave its `fields`
+off, or declare additional non-section fields:
+
+```jsonc
+// content/pages/about.json
+{
+  "key": "about",
+  "sections": {
+    "hero": { "heading": "We make content replaceable" },
+    "rich_text": { "body": "<p>Origin story.</p>" }
+  }
+}
+```
+
 ### Media
 
 Media references stay neutral. Providers normalize source media into
@@ -197,6 +226,18 @@ is registered manually:
 nexus.registerMedia("wordpress", new WordPressMediaProvider({ baseUrl }));
 const asset = await nexus.media.resolve({ id: "9" }); // or { src: "..." }
 ```
+
+For whole content structures (page sections maps, collection item data),
+`nexus.media.resolveFields(value)` recursively resolves every object that
+carries a `src` string into a plain `{ src, alt }`, leaving everything else
+untouched — so pages resolve all section media before rendering:
+
+```ts
+const home = (await nexus.media.resolveFields(page.sections)) as HomeData;
+```
+
+When the provider yields no asset, the authored `{ src, alt }` reference is
+kept; id-only references are not generically detectable and pass through.
 
 ### WordPress Options
 
@@ -413,6 +454,8 @@ interface PageContent<TData> {
   slug?: string;
   title?: string;
   seo?: SeoData;
+  sections?: Record<string, unknown>;  // named map keyed by section type
+  sectionsList?: ContentSection[];      // authoritative ordered sections
   data: TData;
   meta: { source: string; sourceId?: string; updatedAt?: string; locale?: string };
 }
@@ -437,6 +480,12 @@ const seo = resolveSeo(
   { siteTitle: "My Site", defaultImage: { src: "https://example.com/social.jpg" } }
 );
 ```
+
+Inline JSON-LD is serialized with the Core `serializeJsonLd(value)` helper, which
+escapes `<`, `>`, `&`, U+2028, and U+2029 so authored strings cannot break out of
+a `<script type="application/ld+json">` tag. Rendering remains consumer-owned:
+the Astro examples keep their own `NexusSeo` component and build their page-level
+`resolveSeo` defaults from site identity authored in the `site` settings model.
 
 ## Key Concepts
 

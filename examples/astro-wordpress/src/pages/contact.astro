@@ -3,15 +3,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import FormEmbed from "../components/FormEmbed.astro";
 import ImageText from "../components/ImageText.astro";
 import LogoGrid from "../components/LogoGrid.astro";
+import Hero from "../components/Hero.astro";
+import type { Props as HeroProps } from "../components/Hero.astro";
 import type { Props as FormEmbedProps } from "../components/FormEmbed.astro";
 import type { Props as ImageTextProps } from "../components/ImageText.astro";
 import type { Props as LogoGridProps } from "../components/LogoGrid.astro";
 import { nexus } from "../nexus";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../app/seo";
-import { resolveMediaFields } from "../app/media";
+import { canonicalUrl, resolvePageSeo } from "../app/seo";
+
 
 export interface ContactData {
+   hero?: HeroProps;
   image_text?: ImageTextProps;
   logo_grid?: LogoGridProps;
   form_embed?: FormEmbedProps;
@@ -23,15 +25,16 @@ if (!page) {
   throw new Error(`Required content "contact" was not found.`);
 }
 
-const contact = (await resolveMediaFields(nexus, page.data)) as ContactData;
+const contact = (await nexus.media.resolveFields(page.sections)) as ContactData;
 
-const seo = resolveSeo({
+const seo = await resolvePageSeo(nexus, {
   title: page.title ?? "Contact",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/contact/") }
-}, siteSeoDefaults);
+});
 ---
 
 <BaseLayout seo={seo}>
+  {contact.hero && <Hero {...contact.hero} />}
   {contact.image_text && <ImageText {...contact.image_text} />}
   {contact.logo_grid && <LogoGrid {...contact.logo_grid} />}
   {contact.form_embed && <FormEmbed {...contact.form_embed} />}
