@@ -1282,7 +1282,7 @@ final class Admin_Page {
 			class="regular-text"
 			placeholder="https://example.com"
 		>
-		<p class="description"><?php esc_html_e( 'Base URL of the consuming frontend. The Gutenberg preview button opens a tokenized preview URL against this domain.', 'nexuscontent' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Base URL of the consuming frontend — the origin only, for example http://localhost:4321, without /preview. The Gutenberg preview button opens the tokenized preview route against this base.', 'nexuscontent' ); ?></p>
 		<?php
 	}
 

@@ -200,6 +200,23 @@ final class RestControllerTest extends TestCase {
 		self::assertStringContainsString( 'preview?token=' . $data['token'] . '&id=7', $data['previewUrl'] );
 	}
 
+	public function test_create_preview_token_accepts_full_preview_route(): void {
+		$controller = $this->controller();
+		$post       = $this->post( array( 'ID' => 7, 'post_type' => 'page', 'post_name' => 'draft-page', 'post_title' => 'Draft page', 'post_status' => 'draft' ) );
+		$GLOBALS['nc_test']['caps']['edit_post'] = true;
+		$GLOBALS['nc_test']['options']['nexuscontent_settings'] = array( 'preview_frontend_url' => 'https://example.test/preview' );
+
+		$request = new WP_REST_Request( 'POST', '/nexuscontent/v1/preview-token' );
+		$request->set_param( 'postId', $post->ID );
+
+		$response = $controller->create_preview_token( $request );
+		self::assertInstanceOf( WP_REST_Response::class, $response );
+
+		$data = $response->get_data()['data'];
+		self::assertStringStartsWith( 'https://example.test/preview?token=', $data['previewUrl'] );
+		self::assertStringNotContainsString( 'preview/preview', $data['previewUrl'] );
+	}
+
 	public function test_create_preview_token_rejects_missing_post(): void {
 		$controller = $this->controller();
 		$GLOBALS['nc_test']['caps']['edit_post'] = true;

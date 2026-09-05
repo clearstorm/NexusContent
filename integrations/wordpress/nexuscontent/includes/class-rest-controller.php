@@ -380,8 +380,14 @@ final class REST_Controller extends WP_REST_Controller {
 		$frontend    = isset( $settings['preview_frontend_url'] ) ? esc_url_raw( (string) $settings['preview_frontend_url'] ) : '';
 		$preview_url = '';
 		if ( '' !== $frontend ) {
-			$separator   = false !== strpos( $frontend, '?' ) ? '&' : '?';
-			$preview_url = trailingslashit( $frontend ) . 'preview' . $separator . 'token=' . $token_data['token'] . '&id=' . (string) $post_id;
+			$separator = false !== strpos( $frontend, '?' ) ? '&' : '?';
+			$base      = rtrim( $frontend, '/' );
+			// Tolerate a full preview route in the setting: strip a trailing
+			// /preview so an origin and a route both yield one /preview.
+			if ( '/preview' === substr( $base, -8 ) ) {
+				$base = substr( $base, 0, -8 );
+			}
+			$preview_url = $base . '/preview' . $separator . 'token=' . $token_data['token'] . '&id=' . (string) $post_id;
 		}
 
 		$data = array(
