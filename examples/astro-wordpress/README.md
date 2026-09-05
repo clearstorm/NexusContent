@@ -136,3 +136,18 @@ the environment variables above (requires `manage_options`).
 Installed consumers do the same in their own code: call
 `provider.projectComponentContract(schema)` and POST the result (or curl it) to
 the plugin route.
+## Draft preview
+
+The WordPress companion plugin's "Open frontend preview" button opens this
+example's `src/pages/preview.astro` route with `?token=...&id=...`. The token
+is the auth and expires within minutes; the route fetches the tokenized
+companion endpoint server-side and renders the draft through the same section
+components as published content.
+
+The example is `output: "static"`, so this route only renders per request under
+`astro dev` (`npm run dev`). A static `astro build` prerenders it without query
+parameters. If the page shows a failure notice, open its collapsed "Preview
+diagnostics" block: it states whether a token and id reached the renderer and
+which API base was detected, so a misconfigured `WORDPRESS_API_URL` (which must
+end in `/wp-json/wp/v2`) is distinguishable from a missing or stripped query
+string.

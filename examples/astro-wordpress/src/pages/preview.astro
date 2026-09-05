@@ -23,6 +23,10 @@ if (!token || !id) {
 // WordPress REST API root, which includes `.../wp-json/wp/v2`.
 const apiRoot = import.meta.env.WORDPRESS_API_URL as string | undefined;
 const wpJsonIndex = apiRoot?.indexOf("/wp-json/wp/v2");
+const apiBase =
+  apiRoot && wpJsonIndex !== undefined && wpJsonIndex >= 0
+    ? apiRoot.slice(0, wpJsonIndex)
+    : undefined;
 
 let preview:
   | {
@@ -36,9 +40,8 @@ let preview:
   | undefined = undefined;
 let error: string | undefined = undefined;
 
-if (apiRoot && wpJsonIndex !== undefined && wpJsonIndex >= 0 && token && id) {
-  const base = apiRoot.slice(0, wpJsonIndex);
-  const url = `${base}/nexuscontent/v1/preview/${encodeURIComponent(token)}/${encodeURIComponent(id)}`;
+if (apiBase && token && id) {
+  const url = `${apiBase}/nexuscontent/v1/preview/${encodeURIComponent(token)}/${encodeURIComponent(id)}`;
   try {
     const res = await fetch(url);
     if (res.ok) {
@@ -68,7 +71,9 @@ if (apiRoot && wpJsonIndex !== undefined && wpJsonIndex >= 0 && token && id) {
   } catch {
     error = "The preview service could not be reached.";
   }
-} else if (token && id && !apiRoot) {
+} else if (token && id && apiRoot) {
+  error = "WORDPRESS_API_URL must end in /wp-json/wp/v2 to resolve the preview endpoint.";
+} else if (token && id) {
   error = "WORDPRESS_API_URL is required to load a preview.";
 }
 
@@ -118,6 +123,16 @@ const seo = resolveSeo(
     ) : (
       <div class="notice">Missing preview token or content id.</div>
     )}
+    {(!preview || error) && (
+      <details class="diagnostics">
+        <summary>Preview diagnostics</summary>
+        <ul>
+          <li>token present: {token ? "yes" : "no"}</li>
+          <li>id present: {id ? "yes" : "no"}</li>
+          <li>API base: {apiBase ?? "not detected (WORDPRESS_API_URL must end in /wp-json/wp/v2)"}</li>
+        </ul>
+      </details>
+    )}
   </article>
 
   <style>
@@ -165,6 +180,25 @@ const seo = resolveSeo(
       padding: 1rem;
       border: 1px solid var(--border);
       border-radius: var(--radius);
+    }
+
+    .diagnostics {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .diagnostics summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .diagnostics ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.25rem;
     }
 
     /* Same consumer-owned prose layer as the blog post raw-HTML fallback. */
