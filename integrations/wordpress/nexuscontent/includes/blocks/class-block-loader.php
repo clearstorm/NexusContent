@@ -204,7 +204,10 @@ final class Block_Loader {
 			self::PREVIEW_HANDLE,
 			'NexusContentPreviewSettings',
 			array(
-				'restRoot'           => trailingslashit( rest_url( NEXUSCONTENT_COMPANION_REST_NAMESPACE ) ),
+				// Relative namespace only: apiFetch resolves it against the
+				// site's own REST root, so the mint request survives hosts
+				// whose rest_url()/home URL expands to a doubled absolute URL.
+				'restRoot'           => trailingslashit( NEXUSCONTENT_COMPANION_REST_NAMESPACE ),
 				'previewFrontendUrl' => $this->settings_preview_frontend_url(),
 				'labels'             => array(
 					'panel'        => __( 'Frontend preview', 'nexuscontent' ),

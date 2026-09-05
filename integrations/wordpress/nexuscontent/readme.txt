@@ -4,7 +4,7 @@ Tags: headless, content, rest-api, gutenberg, acf
 Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 License: MIT
 License URI: https://opensource.org/license/mit
 
@@ -14,7 +14,7 @@ Contract-versioned, normalized WordPress page and post content for future NexusC
 
 = Purpose =
 
-NexusContent Companion exposes normalized pages, posts, site settings, SEO, schema, capabilities, media, and diagnostics through WordPress REST routes. Content is read-only; the only write route is the admin-only project-contract push. Plugin 0.2.2 uses companion contract 1, supports signed, outbound-only change webhooks, and enables classic menu management even on block themes.
+NexusContent Companion exposes normalized pages, posts, site settings, SEO, schema, capabilities, media, and diagnostics through WordPress REST routes. Content is read-only; the only write route is the admin-only project-contract push. Plugin 0.2.3 uses companion contract 1, supports signed, outbound-only change webhooks, and enables classic menu management even on block themes.
 
 = Requirements =
 
@@ -73,13 +73,13 @@ nexuscontent_companion_loaded($registry) fires after registration. nexuscontent_
 
 = Build and tests =
 
-Run npm install, npm run build, npm run lint-js, npm run format:check, and npm run package. Packaging creates repository-root dist/nexuscontent-0.2.2.zip and excludes maps, source assets, tests, dependencies, local config, secrets, and dev configs.
+Run npm install, npm run build, npm run lint-js, npm run format:check, and npm run package. Packaging creates repository-root dist/nexuscontent-0.2.3.zip and excludes maps, source assets, tests, dependencies, local config, secrets, and dev configs.
 
 Run composer install, composer validate, composer lint, composer phpcs, composer phpstan, and composer test-unit. For integration work run npm run env:start and npm run test:integration. Separate ACF Free and Secure Custom Fields scripts verify both installed configurations. ACF Pro must be legally mounted by the developer and is never downloaded by this project.
 
 = Limitations and Phase 3 status =
 
-0.2.2 retrieval is read-only and page/post/settings-focused: no site-content mutations, rebuild triggering, synchronization, retries, third-party SEO/localisation plugin mapping, endpoint discovery, content conversion, or bundled ACF Pro. HTML remains untrusted. The provider discovers the companion, negotiates contract version 1, and falls back to standard REST settings when `/settings` is unavailable.
+0.2.3 retrieval is read-only and page/post/settings-focused: no site-content mutations, rebuild triggering, synchronization, retries, third-party SEO/localisation plugin mapping, endpoint discovery, content conversion, or bundled ACF Pro. HTML remains untrusted. The provider discovers the companion, negotiates contract version 1, and falls back to standard REST settings when `/settings` is unavailable.
 
 == Installation ==
 
@@ -103,6 +103,10 @@ No. ACF Pro is licensed software and must be legally supplied by the developer.
 Yes, when the provider runs with the companion strategy or auto-discovery. It discovers these routes, negotiates contract version 1, caches capabilities, and falls back to unmodified standard REST retrieval when the plugin is not reachable. Release status of the wrapping NexusContent milestone remains under repo control.
 
 == Changelog ==
+
+= 0.2.3 =
+
+* The Gutenberg "Open frontend preview" token mint no longer depends on an absolute `rest_url()` value: the script now locals a relative `nexuscontent/v1/` API root that `apiFetch` resolves against the site's own REST base. This fixes `rest_no_route` on installs whose `rest_url()` expands into a doubled absolute URL (for example `https://site/wp-json/https://site/wp-json/nexuscontent/v1/preview-token`).
 
 = 0.2.2 =
 
