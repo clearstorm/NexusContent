@@ -172,6 +172,35 @@ fields: {
 }
 ```
 
+### Page sections
+
+Pages returned by `getPage()` carry the provider's ordered sections in two
+forms:
+
+- `page.sections` — a named map keyed by section type, for declarative
+  template composition: `<Hero {...page.sections.hero} />`. Repeated section
+  types are suffixed in order (`hero`, `hero_2`, `hero_3`).
+- `page.sectionsList` — the authoritative ordered `{ type, data }` array,
+  for renderers that iterate sections (`<PostSections sections={page.sectionsList} />`).
+
+Both arrive identically whether the content comes from Git or a CMS provider.
+Git pages author the map directly as `sections:{...}` in `pages/<key>.json`
+(JSON key order is the section order); WordPress flexible/Gutenberg content is
+normalized to the same ordered list and projected to the map. A page model
+therefore never needs to declare the sections it uses — leave its `fields`
+off, or declare additional non-section fields:
+
+```jsonc
+// content/pages/about.json
+{
+  "key": "about",
+  "sections": {
+    "hero": { "heading": "We make content replaceable" },
+    "rich_text": { "body": "<p>Origin story.</p>" }
+  }
+}
+```
+
 ### Media
 
 Media references stay neutral. Providers normalize source media into
@@ -413,6 +442,8 @@ interface PageContent<TData> {
   slug?: string;
   title?: string;
   seo?: SeoData;
+  sections?: Record<string, unknown>;  // named map keyed by section type
+  sectionsList?: ContentSection[];      // authoritative ordered sections
   data: TData;
   meta: { source: string; sourceId?: string; updatedAt?: string; locale?: string };
 }

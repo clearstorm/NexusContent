@@ -67,7 +67,7 @@ if (apiBase && token && id) {
         preview = {
           title: page.title,
           status: page.status,
-          sections: page.sections,
+          sections: page.sectionsList,
           content: typeof page.data.content === "string" ? page.data.content : undefined,
           excerpt: page.excerpt,
           modifiedAt: page.modifiedAt

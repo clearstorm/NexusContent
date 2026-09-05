@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `getPage` results now surface sections as a **named map**: `PageContent.sections` becomes `Record<string, unknown>` keyed by section type (`<Hero {...page.sections.hero} />`), alongside the authoritative ordered list at the new `PageContent.sectionsList`. Repeated section types are suffixed `_2`, `_3`, ... in order. The projection replaces the 0.2.8 sections-to-component-fields expansion: it applies to any page with sections regardless of declared `fields` field, so page models no longer enumerate sections (`strictSections` and `expandSectionsToComponents` are removed). Git pages author the map directly (`pages/<key>.json` → `sections: { "hero": {...}, ... }`, JSON key order = section order; an ordered `[{ type, data }]` array is also accepted), the WordPress page path emits the same ordered list (moved from `data.sections` to page-level), and collection items keep `data.sections` as the ordered `{ type, data }` list. `examples/astro-wordpress` was reworked to prove it: its singleton models are now field-less and its templates compose from `page.sections`, with `PostSections` accepting either the map or the list. This is a breaking change for consumers reading `page.sections` as an array or relying on component-field expansion.
+
 ### Fixed
 
 - The companion plugin `0.2.4` fixes a doubled `/preview` route in the tokenized preview link when the Frontend preview URL setting holds the full preview route (`http://frontend/preview`) instead of the origin: the token mint strips a trailing `/preview` before appending its own, so both an origin and a full route yield one `/preview`, and the setting's admin description now states the origin-only meaning (for example `http://localhost:4321`). The plugin artifact is `dist/nexuscontent-0.2.4.zip`.

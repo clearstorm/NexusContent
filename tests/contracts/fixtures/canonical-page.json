@@ -6,7 +6,11 @@
   "status": "published",
   "excerpt": "Welcome to our site",
   "modifiedAt": "2026-08-18T10:00:00Z",
-  "sections": [
+  "sections": {
+    "hero": { "heading": "Welcome", "subheading": "Hello world" },
+    "features": { "items": [{ "title": "Feature 1" }] }
+  },
+  "sectionsList": [
     {
       "type": "hero",
       "settings": { "visible": true },

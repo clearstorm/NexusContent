@@ -23,7 +23,7 @@ if (!page) {
   throw new Error(`Required content "contact" was not found.`);
 }
 
-const contact = (await resolveMediaFields(nexus, page.data)) as ContactData;
+const contact = (await resolveMediaFields(nexus, page.sections)) as ContactData;
 
 const seo = resolveSeo({
   title: page.title ?? "Contact",

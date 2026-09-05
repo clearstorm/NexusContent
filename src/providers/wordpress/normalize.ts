@@ -66,13 +66,23 @@ export function normalizeWordPressPage(
   context: WordPressNormalizeContext
 ): PageContent<WordPressContentData> {
   const entry = parseEntry(raw, context);
+  const data = buildData(entry, context);
+
+  // Providers surface CMS-ordered sections on the page level (`sectionsList`);
+  // Core projects them onto the consumer's `page.sections` map. Items keep
+  // their sections at `data.sections` instead.
+  const sections = data.sections as ContentSection[] | undefined;
+  if (sections !== undefined) {
+    delete data.sections;
+  }
 
   return {
     id: String(entry.id),
     key,
     slug: entry.slug,
     title: entry.title,
-    data: buildData(entry, context),
+    sectionsList: sections,
+    data,
     meta: {
       source: "wordpress",
       sourceId: String(entry.id),

@@ -141,7 +141,18 @@ export interface PageContent<TData = Record<string, unknown>> {
   excerpt?: string;
   featuredImage?: MediaAsset;
   modifiedAt?: string;
-  sections?: ContentSection[];
+  /**
+   * Normalized page sections as a named map keyed by section type.
+   * Each value is that section's `data`, so a consumer can compose
+   * `<Hero {...page.sections.hero} />` for any provider. Repeated types
+   * are suffixed (`hero`, `hero_2`, ...); see `sectionsList` for order.
+   */
+  sections?: Record<string, unknown>;
+  /**
+   * The authoritative ordered section list (`{ type, data }`), preserving
+   * CMS order, duplicates, ids, and settings. `sections` is derived from it.
+   */
+  sectionsList?: ContentSection[];
   seo?: SeoData;
   data: TData;
   meta: ContentMeta;
@@ -341,26 +352,25 @@ export interface ModelSource {
 }
 
 /**
- * How CMS-ordered page content (`data.sections`) is treated when a model
- * declares component fields.
+ * How CMS-ordered page content is surfaced to consumers.
  *
- * Providers that deliver pages as an ordered section list (WordPress,
- * Strapi, and future CMS providers) surface the page body as
- * `data.sections`, each entry `{ type, data }`. When this model declares
- * component fields (`fields` entries with `type: "component"`), NexusContent
- * expands those sections into the matching declared component fields so the
- * schema and the consumer's page templates stay identical regardless of
- * which provider serves the model.
+ * Providers deliver pages as an ordered section list (WordPress, Strapi,
+ * and future CMS providers). NexusContent projects that list onto every
+ * page regardless of this model's declared `fields`:
  *
- * Set to `true` to make an unmatched section (a section `type` with no
- * matching declared component field) throw a SchemaError instead of being
- * silently kept in `data.sections`.
+ * - `page.sections` is a named map keyed by section type (values are the
+ *   section `data`, so `<Hero {...page.sections.hero} />` composes
+ *   declaratively), with repeated types suffixed (`hero`, `hero_2`, ...).
+ * - `page.sectionsList` is the authoritative ordered list.
+ *
+ * A model therefore never needs to enumerate the sections a page uses.
+ * Models that declare no `fields` skip model-level content validation
+ * entirely.
  */
 export interface ModelSchema {
   readonly kind: ModelKind;
   readonly source: ModelSource;
   readonly fields?: FieldMap;
-  readonly strictSections?: boolean;
 }
 
 export interface SchemaConfig {

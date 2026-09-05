@@ -81,8 +81,7 @@ const modelSchema: z.ZodType<ModelSchema> = z.object({
   }),
   fields: z
     .record(z.string(), z.lazy(() => fieldSchema))
-    .optional(),
-  strictSections: z.boolean().optional()
+    .optional()
 });
 
 const nexusConfigShape = z.object({

@@ -895,6 +895,8 @@ export interface PageContent<
   slug?: string;
   title?: string;
   seo?: SeoData;
+  sections?: Record<string, unknown>;
+  sectionsList?: ContentSection[];
   data: TData;
   meta: ContentMeta;
 }
@@ -1436,6 +1438,8 @@ The `0.1.6` companion plugin release (root package version stays `0.2.8`, plugin
 The `0.1.7` companion plugin release (root package version stays `0.2.8`, plugin `0.1.7`) makes the ACF Flexible FAQ `answer` field a plain Text Area instead of a WYSIWYG editor, matching the Gutenberg FAQ block and Git-authored content, and the server-side fallback block renderer `esc_html`es the plain-text answer (instead of `wp_kses_post( wpautop(...) )`) so consumers no longer see stray `<p>`/`<div>` wrappers from previously rich-WYSIWYG answers. No wire-contract, schema, or TypeScript changes were required; the consumer's `<p>{answer}</p>` already renders plain escaped text. Each FAQ item authored as rich WYSIWYG HTML must be re-saved in the editor to clear any legacy HTML. The plugin artifact is `dist/nexuscontent-0.1.7.zip`.
 
 The `0.1.8` companion plugin release (root package version stays `0.2.9`, plugin `0.1.8`) adds public contract-v1 site settings and editor-mode-aware page/post SEO authoring. ACF Pro or Secure Custom Fields registers the site option page; ACF Free and plugin-free installs fall back to WordPress core site values. Gutenberg uses a document sidebar and ACF modes use a field group, both writing shared `nexus_seo_*` meta that the companion emits as optional `seo`; the TypeScript provider converts wire media `url` to normalized `src`. The provider prefers companion `/settings` under `auto`/`companion` and falls back to native `wp/v2/settings` when the route is absent. The plugin artifact is `dist/nexuscontent-0.1.8.zip`.
+
+The next release (root package version `0.2.9`) makes sections project onto the page level as a named map: `getPage` returns `page.sections` (`Record<string, unknown>` keyed by section type, repeated types suffixed `_2`/`_3` in order) plus the authoritative ordered `page.sectionsList` (`ContentSection[]`), replacing the 0.2.8 sections-to-component-fields expansion. The projection is not gated on declared model fields, so page models no longer enumerate sections and `strictSections` is removed (`expandSectionsToComponents` is gone from `schema.ts`). Git pages author the map directly (`pages/<key>.json` → `sections: { "hero": {...}, ... }`; JSON key order is the section order, and the ordered array form is accepted too), the WordPress page path emits the same ordered list (moved from `data.sections` to page-level via `normalizeCompanionPage`/`normalizeWordPressPage`), and collection items keep `data.sections` as the ordered `{ type, data }` list. The astro-wordpress example proves the letter of it: its page singleton models are field-less, templates compose from `page.sections` (about/contact served by Git, home/services by WordPress), `PostSections` accepts either the map or the list (stripping `_\d+` suffixes to recover the base type), and the example's own Git pages author Form A maps.
 
 The recommended next focus is completing the `0.3.0` contract workflow CLI, followed by the deferred `0.4.0` Strapi provider milestone and the remaining `0.2.x` consolidation if any.
 

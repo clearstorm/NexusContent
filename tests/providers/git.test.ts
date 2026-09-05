@@ -73,6 +73,117 @@ test("keeps SEO optional for Git pages", async () => {
   assert.equal(page.data.body, "SEO remains optional.");
 });
 
+function buildSectionsProvider(root: string) {
+  return new GitProvider({ contentPath: root });
+}
+
+test("normalizes a page authored with a named sections map", async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-sections-map-"));
+  const root = join(fixtureRoot, "content");
+
+  try {
+    await mkdir(join(root, "pages"), { recursive: true });
+    await writeFile(
+      join(root, "pages", "about.json"),
+      JSON.stringify({
+        key: "about",
+        slug: "about",
+        title: "About",
+        sections: {
+          hero: { heading: "Our story", body: "Hello" },
+          cta: { heading: "Get in touch" }
+        }
+      }),
+      "utf8"
+    );
+
+    const page = await buildSectionsProvider(root).getPage("about");
+
+    assert.ok(page);
+    assert.equal(page.sectionsList?.length, 2);
+    assert.deepEqual(
+      page.sectionsList?.map((s) => s.type),
+      ["hero", "cta"]
+    );
+    assert.deepEqual(page.sectionsList?.[0]?.data, {
+      heading: "Our story",
+      body: "Hello"
+    });
+    assert.equal("sections" in page.data, false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("normalizes a page authored with an ordered sections list", async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-sections-list-"));
+  const root = join(fixtureRoot, "content");
+
+  try {
+    await mkdir(join(root, "pages"), { recursive: true });
+    await writeFile(
+      join(root, "pages", "services.json"),
+      JSON.stringify({
+        title: "Services",
+        sections: [
+          { type: "rich_text", data: { body: "<p>Intro</p>" } },
+          { type: "features", data: { heading: "What we do", items: ["a", "b"] } }
+        ]
+      }),
+      "utf8"
+    );
+
+    const page = await buildSectionsProvider(root).getPage("services");
+
+    assert.ok(page);
+    assert.equal(page.sectionsList?.length, 2);
+    assert.deepEqual(
+      page.sectionsList?.map((s) => s.type),
+      ["rich_text", "features"]
+    );
+    assert.deepEqual(page.sectionsList?.[1]?.data, {
+      heading: "What we do",
+      items: ["a", "b"]
+    });
+    assert.equal("sections" in page.data, false);
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("keeps legacy named-field pages free of a sectionsList", async () => {
+  const page = await buildProvider().getPage("about");
+  assert.ok(page);
+  assert.equal(page.sectionsList, undefined);
+  assert.equal("sections" in page.data, false);
+});
+
+test("throws a ProviderError for a malformed sections field", async () => {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), "nexuscontent-sections-bad-"));
+  const root = join(fixtureRoot, "content");
+
+  try {
+    await mkdir(join(root, "pages"), { recursive: true });
+    await writeFile(
+      join(root, "pages", "broken.json"),
+      JSON.stringify({ title: "Broken", sections: "nope" }),
+      "utf8"
+    );
+
+    await assert.rejects(
+      () => buildSectionsProvider(root).getPage("broken"),
+      (error: unknown) => {
+        assert.ok(error instanceof ProviderError);
+        assert.equal(error.content, "pages/broken.json");
+        assert.match(error.message, /"sections" field that is neither an object nor an array/);
+        return true;
+      }
+    );
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
 test("throws a ProviderError for malformed JSON", async () => {
   await assert.rejects(
     () => buildProvider().getPage("malformed"),

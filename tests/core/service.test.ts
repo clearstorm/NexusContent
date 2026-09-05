@@ -101,23 +101,6 @@ function buildConfig(): NexusConfig {
             }
           }
         },
-        cms_page: {
-          kind: "singleton",
-          source: { provider: "mock", key: "cms-page" },
-          strictSections: true,
-          fields: {
-            hero: { type: "component", component: "hero", required: true },
-            features: { type: "component", component: "features" }
-          }
-        },
-        cms_page_lax: {
-          kind: "singleton",
-          source: { provider: "mock", key: "cms-page" },
-          fields: {
-            hero: { type: "component", component: "hero", required: true },
-            features: { type: "component", component: "features" }
-          }
-        },
         singleton: {
           kind: "singleton",
           source: { provider: "mock", key: "singleton" }
@@ -133,17 +116,6 @@ function buildConfig(): NexusConfig {
         site: {
           kind: "settings",
           source: { provider: "mock", key: "site" }
-        }
-      },
-      components: {
-        hero: {
-          fields: { heading: { type: "string", required: true } }
-        },
-        features: {
-          fields: {
-            heading: { type: "string", required: true },
-            items: { type: "string", list: true }
-          }
         }
       }
     }
@@ -270,79 +242,73 @@ test("getPage throws a SchemaError before returning invalid model data", async (
   );
 });
 
-test("getPage expands CMS sections into declared component fields", async () => {
+test("getPage projects sections onto page.sections map and page.sectionsList for a field-less model", async () => {
   const { service, mock } = buildService();
   mock.setPage({
-    id: "cms-page",
-    key: "cms-page",
+    id: "singleton",
+    key: "singleton",
     title: "CMS page",
-    data: {
-      sections: [
-        { type: "hero", data: { heading: "Hello" } },
-        { type: "features", data: { heading: "List", items: ["a", "b"] } }
-      ]
-    },
-    meta: { source: "mock" }
-  });
-
-  const page = await service.getPage("cms_page_lax");
-
-  assert.ok(page);
-  assert.deepEqual(page.data, {
-    hero: { heading: "Hello" },
-    features: { heading: "List", items: ["a", "b"] }
-  });
-});
-
-test("getPage expands page-level sections into declared component fields", async () => {
-  const { service, mock } = buildService();
-  mock.setPage({
-    id: "cms-page",
-    key: "cms-page",
-    title: "CMS page",
-    sections: [
-      { type: "hero", data: { heading: "Greetings" } },
-      { type: "features", data: { heading: "Wins", items: ["x"] } }
+    sectionsList: [
+      { type: "hero", data: { heading: "Hello" } },
+      { type: "features", data: { heading: "List", items: ["a", "b"] } }
     ],
     data: { editorMode: "gutenberg", content: "<p>raw</p>" },
     meta: { source: "mock" }
   });
 
-  const page = await service.getPage("cms_page_lax");
+  const page = await service.getPage("singleton");
 
   assert.ok(page);
-  assert.deepEqual(page.data, {
-    editorMode: "gutenberg",
-    content: "<p>raw</p>",
-    hero: { heading: "Greetings" },
-    features: { heading: "Wins", items: ["x"] }
+  assert.deepEqual(page.sections, {
+    hero: { heading: "Hello" },
+    features: { heading: "List", items: ["a", "b"] }
   });
+  assert.equal(page.sectionsList?.length, 2);
+  assert.deepEqual(page.data, { editorMode: "gutenberg", content: "<p>raw</p>" });
 });
 
-test("getPage throws a SchemaError for unmatched sections when strictSections is set", async () => {
+test("getPage projects repeated section types with suffixed map keys", async () => {
   const { service, mock } = buildService();
   mock.setPage({
-    id: "cms-page",
-    key: "cms-page",
+    id: "singleton",
+    key: "singleton",
     title: "CMS page",
-    data: {
-      sections: [
-        { type: "hero", data: { heading: "Hello" } },
-        { type: "gallery", data: {} }
-      ]
-    },
+    sectionsList: [
+      { type: "hero", data: { heading: "First" } },
+      { type: "rich_text", data: { body: "<p>Intro</p>" } },
+      { type: "hero", data: { heading: "Second" } }
+    ],
+    data: {},
     meta: { source: "mock" }
   });
 
-  await assert.rejects(
-    () => service.getPage("cms_page"),
-    (error: unknown) => {
-      assert.ok(error instanceof SchemaError);
-      assert.equal(error.model, "cms_page");
-      assert.match(error.reason ?? "", /gallery/);
-      return true;
-    }
-  );
+  const page = await service.getPage("singleton");
+
+  assert.ok(page);
+  assert.deepEqual(page.sections, {
+    hero: { heading: "First" },
+    hero_2: { heading: "Second" },
+    rich_text: { body: "<p>Intro</p>" }
+  });
+  assert.equal(page.sectionsList?.length, 3);
+});
+
+test("getPage leaves a page without sections unprojected", async () => {
+  const { service, mock } = buildService();
+  mock.setPage({
+    id: "singleton",
+    key: "singleton",
+    title: "No sections",
+    data: { plain: true },
+    meta: { source: "mock" }
+  });
+
+  const page = await service.getPage("singleton");
+
+  assert.ok(page);
+  assert.equal(page.sections, undefined);
+  assert.equal(page.sectionsList, undefined);
+  assert.deepEqual(page.data, { plain: true });
 });
 
 test("getPage does not coerce null provider data into an empty object", async () => {

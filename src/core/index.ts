@@ -75,6 +75,8 @@ export type { ResolvedBuiltinMediaConfig } from "./config.ts";
 
 export { ModelRegistry, validateModelRelations } from "./schema.ts";
 
+export { namedSections, projectSections } from "./sections.ts";
+
 export type {
   CollectionModelNames,
   InferField,

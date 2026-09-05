@@ -426,8 +426,8 @@ test("normalizeCompanionPage maps companion data to PageContent", () => {
   assert.equal(result.status, "published");
   assert.equal(result.excerpt, "Learn about us");
   assert.equal(result.modifiedAt, "2026-08-10T12:00:00Z");
-  assert.equal(result.sections?.length, 1);
-  assert.equal(result.sections?.[0]?.type, "hero");
+  assert.equal(result.sectionsList?.length, 1);
+  assert.equal(result.sectionsList?.[0]?.type, "hero");
   assert.deepEqual(result.data, { custom: "value" });
   assert.deepEqual(result.meta, { source: "wordpress", sourceId: "42" });
 });

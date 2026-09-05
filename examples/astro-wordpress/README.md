@@ -13,15 +13,16 @@ Every model in `src/schema/schema.ts` declares its own source:
 ```ts
 home: {
   kind: "singleton",
-  source: { provider: "git", key: "home" },
-  fields: { ... }
+  source: { provider: "wordpress", key: "home" }
 }
 ```
 
-All shipped models point at the Git provider (`provider: "git"`) so the example
-builds deterministically from the committed `content/` files. To serve a model
-from WordPress, change only `source.provider` to `"wordpress"` — pages,
-components, and data shapes stay identical.
+Pages come from both providers: `home` and `services` are served by
+WordPress, `about` and `contact` by Git. Page singletons declare **no
+`fields`**: NexusContent projects each provider's ordered sections onto
+`page.sections` — a named map keyed by section type — plus the ordered
+`page.sectionsList`, so the same template composes from the map no matter
+which source supplied it.
 
 The WordPress instance lives in `src/nexus.config.ts` and uses provider options
 `apiStrategy: "companion"` (the secured companion plugin routes via the managed
@@ -59,10 +60,14 @@ companion plugin's `sections.json` defines. A reusable `buttons` subcomponent
 (`{ label, url, variant? }`) appears on hero, image_text, and cta instead of
 fixed primary/secondary action field pairs.
 
-Singleton pages (home, about, services, contact) use the same names as declared
-component fields, so a page authored in the WordPress plugin's ACF layouts maps
-straight onto the same components. Posts without sections fall back to the raw
-HTML `content` field, which is exactly what a plain WordPress post produces.
+Singleton pages (home, about, services, contact) render the same section
+components through the projected `page.sections` map. Git authoring mirrors it:
+`content/pages/about.json` stores a `sections: { ... }` map keyed by section
+type (JSON key order is the section order), and the WordPress page path is
+normalized to the same ordered list, so the map contains the identical
+headings whether `about` came from Git or a CMS. Posts without sections fall
+back to the raw HTML `content` field, which is exactly what a plain WordPress
+post produces.
 
 ## Media
 

@@ -33,7 +33,7 @@ NexusContent Core is framework neutral. Providers normalize source-specific cont
 
 - Framework-neutral normalized content types and public exports.
 - `ContentSection`, `SectionSettings`, and `PageStatus` types for structured page sections.
-- Optional `status`, `excerpt`, `featuredImage`, `modifiedAt`, and `sections` fields on `PageContent`.
+- Optional `status`, `excerpt`, `featuredImage`, `modifiedAt`, `sections` (named map keyed by section type), and `sectionsList` (authoritative ordered list) fields on `PageContent`.
 - Zod validation schemas for sections, section settings, and page status.
 - Generic optional `code` field on `NexusContentErrorDetails` for typed error classification.
 - Shared `ContentProvider` interface.
@@ -95,10 +95,11 @@ The `0.2.1` WordPress companion and `0.2.2` core content contract milestones wer
 - The `0.3.0` milestone is the contract workflow CLI: `nexus-contract` gains `init` (scaffold a `nexus.contract.json` config and starter `sections.custom.json`), `regenerate` (re-derive the consumer contract and re-render the ACF-layout mu-plugin from the recorded paths, with explicit flags overriding config), and `validate` (classify against the live companion `/schema` or the bundled offline vocabulary, print the drift without writing, and fail when the contract references sections with no definition). The existing `generate`/`push` subcommands are unchanged. The companion plugin was redesigned into a seven-page dashboard in `0.2.0` (presentational restyle only).
 - The Strapi provider is deferred from `0.3.0` to `0.4.0` by user decision so the contract CLI can be the current milestone; the deferral re-timelines synchronization to `0.5.0`, webhooks to `0.6.0`, preview to `0.7.0`, and the general-purpose `tooling.cli` to `0.8.0`.
 - The milestone ladder was re-planned by user decision on 2026-09-05: Strapi moves from the `0.3.1` slot to `0.4.0`, and every subsequent milestone (synchronization through the general-purpose CLI) cascades up by `0.1.0`, so the roadmap targets are again whole minor versions with no fractional continuity slots.
+- In development on `feat/sections-map` (targets the next `0.2.x` release): `getPage` now projects sections onto the page level as a named map (`page.sections.<type>`, repeated types suffixed `_2`/`_3`) plus the ordered `page.sectionsList`, replacing the 0.2.8 components-expansion (`strictSections`/`expandSectionsToComponents` removed; page models no longer declare sections). Git pages author the map directly (`sections: { ... }` in `pages/<key>.json`), WordPress page content normalizes to the same list, and collection items keep `data.sections` as the ordered list; the astro-wordpress example proves the field-less page model end to end.
 
 ## Next
 
-1. The `0.2.8` release (seamless provider switching via sections-to-components expansion, plus the singleton-to-`getPage` unification) is complete and released, as is the companion `0.2.0` admin dashboard redesign.
+1. Complete and release the sections-map projection (`feat/sections-map` → next `0.2.x`): field-less page models, Git Form A map authoring, and `page.sections`/`page.sectionsList` consumers.
 2. Implement the contract workflow CLI (`0.3.0-cli`): `nexus-contract init`/`regenerate`/`validate` plus the state-file updates that make them the current milestone.
 
 ## Not Implementing Yet

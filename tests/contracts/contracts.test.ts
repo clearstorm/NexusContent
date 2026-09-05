@@ -80,7 +80,11 @@ const validCanonicalPage: PageContent = {
   status: "published",
   excerpt: "Welcome to our site",
   modifiedAt: "2026-08-18T10:00:00Z",
-  sections: [
+  sections: {
+    hero: { heading: "Welcome", subheading: "Hello world" },
+    features: { items: [{ title: "Feature 1" }] }
+  },
+  sectionsList: [
     {
       type: "hero",
       settings: { visible: true },
@@ -146,31 +150,31 @@ test("accepts all valid page statuses", () => {
   }
 });
 
-test("rejects sections with non-string type", () => {
+test("rejects section list entries with non-string type", () => {
   const page = {
     ...validCanonicalPage,
-    sections: [{ type: 42, data: {} }]
+    sectionsList: [{ type: 42, data: {} }]
   } as unknown as PageContent;
   assert.throws(
     () => validatePageContent(page),
     (error: unknown) => {
       assert.ok(error instanceof ValidationError);
-      assert.ok(error.issues.some((issue) => issue.path === "sections.0.type"));
+      assert.ok(error.issues.some((issue) => issue.path === "sectionsList.0.type"));
       return true;
     }
   );
 });
 
-test("rejects sections with missing data", () => {
+test("rejects section list entries with missing data", () => {
   const page = {
     ...validCanonicalPage,
-    sections: [{ type: "hero" }]
+    sectionsList: [{ type: "hero" }]
   } as unknown as PageContent;
   assert.throws(
     () => validatePageContent(page),
     (error: unknown) => {
       assert.ok(error instanceof ValidationError);
-      assert.ok(error.issues.some((issue) => issue.path === "sections.0.data"));
+      assert.ok(error.issues.some((issue) => issue.path === "sectionsList.0.data"));
       return true;
     }
   );
@@ -189,14 +193,14 @@ test("accepts section settings with arbitrary JSON-compatible values", () => {
     settings,
     data: { heading: "Hi" }
   };
-  const page = { ...validCanonicalPage, sections: [section] };
+  const page = { ...validCanonicalPage, sectionsList: [section] };
   assert.doesNotThrow(() => validatePageContent(page));
 });
 
 test("rejects non-JSON section settings", () => {
   const page = {
     ...validCanonicalPage,
-    sections: [
+    sectionsList: [
       {
         type: "hero",
         settings: { invalid: () => "not JSON" },
@@ -207,8 +211,8 @@ test("rejects non-JSON section settings", () => {
   assert.throws(() => validatePageContent(page), ValidationError);
 });
 
-test("accepts empty sections array", () => {
-  const page = { ...validCanonicalPage, sections: [] };
+test("accepts empty sections map and empty section list", () => {
+  const page = { ...validCanonicalPage, sections: {}, sectionsList: [] };
   assert.doesNotThrow(() => validatePageContent(page));
 });
 
@@ -255,7 +259,8 @@ test("page schema loads valid canonical fixture file", () => {
   const fixture = readJsonFixture("canonical-page.json") as PageContent;
   assert.doesNotThrow(() => validatePageContent(fixture));
   assert.equal(fixture.status, "published");
-  assert.equal(fixture.sections?.length, 2);
+  assert.equal((fixture.sections as Record<string, unknown> | undefined)?.hero !== undefined, true);
+  assert.equal(fixture.sectionsList?.length, 2);
 });
 
 test("page schema loads minimal canonical fixture file", () => {

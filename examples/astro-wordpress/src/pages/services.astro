@@ -26,7 +26,7 @@ if (!page) {
   throw new Error(`Required content "services" was not found.`);
 }
 
-const services = (await resolveMediaFields(nexus, page.data)) as ServicesData;
+const services = (await resolveMediaFields(nexus, page.sections)) as ServicesData;
 
 const seo = resolveSeo({
   title: page.title ?? "Services",
