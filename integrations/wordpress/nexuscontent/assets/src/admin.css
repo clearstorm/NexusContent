@@ -740,7 +740,10 @@
 	padding: 2px 0;
 }
 
-.nc-admin-toggle {
+/* Scoped under the grid so this beats wp-admin's `.form-table td fieldset
+ * label { display: inline-block }` (forms.css), which would otherwise collapse
+ * the track box and leave the absolute thumb floating over the label. */
+.nc-admin-toggles-grid .nc-admin-toggle {
 	display: flex;
 	align-items: center;
 	gap: 10px;

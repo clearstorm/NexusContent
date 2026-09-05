@@ -1340,16 +1340,16 @@ final class Admin_Page {
 		$resolution  = is_string( $input['media_resolution'] ?? null ) ? sanitize_key( $input['media_resolution'] ) : $defaults['media_resolution'];
 		$resolution  = in_array( $resolution, $resolutions, true ) ? $resolution : $defaults['media_resolution'];
 
-		// Accept only an absolute http(s) URL or an empty value for previews.
-		$preview_url = '';
-		if ( isset( $input['preview_frontend_url'] ) && is_string( $input['preview_frontend_url'] ) ) {
-			$candidate = esc_url_raw( trim( $input['preview_frontend_url'] ) );
-			if ( '' === $candidate || wp_http_validate_url( $candidate ) ) {
-				$preview_url = $candidate;
-			}
-		}
+		// The preview URL is only ever rendered as an anchor the admin's own
+		// session opens (client-side window.open), so it needs to be a plain
+		// absolute http(s) URL. Local/dev hosts and non-safe ports such as
+		// http://localhost:4321 must be accepted, so do not reuse the HTTP-API
+		// SSRF guard (wp_http_validate_url) here.
+		$preview_url = $this->sanitize_absolute_http_url( isset( $input['preview_frontend_url'] ) ? $input['preview_frontend_url'] : null );
 
 		// Accept only an absolute http(s) URL or an empty value for webhooks.
+		// This value does drive an outbound server request, so keep the strict
+		// HTTP-API host/port guard to avoid SSRF.
 		$webhook_url = '';
 		if ( isset( $input['webhook_url'] ) && is_string( $input['webhook_url'] ) ) {
 			$candidate = esc_url_raw( trim( $input['webhook_url'] ) );
@@ -1373,6 +1373,34 @@ final class Admin_Page {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Accept an absolute http(s) URL or an empty value.
+	 *
+	 * Unlike wp_http_validate_url() this deliberately skips the HTTP-API
+	 * host-resolution and port checks: the value is stored configuration the
+	 * admin supplies for a client-side link, not an outbound request target.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return string Sanitized URL or ''.
+	 */
+	private function sanitize_absolute_http_url( $value ): string {
+		if ( ! is_string( $value ) ) {
+			return '';
+		}
+		$candidate = esc_url_raw( trim( $value ) );
+		if ( '' === $candidate ) {
+			return '';
+		}
+		$parts = wp_parse_url( $candidate );
+		if ( ! is_array( $parts ) || ! isset( $parts['scheme'], $parts['host'] ) ) {
+			return '';
+		}
+		if ( ! in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) ) {
+			return '';
+		}
+		return $candidate;
 	}
 
 	/**

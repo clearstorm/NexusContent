@@ -184,6 +184,46 @@ final class AdminPageTest extends TestCase {
 		self::assertNotContains( 'unknown_type', $clean['enabled_sections'] );
 	}
 
+	public function test_sanitize_settings_accepts_local_host_preview_url(): void {
+		$clean = $this->admin_page->sanitize_settings( array(
+			'default_editor_mode'  => 'gutenberg',
+			'enabled_sections'     => array(),
+			'media_resolution'     => 'large',
+			'preview_frontend_url' => 'http://localhost:4321',
+		) );
+		self::assertSame( 'http://localhost:4321', $clean['preview_frontend_url'] );
+	}
+
+	public function test_sanitize_settings_accepts_non_safe_port_preview_url(): void {
+		$clean = $this->admin_page->sanitize_settings( array(
+			'default_editor_mode'  => 'gutenberg',
+			'enabled_sections'     => array(),
+			'media_resolution'     => 'large',
+			'preview_frontend_url' => 'https://example.test:8443/preview',
+		) );
+		self::assertSame( 'https://example.test:8443/preview', $clean['preview_frontend_url'] );
+	}
+
+	public function test_sanitize_settings_rejects_scheme_less_preview_url(): void {
+		$clean = $this->admin_page->sanitize_settings( array(
+			'default_editor_mode'  => 'gutenberg',
+			'enabled_sections'     => array(),
+			'media_resolution'     => 'large',
+			'preview_frontend_url' => 'example.test',
+		) );
+		self::assertSame( '', $clean['preview_frontend_url'] );
+	}
+
+	public function test_sanitize_settings_rejects_bad_protocol_preview_url(): void {
+		$clean = $this->admin_page->sanitize_settings( array(
+			'default_editor_mode'  => 'gutenberg',
+			'enabled_sections'     => array(),
+			'media_resolution'     => 'large',
+			'preview_frontend_url' => 'javascript:alert(1)',
+		) );
+		self::assertSame( '', $clean['preview_frontend_url'] );
+	}
+
 	public function test_get_settings_returns_stored_values_when_available(): void {
 		$GLOBALS['nc_test']['options']['nexuscontent_settings'] = array(
 			'default_editor_mode' => 'acf_flexible',

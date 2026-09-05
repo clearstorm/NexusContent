@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The companion plugin `0.2.2` fixes two Settings-page defects. First, the Section types toggle switches no longer collapse into a bare thumb circle floating over the label: the toggle layout is now scoped under `.nc-admin-toggles-grid` so it outguns WordPress core's `.form-table td fieldset label { display: inline-block }` (`forms.css`), which previously broke the flexbox and shrunk the switch track to zero. Second, the Frontend preview URL now saves for absolute http(s) URLs on local or non-standard-port hosts (for example `http://localhost:4321`): the setting is validated as a plain absolute URL rather than through the HTTP-API SSRF guard, which silently dropped local/dev targets. Webhook URL validation stays deliberately strict because it targets a real outbound request. The plugin artifact is `dist/nexuscontent-0.2.2.zip`.
+
 ### Changed
 
 - The companion plugin `0.2.1` enables classic menu management: `add_theme_support( 'menus' )` is registered on `after_setup_theme`, so block themes (which do not declare menu support by default) expose the Appearance > Menus screen that feeds the `wp/v2/menus` and `wp/v2/menu-items` endpoints consumed by WordPress navigation retrieval. The plugin artifact is `dist/nexuscontent-0.2.1.zip`.
