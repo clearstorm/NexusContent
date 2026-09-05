@@ -3,7 +3,12 @@ export const prerender = false;
 
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostSections from "../components/PostSections.astro";
-import { resolveSeo } from "@nexuscontent/core";
+import WordpressContent from "../app/WordpressContent.astro";
+import {
+  companionPageResponseSchema,
+  normalizeCompanionPage,
+  resolveSeo
+} from "@nexuscontent/core";
 import { canonicalUrl, siteSeoDefaults } from "../app/seo";
 import { gutenbergStyleSheets } from "../app/gutenberg";
 import { resolveMediaFields } from "../app/media";
@@ -49,24 +54,27 @@ if (apiBase && token && id) {
   try {
     const res = await fetch(url);
     if (res.ok) {
-      const envelope = (await res.json()) as {
-        data?: {
-          title?: string;
-          status?: string;
-          sections?: unknown[];
-          rawFields?: { content?: string };
-          excerpt?: string;
-          modifiedAt?: string;
+      // The preview endpoint serves the same contract-v1 page wire as the
+      // companion pages/posts routes, so reuse the provider's tested
+      // normalization exactly as companion retrieval does: media `url` becomes
+      // `MediaAsset.src`, sections flatten to the canonical `{ type, data }`
+      // shape, and `data.content` keeps the raw-HTML fallback. This keeps the
+      // preview indistinguishable from a published post for consumer
+      // components.
+      const parsed = companionPageResponseSchema.safeParse(await res.json());
+      if (parsed.success) {
+        const page = normalizeCompanionPage(parsed.data.data, id);
+        preview = {
+          title: page.title,
+          status: page.status,
+          sections: page.sections,
+          content: typeof page.data.content === "string" ? page.data.content : undefined,
+          excerpt: page.excerpt,
+          modifiedAt: page.modifiedAt
         };
-      };
-      preview = {
-        title: envelope.data?.title,
-        status: envelope.data?.status,
-        sections: envelope.data?.sections,
-        content: envelope.data?.rawFields?.content,
-        excerpt: envelope.data?.excerpt,
-        modifiedAt: envelope.data?.modifiedAt
-      };
+      } else {
+        error = "The preview service returned an invalid response.";
+      }
     } else if (res.status === 401) {
       error = "This preview link has expired or is invalid.";
     } else {
@@ -98,6 +106,7 @@ const seo = resolveSeo(
 ---
 
 <BaseLayout seo={seo} styles={gutenbergStyleSheets}>
+  <WordpressContent />
   <article class="preview">
     <p class="back">
       <a href="/">← Home</a>
@@ -203,24 +212,6 @@ const seo = resolveSeo(
     .diagnostics ul {
       margin: 0.5rem 0 0;
       padding-left: 1.25rem;
-    }
-
-    /* Same consumer-owned prose layer as the blog post raw-HTML fallback. */
-    .wordpress-content :global(img) {
-      max-width: 100%;
-      height: auto;
-      border-radius: var(--radius);
-    }
-
-    .wordpress-content :global(p) {
-      margin: 0 0 1rem;
-    }
-
-    .wordpress-content :global(h2),
-    .wordpress-content :global(h3) {
-      margin: 2rem 0 0.5rem;
-      line-height: 1.2;
-      color: var(--fg);
     }
 
     .sections {

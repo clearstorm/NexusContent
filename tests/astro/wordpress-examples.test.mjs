@@ -299,6 +299,11 @@ test("WordPress Astro examples build against a local companion API", async (t) =
   assert.match(draftHtml, /First excerpt/);
   assert.match(draftHtml, /Companion sections, same shape/);
 
+  // Preview media flows through the same wire normalization as published
+  // posts: `image.url` becomes `src` and renders via the shared gallery grid.
+  assert.match(draftHtml, /Gallery parity/);
+  assert.match(draftHtml, /src="https:\/\/example\.test\/gallery-one\.jpg"/);
+
   const expiredHtml = await (await fetch(`${base}/preview?token=${"b".repeat(64)}&id=2`)).text();
   assert.match(expiredHtml, /token present: yes/);
   assert.match(expiredHtml, /This preview link has expired or is invalid/);
