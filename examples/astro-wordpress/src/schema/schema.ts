@@ -216,22 +216,6 @@ export const models = {
           description: { type: "string" },
           credit: { type: "string" }
         }
-      },
-      contactDetails: {
-        type: "object",
-        fields: {
-          heading: { type: "string", required: true },
-          items: {
-            type: "object",
-            list: true,
-            required: true,
-            fields: {
-              label: { type: "string", required: true },
-              value: { type: "string", required: true },
-              href: { type: "string" }
-            }
-          }
-        }
       }
     }
   }

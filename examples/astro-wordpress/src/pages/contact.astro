@@ -3,6 +3,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import FormEmbed from "../components/FormEmbed.astro";
 import ImageText from "../components/ImageText.astro";
 import LogoGrid from "../components/LogoGrid.astro";
+import Hero from "../components/Hero.astro";
+import type { Props as HeroProps } from "../components/Hero.astro";
 import type { Props as FormEmbedProps } from "../components/FormEmbed.astro";
 import type { Props as ImageTextProps } from "../components/ImageText.astro";
 import type { Props as LogoGridProps } from "../components/LogoGrid.astro";
@@ -12,6 +14,7 @@ import { canonicalUrl, siteSeoDefaults } from "../app/seo";
 import { resolveMediaFields } from "../app/media";
 
 export interface ContactData {
+   hero?: HeroProps;
   image_text?: ImageTextProps;
   logo_grid?: LogoGridProps;
   form_embed?: FormEmbedProps;
@@ -32,6 +35,7 @@ const seo = resolveSeo({
 ---
 
 <BaseLayout seo={seo}>
+  {contact.hero && <Hero {...contact.hero} />}
   {contact.image_text && <ImageText {...contact.image_text} />}
   {contact.logo_grid && <LogoGrid {...contact.logo_grid} />}
   {contact.form_embed && <FormEmbed {...contact.form_embed} />}
