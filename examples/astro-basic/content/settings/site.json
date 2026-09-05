@@ -1,5 +1,6 @@
 {
   "siteName": "NexusContent",
+  "defaultImage": { "src": "https://nexuscontent.dev/social-default.jpg", "alt": "NexusContent" },
   "tagline": "Content abstraction for the modern web",
   "footer": {
     "description": "A reference consumer proving that Astro and NexusContent share a clean boundary.",

@@ -481,6 +481,12 @@ const seo = resolveSeo(
 );
 ```
 
+Inline JSON-LD is serialized with the Core `serializeJsonLd(value)` helper, which
+escapes `<`, `>`, `&`, U+2028, and U+2029 so authored strings cannot break out of
+a `<script type="application/ld+json">` tag. Rendering remains consumer-owned:
+the Astro examples keep their own `NexusSeo` component and build their page-level
+`resolveSeo` defaults from site identity authored in the `site` settings model.
+
 ## Key Concepts
 
 - **Framework neutral** — Core never imports Astro, Next.js, React, or any frontend framework

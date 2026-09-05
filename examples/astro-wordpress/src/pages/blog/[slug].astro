@@ -3,8 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostSections from "../../components/PostSections.astro";
 import WordpressContent from "../../app/WordpressContent.astro";
 import { nexus } from "../../nexus";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { canonicalUrl, resolvePageSeo } from "../../app/seo";
 import { gutenbergStyleSheets } from "../../app/gutenberg";
 
 export async function getStaticPaths() {
@@ -36,8 +35,8 @@ const data = (await nexus.media.resolveFields(post.data)) as PostData;
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
 const excerpt = data.excerpt;
-const seo = resolveSeo({
-  title: `${postTitle} - NexusContent WordPress Example`,
+const seo = await resolvePageSeo(nexus, {
+  title: postTitle,
   seo: {
     description: excerpt,
     canonicalUrl: postUrl,
@@ -52,7 +51,7 @@ const seo = resolveSeo({
       }
     ]
   }
-}, siteSeoDefaults);
+});
 ---
 
 <BaseLayout seo={seo} styles={gutenbergStyleSheets}>

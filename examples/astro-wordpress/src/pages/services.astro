@@ -9,8 +9,7 @@ import type { Props as FaqProps } from "../components/Faq.astro";
 import type { Props as FeaturesProps } from "../components/Features.astro";
 import type { Props as HeroProps } from "../components/Hero.astro";
 import { nexus } from "../nexus";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../app/seo";
+import { canonicalUrl, resolvePageSeo } from "../app/seo";
 
 
 export interface ServicesData {
@@ -28,10 +27,10 @@ if (!page) {
 
 const services = (await nexus.media.resolveFields(page.sections)) as ServicesData;
 
-const seo = resolveSeo({
+const seo = await resolvePageSeo(nexus, {
   title: page.title ?? "Services",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/services/") }
-}, siteSeoDefaults);
+});
 ---
 
 <BaseLayout seo={seo}>

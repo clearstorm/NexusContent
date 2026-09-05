@@ -5,8 +5,7 @@ import RichTextContent from "../../components/RichTextContent.astro";
 import ContactDetails from "../../components/ContactDetails.astro";
 import { nexus } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../../app/seo";
+import { canonicalUrl, resolvePageSeo } from "../../app/seo";
 import { resolveHero } from "../../app/media";
 
 export function getStaticPaths() {
@@ -32,10 +31,10 @@ const hero = await resolveHero(nexus, page.data.hero);
 const { introduction } = page.data;
 const { contactDetails } = settings.data;
 
-const seo = resolveSeo({
+const seo = await resolvePageSeo(nexus, {
   title: page.title ?? "Contact",
   seo: { ...page.seo, canonicalUrl: canonicalUrl(`/${locale}/contact/`) }
-}, siteSeoDefaults());
+}, { locale });
 ---
 
 <BaseLayout

@@ -1,6 +1,7 @@
 {
   "key": "site",
   "siteName": "NexusContent",
+  "defaultImage": { "src": "https://nexuscontent.dev/social-default.jpg", "alt": "NexusContent" },
   "tagline": "Content abstraction for the modern web",
   "footer": {
     "description": "A reference consumer proving Astro and NexusContent share a clean boundary across Git and WordPress content sources.",

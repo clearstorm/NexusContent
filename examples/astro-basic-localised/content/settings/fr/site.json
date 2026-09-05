@@ -1,5 +1,6 @@
 {
   "siteName": "NexusContent",
+  "defaultImage": { "src": "https://nexuscontent.dev/social-default.jpg", "alt": "NexusContent" },
   "tagline": "Abstraction de contenu pour le web moderne",
   "footer": {
     "description": "Un consommateur de référence prouvant qu'Astro et NexusContent partagent une frontière propre.",

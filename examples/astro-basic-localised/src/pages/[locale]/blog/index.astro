@@ -3,8 +3,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import PostCard from "../../../components/PostCard.astro";
 import { nexus } from "../../../nexus";
 import { supportedLocales } from "../../../app/locale";
-import { resolveSeo } from "@nexuscontent/core";
-import { canonicalUrl, siteSeoDefaults } from "../../../app/seo";
+import { canonicalUrl, resolvePageSeo } from "../../../app/seo";
 
 export function getStaticPaths() {
   return supportedLocales.map((locale) => ({ params: { locale } }));
@@ -18,10 +17,10 @@ const intro =
   locale === "fr"
     ? "Des articles du dépôt de contenu Git."
     : "Posts from the Git content repository.";
-const seo = resolveSeo({
-  title: "Blog - NexusContent Example",
+const seo = await resolvePageSeo(nexus, {
+  title: "Blog",
   seo: { description: intro, canonicalUrl: canonicalUrl(`/${locale}/blog/`) }
-}, siteSeoDefaults());
+}, { locale });
 ---
 
 <BaseLayout

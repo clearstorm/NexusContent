@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolveSeo } from "../../src/index.ts";
+import { resolveSeo, serializeJsonLd } from "../../src/index.ts";
 import type { ResolveSeoInput } from "../../src/index.ts";
 
 test("resolves explicit SEO values before content and site fallbacks", () => {
@@ -183,4 +183,25 @@ test("uses summary as description when excerpt is absent", () => {
 
 test("omits all unavailable optional values", () => {
   assert.deepEqual(resolveSeo({}), {});
+});
+
+test("serializeJsonLd escapes script-breaking characters", () => {
+  const value = {
+    text: "</script><script>alert('xss')</script>&\u2028\u2029"
+  };
+  const result = serializeJsonLd(value);
+
+  assert.doesNotMatch(result, /[<>&\u2028\u2029]/u);
+  assert.match(result, /\\u003c\/script\\u003e/);
+  assert.match(result, /\\u0026\\u2028\\u2029/);
+  assert.deepEqual(JSON.parse(result), value);
+});
+
+test("serializeJsonLd passes plain JSON through unchanged", () => {
+  const value = {
+    "@type": "Article",
+    headline: "Hello and welcome",
+    nested: { count: 2, ok: true, nothing: null }
+  };
+  assert.equal(serializeJsonLd(value), JSON.stringify(value));
 });

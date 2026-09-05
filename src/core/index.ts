@@ -47,7 +47,7 @@ export type {
   TranslationState
 } from "./types.ts";
 
-export { resolveSeo } from "./seo.ts";
+export { resolveSeo, serializeJsonLd } from "./seo.ts";
 export type { ResolveSeoInput, SeoDefaults } from "./seo.ts";
 
 export type { ContentProvider, ProviderRetrievalOptions } from "./provider.ts";

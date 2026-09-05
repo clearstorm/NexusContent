@@ -209,6 +209,7 @@ export const models = {
     source: { provider: "git", key: "site" },
     fields: {
       siteName: { type: "string" },
+      defaultImage: { type: "media" },
       tagline: { type: "string" },
       footer: {
         type: "object",
