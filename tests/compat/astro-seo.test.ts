@@ -65,8 +65,8 @@ test("each Astro example owns and integrates its SEO component", async () => {
 
     for (const route of routeFiles[example]) {
       const source = await readFile(`${base}/pages/${route}`, "utf8");
-      assert.match(source, /import \{ [^}]*resolvePageSeo[^}]* \} from "[^"]*app\/seo"/);
-      assert.match(source, /const seo = await resolvePageSeo\(/);
+      assert.match(source, /import \{ canonicalUrl \} from "[^"]*app\/seo"/);
+      assert.match(source, /const seo = await nexus\.resolvePageSeo\(/);
       assert.match(source, /seo=\{seo\}/);
     }
   }

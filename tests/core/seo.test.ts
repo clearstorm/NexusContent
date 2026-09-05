@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { resolveSeo, serializeJsonLd } from "../../src/index.ts";
+import { settingsIdentityToDefaults } from "../../src/core/seo.ts";
 import type { ResolveSeoInput } from "../../src/index.ts";
 
 test("resolves explicit SEO values before content and site fallbacks", () => {
@@ -204,4 +205,30 @@ test("serializeJsonLd passes plain JSON through unchanged", () => {
     nested: { count: 2, ok: true, nothing: null }
   };
   assert.equal(serializeJsonLd(value), JSON.stringify(value));
+});
+
+test("settingsIdentityToDefaults maps the site identity convention", () => {
+  assert.deepEqual(settingsIdentityToDefaults(undefined), {});
+
+  assert.deepEqual(
+    settingsIdentityToDefaults({
+      siteName: "NexusContent",
+      defaultImage: { src: "https://example.com/social.jpg", alt: "Nexus" }
+    }),
+    {
+      siteTitle: "NexusContent",
+      defaultImage: { src: "https://example.com/social.jpg", alt: "Nexus" }
+    }
+  );
+});
+
+test("settingsIdentityToDefaults ignores malformed identity fields", () => {
+  assert.deepEqual(
+    settingsIdentityToDefaults({
+      siteName: 42,
+      defaultImage: { url: "https://example.com/social.jpg" },
+      unrelated: true
+    }),
+    {}
+  );
 });

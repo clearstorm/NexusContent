@@ -106,9 +106,9 @@ Blank Introduced values mean the feature is not implemented. `TBD` means no reli
 | Feature | Status | Introduced | Target | Notes |
 |---|---|---|---|---|
 | `seo.normalized-contract` Normalized SEO contract | implemented | 0.1.4 | - | Public robots, Open Graph, Twitter, canonical URL, JSON-compatible structured data, and media types; `PageContent.seo` remains optional and legacy `canonical` is deprecated. Extended in `0.2.9` (all optional): robots `noarchive`/`nosnippet`, Open Graph `siteName`/`url`/`locale`, and Twitter `url`/`site`. |
-| `seo.resolution` Deterministic SEO resolution | implemented | 0.1.4 | - | Pure `resolveSeo` applies documented content and site-default fallback chains without mutating input. |
+| `seo.resolution` Deterministic SEO resolution | implemented | 0.1.4 | - | Pure `resolveSeo` applies documented content and site-default fallback chains without mutating input; `NexusContent.resolvePageSeo` (added `0.2.9`) derives the defaults from the settings model's `siteName`/`defaultImage` convention. |
 | `seo.validation-provider-mapping` SEO validation and provider mapping | implemented | 0.1.4 | - | Zod validates normalized SEO at the provider boundary; Git accepts normalized JSON SEO. Companion plugin `0.1.8` authors page/post SEO and the WordPress provider maps its optional wire `seo`, including media `url` to `src`. |
-| `seo.astro-rendering` Astro SEO rendering | implemented | 0.1.4 | - | Consumer-owned reference components render metadata across the Astro examples; Core's `serializeJsonLd` (added `0.2.9`) escapes script-breaking characters for inline JSON-LD, and the examples' page-level defaults come from site settings content rather than a hardcoded constant. |
+| `seo.astro-rendering` Astro SEO rendering | implemented | 0.1.4 | - | Consumer-owned reference components render metadata across the Astro examples; Core's `serializeJsonLd` (added `0.2.9`) escapes script-breaking characters for inline JSON-LD, vendor-specific page defaults come from `nexus.resolvePageSeo`, and only the deployment-owned canonical base URL stays per project. |
 | `seo.automation` Advanced SEO automation | deferred | - | TBD | Automatic canonical URL construction, sitemaps, robots.txt, metadata scraping, keyword analysis, redirects, and provider-specific SEO plugin behavior require separate scope. |
 
 ## Content Operations

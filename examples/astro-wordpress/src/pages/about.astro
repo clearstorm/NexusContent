@@ -9,7 +9,7 @@ import type { Props as ImageTextProps } from "../components/ImageText.astro";
 import type { Props as RichTextProps } from "../components/RichText.astro";
 import type { Props as StatisticsProps } from "../components/Statistics.astro";
 import { nexus } from "../nexus";
-import { canonicalUrl, resolvePageSeo } from "../app/seo";
+import { canonicalUrl } from "../app/seo";
 
 
 export interface AboutData {
@@ -27,7 +27,7 @@ if (!page) {
 
 const about = (await nexus.media.resolveFields(page.sections)) as AboutData;
 
-const seo = await resolvePageSeo(nexus, {
+const seo = await nexus.resolvePageSeo({
   title: page.title ?? "About",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/about/") }
 });

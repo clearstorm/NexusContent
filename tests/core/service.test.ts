@@ -466,6 +466,65 @@ test("getSettings returns null when the provider has no content", async () => {
   assert.equal(await service.getSettings("site"), null);
 });
 
+test("resolvePageSeo derives defaults from the site settings model", async () => {
+  const { service, mock } = buildService();
+  mock.setSettings({
+    id: "site",
+    key: "site",
+    data: {
+      siteName: "NexusContent",
+      defaultImage: { src: "https://example.com/social.jpg" }
+    },
+    meta: { source: "mock" }
+  });
+
+  const seo = await service.resolvePageSeo({});
+
+  assert.deepEqual(seo, {
+    title: "NexusContent",
+    openGraph: {
+      title: "NexusContent",
+      image: { src: "https://example.com/social.jpg" }
+    },
+    twitter: {
+      title: "NexusContent",
+      image: { src: "https://example.com/social.jpg" }
+    }
+  });
+});
+
+test("resolvePageSeo falls back to input and empty defaults without settings", async () => {
+  const { service, mock } = buildService();
+  mock.setSettings(null);
+
+  assert.deepEqual(await service.resolvePageSeo({ title: "Home" }), {
+    title: "Home",
+    openGraph: { title: "Home" },
+    twitter: { title: "Home" }
+  });
+});
+
+test("resolvePageSeo uses an alternate settingsKey option", async () => {
+  const { service, mock } = buildService();
+  mock.setSettings({
+    id: "site",
+    key: "site",
+    data: {
+      siteName: "SiteTitle",
+      defaultImage: { src: "https://example.com/social.jpg" }
+    },
+    meta: { source: "mock" }
+  });
+
+  const seo = await service.resolvePageSeo(
+    { title: "Page title" },
+    { settingsKey: "site" }
+  );
+
+  assert.equal(seo.title, "Page title");
+  assert.equal(seo.openGraph?.image?.src, "https://example.com/social.jpg");
+});
+
 test("getSettings rejects invalid provider data", async () => {
   const { service, mock } = buildService();
   mock.setSettings({

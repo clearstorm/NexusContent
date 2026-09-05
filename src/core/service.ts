@@ -4,6 +4,7 @@ import type {
   NexusConfig,
   PageContent,
   RetrievalOptions,
+  SeoData,
   SettingsContent
 } from "./types.ts";
 import type { ContentProvider, ProviderRetrievalOptions } from "./provider.ts";
@@ -19,6 +20,12 @@ import { LocaleResolver } from "./locale.ts";
 import { resolveBuiltinMediaProviders } from "./config.ts";
 import { ModelRegistry } from "./schema.ts";
 import { projectSections } from "./sections.ts";
+import {
+  resolveSeo,
+  settingsIdentityToDefaults,
+  type ResolvePageSeoOptions,
+  type ResolveSeoInput
+} from "./seo.ts";
 import {
   MediaProviderRegistry,
   ResolveMediaService,
@@ -246,6 +253,28 @@ export class NexusContent<const TConfig extends NexusConfig = NexusConfig> {
     }) as ResolvedData<TConfig, TName, TData>;
 
     return { ...normalized, data };
+  }
+
+  /**
+   * Resolve page SEO through the settings model's authored site identity.
+   *
+   * Reads the settings content (default model `"site"`), derives `resolveSeo`
+   * defaults from documented `siteName` / `defaultImage` fields, and applies
+   * the deterministic fallback chain. Consumers never infer deployment URLs
+   * here; canonical URLs remain content or consumer supplied.
+   */
+  async resolvePageSeo(
+    input: ResolveSeoInput,
+    options: ResolvePageSeoOptions = {}
+  ): Promise<SeoData> {
+    const settings = await this.getSettings(
+      (options.settingsKey ?? "site") as SettingsModelNames<TConfig>,
+      { locale: options.locale, fallback: options.fallback }
+    );
+    return resolveSeo(
+      input,
+      settingsIdentityToDefaults(settings?.data)
+    );
   }
 
   async getCollection<

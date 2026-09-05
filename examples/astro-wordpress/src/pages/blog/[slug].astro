@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostSections from "../../components/PostSections.astro";
 import WordpressContent from "../../app/WordpressContent.astro";
 import { nexus } from "../../nexus";
-import { canonicalUrl, resolvePageSeo } from "../../app/seo";
+import { canonicalUrl } from "../../app/seo";
 import { gutenbergStyleSheets } from "../../app/gutenberg";
 
 export async function getStaticPaths() {
@@ -35,7 +35,7 @@ const data = (await nexus.media.resolveFields(post.data)) as PostData;
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/blog/${post.slug ?? post.key}/`);
 const excerpt = data.excerpt;
-const seo = await resolvePageSeo(nexus, {
+const seo = await nexus.resolvePageSeo({
   title: postTitle,
   seo: {
     description: excerpt,

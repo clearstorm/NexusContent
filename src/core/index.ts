@@ -48,7 +48,11 @@ export type {
 } from "./types.ts";
 
 export { resolveSeo, serializeJsonLd } from "./seo.ts";
-export type { ResolveSeoInput, SeoDefaults } from "./seo.ts";
+export type {
+  ResolvePageSeoOptions,
+  ResolveSeoInput,
+  SeoDefaults
+} from "./seo.ts";
 
 export type { ContentProvider, ProviderRetrievalOptions } from "./provider.ts";
 

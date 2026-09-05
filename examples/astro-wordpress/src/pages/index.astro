@@ -13,7 +13,7 @@ import type { Props as HeroProps } from "../components/Hero.astro";
 import type { Props as IntroProps } from "../components/Intro.astro";
 import type { Props as TestimonialsProps } from "../components/Testimonials.astro";
 import { nexus } from "../nexus";
-import { canonicalUrl, resolvePageSeo } from "../app/seo";
+import { canonicalUrl } from "../app/seo";
 
 export interface HomeData {
   hero?: HeroProps;
@@ -35,7 +35,7 @@ if (!page) {
 // WordPress content.
 const home = (await nexus.media.resolveFields(page.sections)) as HomeData;
 
-const seo = await resolvePageSeo(nexus, {
+const seo = await nexus.resolvePageSeo({
   title: page.title ?? "Home",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/") }
 });

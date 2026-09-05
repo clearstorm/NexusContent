@@ -9,7 +9,7 @@ import type { Props as FormEmbedProps } from "../components/FormEmbed.astro";
 import type { Props as ImageTextProps } from "../components/ImageText.astro";
 import type { Props as LogoGridProps } from "../components/LogoGrid.astro";
 import { nexus } from "../nexus";
-import { canonicalUrl, resolvePageSeo } from "../app/seo";
+import { canonicalUrl } from "../app/seo";
 
 
 export interface ContactData {
@@ -27,7 +27,7 @@ if (!page) {
 
 const contact = (await nexus.media.resolveFields(page.sections)) as ContactData;
 
-const seo = await resolvePageSeo(nexus, {
+const seo = await nexus.resolvePageSeo({
   title: page.title ?? "Contact",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/contact/") }
 });

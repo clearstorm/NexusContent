@@ -96,6 +96,45 @@ function omitUndefined<T extends object>(value: T): T {
   ) as T;
 }
 
+export interface ResolvePageSeoOptions {
+  /** Settings model key holding the site identity. Defaults to `"site"`. */
+  settingsKey?: string;
+  /** Forwarded to `getSettings` for locale-aware site identity. */
+  locale?: string;
+  /** Forwarded to `getSettings` (default `true`). */
+  fallback?: boolean;
+}
+
+/**
+ * Derive `resolveSeo` defaults from a settings model's authored site identity.
+ *
+ * The convention reads the `siteName` string and the `defaultImage` media
+ * object; any other fields or a settings model that does not follow the
+ * convention yield empty defaults so resolution falls back cleanly.
+ */
+export function settingsIdentityToDefaults(
+  data: Record<string, unknown> | undefined
+): SeoDefaults {
+  const siteTitle =
+    typeof data?.siteName === "string" ? data.siteName : undefined;
+  const defaultImage = toMediaAsset(data?.defaultImage);
+  return {
+    ...(siteTitle !== undefined ? { siteTitle } : {}),
+    ...(defaultImage !== undefined ? { defaultImage } : {})
+  };
+}
+
+function toMediaAsset(value: unknown): MediaAsset | undefined {
+  if (
+    value !== null &&
+    typeof value === "object" &&
+    typeof (value as { src?: unknown }).src === "string"
+  ) {
+    return value as MediaAsset;
+  }
+  return undefined;
+}
+
 /**
  * Serialize JSON-LD structured data for inlining in a
  * `<script type="application/ld+json">` element.

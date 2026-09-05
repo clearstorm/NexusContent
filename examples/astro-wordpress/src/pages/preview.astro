@@ -8,7 +8,7 @@ import {
   companionPageResponseSchema,
   normalizeCompanionPage
 } from "@nexuscontent/core";
-import { canonicalUrl, resolvePageSeo } from "../app/seo";
+import { canonicalUrl } from "../app/seo";
 import { gutenbergStyleSheets } from "../app/gutenberg";
 import { nexus } from "../nexus";
 
@@ -94,7 +94,7 @@ const data = (await nexus.media.resolveFields(preview ?? {})) as {
 };
 
 const previewTitle = preview?.title ?? "Preview";
-const seo = await resolvePageSeo(nexus, {
+const seo = await nexus.resolvePageSeo({
   title: `${previewTitle} - Preview`,
   seo: { robots: { index: false, follow: false } }
 });

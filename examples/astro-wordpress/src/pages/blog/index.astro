@@ -2,7 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/PostCard.astro";
 import { nexus } from "../../nexus";
-import { canonicalUrl, resolvePageSeo } from "../../app/seo";
+import { canonicalUrl } from "../../app/seo";
 
 const posts = await nexus.getCollection("blog");
 
@@ -24,7 +24,7 @@ const cards = await Promise.all(
 );
 
 const intro = "Posts from the Git content repository.";
-const seo = await resolvePageSeo(nexus, {
+const seo = await nexus.resolvePageSeo({
   title: "Blog",
   seo: { description: intro, canonicalUrl: canonicalUrl("/blog/") }
 });

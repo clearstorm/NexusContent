@@ -4,7 +4,7 @@ import Hero from "../components/Hero.astro";
 import RichTextContent from "../components/RichTextContent.astro";
 import ContactDetails from "../components/ContactDetails.astro";
 import { nexus } from "../nexus";
-import { canonicalUrl, resolvePageSeo } from "../app/seo";
+import { canonicalUrl } from "../app/seo";
 import { resolveHero } from "../app/media";
 
 const page = await nexus.getPage("contact");
@@ -24,7 +24,7 @@ const hero = await resolveHero(nexus, page.data.hero);
 const { introduction } = page.data;
 const { contactDetails } = settings.data;
 
-const seo = await resolvePageSeo(nexus, {
+const seo = await nexus.resolvePageSeo({
   title: page.title ?? "Contact",
   seo: { ...page.seo, canonicalUrl: canonicalUrl("/contact/") }
 });
