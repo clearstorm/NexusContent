@@ -6,7 +6,6 @@ import ContactDetails from "../../components/ContactDetails.astro";
 import { nexus } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
 import { canonicalUrl } from "../../app/seo";
-import { resolveHero } from "../../app/media";
 
 export function getStaticPaths() {
   return supportedLocales.map((locale) => ({ params: { locale } }));
@@ -27,8 +26,7 @@ if (!settings) {
   throw new Error(`Required settings "site" was not found for locale "${locale}".`);
 }
 
-const hero = await resolveHero(nexus, page.data.hero);
-const { introduction } = page.data;
+const { hero, introduction } = await nexus.media.resolveFields(page.data);
 const { contactDetails } = settings.data;
 
 const seo = await nexus.resolvePageSeo({

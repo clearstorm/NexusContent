@@ -3,14 +3,14 @@ interface Item {
   quote: string;
   author: string;
   avatar?: {
-    src: string;
+    src?: string;
     alt?: string;
   };
 }
 
 interface Props {
   heading: string;
-  items: Item[];
+  items?: Item[];
 }
 
 const { heading, items } = Astro.props;
@@ -20,7 +20,7 @@ const { heading, items } = Astro.props;
   <h2>{heading}</h2>
   <div class="grid">
     {
-      items.map((item) => (
+      items?.map((item) => (
         <blockquote class="card">
           {item.avatar?.src && (
             <img

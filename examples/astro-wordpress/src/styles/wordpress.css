@@ -1,0 +1,133 @@
+/* Consumer-owned prose layer for raw WordPress HTML. These rules cover what
+   Gutenberg leaves to the theme, plus the small block-reset set that the
+   example previously downloaded from a live WordPress origin. Shared by the
+   published blog post page and the draft preview route so both format the
+   raw-HTML fallback identically. */
+
+.wordpress-content h2,
+.wordpress-content h3 {
+  margin: 2rem 0 0.5rem;
+  line-height: 1.2;
+  color: var(--fg);
+}
+
+.wordpress-content p {
+  margin: 0 0 1rem;
+}
+
+.wordpress-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.wordpress-content figure {
+  margin: 1.5rem 0;
+}
+
+.wordpress-content figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.wordpress-content video,
+.wordpress-content iframe,
+.wordpress-content embed,
+.wordpress-content audio {
+  max-width: 100%;
+}
+
+.wordpress-content ul,
+.wordpress-content ol {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+}
+
+.wordpress-content blockquote {
+  margin: 1.5rem 0;
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-left: 4px solid var(--accent);
+  color: var(--muted);
+}
+
+.wordpress-content a {
+  color: var(--accent);
+}
+
+.wordpress-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--accent-soft);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+}
+
+.wordpress-content pre {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  overflow-x: auto;
+  background: var(--fg);
+  color: #fafaf9;
+  border-radius: var(--radius);
+}
+
+.wordpress-content pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.wordpress-content hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.wordpress-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.wordpress-content thead th {
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  padding: 0.5rem;
+}
+
+.wordpress-content td,
+.wordpress-content tbody th {
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem;
+  vertical-align: top;
+}
+
+/* Gutenberg align classes stay inside the 52rem column. */
+.wordpress-content .alignwide,
+.wordpress-content .alignfull {
+  width: 100%;
+}
+
+/* WordPress core block resets previously downloaded from the WP origin. */
+.wordpress-content .wp-block-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+.wordpress-content .wp-block-table {
+  width: 100%;
+}
+
+.wordpress-content .nexuscontent-section__gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.wordpress-content .nexuscontent-section__image {
+  width: 100%;
+  height: 12rem;
+  object-fit: cover;
+  border-radius: var(--radius);
+}

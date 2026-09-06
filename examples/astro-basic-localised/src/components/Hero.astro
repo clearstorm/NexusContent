@@ -4,8 +4,8 @@ import Button from "./Button.astro";
 interface Props {
   heading: string;
   intro?: string;
-  image: {
-    src: string;
+  image?: {
+    src?: string;
     alt?: string;
   };
   cta?: {
@@ -24,7 +24,7 @@ const { heading, intro, image, cta } = Astro.props;
   {cta && (
     <Button label={cta.label} href={cta.href} variant={cta.variant} />
   )}
-  {image.src && (
+  {image?.src && (
     <img
       class="hero-image"
       src={image.src}

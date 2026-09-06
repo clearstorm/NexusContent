@@ -4,7 +4,6 @@ import ContentBlocks from "../../../components/ContentBlocks.astro";
 import { nexus } from "../../../nexus";
 import { supportedLocales, localizeHref } from "../../../app/locale";
 import { canonicalUrl } from "../../../app/seo";
-import { resolveBlocks } from "../../../app/media";
 
 export async function getStaticPaths() {
   const paths: {
@@ -39,8 +38,8 @@ if (!post) {
   );
 }
 
-const { body, date, excerpt } = post.data;
-const blocks = await resolveBlocks(nexus, body);
+const { date, excerpt } = post.data;
+const body = await nexus.media.resolveFields(post.data.body);
 const postTitle = post.title ?? "Post";
 const postUrl = canonicalUrl(`/${locale}/blog/${post.slug ?? post.key}/`);
 const seo = await nexus.resolvePageSeo({
@@ -73,7 +72,7 @@ const seo = await nexus.resolvePageSeo({
     </p>
     <h1>{post.title}</h1>
     {date && <time>{date}</time>}
-    <ContentBlocks blocks={blocks} />
+    <ContentBlocks blocks={body ?? []} />
   </article>
 
   <style>

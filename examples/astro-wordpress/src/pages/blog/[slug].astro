@@ -1,10 +1,9 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostSections from "../../components/PostSections.astro";
-import WordpressContent from "../../app/WordpressContent.astro";
 import { nexus } from "../../nexus";
 import { canonicalUrl } from "../../app/seo";
-import { gutenbergStyleSheets } from "../../app/gutenberg";
+import "../../styles/wordpress.css";
 
 export async function getStaticPaths() {
   const posts = await nexus.getCollection("blog");
@@ -54,8 +53,7 @@ const seo = await nexus.resolvePageSeo({
 });
 ---
 
-<BaseLayout seo={seo} styles={gutenbergStyleSheets}>
-  <WordpressContent />
+<BaseLayout seo={seo}>
   <article class="post">
     <p class="back">
       <a href="/blog">← Blog</a>

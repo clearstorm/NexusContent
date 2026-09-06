@@ -6,7 +6,6 @@ import Testimonials from "../../components/Testimonials.astro";
 import { nexus } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
 import { canonicalUrl } from "../../app/seo";
-import { resolveHero, resolveServices, resolveTestimonials } from "../../app/media";
 
 export function getStaticPaths() {
   return supportedLocales.map((locale) => ({ params: { locale } }));
@@ -20,12 +19,11 @@ if (!page) {
   throw new Error(`Required content "home" was not found for locale "${locale}".`);
 }
 
-// Named fields carry media as `MediaReference` values, resolved here before
-// components render. The home hero image has no provider, so it resolves
-// through the configured default "local" media provider.
-const hero = await resolveHero(nexus, page.data.hero);
-const services = await resolveServices(nexus, page.data.servicesList);
-const testimonials = await resolveTestimonials(nexus, page.data.testimonialsList);
+// resolveFields() recursively resolves every authored media reference in the
+// page data before the components render. The home hero image has no provider,
+// so it resolves through the configured default "local" media provider.
+const { hero, servicesList, testimonialsList } =
+  await nexus.media.resolveFields(page.data);
 
 const seo = await nexus.resolvePageSeo({
   title: page.title ?? "Home",
@@ -38,6 +36,6 @@ const seo = await nexus.resolvePageSeo({
   locale={locale}
 >
   {hero && <Hero {...hero} />}
-  {services && <Services {...services} />}
-  {testimonials && <Testimonials {...testimonials} />}
+  {servicesList && <Services {...servicesList} />}
+  {testimonialsList && <Testimonials {...testimonialsList} />}
 </BaseLayout>

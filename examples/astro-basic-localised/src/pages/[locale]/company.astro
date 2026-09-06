@@ -6,7 +6,6 @@ import ImageGallery from "../../components/ImageGallery.astro";
 import { nexus } from "../../nexus";
 import { supportedLocales } from "../../app/locale";
 import { canonicalUrl } from "../../app/seo";
-import { resolveHero, resolveGallery } from "../../app/media";
 
 export function getStaticPaths() {
   return supportedLocales.map((locale) => ({ params: { locale } }));
@@ -20,9 +19,8 @@ if (!page) {
   throw new Error(`Required content "about" was not found for locale "${locale}".`);
 }
 
-const hero = await resolveHero(nexus, page.data.hero);
-const gallery = await resolveGallery(nexus, page.data.imageGallery);
-const { richTextContent } = page.data;
+const { hero, imageGallery, richTextContent } =
+  await nexus.media.resolveFields(page.data);
 
 const seo = await nexus.resolvePageSeo({
   title: page.title ?? "About",
@@ -36,5 +34,5 @@ const seo = await nexus.resolvePageSeo({
 >
   {hero && <Hero {...hero} />}
   {richTextContent && <RichTextContent {...richTextContent} />}
-  {gallery && <ImageGallery {...gallery} />}
+  {imageGallery && <ImageGallery {...imageGallery} />}
 </BaseLayout>

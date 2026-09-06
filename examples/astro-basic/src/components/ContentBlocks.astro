@@ -1,5 +1,5 @@
 ---
-import type { ResolvedBlock } from "../app/media";
+import type { MediaReference } from "@nexuscontent/core";
 import Hero from "./Hero.astro";
 import Services from "./Services.astro";
 import Testimonials from "./Testimonials.astro";
@@ -7,8 +7,31 @@ import RichTextContent from "./RichTextContent.astro";
 import ImageGallery from "./ImageGallery.astro";
 import CodeSnippet from "./CodeSnippet.astro";
 
+type Block =
+  | {
+      _type: "hero";
+      heading: string;
+      intro?: string;
+      image?: MediaReference;
+      cta?: { label: string; href: string; variant?: string };
+    }
+  | {
+      _type: "servicesList";
+      heading: string;
+      intro?: string;
+      items?: { title: string; description: string; icon?: MediaReference }[];
+    }
+  | {
+      _type: "testimonialsList";
+      heading: string;
+      items?: { quote: string; author: string; avatar?: MediaReference }[];
+    }
+  | { _type: "richTextContent"; heading?: string; content: string }
+  | { _type: "imageGallery"; heading?: string; images: MediaReference[] }
+  | { _type: "codeSnippet"; language: string; code: string; caption?: string };
+
 interface Props {
-  blocks: ResolvedBlock[];
+  blocks: Block[];
 }
 
 const { blocks } = Astro.props;

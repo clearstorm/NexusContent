@@ -7,36 +7,27 @@ import type { SeoData } from "@nexuscontent/core";
 
 interface Props {
   seo: SeoData;
-  styles?: string[];
 }
 
-const { seo, styles } = Astro.props;
+const { seo } = Astro.props;
 const lang = "en";
 
 // Navigation and settings are declared as NexusContent models wired to the Git
 // provider (the WordPress provider serves pages and posts only, and returns
-// null for navigation/settings). A constant fallback keeps the site usable if
-// those optional sources are missing.
+// null for navigation/settings). They are required for the shell, so a missing
+// model fails the build rather than silently falling back to app-side copy.
 const nav = await nexus.getNavigation("primary");
-const navItems = (nav?.items ??
-  [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Services", href: "/services" },
-    { label: "Blog", href: "/blog" },
-    { label: "Contact", href: "/contact" }
-  ]) as { label: string; href: string }[];
+if (!nav) {
+  throw new Error(`Required navigation "primary" was not found.`);
+}
 
 const sites = await nexus.getSettings("site");
-const siteData = {
-  siteName: "NexusContent",
-  tagline: "Content abstraction for the modern web",
-  footer: {
-    description: "A reference consumer proving Astro and NexusContent share a clean boundary.",
-    credit: "Powered by NexusContent with Git and WordPress content sources."
-  },
-  ...(sites?.data ?? {})
-};
+if (!sites) {
+  throw new Error(`Required settings "site" was not found.`);
+}
+
+const navItems = nav.items;
+const siteData = sites.data;
 ---
 
 <!doctype html>
@@ -46,7 +37,6 @@ const siteData = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <NexusSeo seo={seo} />
-    {styles?.map((href) => <link rel="stylesheet" href={href} />)}
     <style is:global>
       :root {
         --bg: #fafaf9;

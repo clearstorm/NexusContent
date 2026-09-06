@@ -5,7 +5,6 @@ import RichTextContent from "../components/RichTextContent.astro";
 import ContactDetails from "../components/ContactDetails.astro";
 import { nexus } from "../nexus";
 import { canonicalUrl } from "../app/seo";
-import { resolveHero } from "../app/media";
 
 const page = await nexus.getPage("contact");
 
@@ -20,8 +19,7 @@ if (!settings) {
   throw new Error(`Required settings "site" was not found.`);
 }
 
-const hero = await resolveHero(nexus, page.data.hero);
-const { introduction } = page.data;
+const { hero, introduction } = await nexus.media.resolveFields(page.data);
 const { contactDetails } = settings.data;
 
 const seo = await nexus.resolvePageSeo({

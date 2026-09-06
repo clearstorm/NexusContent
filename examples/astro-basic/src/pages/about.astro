@@ -4,7 +4,6 @@ import Hero from "../components/Hero.astro";
 import RichTextContent from "../components/RichTextContent.astro";
 import { nexus } from "../nexus";
 import { canonicalUrl } from "../app/seo";
-import { resolveHero } from "../app/media";
 
 const page = await nexus.getPage("about");
 
@@ -12,10 +11,11 @@ if (!page) {
   throw new Error(`Required content "about" was not found.`);
 }
 
-// The about hero image reference carries an explicit "remote" provider, so it
-// validates the absolute http(s) URL through the remote media provider.
-const hero = await resolveHero(nexus, page.data.hero);
-const { mission, story, principles } = page.data;
+// The about hero image reference carries an explicit "remote" provider, so
+// resolveFields validates the absolute http(s) URL through the remote media
+// provider.
+const { hero, mission, story, principles } =
+  await nexus.media.resolveFields(page.data);
 
 const seo = await nexus.resolvePageSeo({
   title: page.title ?? "About",

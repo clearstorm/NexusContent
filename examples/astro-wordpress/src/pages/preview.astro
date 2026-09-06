@@ -3,14 +3,13 @@ export const prerender = false;
 
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostSections from "../components/PostSections.astro";
-import WordpressContent from "../app/WordpressContent.astro";
 import {
   companionPageResponseSchema,
   normalizeCompanionPage
 } from "@nexuscontent/core";
 import { canonicalUrl } from "../app/seo";
-import { gutenbergStyleSheets } from "../app/gutenberg";
 import { nexus } from "../nexus";
+import "../styles/wordpress.css";
 
 // Draft/scheduled preview route. The WordPress companion plugin mints a
 // short-lived token bound to a single post ID; the Gutenberg "Open frontend
@@ -100,8 +99,7 @@ const seo = await nexus.resolvePageSeo({
 });
 ---
 
-<BaseLayout seo={seo} styles={gutenbergStyleSheets}>
-  <WordpressContent />
+<BaseLayout seo={seo}>
   <article class="preview">
     <p class="back">
       <a href="/">← Home</a>

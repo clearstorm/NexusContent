@@ -96,15 +96,15 @@ code, committed files, logs, or public environment variables.
 
 ## Fallback body styling
 
-Posts without sections render WordPress `content` HTML and load Gutenberg's own
-block styles (`wp-includes/css/dist/block-library/style.min.css` +
-`theme.min.css`) so blocks keep their editor look. `npm run build` first runs
-`scripts/vendor-gutenberg.mjs`, which fetches those two files from the
-`WORDPRESS_API_URL` origin into `public/gutenberg/` (gitignored) — the static
-`dist/` stays self-contained. If the origin is unreachable the build warns and
-fallback bodies render unstyled (a consumer-planned degradation). The vendored
-files are WordPress core block styles (GPL); see `scripts/vendor-gutenberg.mjs`
-for their source.
+Posts without sections render WordPress `content` HTML. A consumer-owned prose
+layer lives in `src/styles/wordpress.css` (imported by the blog and preview
+pages): it covers typography, image, figure, quote, code, table, and list
+styling, confines Gutenberg `alignwide`/`alignfull` to post columns, and keeps
+the minimal WordPress block resets (`.wp-block-image`, `.wp-block-table`). The
+example previously downloaded WordPress' full block-library CSS from the
+`WORDPRESS_API_URL` origin at build time; that step is gone — the fallback
+content this reference consumer renders is plain prose, and a consumer that
+needs WordPress' full block styles can vendor them itself.
 
 ## HTML trust
 

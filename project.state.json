@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": {
     "name": "NexusContent",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "status": "active",
     "stage": "early-development",
     "milestone": "0.3.0-cli",

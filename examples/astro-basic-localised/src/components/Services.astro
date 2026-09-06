@@ -3,7 +3,7 @@ interface Item {
   title: string;
   description: string;
   icon?: {
-    src: string;
+    src?: string;
     alt?: string;
   };
 }
@@ -11,7 +11,7 @@ interface Item {
 interface Props {
   heading: string;
   intro?: string;
-  items: Item[];
+  items?: Item[];
 }
 
 const { heading, intro, items } = Astro.props;
@@ -22,7 +22,7 @@ const { heading, intro, items } = Astro.props;
   {intro && <p class="lede">{intro}</p>}
   <div class="grid">
     {
-      items.map((service) => (
+      items?.map((service) => (
         <article class="card">
           {service.icon?.src && (
             <img

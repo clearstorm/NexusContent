@@ -5,7 +5,6 @@ import Services from "../components/Services.astro";
 import RichTextContent from "../components/RichTextContent.astro";
 import { nexus } from "../nexus";
 import { canonicalUrl } from "../app/seo";
-import { resolveHero, resolveServices } from "../app/media";
 
 const page = await nexus.getPage("services");
 
@@ -13,9 +12,8 @@ if (!page) {
   throw new Error(`Required content "services" was not found.`);
 }
 
-const hero = await resolveHero(nexus, page.data.hero);
-const services = await resolveServices(nexus, page.data.servicesList);
-const { richTextContent } = page.data;
+const { hero, servicesList, richTextContent } =
+  await nexus.media.resolveFields(page.data);
 
 const seo = await nexus.resolvePageSeo({
   title: page.title ?? "Services",
@@ -25,6 +23,6 @@ const seo = await nexus.resolvePageSeo({
 
 <BaseLayout seo={seo}>
   {hero && <Hero {...hero} />}
-  {services && <Services {...services} />}
+  {servicesList && <Services {...servicesList} />}
   {richTextContent && <RichTextContent {...richTextContent} />}
 </BaseLayout>
