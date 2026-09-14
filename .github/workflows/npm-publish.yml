@@ -40,6 +40,6 @@ jobs:
       - run: npm run build --if-present 
       
       # Uses modern OIDC and includes a verifiable provenance link
-      - run: npm publish --provenance
+      - run: npm publish --provenance --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # npm reads the OIDC token here automatically
