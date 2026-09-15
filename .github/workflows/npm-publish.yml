@@ -9,10 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-node@v4
         with:
-          node-version: 24 # Updated to the latest stable LTS
-      - run: npm ci
+          node-version: 24 
+          
+      - name: Install dependencies
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: "" # 👈 FIX: Prevents npm from trying to authenticate for regular downloads
+
       - run: npm test --if-present 
 
   publish-npm:
@@ -25,15 +31,20 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-node@v4
         with:
-          node-version: 24 # Updated to match the build job
-          registry-url: https://npmjs.org
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
           
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: "" 
+          
       - run: npm run build --if-present 
       
-      # Keeping the dry-run flag for your safety test
-      - run: npm publish --provenance --dry-run
+      - name: Publish (Dry Run)
+        run: npm publish --provenance --dry-run
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # npm consumes OIDC handshake here safely
