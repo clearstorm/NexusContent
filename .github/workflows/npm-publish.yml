@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22 # Updated to the latest stable LTS
+          node-version: 24 # Updated to the latest stable LTS
       - run: npm ci
       - run: npm test --if-present 
 
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22 # Updated to match the build job
+          node-version: 24 # Updated to match the build job
           registry-url: https://npmjs.org
           
       - run: npm ci
