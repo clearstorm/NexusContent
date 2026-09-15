@@ -39,8 +39,7 @@ jobs:
           
       - run: npm run build --if-present 
       
-      # FIX: We point to the registry and authenticate strictly on the publish command
-      - name: Publish (Dry Run)
-        run: npm publish --registry=https://npmjs.org --provenance --dry-run
+      - name: Publish
+        run: npm publish --registry=https://npmjs.org --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
